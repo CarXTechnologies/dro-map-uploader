@@ -351,7 +351,7 @@ GameObject:
   - component: {fileID: 223974229}
   - component: {fileID: 223974227}
   m_Layer: 0
-  m_Name: road
+  m_Name: SpawnPoint
   m_TagString: Untagged
   m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -381,7 +381,7 @@ Transform:
   m_LocalScale: {x: 65.419304, y: 10.570789, z: 2.7202582}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &223974229
 MonoBehaviour:
@@ -392,16 +392,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 223974226}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce54ef269e4e0c241bfa30749cee4348, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapObject:
-    value: SpawnPoint
-    index: 0
-    popupValues:
-    - road
-    - spawnpoint
-    - mapconfig
+  markerData:
+    head: SpawnPoint
+    typeGameMaker: 0
+    param: 
 --- !u!1 &406092991
 GameObject:
   m_ObjectHideFlags: 0
@@ -416,7 +413,7 @@ GameObject:
   - component: {fileID: 406092992}
   - component: {fileID: 406092996}
   m_Layer: 11
-  m_Name: spawnpoint
+  m_Name: Road
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -507,16 +504,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 406092991}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce54ef269e4e0c241bfa30749cee4348, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapObject:
-    value: road
-    index: 1
-    popupValues:
-    - road
-    - spawnpoint
-    - mapconfig
+  markerData:
+    head: Road
+    typeGameMaker: 1
+    param: 
 --- !u!1 &568587188
 GameObject:
   m_ObjectHideFlags: 0
@@ -531,7 +525,7 @@ GameObject:
   - component: {fileID: 568587189}
   - component: {fileID: 568587193}
   m_Layer: 11
-  m_Name: spawnpoint
+  m_Name: Road
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -622,16 +616,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 568587188}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce54ef269e4e0c241bfa30749cee4348, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapObject:
-    value: spawnpoint
-    index: 1
-    popupValues:
-    - road
-    - spawnpoint
-    - mapconfig
+  markerData:
+    head: Road
+    typeGameMaker: 1
+    param: 
 --- !u!1 &623492059
 GameObject:
   m_ObjectHideFlags: 0
@@ -689,7 +680,7 @@ GameObject:
   - component: {fileID: 1151899821}
   - component: {fileID: 1151899825}
   m_Layer: 11
-  m_Name: spawnpoint
+  m_Name: Road
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -780,16 +771,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1151899820}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce54ef269e4e0c241bfa30749cee4348, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapObject:
-    value: road
-    index: 1
-    popupValues:
-    - road
-    - spawnpoint
-    - mapconfig
+  markerData:
+    head: Road
+    typeGameMaker: 1
+    param: 
 --- !u!1 &1286579863
 GameObject:
   m_ObjectHideFlags: 0
@@ -804,7 +792,7 @@ GameObject:
   - component: {fileID: 1286579864}
   - component: {fileID: 1286579868}
   m_Layer: 11
-  m_Name: spawnpoint
+  m_Name: Road
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -895,16 +883,81 @@ MonoBehaviour:
   m_GameObject: {fileID: 1286579863}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce54ef269e4e0c241bfa30749cee4348, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapObject:
-    value: road
-    index: 1
-    popupValues:
-    - road
-    - spawnpoint
-    - mapconfig
+  markerData:
+    head: Road
+    typeGameMaker: 1
+    param: 
+--- !u!1 &1388614632
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1388614635}
+  - component: {fileID: 1388614634}
+  - component: {fileID: 1388614633}
+  m_Layer: 0
+  m_Name: MapConfig
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1388614633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1388614632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f3c0605ad578574f93fcca430eec81d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mapObjectConfigValue:
+    targetBundleMapName: Assets/Origin.unity
+    mapName: map
+    mapDescription: This is Atron, it's so big!
+    icon: {fileID: 2800000, guid: ac3639873dc35424785477a9272acfa8, type: 3}
+    largeIcon: {fileID: 2800000, guid: a41d8898536c70744b4c1243ba1a5eed, type: 3}
+    miniMapIcon: {fileID: 2800000, guid: c43a2e164a1f2734898563beebfe2fc9, type: 3}
+  mapObjectConfig: {fileID: 11400000, guid: 6701c6deedd65364790880e7fc9e67c1, type: 2}
+--- !u!114 &1388614634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1388614632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  markerData:
+    head: MapConfig
+    typeGameMaker: 2
+    param: 
+--- !u!4 &1388614635
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1388614632}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 91.88621, y: -163.03217, z: 126.79913}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1414038912
 GameObject:
   m_ObjectHideFlags: 0
@@ -919,7 +972,7 @@ GameObject:
   - component: {fileID: 1414038913}
   - component: {fileID: 1414038917}
   m_Layer: 11
-  m_Name: spawnpoint
+  m_Name: Road
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1010,16 +1063,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1414038912}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce54ef269e4e0c241bfa30749cee4348, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapObject:
-    value: road
-    index: 1
-    popupValues:
-    - road
-    - spawnpoint
-    - mapconfig
+  markerData:
+    head: Road
+    typeGameMaker: 1
+    param: 
 --- !u!1 &1558543590
 GameObject:
   m_ObjectHideFlags: 0
@@ -1031,7 +1081,7 @@ GameObject:
   - component: {fileID: 1558543592}
   - component: {fileID: 1558543591}
   m_Layer: 0
-  m_Name: SpawnPoint
+  m_Name: Gate
   m_TagString: Untagged
   m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -1061,7 +1111,7 @@ Transform:
   m_LocalScale: {x: 65.41929, y: 10.911598, z: 2.720258}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: -15, z: 0}
 --- !u!1 &1765449894
 GameObject:
@@ -1077,7 +1127,7 @@ GameObject:
   - component: {fileID: 1765449895}
   - component: {fileID: 1765449899}
   m_Layer: 11
-  m_Name: spawnpoint
+  m_Name: Road
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1168,88 +1218,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1765449894}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce54ef269e4e0c241bfa30749cee4348, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapObject:
-    value: spawnpoint
-    index: 1
-    popupValues:
-    - road
-    - spawnpoint
-    - mapconfig
---- !u!1 &2116187783
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2116187785}
-  - component: {fileID: 2116187786}
-  - component: {fileID: 2116187784}
-  m_Layer: 0
-  m_Name: mapconfig
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2116187784
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2116187783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f3c0605ad578574f93fcca430eec81d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mapObjectConfigValue:
-    targetBundleMapName: Assets/Origin.unity
-    mapName: map
-    mapDescription: This is Atron, it's so big!
-    icon: {fileID: 2800000, guid: ac3639873dc35424785477a9272acfa8, type: 3}
-    largeIcon: {fileID: 2800000, guid: a41d8898536c70744b4c1243ba1a5eed, type: 3}
-    miniMapIcon: {fileID: 2800000, guid: c43a2e164a1f2734898563beebfe2fc9, type: 3}
-    standalone:
-    - road
-    - spawnpoint
-    - mapconfig
-  mapObjectConfig: {fileID: 11400000, guid: 6701c6deedd65364790880e7fc9e67c1, type: 2}
---- !u!4 &2116187785
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2116187783}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 91.88621, y: -163.03217, z: 126.79913}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 10
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2116187786
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2116187783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce54ef269e4e0c241bfa30749cee4348, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mapObject:
-    value: mapconfig
-    index: 2
-    popupValues:
-    - road
-    - spawnpoint
-    - mapconfig
+  markerData:
+    head: Road
+    typeGameMaker: 1
+    param: 

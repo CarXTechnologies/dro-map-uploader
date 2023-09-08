@@ -25,6 +25,11 @@ public struct MapObjectConfigValue
     public Texture2D icon;
     public Texture2D largeIcon;
     public Texture2D miniMapIcon;
-    
-    [TextArea] public string[] standalone;
+}
+
+public enum TypeGameObject
+{
+    SpawnPoint,
+    Road,
+    Config
 }

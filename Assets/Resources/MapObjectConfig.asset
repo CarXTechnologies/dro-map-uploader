@@ -19,7 +19,3 @@ MonoBehaviour:
     icon: {fileID: 2800000, guid: ac3639873dc35424785477a9272acfa8, type: 3}
     largeIcon: {fileID: 2800000, guid: a41d8898536c70744b4c1243ba1a5eed, type: 3}
     miniMapIcon: {fileID: 2800000, guid: c43a2e164a1f2734898563beebfe2fc9, type: 3}
-    standalone:
-    - road
-    - spawnpoint
-    - 1234

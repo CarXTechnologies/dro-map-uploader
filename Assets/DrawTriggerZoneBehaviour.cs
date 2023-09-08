@@ -1,7 +1,7 @@
 ﻿using Unity.Mathematics;
 using UnityEngine;
 
-public class DrawGateBehaviour : MonoBehaviour
+public class DrawTriggerZoneBehaviour : MonoBehaviour
 {
     private void OnDrawGizmos()
     {

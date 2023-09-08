@@ -1,7 +1,8 @@
 using System;
 using System.IO;
 using UnityEditor;
-using UnityEditor.SceneManagement;  
+using UnityEditor.SceneManagement;
+using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -13,6 +14,48 @@ namespace Editor
     {
         [MenuItem("Map/Create Map")]
         [Obsolete("Obsolete")]
+        private static void TryCreateAsset()
+        {
+            /*var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
+            var filter = new Filter
+            {
+                testMode = TestMode.PlayMode
+            };
+            testRunnerApi.RegisterCallbacks(new TestCallbacks());
+            testRunnerApi.Execute(new ExecutionSettings(filter));*/
+            CreateAsset();
+        }
+        
+        /*
+        private class TestCallbacks : IErrorCallbacks
+        {
+            public void OnError(string message)
+            {
+                Debug.Log(message);
+            }
+ 
+            public void RunFinished(ITestResultAdaptor result)
+            {
+                Debug.Log("Tests finished");
+            }
+ 
+            public void RunStarted(ITestAdaptor testsToRun)
+            {
+                Debug.Log("Tests started");
+            }
+
+            public void TestFinished(ITestResultAdaptor result)
+            {
+                Debug.Log("Tests started");
+            }
+
+            public void TestStarted(ITestAdaptor test)
+            {
+                Debug.Log("Tests started");
+            }
+        }
+        */
+        
         private static void CreateAsset()
         {
             string path = "Assets/map";
@@ -40,14 +83,14 @@ namespace Editor
                 typeof(BoxCollider),
                 typeof(TerrainCollider),
                 typeof(SphereCollider),
-                typeof(GameMarker),
+                typeof(GameMarkerData),
                 typeof(MeshRenderer),
                 typeof(MeshFilter),
                 typeof(Light),
                 typeof(HDAdditionalLightData),
                 typeof(Volume),
                 typeof(MapConfig));
-
+            
             for (int i = 0; i < sceneObjects.Length; i++)
             {
                 sceneObjects[i].transform.SetParent(null);
