@@ -21,7 +21,7 @@ public class ModMapTest
     public IEnumerator Init()
     {
         m_gameObjects.Clear();
-        var scenePath = MapObjectConfig.Value.targetBundleMapName;
+        var scenePath = MapMetaConfig.Value.targetScene;
         string sceneName = scenePath;
         if(scenePath.Split('/').Length > 0)
         {
@@ -32,8 +32,9 @@ public class ModMapTest
         
         var scene = EditorSceneManager.OpenScene(scenePath);
         
-        yield return new WaitUntil(() => scene.isLoaded);
+        //yield return new WaitUntil(() => scene.isLoaded);
         AddTreeGameObjectToList(SceneManager.GetSceneByName(sceneName).GetRootGameObjects());
+        yield break;
     }
     
     [Test, Order(2)]

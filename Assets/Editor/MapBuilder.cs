@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using GameOverlay;
+using Steamworks;
+using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -12,6 +14,8 @@ namespace Editor
 {
     public class MapBuilder : MonoBehaviour
     {
+        const string assetDir = "C:\\Program Files (x86)\\Steam\\steamapps\\workshop\\content\\635260\\";
+        
         [MenuItem("Map/Create Map")]
         [Obsolete("Obsolete")]
         private static void TryCreateAsset()
@@ -56,15 +60,18 @@ namespace Editor
         }
         */
         
+        [Obsolete("Obsolete")]
         private static void CreateAsset()
         {
-            string path = "Assets/map";
+            const string path = "Assets/map";
+            const string assetManifestPath = assetDir + "Standalone";
+            
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
             }
            
-            EditorSceneManager.OpenScene(MapObjectConfig.Value.targetBundleMapName);
+            EditorSceneManager.OpenScene("Assets/" + MapMetaConfig.Value.targetScene + ".unity");
             var scene = SceneManager.GetActiveScene();
             var sceneObjects = scene.GetRootGameObjects();
             
@@ -96,21 +103,70 @@ namespace Editor
                 sceneObjects[i].transform.SetParent(null);
             }
             DestroyImmediate(root);
+
+            var scenePath = path + "/" + MapMetaConfig.Value.mapName + ".unity";
             
+            EditorSceneManager.SaveScene(mapScene, scenePath);
+            
+            var bundleBuilds = CreateBundleArrayDataForOneElement(MapMetaConfig.Value.mapName, scenePath);
+            
+            SceneManager.UnloadScene(mapScene);
+
+            if (Directory.Exists(assetManifestPath))
+            {
+                Directory.Delete(assetManifestPath, true);
+                Directory.CreateDirectory(assetManifestPath);
+            }
+            else
+            {
+                Directory.CreateDirectory(assetManifestPath);
+            }
+            
+            BuildPipeline.BuildAssetBundles(assetManifestPath, bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+            
+            bundleBuilds = CreateBundleArrayDataForOneElement("Meta", "Assets/Resources/" + MapMetaConfig.instance.name + ".asset");
+            BuildPipeline.BuildAssetBundles(assetManifestPath, bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+        }
+
+        private static AssetBundleBuild[] CreateBundleArrayDataForOneElement(string bundleName, string path)
+        {
             var bundleBuilds = new AssetBundleBuild[1];
-            bundleBuilds[0].assetBundleName = "MapBundle";
-            bundleBuilds[0].assetNames = new[] { path + "/map.unity" };
+            bundleBuilds[0].assetBundleName = bundleName;
+            bundleBuilds[0].assetNames = new[] { path };
             AssetImporter.GetAtPath(bundleBuilds[0].assetNames[0]).assetBundleName = bundleBuilds[0].assetBundleName;
             AssetDatabase.RemoveUnusedAssetBundleNames();
-            
-            if (!EditorSceneManager.SaveScene(mapScene, bundleBuilds[0].assetNames[0]))
+
+            return bundleBuilds;
+        }
+
+        [MenuItem("Map/Upload Map To Steam")]
+        private static void UploadBundle()
+        {
+            SteamClient.Shutdown();
+            SteamClient.Init(SteamUGCManager.APP_ID, false);
+			
+            void Callback(ulong id)
             {
-                Debug.LogError("Error stage : Save Scene");
+                Directory.Delete(assetDir + "Standalone", true);
+                
+                if (id == SteamUGCManager.PUBLISH_ITEM_FAILED_CODE)
+                {
+                    Debug.LogError("Publish failed");
+                    return;
+                }
+                
+                Debug.Log("Export track id: " + id);
             }
 
-            SceneManager.UnloadScene(mapScene);
-           
-            BuildPipeline.BuildAssetBundles("AssetBundles/StandaloneWindows", bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+            var steamUgc = new SteamUGCManager();
+            EditorApplication.update += steamUgc.Update;
+
+            var titleIconPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6)
+                                + AssetDatabase.GetAssetPath(MapMetaConfig.Value.largeIcon);
+            
+            EditorCoroutineUtility.StartCoroutine(
+                steamUgc.PublishItemCoroutine(MapMetaConfig.Value.mapName, 
+                    assetDir + "Standalone", titleIconPath, Callback), steamUgc);
         }
 
         private static void ValidComponents(Transform parent, Transform root, string tagGarbage, params Type[] components)
