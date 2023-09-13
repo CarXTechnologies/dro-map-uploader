@@ -263,7 +263,7 @@ Material:
     - _UseEmissiveMap: 0
     - _UseMetallicMap: 0
     - _UseNormalMap: 0
-    - _UseRoughnessMap: 0
+    - _UseRoughnessMap: 1
     - _UseShadowThreshold: 0
     - _ZTestDepthEqualForOpaque: 3
     - _ZTestGBuffer: 4
@@ -288,5 +288,5 @@ Material:
     - _UVMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMaskEmissive: {r: 1, g: 0, b: 0, a: 0}
     - _UvOffset: {r: 0, g: 0, b: 0, a: 0}
-    - _UvTiling: {r: 1, g: 1, b: 0, a: 0}
+    - _UvTiling: {r: 15, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []

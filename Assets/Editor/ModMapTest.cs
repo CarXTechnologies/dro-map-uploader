@@ -18,27 +18,18 @@ public class ModMapTest
     private const int MAX_COUNT_GAMEOBJECT = 10000;
 
     [UnityTest, Order(1)]
-    public IEnumerator Init()
+    public IEnumerator InitTests()
     {
         m_gameObjects.Clear();
-        var scenePath = MapMetaConfig.Value.targetScene;
-        string sceneName = scenePath;
-        if(scenePath.Split('/').Length > 0)
-        {
-            int indexPos = scenePath.LastIndexOf('/') + 1;
-            var sceneNameFormat = scenePath.Substring(indexPos, scenePath.Length - indexPos);
-            sceneName = sceneNameFormat.Substring(0, sceneNameFormat.LastIndexOf('.'));
-        }
-        
+        var scenePath = MapMetaConfig.Value.GetTargetScenePath();
         var scene = EditorSceneManager.OpenScene(scenePath);
         
-        //yield return new WaitUntil(() => scene.isLoaded);
-        AddTreeGameObjectToList(SceneManager.GetSceneByName(sceneName).GetRootGameObjects());
+        AddTreeGameObjectToList(scene.GetRootGameObjects());
         yield break;
     }
     
     [Test, Order(2)]
-    public void GameObjectCount()
+    public void GameObjectTestCount()
     {
         if (m_gameObjects.Count < 1 && m_gameObjects.Count > MAX_COUNT_GAMEOBJECT)
         {
@@ -50,7 +41,7 @@ public class ModMapTest
     }
     
     [Test, Order(2)]
-    public void MeshCount()
+    public void VertexTestCount()
     {
         vertexCount = 0;
         foreach (var gameObject in m_gameObjects)
@@ -91,7 +82,7 @@ public class ModMapTest
     }
     
     [Test, Order(2)]
-    public void SpawnPointExistence()
+    public void SpawnPointTestExistence()
     {
         int countSpawnPoint = 0;
         foreach (var gameObject in m_gameObjects)

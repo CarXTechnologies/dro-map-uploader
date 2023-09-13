@@ -26,6 +26,8 @@ public struct MapMetaConfigValue
     public Texture2D icon;
     public Texture2D largeIcon;
     public Texture2D miniMapIcon;
+
+    public string GetTargetScenePath() => "Assets/" + targetScene + ".unity";
 }
 
 public enum TypeGameObject

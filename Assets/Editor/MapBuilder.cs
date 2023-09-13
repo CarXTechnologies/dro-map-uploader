@@ -5,6 +5,7 @@ using Steamworks;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -15,24 +16,33 @@ namespace Editor
     public class MapBuilder : MonoBehaviour
     {
         const string assetDir = "C:\\Program Files (x86)\\Steam\\steamapps\\workshop\\content\\635260\\";
-        
+
         [MenuItem("Map/Create Map")]
         [Obsolete("Obsolete")]
         private static void TryCreateAsset()
         {
-            /*var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
+            var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
             var filter = new Filter
             {
-                testMode = TestMode.PlayMode
+                testMode = TestMode.EditMode
             };
-            testRunnerApi.RegisterCallbacks(new TestCallbacks());
-            testRunnerApi.Execute(new ExecutionSettings(filter));*/
-            CreateAsset();
+
+            var testCallBack = new TestCallbacks { onComplete = CreateAsset };
+
+            testCallBack.onFinish = () =>
+            {
+                testRunnerApi.UnregisterCallbacks(testCallBack);
+            };
+            
+            testRunnerApi.RegisterCallbacks(testCallBack);
+            testRunnerApi.Execute(new ExecutionSettings(filter));
         }
-        
-        /*
+
         private class TestCallbacks : IErrorCallbacks
         {
+            public Action onComplete;
+            public Action onFinish;
+            
             public void OnError(string message)
             {
                 Debug.Log(message);
@@ -40,26 +50,37 @@ namespace Editor
  
             public void RunFinished(ITestResultAdaptor result)
             {
-                Debug.Log("Tests finished");
+                onFinish?.Invoke();
+                if (result.FailCount == 0)
+                {
+                    Debug.Log("All Tests Complete");
+                    onComplete?.Invoke();
+                }
             }
  
             public void RunStarted(ITestAdaptor testsToRun)
             {
-                Debug.Log("Tests started");
+                
             }
 
             public void TestFinished(ITestResultAdaptor result)
             {
-                Debug.Log("Tests started");
+                if (result.TestStatus == TestStatus.Failed)
+                {
+                    Debug.LogError("Test finished : " + result.Name);
+                }
+                else
+                {
+                    Debug.Log("Test finished : " + result.Name);
+                }
             }
 
             public void TestStarted(ITestAdaptor test)
             {
-                Debug.Log("Tests started");
+                
             }
         }
-        */
-        
+
         [Obsolete("Obsolete")]
         private static void CreateAsset()
         {
@@ -71,7 +92,7 @@ namespace Editor
                 Directory.CreateDirectory(path);
             }
            
-            EditorSceneManager.OpenScene("Assets/" + MapMetaConfig.Value.targetScene + ".unity");
+            EditorSceneManager.OpenScene(MapMetaConfig.Value.GetTargetScenePath());
             var scene = SceneManager.GetActiveScene();
             var sceneObjects = scene.GetRootGameObjects();
             
@@ -174,14 +195,20 @@ namespace Editor
             if (!parent.CompareTag(tagGarbage))
             {
                 var allComponents = parent.GetComponents(typeof(Component));
-                var go = new GameObject(parent.transform.name);
-                go.transform.SetPositionAndRotation(parent.position, parent.rotation);
-                go.transform.localScale = parent.localScale;
-                go.transform.SetParent(root);
-                go.tag = parent.tag;
                 var o = parent.gameObject;
-                go.layer = o.layer;
-                go.isStatic = o.isStatic;
+                var go = new GameObject(parent.transform.name)
+                {
+                    transform =
+                    {
+                        parent = root,
+                        localPosition = parent.localPosition,
+                        localRotation = parent.localRotation,
+                        localScale = parent.localScale
+                    },
+                    tag = parent.tag,
+                    isStatic = o.isStatic,
+                    layer = o.layer
+                };
                 
                 foreach (var component in allComponents)
                 {

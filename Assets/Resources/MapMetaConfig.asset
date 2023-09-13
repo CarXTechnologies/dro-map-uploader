@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapMetaConfigValue:
     targetScene: Origin
-    mapName: AtronModMap123
+    mapName: AtronMod
     mapDescription: 
     icon: {fileID: 2800000, guid: ac3639873dc35424785477a9272acfa8, type: 3}
     largeIcon: {fileID: 2800000, guid: a41d8898536c70744b4c1243ba1a5eed, type: 3}
