@@ -15,78 +15,15 @@ namespace Editor
 {
     public class MapBuilder : MonoBehaviour
     {
-        const string assetDir = "C:\\Program Files (x86)\\Steam\\steamapps\\workshop\\content\\635260\\";
-
+        private const string assetDir = "C:/Program Files (x86)/Steam/steamapps/workshop/content/635260/";
+        private const string path = "Assets/map";
+        public const string assetManifestPath = assetDir + "Standalone";
+        public const string meta = "Meta";
+        
         [MenuItem("Map/Create Map")]
-        [Obsolete("Obsolete")]
-        private static void TryCreateAsset()
-        {
-            var testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
-            var filter = new Filter
-            {
-                testMode = TestMode.EditMode
-            };
-
-            var testCallBack = new TestCallbacks { onComplete = CreateAsset };
-
-            testCallBack.onFinish = () =>
-            {
-                testRunnerApi.UnregisterCallbacks(testCallBack);
-            };
-            
-            testRunnerApi.RegisterCallbacks(testCallBack);
-            testRunnerApi.Execute(new ExecutionSettings(filter));
-        }
-
-        private class TestCallbacks : IErrorCallbacks
-        {
-            public Action onComplete;
-            public Action onFinish;
-            
-            public void OnError(string message)
-            {
-                Debug.Log(message);
-            }
- 
-            public void RunFinished(ITestResultAdaptor result)
-            {
-                onFinish?.Invoke();
-                if (result.FailCount == 0)
-                {
-                    Debug.Log("All Tests Complete");
-                    onComplete?.Invoke();
-                }
-            }
- 
-            public void RunStarted(ITestAdaptor testsToRun)
-            {
-                
-            }
-
-            public void TestFinished(ITestResultAdaptor result)
-            {
-                if (result.TestStatus == TestStatus.Failed)
-                {
-                    Debug.LogError("Test finished : " + result.Name);
-                }
-                else
-                {
-                    Debug.Log("Test finished : " + result.Name);
-                }
-            }
-
-            public void TestStarted(ITestAdaptor test)
-            {
-                
-            }
-        }
-
         [Obsolete("Obsolete")]
         private static void CreateAsset()
         {
-            const string path = "Assets/map";
-            const string assetManifestPath = assetDir + "Standalone";
-            
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
@@ -128,25 +65,25 @@ namespace Editor
             var scenePath = path + "/" + MapMetaConfig.Value.mapName + ".unity";
             
             EditorSceneManager.SaveScene(mapScene, scenePath);
-            
-            var bundleBuilds = CreateBundleArrayDataForOneElement(MapMetaConfig.Value.mapName, scenePath);
-            
             SceneManager.UnloadScene(mapScene);
 
             if (Directory.Exists(assetManifestPath))
             {
                 Directory.Delete(assetManifestPath, true);
-                Directory.CreateDirectory(assetManifestPath);
             }
-            else
+
+            Directory.CreateDirectory(assetManifestPath);
+            
+            var bundleBuilds = CreateBundleArrayDataForOneElement(MapMetaConfig.Value.mapName, scenePath);
+            BuildPipeline.BuildAssetBundles(assetManifestPath, bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+            
+            bundleBuilds = CreateBundleArrayDataForOneElement(meta, "Assets/Resources/" + MapMetaConfig.instance.name + ".asset");
+            BuildPipeline.BuildAssetBundles(assetManifestPath, bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+            
+            if (ModMapTestTool.RunTest(assetManifestPath, meta, MapMetaConfig.Value.mapName, MapMetaConfig.Value.GetTargetScenePath()))
             {
-                Directory.CreateDirectory(assetManifestPath);
+                Directory.Delete(assetManifestPath, true);
             }
-            
-            BuildPipeline.BuildAssetBundles(assetManifestPath, bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
-            
-            bundleBuilds = CreateBundleArrayDataForOneElement("Meta", "Assets/Resources/" + MapMetaConfig.instance.name + ".asset");
-            BuildPipeline.BuildAssetBundles(assetManifestPath, bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
         }
 
         private static AssetBundleBuild[] CreateBundleArrayDataForOneElement(string bundleName, string path)

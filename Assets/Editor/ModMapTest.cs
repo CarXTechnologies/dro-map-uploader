@@ -1,49 +1,70 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using NUnit.Framework;
+using System.IO;
 using Unity.Mathematics;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.TestTools;
 
-public class ModMapTest
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
+
+public static class ModMapTestTool
 {
-    private readonly List<GameObject> m_gameObjects = new List<GameObject>();
-    private int vertexDiscreate = 1;
-    private int vertexCount;
-    private Dictionary<float3, int> vertexCountPositionDiscreate = new Dictionary<float3, int>();
+    private static readonly List<GameObject> m_gameObjects = new List<GameObject>();
+    private static int vertexDiscreate = 1;
+    private static Dictionary<float3, int> vertexCountPositionDiscreate = new Dictionary<float3, int>();
     private const int MAX_COUNT_VERTEX_IN_DISREATE = 100000;
-    private const int MAX_COUNT_VERTEX = 100000000;
     private const int MAX_COUNT_GAMEOBJECT = 10000;
-
-    [UnityTest, Order(1)]
-    public IEnumerator InitTests()
+    private const float BYTES_TO_MEGABYTES = 1048576f;
+    private const float MEGABYTES_MAX = 512f;
+    private const float MEGABYTES_MAX_META = 24f;
+    
+    private static void InitTests(string sceneName)
     {
         m_gameObjects.Clear();
-        var scenePath = MapMetaConfig.Value.GetTargetScenePath();
-        var scene = EditorSceneManager.OpenScene(scenePath);
-        
+        SceneManager.LoadScene(sceneName);
+        var scene = SceneManager.GetActiveScene();
         AddTreeGameObjectToList(scene.GetRootGameObjects());
-        yield break;
+    }
+
+    public static bool IsNotCorrectFileSize(string pathToFile)
+    {
+        return MEGABYTES_MAX < new FileInfo(pathToFile).Length / BYTES_TO_MEGABYTES;
     }
     
-    [Test, Order(2)]
-    public void GameObjectTestCount()
+    public static bool IsNotCorrectMetaFileSize(string pathToFile)
+    {
+        return MEGABYTES_MAX_META < new FileInfo(pathToFile).Length / BYTES_TO_MEGABYTES;
+    }
+    
+#if UNITY_EDITOR
+    private static void InitTestsEditor(string pathToScene)
+    {
+        m_gameObjects.Clear();
+        Scene scene = EditorSceneManager.OpenScene(pathToScene);
+        AddTreeGameObjectToList(scene.GetRootGameObjects());
+    }
+#endif  
+    
+    private static void SizeTest(string path, string metaBundle, string mapBundle)
+    {
+        if (IsNotCorrectFileSize(path + "/" + mapBundle) && IsNotCorrectFileSize(path + "/" + metaBundle))
+        {
+            throw new Exception("Size is Big");
+        }
+    }
+
+    private static void GameObjectTestCount()
     {
         if (m_gameObjects.Count < 1 && m_gameObjects.Count > MAX_COUNT_GAMEOBJECT)
         {
-            Assert.Fail("The number of objects cannot be 0 or greater than " + MAX_COUNT_GAMEOBJECT);
-            return;
+            throw new Exception("The number of objects cannot be 0 or greater than " + MAX_COUNT_GAMEOBJECT);
         }
-        
-        Debug.Log("GameObject count : " + m_gameObjects.Count);
     }
-    
-    [Test, Order(2)]
-    public void VertexTestCount()
+
+    private static void VertexTestCount()
     {
-        vertexCount = 0;
         foreach (var gameObject in m_gameObjects)
         {
             var meshFilter = gameObject.GetComponent<MeshFilter>();
@@ -51,7 +72,6 @@ public class ModMapTest
             if (meshFilter != null && meshFilter.sharedMesh != null)
             {
                 var count = meshFilter.sharedMesh.vertexCount;
-                vertexCount += count;
                 var pos = math.floor(meshFilter.transform.position / vertexDiscreate) * vertexDiscreate;
                 
                 if (vertexCountPositionDiscreate.TryGetValue(pos, out var value))
@@ -69,20 +89,12 @@ public class ModMapTest
         {
             if (val.Value > MAX_COUNT_VERTEX_IN_DISREATE)
             {
-                Assert.Fail("Triangle greater than " + MAX_COUNT_VERTEX_IN_DISREATE);
+                throw new Exception("Triangle greater than " + MAX_COUNT_VERTEX_IN_DISREATE);
             }
         }
-
-        if (vertexCount > MAX_COUNT_VERTEX)
-        {
-            Assert.Fail("Triangle greater than " + MAX_COUNT_VERTEX);
-        }
-        
-        Debug.Log("Vertex count : " + vertexCount);
     }
     
-    [Test, Order(2)]
-    public void SpawnPointTestExistence()
+    private static void SpawnPointTestExistence()
     {
         int countSpawnPoint = 0;
         foreach (var gameObject in m_gameObjects)
@@ -90,7 +102,7 @@ public class ModMapTest
             var gameMaker = gameObject.GetComponent<GameMarkerData>();
             if (gameMaker != null)
             {
-                if (gameMaker.markerData.head.ToLower() == "spawnpoint")
+                if (string.Equals(gameMaker.markerData.head, "SpawnPoint", StringComparison.CurrentCultureIgnoreCase))
                 {
                     countSpawnPoint++;
                 }
@@ -99,15 +111,45 @@ public class ModMapTest
 
         if (countSpawnPoint == 0)
         {
-            Assert.Fail("No one spawn point in map");
+            throw new Exception("No one spawn point in map");
         }
-        else if (countSpawnPoint > 1)
+
+        if (countSpawnPoint > 1)
         {
-            Assert.Fail("Multiple spawn point in map");
+            throw new Exception("Multiple spawn point in map");
         }
     }
 
-    private void AddTreeGameObjectToList(GameObject[] gameObjects)
+    public static bool RunTest(string pathToManifest, string metaBundle, string mapBundle, string editorTargetScene = "")
+    {
+        try
+        {
+            SizeTest(pathToManifest, metaBundle, mapBundle);
+#if UNITY_EDITOR
+            if (Application.isPlaying)
+            {
+                InitTests(mapBundle);
+            }
+            else
+            {
+                InitTestsEditor(editorTargetScene);
+            }
+#else
+            InitTests(MapMetaConfig.Value.mapName);
+#endif
+            GameObjectTestCount();
+            VertexTestCount();
+            SpawnPointTestExistence();
+            return false;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Test Mod Map Error : " + e.Message);
+            return true;
+        }
+    }
+
+    private static void AddTreeGameObjectToList(GameObject[] gameObjects)
     {
         foreach (var gmObject in gameObjects)
         {
