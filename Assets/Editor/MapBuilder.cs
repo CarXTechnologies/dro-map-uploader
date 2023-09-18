@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using GameOverlay;
 using Steamworks;
@@ -19,6 +20,9 @@ namespace Editor
         private const string path = "Assets/map";
         public const string assetManifestPath = assetDir + "Standalone";
         public const string meta = "Meta";
+
+        private static List<GameMarkerData> m_cacheDataList = new List<GameMarkerData>();
+        private static CacheData m_cacheData;
         
         [MenuItem("Map/Create Map")]
         [Obsolete("Obsolete")]
@@ -34,15 +38,29 @@ namespace Editor
             var sceneObjects = scene.GetRootGameObjects();
             
             var root = new GameObject("root");
-            
+
             for (int i = 0; i < sceneObjects.Length; i++)
             {
                 sceneObjects[i].transform.SetParent(root.transform);
             }
             
-            var mapScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
+            var titleIconPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6)
+                                + AssetDatabase.GetAssetPath(MapMetaConfig.Value.largeIcon);
+            
+            SteamClient.Shutdown();
+            SteamClient.Init(SteamUGCManager.APP_ID, false);
+            var steamUgc = new SteamUGCManager();
+            EditorApplication.update += steamUgc.Update;
+            
+            EditorCoroutineUtility.StartCoroutine(steamUgc.CreatePublisherItem(MapMetaConfig.Value.mapName, titleIconPath, 
+                item =>
+            {
+                var mapScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
 
-            ValidComponents(root.transform, null, "Garbage",
+                m_cacheDataList.Clear();
+                m_cacheData = new GameObject("CacheData", typeof(CacheData)).GetComponent<CacheData>();
+
+                ValidComponents(root.transform, null, "Garbage",
                 typeof(Transform), 
                 typeof(MeshCollider), 
                 typeof(BoxCollider),
@@ -54,36 +72,59 @@ namespace Editor
                 typeof(Light),
                 typeof(HDAdditionalLightData),
                 typeof(Volume),
-                typeof(MapConfig));
+                typeof(MapConfig),
+                typeof(CacheData));
             
-            for (int i = 0; i < sceneObjects.Length; i++)
-            {
-                sceneObjects[i].transform.SetParent(null);
-            }
-            DestroyImmediate(root);
+                for (int i = 0; i < sceneObjects.Length; i++)
+                {
+                    sceneObjects[i].transform.SetParent(null);
+                }
+            
+                m_cacheData.gameMarkers = new List<GameMarkerData>(m_cacheDataList.ToArray());
+            
+                DestroyImmediate(root);
+            
+                var scenePath = path + "/" + MapMetaConfig.Value.mapName + item.FileId.Value.ToString() + ".unity";
+            
+                EditorSceneManager.SaveScene(mapScene, scenePath);
+                SceneManager.UnloadScene(mapScene);
 
-            var scenePath = path + "/" + MapMetaConfig.Value.mapName + ".unity";
-            
-            EditorSceneManager.SaveScene(mapScene, scenePath);
-            SceneManager.UnloadScene(mapScene);
+                if (Directory.Exists(assetManifestPath))
+                {
+                    Directory.Delete(assetManifestPath, true);
+                }
 
-            if (Directory.Exists(assetManifestPath))
-            {
-                Directory.Delete(assetManifestPath, true);
-            }
+                Directory.CreateDirectory(assetManifestPath);
+            
+                var bundleBuilds = CreateBundleArrayDataForOneElement(MapMetaConfig.Value.mapName, scenePath);
+                BuildPipeline.BuildAssetBundles(assetManifestPath,
+                    bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+            
+                bundleBuilds = CreateBundleArrayDataForOneElement(meta, "Assets/Resources/" + MapMetaConfig.instance.name + ".asset");
+                BuildPipeline.BuildAssetBundles(assetManifestPath, 
+                    bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
 
-            Directory.CreateDirectory(assetManifestPath);
+                void Callback(ulong id)
+                {
+                    Directory.Delete(assetDir + "Standalone", true);
+                
+                    if (id == SteamUGCManager.PUBLISH_ITEM_FAILED_CODE)
+                    {
+                        Debug.LogError("Publish failed");
+                        return;
+                    }
+                
+                    Debug.Log("Export track id: " + id);
+                }
             
-            var bundleBuilds = CreateBundleArrayDataForOneElement(MapMetaConfig.Value.mapName, scenePath);
-            BuildPipeline.BuildAssetBundles(assetManifestPath, bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+                EditorCoroutineUtility.StartCoroutine(steamUgc.PublishItemCoroutine(MapMetaConfig.Value.mapName,
+                assetDir + "Standalone", Callback), steamUgc);
             
-            bundleBuilds = CreateBundleArrayDataForOneElement(meta, "Assets/Resources/" + MapMetaConfig.instance.name + ".asset");
-            BuildPipeline.BuildAssetBundles(assetManifestPath, bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
-            
-            if (ModMapTestTool.RunTest(assetManifestPath, meta, MapMetaConfig.Value.mapName, MapMetaConfig.Value.GetTargetScenePath()))
-            {
-                Directory.Delete(assetManifestPath, true);
-            }
+                if (ModMapTestTool.RunTest(assetManifestPath, meta, MapMetaConfig.Value.mapName, MapMetaConfig.Value.GetTargetScenePath()))
+                {
+                    Directory.Delete(assetManifestPath, true);
+                }
+            }), steamUgc);
         }
 
         private static AssetBundleBuild[] CreateBundleArrayDataForOneElement(string bundleName, string path)
@@ -95,36 +136,6 @@ namespace Editor
             AssetDatabase.RemoveUnusedAssetBundleNames();
 
             return bundleBuilds;
-        }
-
-        [MenuItem("Map/Upload Map To Steam")]
-        private static void UploadBundle()
-        {
-            SteamClient.Shutdown();
-            SteamClient.Init(SteamUGCManager.APP_ID, false);
-			
-            void Callback(ulong id)
-            {
-                Directory.Delete(assetDir + "Standalone", true);
-                
-                if (id == SteamUGCManager.PUBLISH_ITEM_FAILED_CODE)
-                {
-                    Debug.LogError("Publish failed");
-                    return;
-                }
-                
-                Debug.Log("Export track id: " + id);
-            }
-
-            var steamUgc = new SteamUGCManager();
-            EditorApplication.update += steamUgc.Update;
-
-            var titleIconPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6)
-                                + AssetDatabase.GetAssetPath(MapMetaConfig.Value.largeIcon);
-            
-            EditorCoroutineUtility.StartCoroutine(
-                steamUgc.PublishItemCoroutine(MapMetaConfig.Value.mapName, 
-                    assetDir + "Standalone", titleIconPath, Callback), steamUgc);
         }
 
         private static void ValidComponents(Transform parent, Transform root, string tagGarbage, params Type[] components)
@@ -142,17 +153,23 @@ namespace Editor
                         localRotation = parent.localRotation,
                         localScale = parent.localScale
                     },
-                    tag = parent.tag,
+                    tag = o.tag,
                     isStatic = o.isStatic,
                     layer = o.layer
                 };
                 
                 foreach (var component in allComponents)
                 {
-                    if (Try(component.GetType(), components))
+                    var compType = component.GetType();
+                    if (Try(compType, components))
                     {
                         UnityEditorInternal.ComponentUtility.CopyComponent(component);
                         UnityEditorInternal.ComponentUtility.PasteComponentAsNew(go);
+                        
+                        if(compType.Name == nameof(GameMarkerData))
+                        {
+                            m_cacheDataList.Add(go.GetComponent<GameMarkerData>());
+                        }
                     }
                 }
 

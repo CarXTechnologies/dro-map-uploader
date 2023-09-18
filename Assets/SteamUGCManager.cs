@@ -81,14 +81,23 @@ namespace GameOverlay
 				.WithPrivateVisibility();
 		}
 
-		public IEnumerator PublishItemCoroutine(string itemName, string path, string iconPreviewPath, Action<ulong> uploadedId)
+		private Task<PublishResult> m_currentPublishResult;
+		
+		public IEnumerator CreatePublisherItem(string itemName, string iconPreviewPath, Action<PublishResult> onCreate)
+		{
+			var submitTask = CreateCommunityFile(itemName, iconPreviewPath).SubmitAsync();
+			m_currentPublishResult = submitTask;
+			yield return m_currentPublishResult.AsIEnumerator();
+			onCreate?.Invoke(m_currentPublishResult.Result);
+		}
+		
+		public IEnumerator PublishItemCoroutine(string itemName, string path, Action<ulong> uploadedId)
 		{
 			m_isUploading = true;
+			
+			yield return m_currentPublishResult.AsIEnumerator();
 
-			var submitTask = CreateCommunityFile(itemName, iconPreviewPath).SubmitAsync();
-			yield return submitTask.AsIEnumerator();
-
-			var submitTaskResult = submitTask.Result;
+			var submitTaskResult = m_currentPublishResult.Result;
 
 			Debug.Log($"UGC item ({submitTaskResult.FileId}) creation finished with result '{submitTaskResult.Result}'");
 
