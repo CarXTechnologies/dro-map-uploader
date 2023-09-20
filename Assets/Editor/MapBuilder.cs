@@ -18,8 +18,8 @@ namespace Editor
     {
         private const string assetDir = "C:/Program Files (x86)/Steam/steamapps/workshop/content/635260/";
         private const string path = "Assets/map";
-        public const string assetManifestPath = assetDir + "Standalone";
-        public const string meta = "Meta";
+        private const string assetManifestPath = assetDir + "Standalone";
+        private const string meta = "Meta";
 
         private static List<GameMarkerData> m_cacheDataList = new List<GameMarkerData>();
         private static CacheData m_cacheData;
@@ -52,7 +52,16 @@ namespace Editor
             m_cacheDataList.Clear();
             m_cacheData = new GameObject("CacheData", typeof(CacheData)).GetComponent<CacheData>();
 
-            ValidComponents(root.transform, null, "Garbage",
+            ValidComponents(root.transform, null, "Garbage", (go, component) =>
+                {
+                    UnityEditorInternal.ComponentUtility.CopyComponent(component);
+                    UnityEditorInternal.ComponentUtility.PasteComponentAsNew(go);
+                        
+                    if(component.GetType().Name == nameof(GameMarkerData))
+                    {
+                        m_cacheDataList.Add(go.GetComponent<GameMarkerData>());
+                    }
+                },
                 typeof(Transform), 
                 typeof(MeshCollider), 
                 typeof(BoxCollider),
@@ -65,7 +74,8 @@ namespace Editor
                 typeof(HDAdditionalLightData),
                 typeof(Volume),
                 typeof(MapConfig),
-                typeof(CacheData));
+                typeof(CacheData),
+                typeof(ReflectionProbe));
             
             for (int i = 0; i < sceneObjects.Length; i++)
             {
@@ -146,12 +156,14 @@ namespace Editor
             return bundleBuilds;
         }
 
-        private static void ValidComponents(Transform parent, Transform root, string tagGarbage, params Type[] components)
+        private static void ValidComponents(Transform parent, Transform root, string tagGarbage, 
+            Action<GameObject, Component> tryAct, params Type[] components)
         {
-            if (!parent.CompareTag(tagGarbage))
+            if (string.IsNullOrEmpty(tagGarbage) || !parent.CompareTag(tagGarbage))
             {
                 var allComponents = parent.GetComponents(typeof(Component));
                 var o = parent.gameObject;
+                
                 var go = new GameObject(parent.transform.name)
                 {
                     transform =
@@ -165,26 +177,20 @@ namespace Editor
                     isStatic = o.isStatic,
                     layer = o.layer
                 };
-                
+
                 foreach (var component in allComponents)
                 {
                     var compType = component.GetType();
                     if (Try(compType, components))
                     {
-                        UnityEditorInternal.ComponentUtility.CopyComponent(component);
-                        UnityEditorInternal.ComponentUtility.PasteComponentAsNew(go);
-                        
-                        if(compType.Name == nameof(GameMarkerData))
-                        {
-                            m_cacheDataList.Add(go.GetComponent<GameMarkerData>());
-                        }
+                        tryAct?.Invoke(go, component);
                     }
                 }
 
                 for (var i = 0; i < parent.transform.childCount; i++)
                 {
                     var child = parent.transform.GetChild(i);
-                    ValidComponents(child, go.transform, tagGarbage, components);
+                    ValidComponents(child, go.transform, tagGarbage, tryAct, components);
                 }
             }
         }
