@@ -66,7 +66,8 @@ namespace Editor
                 typeof(MeshCollider), 
                 typeof(BoxCollider),
                 typeof(TerrainCollider),
-                typeof(SphereCollider),
+                typeof(SphereCollider), 
+                typeof(Rigidbody),
                 typeof(GameMarkerData),
                 typeof(MeshRenderer),
                 typeof(MeshFilter),
@@ -75,7 +76,8 @@ namespace Editor
                 typeof(Volume),
                 typeof(MapConfig),
                 typeof(CacheData),
-                typeof(ReflectionProbe));
+                typeof(ReflectionProbe),
+                typeof(Minimap));
             
             for (int i = 0; i < sceneObjects.Length; i++)
             {
