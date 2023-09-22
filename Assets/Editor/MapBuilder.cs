@@ -137,8 +137,7 @@ namespace Editor
                     Debug.Log("Export track id: " + id);
                 }
             
-                EditorCoroutineUtility.StartCoroutine(steamUgc.PublishItemCoroutine(MapMetaConfig.Value.mapName,
-                assetDir + "Standalone", Callback), steamUgc);
+                EditorCoroutineUtility.StartCoroutine(steamUgc.PublishItemCoroutine(assetDir + "Standalone", Callback), steamUgc);
             
                 if (ModMapTestTool.RunTest(assetManifestPath, meta, MapMetaConfig.Value.mapName, MapMetaConfig.Value.GetTargetScenePath()))
                 {

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapMetaConfigValue:
     targetScene: Origin
-    mapName: minimap
+    mapName: meta3413
     mapDescription: This Is Creazy
     icon: {fileID: 2800000, guid: 3c9edc5b1c9b50c418296daab4add9ed, type: 3}
     largeIcon: {fileID: 2800000, guid: 3b988b769eb8e184cb3e29cdb9852406, type: 3}

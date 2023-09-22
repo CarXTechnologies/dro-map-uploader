@@ -20,7 +20,7 @@ namespace GameOverlay
 			SteamClient.RunCallbacks();
 		}
 
-		private IEnumerator UpdateItemCoroutine(string itemName, string path, ulong id)
+		private IEnumerator UpdateItemCoroutine(string path, ulong id)
 		{
 			var dirInfo = new DirectoryInfo(path);
 
@@ -45,12 +45,12 @@ namespace GameOverlay
 			Debug.Log($"UGC item ({submitTaskResult.FileId}) update finished with result '{submitTaskResult.Result}'");
 		}
 
-		private FileInfo TryGetPreviewFileFromDir(DirectoryInfo dirInfo)
+		private FileInfo TryGetMetaFileFromDir(DirectoryInfo dirInfo)
 		{
-			var previewFiles = dirInfo.GetFiles("*.jpg");
+			var previewFiles = dirInfo.GetFiles("meta");
 			foreach (var file in previewFiles)
 			{
-				if (file.Name.ToLower().Contains("preview"))
+				if (file.Name.ToLower().Contains("meta"))
 				{
 					return file;
 				}
@@ -62,10 +62,12 @@ namespace GameOverlay
 		protected virtual Editor EditItemContent(Item item, DirectoryInfo dirInfo)
 		{
 			var editor = item.Edit().WithContent(dirInfo);
-			var previewFileInfo = TryGetPreviewFileFromDir(dirInfo);
-			if (previewFileInfo != null)
+
+			var metaFileInfo = TryGetMetaFileFromDir(dirInfo);
+			if (metaFileInfo != null)
 			{
-				editor.WithPreviewFile(previewFileInfo.DirectoryName + "/" + previewFileInfo.Name);
+				editor.WithMetaData(metaFileInfo.DirectoryName + "/" + metaFileInfo.Name);
+				Debug.LogError("MetaComplete");
 			}
 
 			return editor;
@@ -91,7 +93,7 @@ namespace GameOverlay
 			onCreate?.Invoke(m_currentPublishResult.Result);
 		}
 		
-		public IEnumerator PublishItemCoroutine(string itemName, string path, Action<ulong> uploadedId)
+		public IEnumerator PublishItemCoroutine(string path, Action<ulong> uploadedId)
 		{
 			m_isUploading = true;
 			
@@ -107,7 +109,7 @@ namespace GameOverlay
 
 				File.WriteAllText(path + Path.AltDirectorySeparatorChar + "pid.txt", itemId.ToString());
 
-				yield return UpdateItemCoroutine(itemName, path, itemId);
+				yield return UpdateItemCoroutine(path, itemId);
 				uploadedId.Invoke(itemId);
 			}
 			else
