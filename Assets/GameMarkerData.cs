@@ -18,12 +18,13 @@ public struct MarkerData
     [HideInInspector] public string head;
     public TypeGameMaker typeGameMaker;
     [TextArea] public string param;
+
+    public string GetHead() => typeGameMaker.ToString().ToLower();
 }
 
 public enum TypeGameMaker
 {
     SpawnPoint,
-    Road,
-    MapConfig
+    Road
 }
 

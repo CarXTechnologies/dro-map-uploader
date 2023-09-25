@@ -67,7 +67,6 @@ namespace GameOverlay
 			if (metaFileInfo != null)
 			{
 				editor.WithMetaData(metaFileInfo.DirectoryName + "/" + metaFileInfo.Name);
-				Debug.LogError("MetaComplete");
 			}
 
 			return editor;
