@@ -22,10 +22,10 @@ MonoBehaviour:
     m_Value: 1
   colorMode:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0
   color:
     m_OverrideState: 1
-    m_Value: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    m_Value: {r: 0.06318186, g: 0.056514766, b: 0.09433961, a: 1}
     hdr: 1
     showAlpha: 0
     showEyeDropper: 1
@@ -60,7 +60,7 @@ MonoBehaviour:
     m_Value: 300
   meanFreePath:
     m_OverrideState: 1
-    m_Value: 600
+    m_Value: 206.4
     min: 1
   enableVolumetricFog:
     m_OverrideState: 1
@@ -153,10 +153,10 @@ MonoBehaviour:
     m_Value: 1.4
   limitMin:
     m_OverrideState: 1
-    m_Value: 2
+    m_Value: -5
   limitMax:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 15
   curveMap:
     m_OverrideState: 1
     m_Value:
@@ -295,7 +295,7 @@ MonoBehaviour:
   m_AdvancedMode: 0
   skyType:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 4
   skyAmbientMode:
     m_OverrideState: 1
     m_Value: 1
@@ -318,7 +318,7 @@ MonoBehaviour:
   m_AdvancedMode: 0
   rotation:
     m_OverrideState: 1
-    m_Value: 228
+    m_Value: 191
     min: 0
     max: 360
   skyIntensityMode:
@@ -333,11 +333,11 @@ MonoBehaviour:
     min: 0
   upperHemisphereLuxValue:
     m_OverrideState: 0
-    m_Value: 0.3728285
+    m_Value: 0.37281665
     min: 0
   upperHemisphereLuxColor:
     m_OverrideState: 0
-    m_Value: {x: 0.18226013, y: 0.2601031, z: 0.5}
+    m_Value: {x: 0.18224551, y: 0.26012024, z: 0.5}
   desiredLuxValue:
     m_OverrideState: 0
     m_Value: 20000
@@ -352,13 +352,13 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 0
   hdriSky:
-    m_OverrideState: 1
+    m_OverrideState: 0
     m_Value: {fileID: 8900000, guid: d0a8c9c016bf45d47b00764bc4825e43, type: 3}
   enableDistortion:
-    m_OverrideState: 0
-    m_Value: 0
+    m_OverrideState: 1
+    m_Value: 1
   procedural:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 1
   flowmap:
     m_OverrideState: 0
@@ -367,8 +367,8 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 1
   scrollDirection:
-    m_OverrideState: 0
-    m_Value: 0
+    m_OverrideState: 1
+    m_Value: 189
     min: 0
     max: 360
   scrollSpeed:
