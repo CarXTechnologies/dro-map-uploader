@@ -52,32 +52,54 @@ namespace Editor
             m_cacheDataList.Clear();
             m_cacheData = new GameObject("CacheData", typeof(CacheData)).GetComponent<CacheData>();
 
-            ValidComponents(root.transform, null, "Garbage", (go, component) =>
+            bool isError = false;
+            
+            ModMapTestTool.errorCallback = (name, error) =>
+            {
+                Debug.LogError(error);
+                isError = true;
+            };
+            
+            ModMapTestTool.Play(MapMetaConfig.Value.mapName)?
+                .With((typeof(Transform), 0, 1000))
+                .With((typeof(MeshCollider), 0, 1000))
+                .With((typeof(BoxCollider), 0, 1000))
+                .With((typeof(SphereCollider), 0, 1000))
+                .With((typeof(GameMarkerData), 0, 1000))
+                .With((typeof(MeshRenderer), 0, 1000))
+                .With((typeof(MeshFilter), 0, 1000))
+                .With((typeof(Light), 0, 1000))
+                .With((typeof(HDAdditionalLightData), 0, 1000))
+                .With((typeof(Volume), 0, 1000))
+                .With((typeof(MapConfig), 0, 1000))
+                .With((typeof(CacheData), 0, 1000))
+                .With((typeof(ReflectionProbe), 0, 1000))
+                .ValidComponents();
+
+            ModMapTestTool.InitTestsEditor(scene);
+            ModMapTestTool.RunTest(MapMetaConfig.Value.targetScene);
+            
+            if (isError)
+            {
+                for (int i = 0; i < sceneObjects.Length; i++)
                 {
-                    UnityEditorInternal.ComponentUtility.CopyComponent(component);
-                    UnityEditorInternal.ComponentUtility.PasteComponentAsNew(go);
-                        
-                    if(component.GetType().Name == nameof(GameMarkerData))
-                    {
-                        m_cacheDataList.Add(go.GetComponent<GameMarkerData>());
-                    }
-                },
-                typeof(Transform), 
-                typeof(MeshCollider), 
-                typeof(BoxCollider),
-                typeof(TerrainCollider),
-                typeof(SphereCollider), 
-                typeof(Rigidbody),
-                typeof(GameMarkerData),
-                typeof(MeshRenderer),
-                typeof(MeshFilter),
-                typeof(Light),
-                typeof(HDAdditionalLightData),
-                typeof(Volume),
-                typeof(MapConfig),
-                typeof(CacheData),
-                typeof(ReflectionProbe),
-                typeof(Minimap));
+                    sceneObjects[i].transform.SetParent(null);
+                }
+                SceneManager.UnloadSceneAsync(mapScene);
+                DestroyImmediate(root);
+                return;
+            }
+            
+            DuplicateValidComponents(root.transform, null, "Garbage", (go, component) =>
+            {
+                UnityEditorInternal.ComponentUtility.CopyComponent(component);
+                UnityEditorInternal.ComponentUtility.PasteComponentAsNew(go);
+
+                if (component.GetType().Name == nameof(GameMarkerData))
+                {
+                    m_cacheDataList.Add(go.GetComponent<GameMarkerData>());
+                }
+            });
             
             for (int i = 0; i < sceneObjects.Length; i++)
             {
@@ -123,7 +145,17 @@ namespace Editor
                 bundleBuilds = CreateBundleArrayDataForOneElement(meta, "Assets/Resources/" + MapMetaConfig.instance.name + ".asset");
                 BuildPipeline.BuildAssetBundles(assetManifestPath, 
                     bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+                
+                
+                bool notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(MapMetaConfig.Value.mapName, assetManifestPath + "/" + MapMetaConfig.Value.mapName);
+                bool notMetaSize = ModMapTestTool.IsNotCorrectMetaFileSize(assetManifestPath + "/" + meta);
 
+                if (notMapSize || notMetaSize)
+                {
+                    Directory.Delete(assetManifestPath, true);
+                    return;
+                }
+                
                 void Callback(ulong id)
                 {
                     Directory.Delete(assetDir + "Standalone", true);
@@ -138,11 +170,6 @@ namespace Editor
                 }
             
                 EditorCoroutineUtility.StartCoroutine(steamUgc.PublishItemCoroutine(assetDir + "Standalone", Callback), steamUgc);
-            
-                if (ModMapTestTool.RunTest(assetManifestPath, meta, MapMetaConfig.Value.mapName, MapMetaConfig.Value.GetTargetScenePath()))
-                {
-                    Directory.Delete(assetManifestPath, true);
-                }
             }), steamUgc);
         }
 
@@ -157,8 +184,7 @@ namespace Editor
             return bundleBuilds;
         }
 
-        private static void ValidComponents(Transform parent, Transform root, string tagGarbage, 
-            Action<GameObject, Component> tryAct, params Type[] components)
+        private static void DuplicateValidComponents(Transform parent, Transform root, string tagGarbage, Action<GameObject, Component> tryAct)
         {
             if (string.IsNullOrEmpty(tagGarbage) || !parent.CompareTag(tagGarbage))
             {
@@ -181,17 +207,13 @@ namespace Editor
 
                 foreach (var component in allComponents)
                 {
-                    var compType = component.GetType();
-                    if (Try(compType, components))
-                    {
-                        tryAct?.Invoke(go, component);
-                    }
+                    tryAct?.Invoke(go, component);
                 }
 
                 for (var i = 0; i < parent.transform.childCount; i++)
                 {
                     var child = parent.transform.GetChild(i);
-                    ValidComponents(child, go.transform, tagGarbage, tryAct, components);
+                    DuplicateValidComponents(child, go.transform, tagGarbage, tryAct);
                 }
             }
         }
