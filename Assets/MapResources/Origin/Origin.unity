@@ -1949,7 +1949,7 @@ GameObject:
   - component: {fileID: 1752412392}
   - component: {fileID: 1752412391}
   m_Layer: 0
-  m_Name: Tribune (1)
+  m_Name: Thunder
   m_TagString: Untagged
   m_Icon: {fileID: 3443629218296621865, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
