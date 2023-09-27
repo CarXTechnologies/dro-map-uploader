@@ -17,7 +17,7 @@ namespace Editor
     public class MapBuilder : MonoBehaviour
     {
         private const string assetDir = "C:/Program Files (x86)/Steam/steamapps/workshop/content/635260/";
-        private const string path = "Assets/map";
+        private const string path = "Assets";
         private const string assetManifestPath = assetDir + "Standalone";
         private const string meta = "Meta";
 
@@ -33,7 +33,7 @@ namespace Editor
                 Directory.CreateDirectory(path);
             }
            
-            EditorSceneManager.OpenScene(MapMetaConfig.Value.GetTargetScenePath());
+            EditorSceneManager.OpenScene(MapManagerConfig.Value.GetTargetScenePath());
             var scene = SceneManager.GetActiveScene();
             var sceneObjects = scene.GetRootGameObjects();
             
@@ -45,7 +45,7 @@ namespace Editor
             }
             
             var titleIconPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6)
-                                + AssetDatabase.GetAssetPath(MapMetaConfig.Value.largeIcon);
+                                + AssetDatabase.GetAssetPath(MapManagerConfig.Value.largeIcon);
             
             var mapScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
 
@@ -60,7 +60,7 @@ namespace Editor
                 isError = true;
             };
             
-            ModMapTestTool.Play(MapMetaConfig.Value.mapName)?
+            ModMapTestTool.Play(MapManagerConfig.Value.mapName)?
                 .With((typeof(Transform), 0, 1000))
                 .With((typeof(MeshCollider), 0, 1000))
                 .With((typeof(BoxCollider), 0, 1000))
@@ -77,7 +77,7 @@ namespace Editor
                 .ValidComponents();
 
             ModMapTestTool.InitTestsEditor(scene);
-            ModMapTestTool.RunTest(MapMetaConfig.Value.targetScene);
+            ModMapTestTool.RunTest(MapManagerConfig.Value.targetScene);
             
             if (isError)
             {
@@ -110,7 +110,7 @@ namespace Editor
             
             DestroyImmediate(root);
             
-            var scenePath = path + "/" + MapMetaConfig.Value.mapName + ".unity";
+            var scenePath = path + "/" + MapManagerConfig.Value.mapName + ".unity";
                 
             foreach (var file in Directory.GetFiles(path))
             {
@@ -132,22 +132,22 @@ namespace Editor
             var steamUgc = new SteamUGCManager();
             EditorApplication.update += steamUgc.Update;
             
-            EditorCoroutineUtility.StartCoroutine(steamUgc.CreatePublisherItem(MapMetaConfig.Value.mapName, titleIconPath, item =>
+            EditorCoroutineUtility.StartCoroutine(steamUgc.CreatePublisherItem(MapManagerConfig.Value.mapName, titleIconPath, item =>
             {
-                var scenePathNew = path + "/" + MapMetaConfig.Value.mapName + item.FileId.Value + ".unity";
-                AssetDatabase.RenameAsset(scenePath, MapMetaConfig.Value.mapName + item.FileId.Value);
+                var scenePathNew = path + "/" + MapManagerConfig.Value.mapName + item.FileId.Value + ".unity";
+                AssetDatabase.RenameAsset(scenePath, MapManagerConfig.Value.mapName + item.FileId.Value);
                 scenePath = scenePathNew;
                 
-                var bundleBuilds = CreateBundleArrayDataForOneElement(MapMetaConfig.Value.mapName, scenePath);
+                var bundleBuilds = CreateBundleArrayDataForOneElement(MapManagerConfig.Value.mapName, scenePath);
                 BuildPipeline.BuildAssetBundles(assetManifestPath,
                     bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
             
-                bundleBuilds = CreateBundleArrayDataForOneElement(meta, "Assets/Resources/" + MapMetaConfig.instance.name + ".asset");
+                bundleBuilds = CreateBundleArrayDataForOneElement(meta, "Assets/Resources/" + MapManagerConfig.instance.name + ".asset");
                 BuildPipeline.BuildAssetBundles(assetManifestPath, 
                     bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
                 
                 
-                bool notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(MapMetaConfig.Value.mapName, assetManifestPath + "/" + MapMetaConfig.Value.mapName);
+                bool notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(MapManagerConfig.Value.mapName, assetManifestPath + "/" + MapManagerConfig.Value.mapName);
                 bool notMetaSize = ModMapTestTool.IsNotCorrectMetaFileSize(assetManifestPath + "/" + meta);
 
                 if (notMapSize || notMetaSize)
