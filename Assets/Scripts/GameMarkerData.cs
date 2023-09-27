@@ -1,30 +1,41 @@
 using System;
+using Steamworks;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GameMarkerData : MonoBehaviour
 {
     public MarkerData markerData;
-
-    private void OnValidate()
-    {
-        markerData.head = markerData.typeGameMaker.ToString();
-        transform.name = markerData.head;
-    }
+    
 }
 
 [Serializable]
 public struct MarkerData
 {
-    [HideInInspector] public string head;
-    public TypeGameMaker typeGameMaker;
+    public static readonly string[] paramEditor =
+    {
+        "SpawnPoint",
+        "Road",
+        "Ambient/Airfield",
+        "Ambient/City",
+        "Ambient/Crowd",
+        "Ambient/Crowd_parking",
+        "Ambient/Garage1",
+        "Ambient/Garage2",
+        "Ambient/Kami",
+        "Ambient/Pacific",
+        "Ambient/Stadium",
+        "Ambient/Thunder",
+        "Ambient/Thunder2",
+        "Ambient/Track",
+        "Ambient/Waterfall",
+        "Ambient/Winter",
+    };
+    
+    public string head;
     [TextArea] public string param;
-
-    public string GetHead() => typeGameMaker.ToString().ToLower();
+    public int index;
+    
+    public string GetHead() => head.ToLower();
 }
-
-public enum TypeGameMaker
-{
-    SpawnPoint,
-    Road
-}
-

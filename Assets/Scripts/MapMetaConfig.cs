@@ -28,10 +28,3 @@ public struct MapMetaConfigValue
     
     public string GetTargetScenePath() => $"Assets/MapResources/{targetScene}/{targetScene}.unity";
 }
-
-public enum TypeGameObject
-{
-    SpawnPoint,
-    Road,
-    Config
-}

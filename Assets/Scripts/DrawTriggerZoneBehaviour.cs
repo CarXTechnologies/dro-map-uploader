@@ -3,19 +3,47 @@ using UnityEngine;
 
 public class DrawTriggerZoneBehaviour : MonoBehaviour
 {
+    public FormType form;
+    public bool castToFloor = true;
+    
+    public enum FormType
+    {
+        Point,
+        Box,
+        Sphere
+    }
+    
     private void OnDrawGizmos()
     {
-        Vector3 pos = transform.position;
-        Vector3 scale = transform.localScale;
+        var thisTrans = transform;
+        Vector3 pos = thisTrans.position;
+        Vector3 scale = thisTrans.localScale;
 
-        RayMaxDraw(ref pos, ref scale, Vector3.down);
+        if (castToFloor)
+        {
+            RayMaxDraw(ref pos, ref scale, Vector3.down);
+        }
 
-        transform.position = pos;
-        transform.localScale = scale;
-        
+        thisTrans.position = pos;
         Gizmos.color = Color.green;
-        Gizmos.matrix = transform.localToWorldMatrix;
-        Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
+        
+        switch (form)
+        {
+            case FormType.Point :
+                break;
+            case FormType.Box :
+                thisTrans.localScale = scale;
+                Gizmos.matrix = thisTrans.localToWorldMatrix;
+                Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
+                break;
+            case FormType.Sphere :
+                var lossyScale = thisTrans.lossyScale;
+                thisTrans.localScale = Vector3.one * lossyScale.y; 
+                Gizmos.matrix = thisTrans.localToWorldMatrix;
+                Gizmos.DrawWireSphere(Vector3.zero, 0.5f);
+                break;
+        }
+        
         Gizmos.matrix = Matrix4x4.identity;
         Gizmos.color = Color.white;
     }

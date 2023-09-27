@@ -567,6 +567,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e579fe3e36ad41499c314b964c1bbb64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  form: 0
+  castToFloor: 1
 --- !u!4 &223974228
 Transform:
   m_ObjectHideFlags: 0
@@ -595,8 +597,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   markerData:
     head: SpawnPoint
-    typeGameMaker: 0
-    param: 
+    param: SpawnPoint
+    index: 0
 --- !u!1001 &319951433
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1109,6 +1111,68 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 740105090407800524, guid: b1db41dc5f3e10a4882129ab859df58a, type: 3}
   m_PrefabInstance: {fileID: 897997287}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &955824383
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 955824386}
+  - component: {fileID: 955824385}
+  - component: {fileID: 955824384}
+  m_Layer: 0
+  m_Name: KamiForest
+  m_TagString: Untagged
+  m_Icon: {fileID: 3443629218296621865, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &955824384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 955824383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e579fe3e36ad41499c314b964c1bbb64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  form: 2
+  castToFloor: 0
+--- !u!114 &955824385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 955824383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  markerData:
+    head: Ambient
+    param: Ambient/Kami
+    index: 8
+--- !u!4 &955824386
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 955824383}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -29.7, y: 2.88, z: 40.1}
+  m_LocalScale: {x: 69.5, y: 69.5, z: 69.5}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1033570551
 GameObject:
   m_ObjectHideFlags: 0
@@ -1389,8 +1453,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   markerData:
     head: Road
-    typeGameMaker: 1
     param: event:/GameEvents/UI/TimeIsOver
+    index: 0
 --- !u!1001 &1396374588
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1701,6 +1765,68 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5667830401730778439, guid: 4af4720e574d10242954c338a5611230, type: 3}
   m_PrefabInstance: {fileID: 1592011382}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1612694669
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1612694672}
+  - component: {fileID: 1612694671}
+  - component: {fileID: 1612694670}
+  m_Layer: 0
+  m_Name: Tribune
+  m_TagString: Untagged
+  m_Icon: {fileID: 3443629218296621865, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1612694670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1612694669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e579fe3e36ad41499c314b964c1bbb64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  form: 2
+  castToFloor: 0
+--- !u!114 &1612694671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1612694669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  markerData:
+    head: Ambient
+    param: Ambient/Crowd
+    index: 4
+--- !u!4 &1612694672
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1612694669}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 96.3, y: 2.88, z: -125}
+  m_LocalScale: {x: 128.75569, y: 128.75569, z: 128.75569}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1641077912
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1810,6 +1936,68 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1752412390
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1752412393}
+  - component: {fileID: 1752412392}
+  - component: {fileID: 1752412391}
+  m_Layer: 0
+  m_Name: Tribune (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 3443629218296621865, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1752412391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1752412390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e579fe3e36ad41499c314b964c1bbb64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  form: 2
+  castToFloor: 0
+--- !u!114 &1752412392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1752412390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  markerData:
+    head: Ambient
+    param: Ambient/Thunder2
+    index: 12
+--- !u!4 &1752412393
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1752412390}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -117.5, y: 2.88, z: -98.6}
+  m_LocalScale: {x: 128.75569, y: 128.75569, z: 128.75569}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1783082485
 GameObject:
