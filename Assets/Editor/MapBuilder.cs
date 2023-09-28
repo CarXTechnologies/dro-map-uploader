@@ -15,9 +15,9 @@ namespace Editor
 {
     public class MapBuilder : MonoBehaviour
     {
-        private const string assetDir = "C:/Program Files (x86)/Steam/steamapps/workshop/content/635260/";
+        private static string assetDir = Application.temporaryCachePath + "/635260/";
         private const string path = "Assets";
-        private static string assetManifestPath = Application.temporaryCachePath + "/Standalone";
+        private static string assetManifestPath = assetDir + "Standalone";
         private const string meta = "Meta";
 
         private static List<GameMarkerData> m_cacheDataList = new List<GameMarkerData>();
@@ -157,7 +157,7 @@ namespace Editor
                 
                 void Callback(ulong id)
                 {
-                    Directory.Delete(assetDir + "Standalone", true);
+                    Directory.Delete(assetManifestPath, true);
 
                     if (id == SteamUGCManager.PUBLISH_ITEM_FAILED_CODE)
                     {
@@ -168,7 +168,7 @@ namespace Editor
                     Debug.Log("Export track id: " + id);
                 }
             
-                EditorCoroutineUtility.StartCoroutine(steamUgc.PublishItemCoroutine(assetDir + "Standalone", Callback), steamUgc);
+                EditorCoroutineUtility.StartCoroutine(steamUgc.PublishItemCoroutine(assetManifestPath, Callback), steamUgc);
             }), steamUgc);
         }
 
