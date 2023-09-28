@@ -4,6 +4,7 @@ using UnityEngine;
 using Steamworks;
 using System.IO;
 using System.Threading.Tasks;
+using Steamworks.Data;
 using Steamworks.Ugc;
 
 namespace GameOverlay
@@ -23,7 +24,7 @@ namespace GameOverlay
 		private IEnumerator UpdateItemCoroutine(string path, ulong id)
 		{
 			var dirInfo = new DirectoryInfo(path);
-
+			
 			var itemTask = Item.GetAsync(id);
 			yield return itemTask.AsIEnumerator();
 
@@ -67,26 +68,36 @@ namespace GameOverlay
 			if (metaFileInfo != null)
 			{
 				editor.WithMetaData(metaFileInfo.DirectoryName + "/" + metaFileInfo.Name);
+				editor.WithTitle(m_itemName);
+				editor.WithPreviewFile(m_previewPath);
+				editor.WithTag(MAP_TAG);
+				editor.WithPrivateVisibility();
 			}
 
 			return editor;
 		}
 
-		private Editor CreateCommunityFile(string mapName, string iconPreviewPath)
+		private Editor CreateCommunityFile()
 		{     
 			return Editor.NewCommunityFile
 				.ForAppId(APP_ID)
-				.WithTitle(mapName)
-				.WithPreviewFile(iconPreviewPath)
 				.WithTag(MAP_TAG)
 				.WithPrivateVisibility();
 		}
 
 		private Task<PublishResult> m_currentPublishResult;
+		private string m_itemName;
+		private string m_previewPath;
 		
-		public IEnumerator CreatePublisherItem(string itemName, string iconPreviewPath, Action<PublishResult> onCreate)
+		public void SetItemData(string itemName, string previewPath)
 		{
-			var submitTask = CreateCommunityFile(itemName, iconPreviewPath).SubmitAsync();
+			m_itemName = itemName;
+			m_previewPath = previewPath;
+		}
+		
+		public IEnumerator CreatePublisherItem(Action<PublishResult> onCreate)
+		{
+			var submitTask = CreateCommunityFile().SubmitAsync();
 			m_currentPublishResult = submitTask;
 			yield return m_currentPublishResult.AsIEnumerator();
 			onCreate?.Invoke(m_currentPublishResult.Result);
@@ -117,6 +128,12 @@ namespace GameOverlay
 			}
 
 			m_isUploading = false;
+		}
+
+		public IEnumerator UploadItemCoroutine(string path, PublishedFileId itemId, Action<ulong> uploadedId = null)
+		{
+			yield return UpdateItemCoroutine(path, itemId);
+			uploadedId?.Invoke(itemId);
 		}
 	}
 }

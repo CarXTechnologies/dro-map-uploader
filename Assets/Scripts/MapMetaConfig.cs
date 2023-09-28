@@ -1,4 +1,5 @@
 using System;
+using Steamworks.Data;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -25,6 +26,8 @@ public struct MapMetaConfigValue
     public Texture2D icon;
     public Texture2D largeIcon;
     public Texture2D miniMapIcon;
-    
+
+    public PublishedFileId lastItemWorkshop;
+
     public string GetTargetScenePath() => $"Assets/MapResources/{targetScene}/{targetScene}.unity";
 }
