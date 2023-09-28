@@ -17,8 +17,6 @@ public struct MarkerData
     {
         "SpawnPoint",
         "Road",
-        "Ambient/Airfield",
-        "Ambient/City",
         "Ambient/Crowd",
         "Ambient/Crowd_parking",
         "Ambient/Garage1",
