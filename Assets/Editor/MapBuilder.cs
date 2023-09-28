@@ -17,7 +17,7 @@ namespace Editor
     {
         private const string assetDir = "C:/Program Files (x86)/Steam/steamapps/workshop/content/635260/";
         private const string path = "Assets";
-        private const string assetManifestPath = assetDir + "Standalone";
+        private static string assetManifestPath = Application.temporaryCachePath + "/Standalone";
         private const string meta = "Meta";
 
         private static List<GameMarkerData> m_cacheDataList = new List<GameMarkerData>();
