@@ -11,7 +11,7 @@ using UnityEditor.SceneManagement;
 
 public class ModMapTestTool
 {
-    private const int MAX_COUNT_VERTEX_IN_DISREATE = 100000;
+    private const int MAX_COUNT_VERTEX_IN_DISREATE = 1000000;
     private const int MAX_COUNT_GAMEOBJECT = 10000;
     private const float BYTES_TO_MEGABYTES = 1048576f;
     private const float MEGABYTES_MAX = 512f;
