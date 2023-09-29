@@ -27,7 +27,7 @@ public struct MapMetaConfigValue
     public Texture2D largeIcon;
     public Texture2D miniMapIcon;
 
-    public PublishedFileId lastItemWorkshop;
+    public ulong lastItemWorkshop;
 
     public string GetTargetScenePath() => $"Assets/MapResources/{targetScene}/{targetScene}.unity";
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using GameOverlay;
 using Steamworks;
+using Steamworks.Data;
 using Steamworks.Ugc;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
@@ -16,7 +17,7 @@ namespace Editor
 {
     public class MapBuilder : MonoBehaviour
     {
-        private static string assetDir = Application.temporaryCachePath + "/635260/";
+        private static string assetDir = Application.temporaryCachePath + "/";
         private const string path = "Assets";
         private static string assetManifestPath = assetDir + "Standalone";
         private const string meta = "Meta";
@@ -41,7 +42,7 @@ namespace Editor
             m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath);
             EditorCoroutineUtility.StartCoroutine(m_steamUgc.CreatePublisherItem(item =>
             {
-                CreateBundles(item);
+                CreateBundles(item.FileId);
                 if (IsSizeValid())
                 {
                     return;
@@ -63,7 +64,7 @@ namespace Editor
                 return;
             }
 
-            CreateBundles(default);
+            CreateBundles(MapManagerConfig.Value.lastItemWorkshop);
             if (IsSizeValid())
             {
                 return;
@@ -206,10 +207,10 @@ namespace Editor
             return false;
         }
 
-        private static void CreateBundles(PublishResult publishResult)
+        private static void CreateBundles(PublishedFileId publishResult)
         {
-            var scenePathNew = path + "/" + MapManagerConfig.Value.mapName + publishResult.FileId.Value + ".unity";
-            AssetDatabase.RenameAsset(m_scenePath, MapManagerConfig.Value.mapName + publishResult.FileId.Value);
+            var scenePathNew = path + "/" + MapManagerConfig.Value.mapName + publishResult.Value + ".unity";
+            AssetDatabase.RenameAsset(m_scenePath, MapManagerConfig.Value.mapName + publishResult.Value);
             m_scenePath = scenePathNew;
                 
             var bundleBuilds = CreateBundleArrayDataForOneElement(MapManagerConfig.Value.mapName, m_scenePath);
