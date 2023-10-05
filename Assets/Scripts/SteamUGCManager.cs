@@ -71,6 +71,7 @@ namespace GameOverlay
 				editor.WithTitle(m_itemName);
 				editor.WithPreviewFile(m_previewPath);
 				editor.WithTag(MAP_TAG);
+				editor.WithDescription(m_desciption);
 				editor.WithPrivateVisibility();
 			}
 
@@ -88,11 +89,13 @@ namespace GameOverlay
 		private Task<PublishResult> m_currentPublishResult;
 		private string m_itemName;
 		private string m_previewPath;
+		private string m_desciption;
 		
-		public void SetItemData(string itemName, string previewPath)
+		public void SetItemData(string itemName, string previewPath, string desciption)
 		{
 			m_itemName = itemName;
 			m_previewPath = previewPath;
+			m_desciption = desciption;
 		}
 		
 		public IEnumerator CreatePublisherItem(Action<PublishResult> onCreate)
