@@ -1,7 +1,5 @@
 using System;
-using Steamworks.Data;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [CreateAssetMenu(menuName = "Map/MapMetaConfig", fileName = "MapMetaConfig", order = 0)]
 public class MapMetaConfig : ScriptableObject
@@ -25,7 +23,7 @@ public struct MapMetaConfigValue
     [TextArea] public string mapDescription;
     public Texture2D icon;
     public Texture2D largeIcon;
-    public Texture2D miniMapIcon;
+    [HideInInspector]public Texture2D miniMapIcon;
 
     public ulong lastItemWorkshop;
 

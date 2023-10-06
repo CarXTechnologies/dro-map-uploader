@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8fcbec40bef0404b8fe17c79016a66fb, type: 3}
-  m_Name: Bayshore DarkConfig
+  m_Name: Config
   m_EditorClassIdentifier: 
   mapMetaConfigValue:
     targetScene: Bayshore Dark
-    mapName: Bayshore Dark 2
+    mapName: VAVAE
     mapDescription: Japan Map222
-    icon: {fileID: 2800000, guid: a85374ed9004dad4cb42233c843edc5a, type: 3}
+    icon: {fileID: 2800000, guid: ac3639873dc35424785477a9272acfa8, type: 3}
     largeIcon: {fileID: 2800000, guid: a41d8898536c70744b4c1243ba1a5eed, type: 3}
-    miniMapIcon: {fileID: 2800000, guid: c43a2e164a1f2734898563beebfe2fc9, type: 3}
-    lastItemWorkshop: 0
+    miniMapIcon: {fileID: 0}
+    lastItemWorkshop: 3046547498
