@@ -34,6 +34,13 @@ namespace Editor
         {
             InitDirectories();
             InitSteamUGC();
+
+            if (MapManagerConfig.Value.icon == null)
+            {
+                Debug.LogError($"Please apply icon config({MapManagerConfig.instance.mapMetaConfigValue.name}) field");
+                return;
+            }
+
             if (ValidateSceneAndMirror())
             {
                 return;
@@ -59,6 +66,13 @@ namespace Editor
         {
             InitDirectories();
             InitSteamUGC();
+            
+            if (MapManagerConfig.Value.icon == null)
+            {
+                Debug.LogError($"Please apply icon config({MapManagerConfig.instance.mapMetaConfigValue.name}) field");
+                return;
+            }
+            
             if (ValidateSceneAndMirror())
             {
                 return;
