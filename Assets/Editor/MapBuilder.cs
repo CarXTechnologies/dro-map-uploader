@@ -191,6 +191,7 @@ namespace Editor
 
             if (IsValidate(scene))
             {
+                EditorSceneManager.OpenScene(MapManagerConfig.Value.GetTargetScenePath());
                 SceneManager.UnloadSceneAsync(mapScene);
                 DestroyImmediate(root);
                 return true;
