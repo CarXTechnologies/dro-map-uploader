@@ -34,12 +34,19 @@ namespace Editor
         {
             InitDirectories();
             InitSteamUGC();
+
+            if (MapManagerConfig.Value.icon == null)
+            {
+                Debug.LogError($"Please apply icon config({MapManagerConfig.instance.mapMetaConfigValue.name}) field");
+                return;
+            }
+
             if (ValidateSceneAndMirror())
             {
                 return;
             }
             
-            m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath);
+            m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
             EditorCoroutineUtility.StartCoroutine(m_steamUgc.CreatePublisherItem(item =>
             {
                 CreateBundles(item.FileId);
@@ -59,6 +66,13 @@ namespace Editor
         {
             InitDirectories();
             InitSteamUGC();
+            
+            if (MapManagerConfig.Value.icon == null)
+            {
+                Debug.LogError($"Please apply icon config({MapManagerConfig.instance.mapMetaConfigValue.name}) field");
+                return;
+            }
+            
             if (ValidateSceneAndMirror())
             {
                 return;
@@ -70,7 +84,7 @@ namespace Editor
                 return;
             }
             
-            m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath);
+            m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
             EditorCoroutineUtility.StartCoroutine(
                 m_steamUgc.UploadItemCoroutine(assetManifestPath, MapManagerConfig.Value.lastItemWorkshop), m_steamUgc);
         }
@@ -144,6 +158,7 @@ namespace Editor
                 .With((typeof(CacheData), 0, 1000))
                 .With((typeof(ReflectionProbe), 0, 1000))
                 .With((typeof(LODGroup), 0, 1000))
+                .With((typeof(Minimap), 1, 1))
                 .ValidComponents();
 
             ModMapTestTool.InitTestsEditor(scene);
