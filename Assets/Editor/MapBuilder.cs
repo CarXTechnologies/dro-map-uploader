@@ -144,21 +144,7 @@ namespace Editor
             };
             
             ModMapTestTool.Play(MapManagerConfig.Value.mapName)?
-                .With((typeof(Transform), 0, 1000))
-                .With((typeof(MeshCollider), 0, 1000))
-                .With((typeof(BoxCollider), 0, 1000))
-                .With((typeof(SphereCollider), 0, 1000))
-                .With((typeof(GameMarkerData), 0, 1000))
-                .With((typeof(MeshRenderer), 0, 1000))
-                .With((typeof(MeshFilter), 0, 1000))
-                .With((typeof(Light), 0, 1000))
-                .With((typeof(HDAdditionalLightData), 0, 1000))
-                .With((typeof(Volume), 0, 1000))
-                .With((typeof(MapConfig), 0, 1000))
-                .With((typeof(CacheData), 0, 1000))
-                .With((typeof(ReflectionProbe), 0, 1000))
-                .With((typeof(LODGroup), 0, 1000))
-                .With((typeof(Minimap), 1, 1))
+                .WithList(ModMapTestTool.Steam)
                 .ValidComponents();
 
             ModMapTestTool.InitTestsEditor(scene);

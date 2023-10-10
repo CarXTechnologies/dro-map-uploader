@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
@@ -16,16 +18,35 @@ public class ModMapTestTool
     private const float BYTES_TO_MEGABYTES = 1048576f;
     private const float MEGABYTES_MAX = 512f;
     private const float MEGABYTES_MAX_META = 24f;
-    private const int VERTEX_DISCREATE = 1;
+    private const int VERTEX_DISCRETE = 1;
     
     private static readonly List<GameObject> m_gameObjects = new List<GameObject>();
-    private static Dictionary<float3, int> vertexCountPositionDiscreate = new Dictionary<float3, int>();
+    private static Dictionary<float3, int> m_vertexCountPositionDiscreate = new Dictionary<float3, int>();
     public static Func<string, bool> playCallback;
     public static Action<string, string> errorCallback;
 
     private string m_currentName;
     private GameObject m_root;
     private List<ValidItem> m_listValid = new List<ValidItem>();
+
+    public static readonly List<ValidItem> Steam = new List<ValidItem>()
+    {
+        new ValidItem(typeof(Transform), 0, 1000),
+        new ValidItem(typeof(MeshCollider), 0, 100),
+        new ValidItem(typeof(BoxCollider), 0, 1000),
+        new ValidItem(typeof(SphereCollider), 0, 1000),
+        new ValidItem(typeof(GameMarkerData), 0, 1000),
+        new ValidItem(typeof(MeshRenderer), 0, 1000),
+        new ValidItem(typeof(MeshFilter), 0, 1000),
+        new ValidItem(typeof(Light), 0, 1000),
+        new ValidItem(typeof(HDAdditionalLightData), 0, 1000),
+        new ValidItem(typeof(Volume), 0, 1000),
+        new ValidItem(typeof(MapConfig), 0, 1000),
+        new ValidItem(typeof(CacheData), 0, 1000),
+        new ValidItem(typeof(ReflectionProbe), 0, 1000),
+        new ValidItem(typeof(LODGroup), 0, 1000),
+        new ValidItem(typeof(Minimap), 1, 1),
+    };
     
     public static void InitTests(string sceneName)
     {
@@ -51,10 +72,11 @@ public class ModMapTestTool
             return true;
         }
 
-        var isNoCorrect = MEGABYTES_MAX < file.Length / BYTES_TO_MEGABYTES;
+        var sizeFileInMegabytes = file.Length / BYTES_TO_MEGABYTES;
+        var isNoCorrect = MEGABYTES_MAX < sizeFileInMegabytes;
         if (isNoCorrect)
         {
-            TryErrorMessage(name, "Map size is " + file.Length / BYTES_TO_MEGABYTES + "/" + MEGABYTES_MAX);
+            TryErrorMessage(name, "Map size is " + sizeFileInMegabytes + "/" + MEGABYTES_MAX);
         }
 
         return isNoCorrect;
@@ -69,10 +91,11 @@ public class ModMapTestTool
             return true;
         }
 
-        var isNoCorrect = MEGABYTES_MAX_META < file.Length / BYTES_TO_MEGABYTES;
+        var sizeFileInMegabytes = file.Length / BYTES_TO_MEGABYTES;
+        var isNoCorrect = MEGABYTES_MAX_META < sizeFileInMegabytes;
         if (isNoCorrect)
         {
-            TryErrorMessage(null, "Meta size is " + file.Length / BYTES_TO_MEGABYTES + "/" + MEGABYTES_MAX_META);
+            TryErrorMessage(null, "Meta size is " + sizeFileInMegabytes + "/" + MEGABYTES_MAX_META);
         }
 
         return isNoCorrect;
@@ -95,20 +118,20 @@ public class ModMapTestTool
             if (meshFilter != null && meshFilter.sharedMesh != null)
             {
                 var count = meshFilter.sharedMesh.vertexCount;
-                var pos = math.floor(meshFilter.transform.position / VERTEX_DISCREATE) * VERTEX_DISCREATE;
+                var pos = math.floor(meshFilter.transform.position / VERTEX_DISCRETE) * VERTEX_DISCRETE;
                 
-                if (vertexCountPositionDiscreate.TryGetValue(pos, out var value))
+                if (m_vertexCountPositionDiscreate.TryGetValue(pos, out var value))
                 {
-                    vertexCountPositionDiscreate[pos] = value + count;
+                    m_vertexCountPositionDiscreate[pos] = value + count;
                 }
                 else
                 {
-                    vertexCountPositionDiscreate.Add(pos, count);
+                    m_vertexCountPositionDiscreate.Add(pos, count);
                 }
             }
         }
         
-        foreach (var val in vertexCountPositionDiscreate)
+        foreach (var val in m_vertexCountPositionDiscreate)
         {
             if (val.Value > MAX_COUNT_VERTEX_IN_DISREATE)
             {
@@ -167,7 +190,7 @@ public class ModMapTestTool
         public int max;
         public int current;
 
-        public ValidItem(Type type, int min, int max, int current)
+        public ValidItem(Type type, int min, int max, int current = 0)
         {
             this.type = type;
             this.min = min;
@@ -241,7 +264,13 @@ public class ModMapTestTool
 
     public ModMapTestTool With((Type, int, int) value)
     {
-        m_listValid.Add(new ValidItem(value.Item1, value.Item2, value.Item3, 0));
+        m_listValid.Add(new ValidItem(value.Item1, value.Item2, value.Item3));
+        return this;
+    }
+    
+    public ModMapTestTool WithList(List<ValidItem> value)
+    {
+        m_listValid.AddRange(value);
         return this;
     }
     
@@ -257,8 +286,7 @@ public class ModMapTestTool
 
                 if (!Try(compType, m_listValid))
                 {
-                    TryErrorMessage(m_currentName,
-                        new ValidItem(compType, Int32.MinValue, Int32.MaxValue, 1).ToString());
+                    TryErrorMessage(m_currentName, new ValidItem(compType, Int32.MinValue, Int32.MaxValue, 1).ToString());
                     return;
                 }
             }
