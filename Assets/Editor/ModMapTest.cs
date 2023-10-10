@@ -183,7 +183,7 @@ public class ModMapTestTool
         }
     }
 
-    public class ValidItem
+    public struct ValidItem
     {
         public Type type;
         public int min;
@@ -270,6 +270,7 @@ public class ModMapTestTool
     
     public ModMapTestTool WithList(List<ValidItem> value)
     {
+        m_listValid.Clear();
         m_listValid.AddRange(value);
         return this;
     }
@@ -322,7 +323,7 @@ public class ModMapTestTool
             if (type.Name == types[index].type.Name)
             {
                 tryComp = true;
-                types[index].current++;
+                types[index] = new ValidItem(types[index].type, types[index].min, types[index].max, types[index].current + 1);
                 break;
             }
         }
