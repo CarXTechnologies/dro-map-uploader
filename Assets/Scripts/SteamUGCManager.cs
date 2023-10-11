@@ -47,7 +47,14 @@ namespace GameOverlay
 
 			var submitTaskResult = submitTask.Result;
 
-			Debug.Log($"UGC item ({submitTaskResult.FileId}) update finished with result '{submitTaskResult.Result}'");
+			if (submitTaskResult.Success)
+			{
+				Debug.Log($"UGC item ({submitTaskResult.FileId}) update finished with result '{submitTaskResult.Result}'");
+			}
+			else
+			{
+				Debug.LogError($"Error UGC item ({submitTaskResult.FileId}) with result '{submitTaskResult.Result}'");
+			}
 		}
 
 		private FileInfo TryGetMetaFileFromDir(DirectoryInfo dirInfo)
