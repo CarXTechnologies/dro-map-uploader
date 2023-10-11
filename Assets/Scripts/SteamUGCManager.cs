@@ -15,6 +15,10 @@ namespace GameOverlay
 		public const uint APP_ID = 635260;
 		private const string MAP_TAG = "3";
 		private bool m_isUploading;
+		private Task<PublishResult> m_currentPublishResult;
+		private string m_itemName;
+		private string m_previewPath;
+		private string m_desciption;
 		
 		public void Update()
 		{
@@ -86,11 +90,6 @@ namespace GameOverlay
 				.WithPrivateVisibility();
 		}
 
-		private Task<PublishResult> m_currentPublishResult;
-		private string m_itemName;
-		private string m_previewPath;
-		private string m_desciption;
-		
 		public void SetItemData(string itemName, string previewPath, string desciption)
 		{
 			m_itemName = itemName;

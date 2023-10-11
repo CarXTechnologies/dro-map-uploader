@@ -28,9 +28,19 @@ namespace Editor
         private static string m_scenePath;
         private static string m_titleIconPath;
 
-        [MenuItem("Map/Create workshop map")]
+        
+        [MenuItem("Map/Create")]
         [Obsolete("Obsolete")]
-        private static void CreateAssetEditor()
+        private static void Create()
+        {
+            InitDirectories();
+            ValidateSceneAndMirror();
+            CreateBundles(new PublishedFileId());
+        }
+
+        [MenuItem("Map/Create and publication")]
+        [Obsolete("Obsolete")]
+        private static void CreateAndPublication()
         {
             InitDirectories();
             InitSteamUGC();
@@ -60,9 +70,9 @@ namespace Editor
             }), m_steamUgc);
         }
 
-        [MenuItem("Map/Update workshop map")]
+        [MenuItem("Map/Update exist publication")]
         [Obsolete("Obsolete")]
-        private static void UpdateAssetEditor()
+        private static void UpdateExistPublication()
         {
             InitDirectories();
             InitSteamUGC();
@@ -88,7 +98,7 @@ namespace Editor
             EditorCoroutineUtility.StartCoroutine(
                 m_steamUgc.UploadItemCoroutine(assetManifestPath, MapManagerConfig.Value.lastItemWorkshop), m_steamUgc);
         }
-
+        
         private static void PublishCallback(ulong id)
         {
             Directory.Delete(assetManifestPath, true);
@@ -195,10 +205,22 @@ namespace Editor
             {
                 UnityEditorInternal.ComponentUtility.CopyComponent(component);
                 UnityEditorInternal.ComponentUtility.PasteComponentAsNew(go);
-
-                if (component.GetType().Name == nameof(GameMarkerData))
+                
+                switch (component.GetType().Name)
                 {
-                    m_cacheDataList.Add(go.GetComponent<GameMarkerData>());
+                    case nameof(GameMarkerData) : 
+                        m_cacheDataList.Add(go.GetComponent<GameMarkerData>()); 
+                        break;
+                    case nameof(LODGroup) :
+                        var groupLods = (component as LODGroup)?.GetLODs();
+
+                        for (int i = 0; i < groupLods.Length; i++)
+                        {
+                            groupLods[i].renderers = go.transform.FindAllComponent<Renderer>(groupLods[i].renderers);
+                        }
+                        
+                        go.GetComponent<LODGroup>().SetLODs(groupLods);
+                        break;
                 }
             });
             
@@ -277,38 +299,53 @@ namespace Editor
                     isStatic = o.isStatic,
                     layer = o.layer
                 };
-
-                foreach (var component in allComponents)
-                {
-                    tryAct?.Invoke(go, component);
-                }
-
+                
                 for (var i = 0; i < parent.transform.childCount; i++)
                 {
                     var child = parent.transform.GetChild(i);
                     DuplicateValidComponents(child, go.transform, tagGarbage, tryAct);
                 }
+                
+                foreach (var component in allComponents)
+                {
+                    tryAct?.Invoke(go, component);
+                }
             }
         }
+    }
+}
 
-        private static bool Try(Type type, params Type[] types)
+public static class ComponentUtility
+{
+    public static T[] FindAllComponent<T>(this Transform parent, params Component[] validNames) where T : Component
+    {
+        var components = new List<T>(parent.childCount);
+        for (int i = 0; i < parent.childCount; i++)
         {
-            if (type == null)
+            var child = parent.GetChild(i);
+            var childChild = child.FindAllComponent<T>();
+            if (childChild != null && childChild.Length > 0)
             {
-                return true;
+                components.AddRange(childChild);
             }
-            
-            var tryComp = false;
-            foreach (var typeTry in types)
+
+            var component = child.GetComponent<T>();
+            bool validName = false;
+            foreach (var name in validNames)
             {
-                if (type.Name == typeTry.Name)
+                if (component.transform.name == name.transform.name)
                 {
-                    tryComp = true;
+                    validName = true;
                     break;
                 }
             }
-
-            return tryComp;
+            
+            if (component != null && validName)
+            {
+                components.Add(component);
+            }
         }
+
+        return components.ToArray();
     }
 }
