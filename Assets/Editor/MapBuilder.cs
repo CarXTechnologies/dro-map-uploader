@@ -33,7 +33,14 @@ namespace Editor
         [Obsolete("Obsolete")]
         private static void Create()
         {
+            InitPath();
             InitDirectories();
+            
+            if (CheckAndError())
+            {
+                return;
+            }
+            
             ValidateSceneAndMirror();
             CreateBundles(new PublishedFileId());
         }
@@ -42,12 +49,12 @@ namespace Editor
         [Obsolete("Obsolete")]
         private static void CreateAndPublication()
         {
+            InitPath();
             InitDirectories();
             InitSteamUGC();
-
-            if (MapManagerConfig.Value.icon == null)
+            
+            if (CheckAndError())
             {
-                Debug.LogError($"Please apply icon config({MapManagerConfig.instance.mapMetaConfigValue.name}) field");
                 return;
             }
 
@@ -74,8 +81,14 @@ namespace Editor
         [Obsolete("Obsolete")]
         private static void UpdateExistPublication()
         {
+            InitPath();
             InitDirectories();
             InitSteamUGC();
+            
+            if (CheckAndError())
+            {
+                return;
+            }
             
             if (MapManagerConfig.Value.icon == null)
             {
@@ -110,6 +123,30 @@ namespace Editor
             }
                 
             Debug.Log("Export track id: " + id);
+        }
+
+        private static bool CheckAndError()
+        {
+            if (MapManagerConfig.Value.icon == null)
+            {
+                Debug.LogError($"Please apply icon config({MapManagerConfig.instance.mapMetaConfigValue.name}) field");
+                return true;
+            }
+            
+            if (!MapManagerConfig.Value.largeIcon.isReadable || !MapManagerConfig.Value.icon.isReadable)
+            {
+                Debug.LogError($"Icon no valid format");
+                return true;
+            }
+            
+            
+            if ((float)new FileInfo(m_titleIconPath).Length / ModMapTestTool.BYTES_TO_MEGABYTES > 1f)
+            {
+                Debug.LogError($"IconPreview more 1mb");
+                return true;
+            }
+
+            return false;
         }
         
         private static void InitDirectories()
@@ -163,12 +200,15 @@ namespace Editor
             return isError;
         }
 
-        private static bool ValidateSceneAndMirror()
+        private static void InitPath()
         {
             m_scenePath = path + "/" + MapManagerConfig.Value.mapName + ".unity";
             var assetPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
             m_titleIconPath = assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.largeIcon);
-
+        }
+        
+        private static bool ValidateSceneAndMirror()
+        {
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
             EditorSceneManager.OpenScene(MapManagerConfig.Value.GetTargetScenePath());
             var scene = SceneManager.GetActiveScene();
