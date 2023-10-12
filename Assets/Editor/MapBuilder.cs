@@ -248,8 +248,21 @@ namespace Editor
                 
                 switch (component.GetType().Name)
                 {
-                    case nameof(GameMarkerData) : 
-                        m_cacheDataList.Add(go.GetComponent<GameMarkerData>()); 
+                    case nameof(GameMarkerData) :
+                        var comp = go.GetComponent<GameMarkerData>();
+                        m_cacheDataList.Add(comp);
+                        if (comp.markerData.GetHead() == "road")
+                        {
+                            var road = comp.gameObject;
+                            road.isStatic = true;
+                            GameObjectUtility.SetStaticEditorFlags(road, 
+                                StaticEditorFlags.BatchingStatic |
+                                StaticEditorFlags.NavigationStatic | 
+                                StaticEditorFlags.OccludeeStatic | 
+                                StaticEditorFlags.OccluderStatic | 
+                                StaticEditorFlags.ReflectionProbeStatic | 
+                                StaticEditorFlags.OffMeshLinkGeneration);
+                        }
                         break;
                     case nameof(LODGroup) :
                         var groupLods = (component as LODGroup)?.GetLODs();
