@@ -3,44 +3,62 @@ using UnityEngine;
 
 public class DrawTriggerZoneBehaviour : MonoBehaviour
 {
-    public FormType form;
-    public bool castToFloor = true;
+    [SerializeField] private FormType m_form;
+    [SerializeField] private bool m_isEmpty;
+    [SerializeField] private bool m_castToFloor = true;
+    [SerializeField] private Color m_color = Color.green;
     
-    public enum FormType
+    private enum FormType
     {
         Point,
         Box,
         Sphere
     }
-    
+
     private void OnDrawGizmos()
     {
         var thisTrans = transform;
         Vector3 pos = thisTrans.position;
         Vector3 scale = thisTrans.localScale;
 
-        if (castToFloor)
+        if (m_castToFloor)
         {
             RayMaxDraw(ref pos, ref scale, Vector3.down);
         }
 
         thisTrans.position = pos;
-        Gizmos.color = Color.green;
+        Gizmos.color = m_color;
         
-        switch (form)
+        switch (m_form)
         {
             case FormType.Point :
                 break;
             case FormType.Box :
                 thisTrans.localScale = scale;
                 Gizmos.matrix = thisTrans.localToWorldMatrix;
-                Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
+                if (m_isEmpty)
+                {
+                    Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
+                }
+                else
+                {
+                    Gizmos.DrawCube(Vector3.zero, Vector3.one);
+                }
+
                 break;
             case FormType.Sphere :
                 var lossyScale = thisTrans.lossyScale;
                 thisTrans.localScale = Vector3.one * lossyScale.y; 
                 Gizmos.matrix = thisTrans.localToWorldMatrix;
-                Gizmos.DrawWireSphere(Vector3.zero, 0.5f);
+                if (m_isEmpty)
+                {
+                    Gizmos.DrawWireSphere(Vector3.zero, 0.5f);
+                }
+                else
+                {
+                    Gizmos.DrawSphere(Vector3.zero, 0.5f);
+                }
+
                 break;
         }
         

@@ -24,6 +24,16 @@ public class Minimap : MonoBehaviour
     [SerializeField] private LayerMask m_boundsLayers;
     [SerializeField] private Vector2 m_boundsCenter;
     [SerializeField] private Vector2 m_boundsSize;
-    [SerializeField] private float m_baseZoom = 1f;
     [SerializeField] private TexturePair[] m_textures = null;
+    [SerializeField] private bool m_lockSize = false;
+
+    private void OnValidate()
+    {
+        if (m_lockSize)
+        {
+            var lossyScale = transform.lossyScale;
+            m_boundsSize.x = lossyScale.x;
+            m_boundsSize.y = lossyScale.z;
+        }
+    }
 }

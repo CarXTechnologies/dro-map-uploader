@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapMetaConfigValue:
     targetScene: Origin
-    mapName: Bayshore Dark 2
-    mapDescription: Japan Map222
-    icon: {fileID: 2800000, guid: 3c9edc5b1c9b50c418296daab4add9ed, type: 3}
-    largeIcon: {fileID: 2800000, guid: 3b988b769eb8e184cb3e29cdb9852406, type: 3}
+    mapName: 55555
+    mapDescription: ggggggggggg
+    icon: {fileID: 2800000, guid: ac3639873dc35424785477a9272acfa8, type: 3}
+    largeIcon: {fileID: 2800000, guid: a41d8898536c70744b4c1243ba1a5eed, type: 3}
     miniMapIcon: {fileID: 2800000, guid: c43a2e164a1f2734898563beebfe2fc9, type: 3}
-    lastItemWorkshop: 0
+    lastItemWorkshop: 3049141079
