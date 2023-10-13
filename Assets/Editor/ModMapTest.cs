@@ -31,19 +31,18 @@ public class ModMapTestTool
 
     public static readonly List<ValidItem> Steam = new List<ValidItem>()
     {
-        new ValidItem(typeof(Transform), 0, 1000),
-        new ValidItem(typeof(MeshCollider), 0, 100),
+        new ValidItem(typeof(Transform), 1, 10000),
+        new ValidItem(typeof(MeshCollider), 1, 2000),
         new ValidItem(typeof(BoxCollider), 0, 1000),
         new ValidItem(typeof(SphereCollider), 0, 1000),
         new ValidItem(typeof(GameMarkerData), 0, 1000),
         new ValidItem(typeof(MeshRenderer), 0, 1000),
         new ValidItem(typeof(MeshFilter), 0, 1000),
-        new ValidItem(typeof(Light), 0, 1000),
-        new ValidItem(typeof(HDAdditionalLightData), 0, 1000),
-        new ValidItem(typeof(Volume), 0, 1000),
-        new ValidItem(typeof(MapConfig), 0, 1000),
-        new ValidItem(typeof(CacheData), 0, 1000),
-        new ValidItem(typeof(ReflectionProbe), 0, 1000),
+        new ValidItem(typeof(Light), 0, 200),
+        new ValidItem(typeof(HDAdditionalLightData), 0, 200),
+        new ValidItem(typeof(Volume), 1, 1),
+        new ValidItem(typeof(CacheData), 0, 1),
+        new ValidItem(typeof(ReflectionProbe), 1, 1),
         new ValidItem(typeof(LODGroup), 0, 1000),
         new ValidItem(typeof(Minimap), 1, 1),
     };
@@ -138,6 +137,8 @@ public class ModMapTestTool
                 throw new Exception("Triangle greater than " + MAX_COUNT_VERTEX_IN_DISREATE);
             }
         }
+        
+        m_vertexCountPositionDiscreate.Clear();
     }
     
     private static void SpawnPointTestExistence()

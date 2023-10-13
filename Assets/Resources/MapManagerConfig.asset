@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36e43af6c5384c568790db74c002d824, type: 3}
   m_Name: MapManagerConfig
   m_EditorClassIdentifier: 
-  mapMetaConfigValue: {fileID: 11400000, guid: 3146af69009fe17409ff1087d0a0d7e2, type: 2}
+  mapMetaConfigValue: {fileID: 11400000, guid: 654c3b0918c80c140a33e80139bdb4cb, type: 2}

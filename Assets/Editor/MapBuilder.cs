@@ -90,12 +90,6 @@ namespace Editor
                 return;
             }
             
-            if (MapManagerConfig.Value.icon == null)
-            {
-                Debug.LogError($"Please apply icon config({MapManagerConfig.instance.mapMetaConfigValue.name}) field");
-                return;
-            }
-            
             if (ValidateSceneAndMirror())
             {
                 return;
@@ -361,7 +355,10 @@ namespace Editor
                 
                 foreach (var component in allComponents)
                 {
-                    tryAct?.Invoke(go, component);
+                    if (component != null)
+                    {
+                        tryAct?.Invoke(go, component);
+                    }
                 }
             }
         }
@@ -383,19 +380,22 @@ public static class ComponentUtility
             }
 
             var component = child.GetComponent<T>();
-            bool validName = false;
-            foreach (var name in validNames)
+            if (component != null)
             {
-                if (component.transform.name == name.transform.name)
+                bool validName = false;
+                foreach (var name in validNames)
                 {
-                    validName = true;
-                    break;
+                    if (component.transform.name == name.transform.name)
+                    {
+                        validName = true;
+                        break;
+                    }
                 }
-            }
-            
-            if (component != null && validName)
-            {
-                components.Add(component);
+
+                if (validName)
+                {
+                    components.Add(component);
+                }
             }
         }
 
