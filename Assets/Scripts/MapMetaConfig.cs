@@ -26,9 +26,9 @@ public struct MapMetaConfigValue
     [HideInInspector]public Texture2D miniMapIcon;
 
     public ulong lastItemWorkshop;
-    public bool UploadDescription;
-    public bool UploadName;
-    public bool UploadPreview;
+    public bool UploadSteamDescription;
+    public bool UploadSteamName;
+    public bool UploadSteamPreview;
     
     public string GetTargetScenePath() => $"Assets/MapResources/{targetScene}/{targetScene}.unity";
 }
