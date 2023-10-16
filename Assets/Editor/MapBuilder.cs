@@ -60,15 +60,20 @@ namespace Editor
                 return;
             }
             
+   
+            EditorUtility.DisplayProgressBar("Create Publisher Item", String.Empty, 0.5f);
             m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
             EditorCoroutineUtility.StartCoroutine(m_steamUgc.CreatePublisherItem(item =>
             {
+                EditorUtility.ClearProgressBar();
                 CreateBundles(item.FileId);
+                
+                EditorUtility.DisplayProgressBar("Upload Publisher Item", String.Empty, 0.75f);
                 if (IsSizeValid())
                 {
                     return;
                 }
-
+              
                 MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.lastItemWorkshop = item.FileId;
                 EditorCoroutineUtility.StartCoroutine(m_steamUgc.PublishItemCoroutine(assetManifestPath, PublishCallback), m_steamUgc);
             }), m_steamUgc);
@@ -98,13 +103,18 @@ namespace Editor
                 return;
             }
             
+            EditorUtility.DisplayProgressBar("Upload Publisher Item", String.Empty, 0.5f);
             m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
             EditorCoroutineUtility.StartCoroutine(
-                m_steamUgc.UploadItemCoroutine(assetManifestPath, MapManagerConfig.Value.lastItemWorkshop), m_steamUgc);
+                m_steamUgc.UploadItemCoroutine(assetManifestPath, MapManagerConfig.Value.lastItemWorkshop, obj =>
+                {
+                    EditorUtility.ClearProgressBar();
+                }), m_steamUgc);
         }
         
         private static void PublishCallback(ulong id)
         {
+            EditorUtility.ClearProgressBar();
             Directory.Delete(assetManifestPath, true);
 
             if (id == SteamUGCManager.PUBLISH_ITEM_FAILED_CODE)
