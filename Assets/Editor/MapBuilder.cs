@@ -136,6 +136,12 @@ namespace Editor
                 Debug.LogError($"IconPreview more 1mb");
                 return true;
             }
+            
+            if (MapManagerConfig.Value.mapDescription.Length > 7999)
+            {
+                Debug.LogError($"Map description must be less than 8000 characters({MapManagerConfig.Value.mapDescription.Length})");
+                return true;
+            }
 
             return false;
         }
