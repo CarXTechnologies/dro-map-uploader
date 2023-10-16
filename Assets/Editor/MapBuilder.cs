@@ -24,7 +24,7 @@ namespace Editor
         private static SteamUGCManager m_steamUgc;
         private static string m_scenePath;
         private static string m_titleIconPath;
-
+        private static string m_assetPath;
         
         [MenuItem("Map/Create")]
         [Obsolete("Obsolete")]
@@ -118,6 +118,12 @@ namespace Editor
 
         private static bool CheckAndError()
         {
+            if (string.IsNullOrWhiteSpace(MapManagerConfig.Value.mapName))
+            {
+                Debug.LogError($"Please name your track");
+                return true;
+            }
+            
             if (MapManagerConfig.Value.icon == null)
             {
                 Debug.LogError($"Please apply icon config({MapManagerConfig.instance.mapMetaConfigValue.name}) field");
@@ -130,10 +136,16 @@ namespace Editor
                 return true;
             }
             
-            
             if ((float)new FileInfo(m_titleIconPath).Length / ModMapTestTool.BYTES_TO_MEGABYTES > 1f)
             {
-                Debug.LogError($"IconPreview more 1mb");
+                Debug.LogError($"Large icon more 1mb");
+                return true;
+            }
+            
+            if ((float)new FileInfo(m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.icon)).Length 
+                / ModMapTestTool.BYTES_TO_MEGABYTES > 1f)
+            {
+                Debug.LogError($"Icon more 1mb");
                 return true;
             }
             
@@ -200,8 +212,8 @@ namespace Editor
         private static void InitPath()
         {
             m_scenePath = path + "/" + MapManagerConfig.Value.mapName + ".unity";
-            var assetPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
-            m_titleIconPath = assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.largeIcon);
+            m_assetPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
+            m_titleIconPath = m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.largeIcon);
         }
         
         private static bool ValidateSceneAndMirror()
