@@ -80,17 +80,17 @@ namespace GameOverlay
 			{
 				editor.WithMetaData(metaFileInfo.DirectoryName + "/" + metaFileInfo.Name);
 				
-				if (MapManagerConfig.Value.UploadName)
+				if (MapManagerConfig.Value.UploadSteamName)
 				{
 					editor.WithTitle(m_itemName);
 				}
 
-				if (MapManagerConfig.Value.UploadPreview)
+				if (MapManagerConfig.Value.UploadSteamPreview)
 				{
 					editor.WithPreviewFile(m_previewPath);
 				}
 
-				if (MapManagerConfig.Value.UploadDescription)
+				if (MapManagerConfig.Value.UploadSteamDescription)
 				{
 					editor.WithDescription(m_desciption);
 				}

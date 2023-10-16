@@ -124,6 +124,12 @@ namespace Editor
                 return true;
             }
             
+            if (MapManagerConfig.Value.mapName.Length > 127)
+            {
+                Debug.LogError($"Length name more 127 symbols");
+                return true;
+            }
+            
             if (MapManagerConfig.Value.icon == null)
             {
                 Debug.LogError($"Please apply icon config({MapManagerConfig.instance.mapMetaConfigValue.name}) field");
