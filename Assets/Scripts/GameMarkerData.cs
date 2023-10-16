@@ -1,13 +1,9 @@
 using System;
-using Steamworks;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class GameMarkerData : MonoBehaviour
 {
     public MarkerData markerData;
-    
 }
 
 [Serializable]

@@ -7,19 +7,10 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
 
-#if UNITY_EDITOR
-using UnityEditor.SceneManagement;
-#endif
-
 public class ModMapTestTool
 {
-    private const int MAX_COUNT_VERTEX_IN_DISREATE = 10000000;
-    private const int MAX_COUNT_GAMEOBJECT = 10000;
     public const float BYTES_TO_MEGABYTES = 1048576f;
-    private const float MEGABYTES_MAX = 512f;
-    private const float MEGABYTES_MAX_META = 24f;
-    private const int VERTEX_DISCRETE = 1;
-    
+
     private static readonly List<GameObject> m_gameObjects = new List<GameObject>();
     private static Dictionary<float3, int> m_vertexCountPositionDiscreate = new Dictionary<float3, int>();
     public static Func<string, bool> playCallback;
@@ -29,8 +20,8 @@ public class ModMapTestTool
     private GameObject m_root;
     private List<ValidItem> m_listValid = new List<ValidItem>();
 
-    public static readonly List<ValidItem> Steam = new List<ValidItem>()
-    {
+    public static readonly ValidItemData Target = new ValidItemData
+    (512f, 24f, 1f, 10000000,
         new ValidItem(typeof(Transform), 1, 10000),
         new ValidItem(typeof(MeshCollider), 1, 2000),
         new ValidItem(typeof(BoxCollider), 0, 1000),
@@ -44,8 +35,8 @@ public class ModMapTestTool
         new ValidItem(typeof(CacheData), 0, 1),
         new ValidItem(typeof(ReflectionProbe), 1, 1),
         new ValidItem(typeof(LODGroup), 0, 1000),
-        new ValidItem(typeof(Minimap), 1, 1),
-    };
+        new ValidItem(typeof(Minimap), 1, 1)
+    );
     
     public static void InitTests(string sceneName)
     {
@@ -72,10 +63,10 @@ public class ModMapTestTool
         }
 
         var sizeFileInMegabytes = file.Length / BYTES_TO_MEGABYTES;
-        var isNoCorrect = MEGABYTES_MAX < sizeFileInMegabytes;
+        var isNoCorrect = Target.maxSizeInMb < sizeFileInMegabytes;
         if (isNoCorrect)
         {
-            TryErrorMessage(name, "Map size is " + sizeFileInMegabytes + "/" + MEGABYTES_MAX);
+            TryErrorMessage(name, "Map size is " + sizeFileInMegabytes + "/" + Target.maxSizeInMb);
         }
 
         return isNoCorrect;
@@ -91,21 +82,13 @@ public class ModMapTestTool
         }
 
         var sizeFileInMegabytes = file.Length / BYTES_TO_MEGABYTES;
-        var isNoCorrect = MEGABYTES_MAX_META < sizeFileInMegabytes;
+        var isNoCorrect = Target.maxSizeInMbMeta < sizeFileInMegabytes;
         if (isNoCorrect)
         {
-            TryErrorMessage(null, "Meta size is " + sizeFileInMegabytes + "/" + MEGABYTES_MAX_META);
+            TryErrorMessage(null, "Meta size is " + sizeFileInMegabytes + "/" + Target.maxSizeInMbMeta);
         }
 
         return isNoCorrect;
-    }
-
-    private static void GameObjectTestCount()
-    {
-        if (m_gameObjects.Count < 1 && m_gameObjects.Count > MAX_COUNT_GAMEOBJECT)
-        {
-            throw new Exception("The number of objects cannot be 0 or greater than " + MAX_COUNT_GAMEOBJECT);
-        }
     }
 
     private static void VertexTestCount()
@@ -117,7 +100,8 @@ public class ModMapTestTool
             if (meshFilter != null && meshFilter.sharedMesh != null)
             {
                 var count = meshFilter.sharedMesh.vertexCount;
-                var pos = math.floor(meshFilter.transform.position / VERTEX_DISCRETE) * VERTEX_DISCRETE;
+                var pos = math.floor(meshFilter.transform.position / Target.vertexDistanceForMaxCount)
+                          * Target.vertexDistanceForMaxCount;
                 
                 if (m_vertexCountPositionDiscreate.TryGetValue(pos, out var value))
                 {
@@ -132,9 +116,9 @@ public class ModMapTestTool
         
         foreach (var val in m_vertexCountPositionDiscreate)
         {
-            if (val.Value > MAX_COUNT_VERTEX_IN_DISREATE)
+            if (val.Value > Target.vertexCountForDistance)
             {
-                throw new Exception("Triangle greater than " + MAX_COUNT_VERTEX_IN_DISREATE);
+                throw new Exception("Triangle greater than " + Target.vertexCountForDistance);
             }
         }
         
@@ -172,7 +156,6 @@ public class ModMapTestTool
     {
         try
         {
-            GameObjectTestCount();
             VertexTestCount();
             SpawnPointTestExistence();
             return false;
@@ -214,6 +197,26 @@ public class ModMapTestTool
             return string.Empty;
         }
     }
+    
+    public struct ValidItemData
+    {
+        public List<ValidItem> data;
+        public readonly int vertexCountForDistance;
+        public readonly float vertexDistanceForMaxCount;
+        public readonly float maxSizeInMb;
+        public readonly float maxSizeInMbMeta;
+
+        public ValidItemData(float maxSizeInMb = 512f, float maxSizeInMbMeta = 24f, float vertexDistanceForMaxCount = 1f, 
+            int vertexCountForDistance = 10000000, params ValidItem[] data)
+        {
+            this.vertexCountForDistance = vertexCountForDistance;
+            this.vertexDistanceForMaxCount = vertexDistanceForMaxCount;
+            this.maxSizeInMb = maxSizeInMb;
+            this.maxSizeInMbMeta = maxSizeInMbMeta;
+            this.data = new List<ValidItem>(data);
+        }
+    }
+    
     
     private static void AddTreeGameObjectToList(GameObject[] gameObjects)
     {

@@ -1087,7 +1087,7 @@ Transform:
   m_GameObject: {fileID: 66814370}
   m_LocalRotation: {x: -0.023581391, y: -0.40617818, z: -0.0104860095, w: 0.91342944}
   m_LocalPosition: {x: 71.01, y: 2.12, z: -63.99}
-  m_LocalScale: {x: 1, y: 1.0000017, z: 1.0000012}
+  m_LocalScale: {x: 1, y: 1.0000018, z: 1.0000012}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 6
@@ -3709,7 +3709,6 @@ MonoBehaviour:
   m_Script: {fileID: 764987095}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Entries: []
 --- !u!4 &489097978
 Transform:
   m_ObjectHideFlags: 19
@@ -8383,7 +8382,7 @@ Transform:
   m_GameObject: {fileID: 1223707475}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 52, z: 0}
-  m_LocalScale: {x: 1, y: 1.0000026, z: 1.0000026}
+  m_LocalScale: {x: 1, y: 1.0000029, z: 1.0000029}
   m_Children:
   - {fileID: 1790576603}
   m_Father: {fileID: 0}
@@ -39881,7 +39880,7 @@ ReflectionProbe:
   m_Enabled: 1
   serializedVersion: 2
   m_Type: 0
-  m_Mode: 2
+  m_Mode: 1
   m_RefreshMode: 2
   m_TimeSlicingMode: 0
   m_Resolution: 128
@@ -40018,7 +40017,7 @@ MonoBehaviour:
       automaticScale: 1
       viewerScale: 1
     type: 0
-    mode: 0
+    mode: 1
     realtimeMode: 1
     lighting:
       multiplier: 1
@@ -40283,7 +40282,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4445533121024825931}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -8, y: 229, z: 13}
+  m_LocalPosition: {x: 0, y: 10.9, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

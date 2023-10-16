@@ -4,13 +4,10 @@ using System.IO;
 using GameOverlay;
 using Steamworks;
 using Steamworks.Data;
-using Steamworks.Ugc;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
 
 namespace Editor
@@ -185,7 +182,7 @@ namespace Editor
             };
             
             ModMapTestTool.Play(MapManagerConfig.Value.mapName)?
-                .WithList(ModMapTestTool.Steam)
+                .WithList(ModMapTestTool.Target.data)
                 .ValidComponents();
 
             ModMapTestTool.InitTestsEditor(scene);
