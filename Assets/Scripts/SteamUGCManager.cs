@@ -79,10 +79,23 @@ namespace GameOverlay
 			if (metaFileInfo != null)
 			{
 				editor.WithMetaData(metaFileInfo.DirectoryName + "/" + metaFileInfo.Name);
-				editor.WithTitle(m_itemName);
-				editor.WithPreviewFile(m_previewPath);
+				
+				if (MapManagerConfig.Value.UploadName)
+				{
+					editor.WithTitle(m_itemName);
+				}
+
+				if (MapManagerConfig.Value.UploadPreview)
+				{
+					editor.WithPreviewFile(m_previewPath);
+				}
+
+				if (MapManagerConfig.Value.UploadDescription)
+				{
+					editor.WithDescription(m_desciption);
+				}
+
 				editor.WithTag(MAP_TAG);
-				editor.WithDescription(m_desciption);
 				editor.WithPrivateVisibility();
 			}
 

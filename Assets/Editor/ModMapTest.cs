@@ -93,6 +93,7 @@ public class ModMapTestTool
 
     private static void VertexTestCount()
     {
+        m_vertexCountPositionDiscreate.Clear();
         foreach (var gameObject in m_gameObjects)
         {
             var meshFilter = gameObject.GetComponent<MeshFilter>();
@@ -121,8 +122,6 @@ public class ModMapTestTool
                 throw new Exception("Triangle greater than " + Target.vertexCountForDistance);
             }
         }
-        
-        m_vertexCountPositionDiscreate.Clear();
     }
     
     private static void SpawnPointTestExistence()
