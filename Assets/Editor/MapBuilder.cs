@@ -26,6 +26,11 @@ namespace Editor
         private static string m_titleIconPath;
         private static string m_assetPath;
         
+        private static readonly List<ValidItem> m_skipComponentInCompile = new List<ValidItem>
+        {
+            new ValidItem(typeof(DrawTriggerZoneBehaviour), 1, 999999),
+        };
+        
         [MenuItem("Map/Create")]
         [Obsolete("Obsolete")]
         private static void Create()
@@ -268,10 +273,21 @@ namespace Editor
             
             DuplicateValidComponents(root.transform, null, "Garbage", (go, component) =>
             {
+                var compType = component.GetType();
+                if (!ModMapTestTool.ValidType(compType, ModMapTestTool.Target.data))
+                {
+                    if (ModMapTestTool.ValidType(compType, m_skipComponentInCompile))
+                    {
+                        return;
+                    }
+                    ModMapTestTool.TryErrorMessage(compType.Name, $"No valid component : {compType.Name}");
+                    return;
+                }
+                
                 UnityEditorInternal.ComponentUtility.CopyComponent(component);
                 UnityEditorInternal.ComponentUtility.PasteComponentAsNew(go);
                 
-                switch (component.GetType().Name)
+                switch (compType.Name)
                 {
                     case nameof(GameMarkerData) :
                         var comp = go.GetComponent<GameMarkerData>();
