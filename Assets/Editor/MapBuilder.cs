@@ -274,9 +274,9 @@ namespace Editor
             DuplicateValidComponents(root.transform, null, "Garbage", (go, component) =>
             {
                 var compType = component.GetType();
-                if (!ModMapTestTool.ValidType(compType, ModMapTestTool.Target.data))
+                if (!ModMapTestTool.ValidType(compType, ModMapTestTool.Target.data, false))
                 {
-                    if (ModMapTestTool.ValidType(compType, m_skipComponentInCompile))
+                    if (ModMapTestTool.ValidType(compType, m_skipComponentInCompile, false))
                     {
                         return;
                     }

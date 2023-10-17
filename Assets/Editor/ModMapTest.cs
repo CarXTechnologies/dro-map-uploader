@@ -337,8 +337,8 @@ public class ModMapTestTool
             }
         }
     }
-        
-    public static bool ValidType(Type type, List<ValidItem> types)
+    
+    public static bool ValidType(Type type, List<ValidItem> types, bool addToValidList = true)
     {
         var tryComp = false;
         for (var index = 0; index < types.Count; index++)
@@ -346,7 +346,11 @@ public class ModMapTestTool
             if (type.Name == types[index].type.Name)
             {
                 tryComp = true;
-                types[index] = new ValidItem(types[index].type, types[index].min, types[index].max, types[index].current + 1);
+                if (addToValidList)
+                {
+                    types[index] = new ValidItem(types[index].type, types[index].min, types[index].max, types[index].current + 1);
+                }
+
                 break;
             }
         }
