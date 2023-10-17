@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using Steamworks;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Steamworks.Data;
 using Steamworks.Ugc;
@@ -166,6 +167,7 @@ public static class ExtensionMethods
 	{
 		while (!task.IsCompleted)
 		{
+			Thread.Sleep(5000);
 			yield return null;
 		}
 

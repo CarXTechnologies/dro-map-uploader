@@ -111,12 +111,9 @@ namespace Editor
             EditorUtility.DisplayProgressBar("Upload Publisher Item", String.Empty, 0.5f);
             m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
             EditorCoroutineUtility.StartCoroutine(
-                m_steamUgc.UploadItemCoroutine(assetManifestPath, MapManagerConfig.Value.lastItemWorkshop, obj =>
-                {
-                    EditorUtility.ClearProgressBar();
-                }), m_steamUgc);
+                m_steamUgc.UploadItemCoroutine(assetManifestPath, MapManagerConfig.Value.lastItemWorkshop, PublishCallback), m_steamUgc);
         }
-        
+
         private static void PublishCallback(ulong id)
         {
             EditorUtility.ClearProgressBar();
