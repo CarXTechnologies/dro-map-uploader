@@ -19,4 +19,7 @@ MonoBehaviour:
     icon: {fileID: 2800000, guid: bc7c643291b371742baffd7e3bfc0fd5, type: 3}
     largeIcon: {fileID: 2800000, guid: bc7c643291b371742baffd7e3bfc0fd5, type: 3}
     miniMapIcon: {fileID: 0}
-    lastItemWorkshop: 3050098246
+    lastItemWorkshop: 3052766113
+    UploadSteamDescription: 1
+    UploadSteamName: 1
+    UploadSteamPreview: 1

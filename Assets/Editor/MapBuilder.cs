@@ -25,12 +25,7 @@ namespace Editor
         private static string m_scenePath;
         private static string m_titleIconPath;
         private static string m_assetPath;
-        
-        private static readonly List<ValidItem> m_skipComponentInCompile = new List<ValidItem>
-        {
-            new ValidItem(typeof(DrawTriggerZoneBehaviour), 1, 999999),
-        };
-        
+
         [MenuItem("Map/Create")]
         [Obsolete("Obsolete")]
         private static void Create()
@@ -273,7 +268,7 @@ namespace Editor
                 var compType = component.GetType();
                 if (!ModMapTestTool.ValidType(compType, ModMapTestTool.Target.data, false))
                 {
-                    if (ModMapTestTool.ValidType(compType, m_skipComponentInCompile, false))
+                    if (ModMapTestTool.ValidType(compType, MapSkipComponentConfig.instance.valid))
                     {
                         return;
                     }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TMPro;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -45,7 +44,7 @@ public class ModMapTestTool
     public const float BYTES_TO_MEGABYTES = 1048576f;
 
     private static readonly List<GameObject> m_gameObjects = new List<GameObject>();
-    private static Dictionary<float3, int> m_vertexCountPositionDiscreate = new Dictionary<float3, int>();
+    private static Dictionary<Vector3, int> m_vertexCountPositionDiscreate = new Dictionary<Vector3, int>();
     public static Func<string, bool> playCallback;
     public static Action<string, string> errorCallback;
 
@@ -152,16 +151,19 @@ public class ModMapTestTool
             if (meshFilter != null && meshFilter.sharedMesh != null)
             {
                 var count = meshFilter.sharedMesh.vertexCount;
-                var pos = math.floor(meshFilter.transform.position / Target.vertexDistanceForMaxCount)
+
+                var pos = meshFilter.transform.position / Target.vertexDistanceForMaxCount;
+                
+                var posDisc = new Vector3(Mathf.Floor(pos.x), Mathf.Floor(pos.y), Mathf.Floor(pos.z))
                           * Target.vertexDistanceForMaxCount;
                 
-                if (m_vertexCountPositionDiscreate.TryGetValue(pos, out var value))
+                if (m_vertexCountPositionDiscreate.TryGetValue(posDisc, out var value))
                 {
-                    m_vertexCountPositionDiscreate[pos] = value + count;
+                    m_vertexCountPositionDiscreate[posDisc] = value + count;
                 }
                 else
                 {
-                    m_vertexCountPositionDiscreate.Add(pos, count);
+                    m_vertexCountPositionDiscreate.Add(posDisc, count);
                 }
             }
         }
@@ -351,6 +353,22 @@ public class ModMapTestTool
                     types[index] = new ValidItem(types[index].type, types[index].min, types[index].max, types[index].current + 1);
                 }
 
+                break;
+            }
+        }
+        
+        return tryComp;
+    }
+    
+    public static bool ValidType(Type type, List<string> types)
+    {
+        var tryComp = false;
+        for (var index = 0; index < types.Count; index++)
+        {
+            if (type.Name == types[index])
+            {
+                tryComp = true;
+                
                 break;
             }
         }

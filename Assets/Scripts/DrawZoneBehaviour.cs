@@ -1,7 +1,6 @@
-﻿using Unity.Mathematics;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class DrawTriggerZoneBehaviour : MonoBehaviour
+public class DrawZoneBehaviour : MonoBehaviour
 {
     [SerializeField] private FormType m_form;
     [SerializeField] private bool m_isEmpty;
@@ -72,7 +71,7 @@ public class DrawTriggerZoneBehaviour : MonoBehaviour
         {
             Gizmos.color = Color.red;
             Gizmos.DrawRay(pos, raycastHit.distance * direction);
-            pos += (Vector3)((float3)(raycastHit.distance * direction) - (scale * (float3)direction) / 2);
+            pos += (raycastHit.distance * direction - new Vector3(scale.x * direction.x, scale.y * direction.y, scale.z * direction.z) / 2);
         }
     }
 }
