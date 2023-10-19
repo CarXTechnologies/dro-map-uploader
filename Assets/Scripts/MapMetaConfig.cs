@@ -14,7 +14,6 @@ public class MapMetaConfig : ScriptableObject
     }
 }
 
-
 [Serializable]
 public struct MapMetaConfigValue
 {

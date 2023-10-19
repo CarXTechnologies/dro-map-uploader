@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine;
 using Steamworks;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Steamworks.Data;
 using Steamworks.Ugc;
@@ -157,23 +156,6 @@ namespace GameOverlay
 		{
 			yield return UpdateItemCoroutine(path, itemId);
 			uploadedId?.Invoke(itemId);
-		}
-	}
-}
-
-public static class ExtensionMethods 
-{
-	public static IEnumerator AsIEnumerator(this Task task)
-	{
-		while (!task.IsCompleted)
-		{
-			Thread.Sleep(5000);
-			yield return null;
-		}
-
-		if (task.IsFaulted && task.Exception != null)
-		{
-			throw task.Exception;
 		}
 	}
 }
