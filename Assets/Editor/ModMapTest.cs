@@ -53,7 +53,7 @@ namespace Editor
         private string m_currentName;
 
         public static readonly ValidItemData Target = new ValidItemData
-        (4096, 24f, 1f, 10000000,
+        (4096, 24f, 100f, 30000000,
             new ValidItem(typeof(Transform), 1, 10000),
             //Physics
             new ValidItem(typeof(MeshCollider), 1, 2000),
