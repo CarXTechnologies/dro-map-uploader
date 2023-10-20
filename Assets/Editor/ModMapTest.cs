@@ -82,7 +82,7 @@ namespace Editor
             new ValidItem(typeof(ParticleSystem), 0, 100),
             new ValidItem(typeof(ParticleSystemRenderer), 0, 100),
             //Other
-            new ValidItem(typeof(GameMarkerData), 0, 1000),
+            new ValidItem(typeof(GameMarkerData), 1, 1000),
             new ValidItem(typeof(CacheData), 0, 1),
             new ValidItem(typeof(Minimap), 1, 1)
         );

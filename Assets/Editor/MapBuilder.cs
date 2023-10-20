@@ -73,8 +73,7 @@ namespace Editor
                 {
                     return;
                 }
-              
-                MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.lastItemWorkshop = item.FileId;
+                
                 EditorCoroutineUtility.StartCoroutine(m_steamUgc.PublishItemCoroutine(assetManifestPath, PublishCallback), m_steamUgc);
             }), m_steamUgc);
         }
@@ -120,6 +119,7 @@ namespace Editor
                 return;
             }
                 
+            MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.lastItemWorkshop = id;
             Debug.Log("Export track id: " + id);
         }
 
