@@ -333,7 +333,7 @@ namespace Editor
                 
             var bundleBuilds = CreateBundleArrayDataForOneElement(MapManagerConfig.Value.mapName, m_scenePath);
             BuildPipeline.BuildAssetBundles(assetManifestPath,
-                bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+                bundleBuilds, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.StandaloneWindows);
             
             bundleBuilds = CreateBundleArrayDataForOneElement(meta, "Assets/Resources/" + MapManagerConfig.instance.name + ".asset");
             BuildPipeline.BuildAssetBundles(assetManifestPath, 
