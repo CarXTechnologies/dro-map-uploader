@@ -125,15 +125,15 @@ namespace Editor
 
         private static bool CheckAndError()
         {
-            if (string.IsNullOrWhiteSpace(MapManagerConfig.Value.mapName))
+            if (string.IsNullOrWhiteSpace(MapManagerConfig.Value.mapName) && MapManagerConfig.Value.UploadSteamName)
             {
                 Debug.LogError($"Please name your track");
                 return true;
             }
             
-            if (MapManagerConfig.Value.mapName.Length > 127)
+            if (MapManagerConfig.Value.mapName.Length > 128 && MapManagerConfig.Value.UploadSteamName)
             {
-                Debug.LogError($"Length name more 127 symbols");
+                Debug.LogError($"Length name more 128 symbols");
                 return true;
             }
             
@@ -162,7 +162,7 @@ namespace Editor
                 return true;
             }
             
-            if (MapManagerConfig.Value.mapDescription.Length > 7999)
+            if (MapManagerConfig.Value.mapDescription.Length > 8000 && MapManagerConfig.Value.UploadSteamDescription)
             {
                 Debug.LogError($"Map description must be less than 8000 characters({MapManagerConfig.Value.mapDescription.Length})");
                 return true;
