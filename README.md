@@ -1,83 +1,83 @@
-Инструкция по загрузке трассы в workshop из модового проекта
+Instructions for uploading tracks to workshop from a mod project
 
-1. Подготовка проекта загрузки трасс
-2. Импорт 3d модели трассы в проект
-3. Добавление основных компонентов
-  a. Назначение коллизий поверхности
-  b. Назначение точки появления на карте
-  c. Назначение звуков окружения
-  d. Добавление мини-карты
-4. Выгрузка трассы в workshop
+1. Preparation of the route loading project
+2. Import a 3d model of the route into the project
+3. Adding the main components
+  a. Assignment of surface collisions
+  b. Assignment of the point of appearance on the map
+  c. Assignment of ambient sounds
+  d. Adding a minimap
+4. Unloading the route in the workshop
 
-1. Подготовка проекта загрузки трасс
-   Для начала необходимо выкачать сам проект. Он доступен по ссылке https://github.com/CarXTechnologies/dro-map-uploader Подключите свой аккаунт Github. Можно выкачать zip-архив и распаковать в любом месте файловой системы
-   (Code → Download ZIP)
-   Далее, чтобы открыть проект, Вам необходимо установить редактор Unity, нужна версия Unity 2020.3.25, ссылка для скачивания (только для 64x разрядных систем)   
-   https://download.unity3d.com/download_unity/9b9180224418/Windows64EditorInstaller/UnitySetup64-2020.3.25f1.exe
-   Следующим шагом запускаем Unity, выбираем меню File → Open Project и выбираем папку, содержащую распакованный проект (в этой папке должны быть папки Assets, Packages и т.д.)
-   Проект подготовлен, можно переходить к следующему пункту
+1) Preparation of the route loading project
+First you need to pump out the project itself. It is available at the link https://github.com/CarXTechnologies/dro-map-uploader Connect your Github account. You can download a zip archive and unpack it anywhere in the file system
+(Code → Download ZIP)
+Next, to open the project, you need to install the Unity editor, you need the Unity version 2020.3.25, download link (only for 64x bit systems)
+https://download.unity3d.com/download_unity/9b9180224418/Windows64EditorInstaller/UnitySetup64-2020.3.25f1.exe The
+next step is to launch Unity, select the File → Open Project menu and select the folder containing the unpacked project (there should be Assets, Packages, etc. folders in this folder)
+The project is ready, you can proceed to the next item
 
-2. Импорт 3d модели трассы в проект
-  В папке Assets/MapResources/ создайте папку с рабочим названием карты. 
-  В созданной папке необходимо создать сцену через меню Assets →  Create → Scene.
-  Далее нужно загрузить .fbx/.obj/.dae (Collada) из таких программ, как например Blender/Maya/Autodesk 3ds max. Для этого через Drag&Drop нужно перенести 3d модель в папку  Assets/MapResources/%your_folder%/
-  Если материалы не настроены в моделях, то создайте материал через меню Assets → Create → Material и настройте (пример см. ниже)
-  Откройте созданную сцену (п. 2) и создайте объект сцены (GameObject) путем переноса 3d модели на сцену. 
-  Для созданного GameObject добавьте необходимые компоненты (раздел 3).
-  Для создания многоразового объекта (Prefab) создайте папку  Assets/MapResources/%your_folder%/ Prefabs.
-  На объекте в сцене нажмите правой кнопкой мыши и выберите меню Prefab → Unpack Comletely.
-  Далее перенесите GameObject в созданную папку Prefabs из сцены. Таким образом появляется возможность повторно использовать объект нужное количество раз.
-3. Добавление основных компонентов
-   Проект поддерживает несколько типов компонентов, которые переносятся в игру. Основные из них: 
-   точка появления авто на карте, звуки окружения, физические материалы поверхностей
+2) Import a 3d model of the route into the project
+In the Assets/MapResources/ folder, create a folder with the working name of the map.
+In the created folder, you need to create a scene through the Assets → Create → menu Scene.
+Next, you need to download .fbx/.obj/.dae (Collada) from programs such as Blender/Maya/Autodesk 3ds max. To do this, use Drag&Drop you need to move the 3d model to the Assets/MapResources/%your_folder% folder/
+If the materials are not configured in the models, then create the material via the Assets → Create → Material menu and configure (see example below)
+Open the created scene (item 2) and create a scene object (GameObject) by transferring the 3d model to the scene.
+For the created GameObject, add the necessary components (section 3).
+To create a reusable object (Prefab), create the Assets/MapResources/%your_folder%/ Prefabs folder.
+Right-click on the object in the scene and select the Prefab → Unpack Comletely menu.
+Next, move the GameObject to the created Prefabs folder from the scene. Thus, it becomes possible to reuse the object the required number of times.
+3) Adding the main components
+The project supports several types of components that are transferred to the game. The main ones are:
+the point of appearance of the car on the map, the sounds of the environment, the physical materials of the surfaces
 
-Эти компоненты назначаются через вспомогательный компонент GameMarkerData.
-Для добавления компонента у объекта сцены (GameObject) или объекта в проекте (Prefab) в окне инспектора (Inspector) нажмите кнопку Add Component и введите имя GameMarkerData. 
-Также есть возможность добавить мини-карту.
+These components are assigned via the GameMarkerData auxiliary component.
+To add a component to a scene object (GameObject) or an object in a project (Prefab) in the Inspector window, click the Add Component button and enter the name GameMarkerData.
+It is also possible to add a mini-map.
 
-a. Назначение коллизий поверхности
-Для объекта трассы, представлющего поверхность выберите тип компонента GameMarkerData Road, и в дропдауне выберите необходимый тип материала, который будет использоваться в игре при наезде на данную поверхность.
+a. Assignment of surface collisions
+For the route object representing the surface, select the type of the GameMarkerData Road component, and in the dropdown, select the required type of material to be used in the game when hitting this surface.
 
-Обратите внимание, что любой GameObject/Prefab с коллизией должен быть также с каким-либо компонентом типа Collider (Box/Sphere/Capsule/Mesh Collider). Данное условие необходимо для корректности столкновений.
+Note that any GameObject/Prefab with a collision must also be with some Collider type component (Box/Sphere/Capsule/Mesh Collider). This condition is necessary for the correctness of collisions.
 
-b. Назначение точки появления на карте
-Для назначения точки появления на карте выберите пункт меню GameObect → Create Empty (или Ctrl+Shift+N). В компоненте Transform выставите координаты точки, наиболее подходящей для появления авто в игре. Добавьте компонент GameMarkerData, и выберите тип SpawnPoint
+b. Assignment of the point of appearance on the map
+To assign a point of appearance on the map, select the menu item GameObect → Create Empty (or Ctrl+Shift+N). In the Transform component, set the coordinates of the point that is most suitable for the appearance of the car in the game. Add the GameMarkerData component, and select the SpawnPoint type
 
-c. Назначение звуков окружения
-Для назначения точки появления на карте выберите пункт меню GameObect → Create Empty (или Ctrl+Shift+N). Добавьте компонент GameMarkerData, и выберите тип Ambient. Далее в дропдауне выберите тип звука, наиболее подходящий обстановке на карте.
+c. Assignment of ambient sounds
+To assign a point of appearance on the map, select the menu item GameObect → Create Empty (or Ctrl+Shift+N). Add the GameMarkerData component, and select the Ambient type. Next, in the dropdown, select the sound type that best suits the situation on the map.
 
-При добавления маркера типа Ambient можно использовать компонент DrawZoneBehaviour - это вспомогательный компонент, который отрисовывает зону действия компонента. Например для маркера типов Ambient данный компонент покажет зону, в которой будут слышны назначенные звуки.
-Если необходим другой вспомогательный скрипт, то его можно написать самому и добавить свой по пути Assets/Resources/MapSkipComponent
+When adding an Ambient marker, you can use the DrawZoneBehaviour component - this is an auxiliary component that draws the area of the component. For example, for an Ambient marker, this component will show the zone in which the assigned sounds will be heard.
+If another auxiliary script is needed, then you can write it yourself and add your own along the path Assets/Resources/MapSkipComponent
 
-d. Добавление мини-карты
-Есть возможность также добавить необязательный объект миникарты. Для этого необходимо  создать пустой объект на сцене (см. выше) и добавить компонент Minimap. Далее необходимо выбрать слой (Layer) Minimap. В поле Textures → Element 0 нужно назначить хотя бы одну текстуру - MainTexture
+d. Adding a minimap
+It is also possible to add an optional minimap object. To do this, create an empty object on the scene (see above) and add the Minimap component. Next, you need to select the Minimap layer. In the Textures → Element 0 field, you need to assign at least one texture - MainTexture
 
-4. Выгрузка трассы в workshop
-Для выгрузки нужно сначала создать конфиг карты в папке карты
-Далее необходимо настроить конфиг. Для этого нужно:
-- *указать название рабочей сцены.
-- *ввести имя карты, которое будет отображаться в workshop
-- ввести описание карты, которое будет отображаться в workshop
-- *назначить Icon - иконка карты, которая будет отображаться в списке workshop карт в самой игре
-- *назначить Large icon - превью карты, которое будет отображаться в workshop и при входе в карту в самой игре
-- Item Workshop Id - id карты, получаемый при загрузке в workshop (назначается автоматически после публикации)
-- Upload Steam Description - если включено, то описание на странице в workshop обязательно будет обновлено
-- Upload Steam Name - если включено, то имя карты на странице в workshop обязательно будет обновлено
-- Upload Steam Preview - если включено, то иконка карты на странице в workshop обязательно будет обновлена
-(*) - обязательное поле
+4) Unloading the route in the workshop
+To upload, you first need to create a map config in the maps folder
+Next, you need to configure the config. To do this, you need:
+- *specify the name of the working scene.
+- *enter the name of the card to be displayed in the workshop
+- enter a description of the map to be displayed in the workshop
+- *assign Icon - a map icon that will be displayed in the list of workshop maps in the game itself
+- *assign a Large icon - a preview of the map that will be displayed in the workshop and when entering the map in the game itself
+- Item Workshop Id - the ID of the card received when uploaded to the workshop (assigned automatically after publication)
+- Upload Steam Description - if enabled, the description on the workshop page will definitely be updated
+- Upload Steam Name - if enabled, the name of the card on the page in the workshop will definitely be updated
+- Upload Steam Preview - if enabled, the map icon on the workshop page will definitely be updated
+(*) - required field
 
-Для установки сцены в качестве сборки в Steam, выберите MapMetaConfig который создали до этого в Resources/MapManagerConfig
-Когда всё готово, время экспортировать в steam, для этого откройте steam, после есть
-несколько пунктов для выбора сборки
+To install the scene as an assembly in Steam, select the MapMetaConfig that was created before in Resources/MapManagerConfig
+When everything is ready, it's time to export to steam, to do this, open steam, after there are
+several items to select the build
 
-Create - Просто собрать карту, если ошибок нет. То карта сделана правильно. Так же создаёт промежуточный результат в Asset/{MapName}
+Create - Just assemble the map if there are no errors. Then the map is made correctly. It also creates an intermediate result in Asset/{MapName}
 
-Create and publication - Собирает карту и отправляет в мастерскую, если карта собирается и успешно проходит стадию публикации то ошибок в консоли не будет
+Create and publication - Collects the map and sends it to the workshop, if the map is assembled and successfully passes the publication stage, there will be no errors in the console
 
-Update exist publication - обновляет существующую публикацию к которой у вас есть доступ, id последней публикации указывается в поле Item Workshop Id
+Update exist publication - updates an existing publication to which you have access, the id of the last publication is specified in the Item Workshop Id field
 
-Если карта настроена неправильно, то при выгрузке отобразиться ошибка, причины которой будет необходимо устранить самостоятельно.
+If the card is configured incorrectly, then an error will be displayed during unloading, the reasons for which will need to be resolved independently.
 
-После выполнения данных пунктов карта будет опубликована в steam workshop. Изначально видимость загруженной карты будет как “Приватная“. Так, можно протестировать созданную карту в игре, и она будет видна только автору. Для этого в игре необходимо зайти в меню Мастерская → Мастерская трасс. Изменить видимость на “Для всех“ можно на странице карты в workshop.
+After completing these points, the map will be published in steam workshop. Initially, the visibility of the downloaded map will be as “Private". So, you can test the created map in the game, and it will be visible only to the author. To do this, go to the Workshop → Workshop Tracks menu in the game. You can change the visibility to “For everyone" on the map page in the workshop.
 
-Важно! В данный момент не корректно работает видимость “Только для друзей“. Это связано с проблемой на стороне внешней библиотеки, через которую мы работаем с api стима. Этой проблемой займемся в последующих релизах.
+Important! At the moment, the “Friends Only" visibility is not working correctly. This is due to a problem on the side of the external library through which we work with the steam api. We will deal with this problem in subsequent releases.
