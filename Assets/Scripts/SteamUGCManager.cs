@@ -14,7 +14,6 @@ namespace GameOverlay
 		public const ulong PUBLISH_ITEM_FAILED_CODE = 0u;
 		public const uint APP_ID = 635260;
 		private const string MAP_TAG = "3";
-		private bool m_isUploading;
 		private Task<PublishResult> m_currentPublishResult;
 		private string m_itemName;
 		private string m_previewPath;
@@ -127,8 +126,6 @@ namespace GameOverlay
 		
 		public IEnumerator PublishItemCoroutine(string path, Action<ulong> uploadedId)
 		{
-			m_isUploading = true;
-			
 			yield return m_currentPublishResult.AsIEnumerator();
 
 			var submitTaskResult = m_currentPublishResult.Result;
@@ -148,8 +145,6 @@ namespace GameOverlay
 			{
 				uploadedId.Invoke(PUBLISH_ITEM_FAILED_CODE);
 			}
-
-			m_isUploading = false;
 		}
 
 		public IEnumerator UploadItemCoroutine(string path, PublishedFileId itemId, Action<ulong> uploadedId = null)
