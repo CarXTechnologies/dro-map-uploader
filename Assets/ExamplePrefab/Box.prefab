@@ -157,6 +157,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   markerData:
-    head: SpawnPoint
-    param: SpawnPoint
-    index: 0
+    head: Road
+    param: Road/asphalt
+    index: 2
