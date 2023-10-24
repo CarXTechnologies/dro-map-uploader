@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using GameOverlay;
 using Steamworks;
 using Steamworks.Data;
@@ -73,8 +74,7 @@ namespace Editor
                 {
                     return;
                 }
-              
-                MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.lastItemWorkshop = item.FileId;
+                
                 EditorCoroutineUtility.StartCoroutine(m_steamUgc.PublishItemCoroutine(assetManifestPath, PublishCallback), m_steamUgc);
             }), m_steamUgc);
         }
@@ -97,7 +97,7 @@ namespace Editor
                 return;
             }
 
-            CreateBundles(MapManagerConfig.Value.lastItemWorkshop);
+            CreateBundles(MapManagerConfig.Value.itemWorkshopId);
             if (IsSizeValid())
             {
                 return;
@@ -106,7 +106,7 @@ namespace Editor
             EditorUtility.DisplayProgressBar("Upload Publisher Item", String.Empty, 0.5f);
             m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
             EditorCoroutineUtility.StartCoroutine(
-                m_steamUgc.UploadItemCoroutine(assetManifestPath, MapManagerConfig.Value.lastItemWorkshop, PublishCallback), m_steamUgc);
+                m_steamUgc.UploadItemCoroutine(assetManifestPath, MapManagerConfig.Value.itemWorkshopId, PublishCallback), m_steamUgc);
         }
 
         private static void PublishCallback(ulong id)
@@ -120,6 +120,7 @@ namespace Editor
                 return;
             }
                 
+            MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.itemWorkshopId = id;
             Debug.Log("Export track id: " + id);
         }
 
@@ -131,9 +132,15 @@ namespace Editor
                 return true;
             }
             
-            if (MapManagerConfig.Value.mapName.Length > 127)
+            if (!MapManagerConfig.Value.mapName.All(char.IsLetter))
             {
-                Debug.LogError($"Length name more 127 symbols");
+                Debug.LogError($"UnCorrect name your track");
+                return true;
+            }
+            
+            if (MapManagerConfig.Value.mapName.Length > 128 && MapManagerConfig.Value.UploadSteamName)
+            {
+                Debug.LogError($"Length name more 128 symbols");
                 return true;
             }
             
@@ -162,7 +169,7 @@ namespace Editor
                 return true;
             }
             
-            if (MapManagerConfig.Value.mapDescription.Length > 7999)
+            if (MapManagerConfig.Value.mapDescription.Length > 8000 && MapManagerConfig.Value.UploadSteamDescription)
             {
                 Debug.LogError($"Map description must be less than 8000 characters({MapManagerConfig.Value.mapDescription.Length})");
                 return true;
@@ -333,7 +340,7 @@ namespace Editor
                 
             var bundleBuilds = CreateBundleArrayDataForOneElement(MapManagerConfig.Value.mapName, m_scenePath);
             BuildPipeline.BuildAssetBundles(assetManifestPath,
-                bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+                bundleBuilds, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.StandaloneWindows);
             
             bundleBuilds = CreateBundleArrayDataForOneElement(meta, "Assets/Resources/" + MapManagerConfig.instance.name + ".asset");
             BuildPipeline.BuildAssetBundles(assetManifestPath, 
@@ -401,43 +408,5 @@ namespace Editor
                 }
             }
         }
-    }
-}
-
-public static class ComponentUtility
-{
-    public static T[] FindAllComponent<T>(this Transform parent, params Component[] validNames) where T : Component
-    {
-        var components = new List<T>(parent.childCount);
-        for (int i = 0; i < parent.childCount; i++)
-        {
-            var child = parent.GetChild(i);
-            var childChild = child.FindAllComponent<T>();
-            if (childChild != null && childChild.Length > 0)
-            {
-                components.AddRange(childChild);
-            }
-
-            var component = child.GetComponent<T>();
-            if (component != null)
-            {
-                bool validName = false;
-                foreach (var name in validNames)
-                {
-                    if (component.transform.name == name.transform.name)
-                    {
-                        validName = true;
-                        break;
-                    }
-                }
-
-                if (validName)
-                {
-                    components.Add(component);
-                }
-            }
-        }
-
-        return components.ToArray();
     }
 }

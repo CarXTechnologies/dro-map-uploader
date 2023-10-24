@@ -14,7 +14,6 @@ public class MapMetaConfig : ScriptableObject
     }
 }
 
-
 [Serializable]
 public struct MapMetaConfigValue
 {
@@ -25,9 +24,9 @@ public struct MapMetaConfigValue
     public Texture2D largeIcon;
     [HideInInspector]public Texture2D miniMapIcon;
 
-    public ulong lastItemWorkshop;
-    public bool UploadSteamDescription;
+    public ulong itemWorkshopId;
     public bool UploadSteamName;
+    public bool UploadSteamDescription;
     public bool UploadSteamPreview;
     
     public string GetTargetScenePath() => $"Assets/MapResources/{targetScene}/{targetScene}.unity";
