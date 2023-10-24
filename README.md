@@ -1,4 +1,4 @@
-<h1>Instructions for uploading tracks to workshop from a mod project</h1>
+<h1>Instructions for uploading tracks to workshop</h1>
 
 1. [Preparation of the route loading project](https://github.com/CarXTechnologies/dro-map-uploader#preparation-of-the-route-loading-project)
 2. [Import a 3d model of the route into the project](https://github.com/CarXTechnologies/dro-map-uploader#import-a-3d-model-of-the-route-into-the-project)
