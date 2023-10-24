@@ -27,7 +27,7 @@ In the created folder, you need to create a scene through the Assets → Create 
 Next, you need to download .fbx/.obj/.dae (Collada) from programs such as Blender/Maya/Autodesk 3ds max.<br>
 To do this, use Drag&Drop you need to move the 3d model to the Assets/MapResources/%your_folder% folder/<br>
 
-If the materials are not configured in the models, then create the material via the Assets → Create → Material menu and configure (see example below)<br>
+If the materials are not configured in the models, then create the material via the Assets → Create → Material menu and configure (see example below)<br><br>
 Open the created scene (item 2) and create a scene object (GameObject) by transferring the 3d model to the scene.<br>
 
 For the created GameObject, add the necessary components (section 3).<br>
