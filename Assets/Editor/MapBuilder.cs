@@ -97,7 +97,7 @@ namespace Editor
                 return;
             }
 
-            CreateBundles(MapManagerConfig.Value.lastItemWorkshop);
+            CreateBundles(MapManagerConfig.Value.itemWorkshopId);
             if (IsSizeValid())
             {
                 return;
@@ -106,7 +106,7 @@ namespace Editor
             EditorUtility.DisplayProgressBar("Upload Publisher Item", String.Empty, 0.5f);
             m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
             EditorCoroutineUtility.StartCoroutine(
-                m_steamUgc.UploadItemCoroutine(assetManifestPath, MapManagerConfig.Value.lastItemWorkshop, PublishCallback), m_steamUgc);
+                m_steamUgc.UploadItemCoroutine(assetManifestPath, MapManagerConfig.Value.itemWorkshopId, PublishCallback), m_steamUgc);
         }
 
         private static void PublishCallback(ulong id)
@@ -120,7 +120,7 @@ namespace Editor
                 return;
             }
                 
-            MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.lastItemWorkshop = id;
+            MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.itemWorkshopId = id;
             Debug.Log("Export track id: " + id);
         }
 
