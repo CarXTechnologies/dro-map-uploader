@@ -3,10 +3,10 @@ Instructions for uploading tracks to workshop from a mod project
 1. Preparation of the route loading project
 2. Import a 3d model of the route into the project
 3. Adding the main components
-- Assignment of surface collisions
-- Assignment of the point of appearance on the map
-- Assignment of ambient sounds
-- Adding a minimap
+ - Assignment of surface collisions
+ - Assignment of the point of appearance on the map
+ - Assignment of ambient sounds
+ - Adding a minimap
 4. Unloading the route in the workshop
 
 1) Preparation of the route loading project
