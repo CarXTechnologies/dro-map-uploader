@@ -82,7 +82,7 @@ To upload, you first need to create a map config in the maps folder<br>
 Next, you need to configure the config. <br>
 To do this, you need:<br>
 
-- specify the name of the working scene.
+- Specify the name of the working scene.
 
 - Enter the name of the card to be displayed in the workshop.
 
