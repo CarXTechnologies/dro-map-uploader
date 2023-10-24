@@ -15,9 +15,10 @@ First you need to pump out the project itself. <br>
 It is available at the link **[Project](https://github.com/CarXTechnologies/dro-map-uploader)** Connect your Github account. <br>
 You can download a zip archive and unpack it anywhere in the file system(Code → Download ZIP)<br>
 
-Next, to open the project, you need to install the Unity editor, you need the Unity version 2020.3.25 **[Download link](https://download.unity3d.com/download_unity/9b9180224418/Windows64EditorInstaller/UnitySetup64-2020.3.25f1.exe)** <br>only for 64x bit systems.<br>
+Next, to open the project, you need to install the Unity editor, you need the Unity version 2020.3.25 **[Download link](https://download.unity3d.com/download_unity/9b9180224418/Windows64EditorInstaller/UnitySetup64-2020.3.25f1.exe)** <br>
 The next step is to launch Unity, select the File → Open Project menu and select the folder containing the unpacked project 
->there should be Assets, Packages, etc. folders in this folder
+>there should be Assets, Packages, etc. folders in this folder<br>
+
 The project is ready, you can proceed to the next item
 
 <h2>Import a 3d model of the route into the project</h2>
@@ -31,14 +32,15 @@ If the materials are not configured in the models, then create the material via 
 Open the created scene (item 2) and create a scene object (GameObject) by transferring the 3d model to the scene.<br>
 
 For the created GameObject, add the necessary components (section 3).<br>
-To create a reusable object (Prefab), create the Assets/MapResources/%your_folder%/ Prefabs folder.<br>
-Right-click on the object in the scene and select the Prefab → Unpack Comletely menu.<br>
+- To create a reusable object (Prefab)<br>
+- Create the Assets/MapResources/%your_folder%/ Prefabs folder.<br>
+- Right-click on the object in the scene and select the Prefab → Unpack Comletely menu.<br>
 
 Next, move the GameObject to the created Prefabs folder from the scene.<br>
 Thus, it becomes possible to reuse the object the required number of times.<br>
 
 <h2>Adding the main components</h2>
-The project supports several types of components that are transferred to the game. The main ones are:<br>
+The project supports several types of components that are transferred to the game.The main ones are:<br>
 
 - The point of appearance of the car on the map
   
