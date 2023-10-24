@@ -66,7 +66,7 @@ In the Transform component, set the coordinates of the point that is most suitab
 To assign a point of appearance on the map, select the menu item GameObect → Create Empty (or Ctrl+Shift+N).<br>
 Add the GameMarkerData component, and select the Ambient type.<br>
 Next, in the dropdown, select the sound type that best suits the situation on the map.<br>
-
+<br>
 When adding an Ambient marker, you can use the DrawZoneBehaviour component - this is an auxiliary component that draws the area of the component.<br>
 For example, for an Ambient marker, this component will show the zone in which the assigned sounds will be heard.<br>
 If another auxiliary script is needed, then you can write it yourself and add your own along the path Assets/Resources/MapSkipComponent<br>
