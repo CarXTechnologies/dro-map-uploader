@@ -125,7 +125,7 @@ namespace Editor
 
         private static bool CheckAndError()
         {
-            if (string.IsNullOrWhiteSpace(MapManagerConfig.Value.mapName) && MapManagerConfig.Value.UploadSteamName)
+            if (string.IsNullOrWhiteSpace(MapManagerConfig.Value.mapName))
             {
                 Debug.LogError($"Please name your track");
                 return true;
