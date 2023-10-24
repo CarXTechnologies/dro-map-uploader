@@ -86,8 +86,6 @@ To do this, you need:<br>
 - Upload Steam Name - if enabled, the name of the card on the page in the workshop will definitely be updated.
   
 - Upload Steam Preview - if enabled, the map icon on the workshop page will definitely be updated.
-  
->(*) - required field.
 
 To install the scene as an assembly in Steam, select the MapMetaConfig that was created before in Resources/MapManagerConfig<br>
 When everything is ready, it's time to export to steam, to do this, open steam, after there are<br>
