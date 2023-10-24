@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using GameOverlay;
 using Steamworks;
 using Steamworks.Data;
@@ -128,6 +129,12 @@ namespace Editor
             if (string.IsNullOrWhiteSpace(MapManagerConfig.Value.mapName))
             {
                 Debug.LogError($"Please name your track");
+                return true;
+            }
+            
+            if (!MapManagerConfig.Value.mapName.All(char.IsLetter))
+            {
+                Debug.LogError($"UnCorrect name your track");
                 return true;
             }
             
