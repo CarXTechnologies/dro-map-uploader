@@ -1,13 +1,13 @@
 <h1>Instructions for uploading tracks to workshop from a mod project</h1>
 
-1. [Preparation of the route loading project](https://github.com/CarXTechnologies/dro-map-uploader/edit/main/README.md#preparation-of-the-route-loading-project)
-2. [Import a 3d model of the route into the project](https://github.com/CarXTechnologies/dro-map-uploader/edit/main/README.md#import-a-3d-model-of-the-route-into-the-project)
-3. [Adding the main components](https://github.com/CarXTechnologies/dro-map-uploader/edit/main/README.md#adding-the-main-components)
-   - [Assignment of surface collisions](https://github.com/CarXTechnologies/dro-map-uploader/edit/main/README.md#assignment-of-surface-collisions)
-   - [Assignment of the point of appearance on the map](https://github.com/CarXTechnologies/dro-map-uploader/edit/main/README.md#assignment-of-surface-collisions)
-   - [Assignment of ambient sounds](https://github.com/CarXTechnologies/dro-map-uploader/edit/main/README.md#assignment-of-ambient-sounds)
-   - [Adding a minimap](https://github.com/CarXTechnologies/dro-map-uploader/edit/main/README.md#adding-a-minimap)
-4. [Unloading the route in the workshop](https://github.com/CarXTechnologies/dro-map-uploader/edit/main/README.md#unloading-the-route-in-the-workshop)
+1. [Preparation of the route loading project](https://github.com/CarXTechnologies/dro-map-uploader#preparation-of-the-route-loading-project)
+2. [Import a 3d model of the route into the project](https://github.com/CarXTechnologies/dro-map-uploader#import-a-3d-model-of-the-route-into-the-project)
+3. [Adding the main components](https://github.com/CarXTechnologies/dro-map-uploader#adding-the-main-components)
+   - [Assignment of surface collisions](https://github.com/CarXTechnologies/dro-map-uploader#assignment-of-surface-collisions)
+   - [Assignment of the point of appearance on the map](https://github.com/CarXTechnologies/dro-map-uploader#assignment-of-the-point-of-appearance-on-the-map)
+   - [Assignment of ambient sounds](https://github.com/CarXTechnologies/dro-map-uploader#assignment-of-ambient-sounds)
+   - [Adding a minimap](https://github.com/CarXTechnologies/dro-map-uploader#adding-a-minimap)
+4. [Unloading the route in the workshop](https://github.com/CarXTechnologies/dro-map-uploader#unloading-the-route-in-the-workshop)
 
 <h2>Preparation of the route loading project</h2>
 First you need to pump out the project itself. <br>
