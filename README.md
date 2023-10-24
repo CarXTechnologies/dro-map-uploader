@@ -110,7 +110,8 @@ several items to select the build<br>
 
 If the card is configured incorrectly, then an error will be displayed during unloading, the reasons for which will need to be resolved independently.<br>
 After completing these points, the map will be published in steam workshop. <br>
-Initially, the visibility of the downloaded map will be as “Private". <br>
+Initially, the visibility of the downloaded map will be as “Private". <br> 
+<br>
 So, you can test the created map in the game, and it will be visible only to the author.<br>
 To do this, go to the Workshop → Workshop Tracks menu in the game. <br>
 You can change the visibility to “For everyone" on the map page in the workshop.<br>
