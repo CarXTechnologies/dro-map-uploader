@@ -13,9 +13,9 @@
 First you need to pump out the project itself. <br>
 
 It is available at the link **[Project](https://github.com/CarXTechnologies/dro-map-uploader)** Connect your Github account. <br>
-You can download a zip archive and unpack it anywhere in the file system(Code → Download ZIP)<br><br>
+You can download a zip archive and unpack it anywhere in the file system(Code → Download ZIP)<br>
 
-Next, to open the project, you need to install the Unity editor, you need the Unity version 2020.3.25, **[Download link (only for 64x bit systems)](https://download.unity3d.com/download_unity/9b9180224418/Windows64EditorInstaller/UnitySetup64-2020.3.25f1.exe)** <br>
+Next, to open the project, you need to install the Unity editor, you need the Unity version 2020.3.25,<br> **[Download link (only for 64x bit systems)](https://download.unity3d.com/download_unity/9b9180224418/Windows64EditorInstaller/UnitySetup64-2020.3.25f1.exe)** <br>
 The next step is to launch Unity, select the File → Open Project menu and select the folder containing the unpacked project (there should be Assets, Packages, etc. folders in this folder)
 The project is ready, you can proceed to the next item
 
