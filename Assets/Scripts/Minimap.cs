@@ -18,7 +18,7 @@ public class Minimap : MonoBehaviour
     public class TexturePair
     {
         public Texture mainTexture;
-        public Texture alphaTexture;
+        [HideInInspector]public Texture alphaTexture;
     }
 
     [SerializeField] private LayerMask m_boundsLayers;
