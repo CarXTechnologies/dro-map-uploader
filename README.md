@@ -34,9 +34,9 @@ To do this, use Drag&Drop you need to move the 3d model to the Assets/MapResourc
 If the materials are not configured in the models, then create the material via the Assets → Create → Material menu and configure (see example below)<br><br>
 ![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/cb3042e0-aabf-4efa-94b3-1583f9c22fc9)
 
-Open the created scene (item 2) and create a scene object (GameObject) by transferring the 3d model to the scene.<br>
+Open the created scene and create a scene object (GameObject) by transferring the 3d model to the scene.<br>
 
-For the created GameObject, add the necessary components (section 3).<br>
+For the created GameObject, add the necessary components.<br>
 - To create a reusable object (Prefab)<br>
 - Create the Assets/MapResources/%your_folder%/ Prefabs folder.<br>
 - Right-click on the object in the scene and select the Prefab → Unpack Comletely menu.<br>
