@@ -134,7 +134,7 @@ namespace Editor
             
             if (!MapManagerConfig.Value.mapName.All(char.IsLetter))
             {
-                Debug.LogError($"UnCorrect name your track");
+                Debug.LogError($"Track name only letters");
                 return true;
             }
             
