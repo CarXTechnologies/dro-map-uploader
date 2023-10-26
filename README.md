@@ -1,12 +1,12 @@
-<h1>Instructions for uploading tracks to workshop</h1>
+## Instructions for uploading tracks to workshop</h1>
 
 1. [Preparation of the track loading project](https://github.com/CarXTechnologies/dro-map-uploader#1-preparation-of-the-track-loading-project)
 2. [Import the 3D model of the alignment into the project](https://github.com/CarXTechnologies/dro-map-uploader#2-import-the-3d-model-of-the-alignment-into-the-project)
 3. [Adding core components](https://github.com/CarXTechnologies/dro-map-uploader#3-adding-core-components)
-   a. [Assigning surface collisions](https://github.com/CarXTechnologies/dro-map-uploader#a-assigning-surface-collisions)
-   b. Assigning a spawn point on the map
-   c. Assigning ambient Sounds
-   d. Adding a mini-map
+   1. [Assigning surface collisions](https://github.com/CarXTechnologies/dro-map-uploader#a-assigning-surface-collisions)
+   2. Assigning a spawn point on the map
+   3. Assigning ambient Sounds
+   4. Adding a mini-map</pre>
 4. Uploading the track to the workshop
 5. References
 
