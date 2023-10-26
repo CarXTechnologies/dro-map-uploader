@@ -1,13 +1,14 @@
 <h1>Instructions for uploading tracks to workshop</h1>
 
-1. [Preparation of the route loading project](https://github.com/CarXTechnologies/dro-map-uploader#preparation-of-the-route-loading-project)
-2. [Import a 3d model of the route into the project](https://github.com/CarXTechnologies/dro-map-uploader#import-a-3d-model-of-the-route-into-the-project)
-3. [Adding the main components](https://github.com/CarXTechnologies/dro-map-uploader#adding-the-main-components)
-   - [Assignment of surface collisions](https://github.com/CarXTechnologies/dro-map-uploader#assignment-of-surface-collisions)
-   - [Assignment of the point of appearance on the map](https://github.com/CarXTechnologies/dro-map-uploader#assignment-of-the-point-of-appearance-on-the-map)
-   - [Assignment of ambient sounds](https://github.com/CarXTechnologies/dro-map-uploader#assignment-of-ambient-sounds)
-   - [Adding a minimap](https://github.com/CarXTechnologies/dro-map-uploader#adding-a-minimap)
-4. [Unloading the route in the workshop](https://github.com/CarXTechnologies/dro-map-uploader#unloading-the-route-in-the-workshop)
+1. [Preparation of the track loading project](https://github.com/CarXTechnologies/dro-map-uploader#1-preparation-of-the-track-loading-project)
+2. [Import the 3D model of the alignment into the project](https://github.com/CarXTechnologies/dro-map-uploader#2-import-the-3d-model-of-the-alignment-into-the-project)
+3. [Adding core components](https://github.com/CarXTechnologies/dro-map-uploader#3-adding-core-components)
+   a. [Assigning surface collisions](https://github.com/CarXTechnologies/dro-map-uploader#a-assigning-surface-collisions)
+   b. Assigning a spawn point on the map
+   c. Assigning ambient Sounds
+   d. Adding a mini-map
+4. Uploading the track to the workshop
+5. References
 
 # 1. Preparation of the track loading project
 
@@ -23,7 +24,7 @@
 
 1. In the _Assets/MapResources/ folder,_ create a folder with the working name of the map.
 2. In the created folder, you need to create a scene through the Assets → Create → Scene menu.
-3. Next, you need to load .fbx[/.obj](https://www.autodesk.com/products/fbx/overview)/.dae (Collada)[from programs such as Blender/Maya/Autodesk 3ds max. To do this, you need to transfer the 3d model to the](https://www.khronos.org/collada/)Assets/MapResources/%_your\_folder%/_ folder via Drag & Drop.
+3. Next, you need to load .fbx/[.obj](https://www.autodesk.com/products/fbx/overview)/[.dae](https://www.khronos.org/collada/) Assets/MapResources/%_your\_folder%/_ folder via Drag & Drop.
 4. If the materials are not set up in the models, then create the material via the Assets → Create → Material menu and configure (see below for an example)
 
 ![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/cb3042e0-aabf-4efa-94b3-1583f9c22fc9)
@@ -36,7 +37,7 @@
 
 ![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/48bbcd2d-6ce9-4fe5-94cd-a69672e74231)
 
-# 3. Adding Core Components
+# 3. Adding core components
 
 The project supports several types of components that are ported into the game. The main ones are:
 
@@ -49,7 +50,7 @@ These components are assigned through the **GameMarkerData helper.**
 To add a component to a GameObject or Prefab in the Inspector window, click the _Add Component button_ and type the name _GameMarkerData._
  There is also an option to add a mini-map.
 
-## a. Assigning Surface Collisions
+## a. Assigning surface collisions
 
 1. For the track object that represents the surface, select the GameMarkerData **Road** component type, and in the dropdown, select the type of material that will be used in the game when hitting this surface.
 
@@ -57,7 +58,7 @@ To add a component to a GameObject or Prefab in the Inspector window, click the 
 
 Note that any collision GameObject/Prefab must also be with some component of type Collider (Box/Sphere/Capsule/Mesh Collider). This condition is necessary for collisions to be correct.
 
-## b. Assigning a Spawn Point on the Map
+## b. Assigning a spawn point on the map
 
 1. To assign a spawn point on the map, create an empty object: select the GameObect → Create Empty menu item (or Ctrl+Shift+N). In the Transform component, set the coordinates of the point that is most suitable for the car to appear in the game. Add the _GameMarkerData component_, and select the **SpawnPoint type**
 
@@ -65,7 +66,7 @@ Please note that only one **vehicle spawn point** should be placed on the map!
 
 ![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/10999ae9-aef8-45c8-8f40-d5f5fe8f837e)
 
-## c. Assigning Ambient Sounds
+## c. Assigning ambient sounds
 
 1. To assign a spawn point on the map, select the GameObect → Create Empty menu item (or Ctrl+Shift+N). Add the _GameMarkerData component, and select the_ Ambient type. **Next, in the dropdown, select the sound type that best suits the situation on the map.**
 
@@ -83,7 +84,7 @@ If you need another helper script, you can write it yourself and add your own at
 2. Bound center is the offset of the minimap relative to the center
 3. Bound size - the size of the map is measured in world scale
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/665085a1-7a9b-45e2-978e-70534dbaa983)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/b044147c-cb10-49a6-a23a-e5100c8f4eba)
 
 # 4. Uploading the track to the workshop
 
