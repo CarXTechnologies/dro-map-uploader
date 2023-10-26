@@ -14,7 +14,7 @@
 
 1. First, you need to download the project itself. It is available at the link **[Project](https://github.com/CarXTechnologies/dro-map-uploader)**. You can download the zip archive and unzip it anywhere (Code → Download ZIP)
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/c3e5de1e-086f-4d49-9378-e99dc2c8a1e3)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/1.png?raw=true)
 
 1. Next, to open the project, you need to install the Unity Editor, you need Unity version 2020.3.25, a download link (only for 64-bit systems), **[Download link](https://download.unity3d.com/download_unity/9b9180224418/Windows64EditorInstaller/UnitySetup64-2020.3.25f1.exe)**
 2. The next step is to start Unity, select the File → Open Project menu, and select the folder containing the unpacked project (this folder should contain the Assets, Packages, etc. folders)
@@ -27,7 +27,7 @@
 3. Next, you need to load .fbx/[.obj](https://www.autodesk.com/products/fbx/overview)/[.dae](https://www.khronos.org/collada/) Assets/MapResources/%_your\_folder%/_ folder via Drag & Drop.
 4. If the materials are not set up in the models, then create the material via the Assets → Create → Material menu and configure (see below for an example)
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/cb3042e0-aabf-4efa-94b3-1583f9c22fc9)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/2.png?raw=true)
 
 1. Open the created scene (step 2) and create a GameObject by dragging the 3d model onto the scene.
 2. For the created GameObject, add the required components ( **section 3** ).
@@ -35,7 +35,7 @@
 4. On the object in the scene, right-click and select the Prefab → Unpack Complete menu .
 5. Next, drag the GameObject to the created Prefabs folder from the scene. Thus, it is possible to reuse the object as many times as necessary.
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/48bbcd2d-6ce9-4fe5-94cd-a69672e74231)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/3.png?raw=true)
 
 # 3. Adding core components
 
@@ -54,7 +54,7 @@ To add a component to a GameObject or Prefab in the Inspector window, click the 
 
 1. For the track object that represents the surface, select the GameMarkerData **Road** component type, and in the dropdown, select the type of material that will be used in the game when hitting this surface.
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/c0dbd8c8-b469-49aa-ad52-7c39d7e0e29e)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/4.png?raw=true)
 
 Note that any collision GameObject/Prefab must also be with some component of type Collider (Box/Sphere/Capsule/Mesh Collider). This condition is necessary for collisions to be correct.
 
@@ -64,17 +64,17 @@ Note that any collision GameObject/Prefab must also be with some component of ty
 
 Please note that only one **vehicle spawn point** should be placed on the map!
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/10999ae9-aef8-45c8-8f40-d5f5fe8f837e)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/5.png?raw=true)
 
 ## Assigning ambient sounds
 
 1. To assign a spawn point on the map, select the GameObect → Create Empty menu item (or Ctrl+Shift+N). Add the _GameMarkerData component, and select the_ Ambient type. **Next, in the dropdown, select the sound type that best suits the situation on the map.**
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/098560fa-4bd8-477a-9049-dd0228abe733)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/6.png?raw=true)
 
 When adding an Ambient marker, you can use the DrawZoneBehaviour component, which is a helper component that draws the component's range of operation. For example, for an Ambient type marker, this component will show the area in which the assigned sounds will be heard.
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/8bae79f5-aaee-4315-94e7-a13029653799)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/7.png?raw=true)
 
 If you need another helper script, you can write it yourself and add your own at Assets/Resources/MapSkipComponent
 
@@ -84,7 +84,7 @@ If you need another helper script, you can write it yourself and add your own at
 2. Bound center is the offset of the minimap relative to the center
 3. Bound size - the size of the map is measured in world scale
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/b044147c-cb10-49a6-a23a-e5100c8f4eba)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/8.png?raw=true)
 
 # 4. Uploading the track to the workshop
 
@@ -92,7 +92,7 @@ If you need another helper script, you can write it yourself and add your own at
 
 1. Next, you need to set up the config.
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/346c44a3-a1cd-4173-af92-85ade24eadb8)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/9.png?raw=true)
 
 3. To do this, you need to:
  - \*specify **the name of the working scene.** - \*enter the name of the map that will be displayed in the workshop- enter a description of the map that will be displayed in the workshop- \ ***assign** Icon
@@ -102,21 +102,21 @@ If you need another helper script, you can write it yourself and add your own at
 
 - Item Workshop Id _- map id received when uploading to_ workshop (assigned automatically after publishing) **- Upload Steam Description - if enabled, then the description on the page in the workshop will definitely be updated-** Upload Steam Name - _if enabled, then_ the map name on the page in the workshop will definitely be updated **-** _Upload Steam Preview_ - If enabled, the map icon on the Workshop page will be updated( **\*** ) - required field
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/bd977c2e-851d-437a-aa07-88e6cd227438)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/10.png?raw=true)
 
 1. To set the scene as a build on Steam, select the MapMetaConfig that you created earlier in Resources/MapManagerConfig
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/628981c3-8980-4636-9b53-be8851cd3942)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/11.png?raw=true)
 
 1. When everything is ready, it's time to export to steam, for this open steam, then there are a few items to choose a build
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/822352fb-f6cc-4388-8ac1-e1ac4b7aa75f)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/12.png?raw=true)
 
   1. **Create** - Simply assemble the map if there are no errors. Then the map is done correctly. It also creates an intermediate result in Asset/{MapName}
   2. **Create and publication** - Assembles the map and sends it to the workshop, if the card is assembled and successfully passes the publishing stage, then there will be no errors in the console
   3. **Update exist publication** - updates an existing publication that you have access to, the id of the last publication is specified in the _Item Workshop Id field_
 
-![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/2c2e6552-defa-40ce-b90d-688c6b264e23)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/13.png?raw=true)
 
 # 5. Recommendations
 
