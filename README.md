@@ -95,12 +95,17 @@ If you need another helper script, you can write it yourself and add your own at
 ![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/9.png?raw=true)
 
 3. To do this, you need to:
- - \*specify **the name of the working scene.** - \*enter the name of the map that will be displayed in the workshop- enter a description of the map that will be displayed in the workshop- \ ***assign** Icon
-**-**
- the icon of the map that will be displayed **in the list of workshop maps in the game itself** (read/write enabled item required, png only)-
- \*assign **Large icon** - map preview, which will be displayed in the **workshop** and when entering the map in the game itself(read/write enabled item required, png only)
+ - \*specify **the name of the working scene.** - \*enter the name of the map that will be displayed in the workshop<br>
+ - enter a description of the map that will be displayed in the workshop<br>
+ - \*assign **Icon** -the icon of the map that will be displayed **in the list of workshop maps in the game itself** (read/write enabled item required, png only)-<br>
+ - \*assign **Large icon** - map preview, which will be displayed in the **workshop** and when entering the map in the game itself(read/write enabled item required, png only)
 
-- Item Workshop Id _- map id received when uploading to_ workshop (assigned automatically after publishing) **- Upload Steam Description - if enabled, then the description on the page in the workshop will definitely be updated-** Upload Steam Name - _if enabled, then_ the map name on the page in the workshop will definitely be updated **-** _Upload Steam Preview_ - If enabled, the map icon on the Workshop page will be updated( **\*** ) - required field
+- Item Workshop Id _- map id received when uploading to_ workshop (assigned automatically after publishing)<br>
+**- Upload Steam Description - if enabled, then the description on the page in the workshop will definitely be updated<br>
+-** Upload Steam Name - _if enabled, then_ the map name on the page in the workshop will definitely be updated **<br>
+-** _Upload Steam Preview_ - If enabled, the map icon on the Workshop page will be updated
+
+>( **\*** ) - required field<br>
 
 ![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/10.png?raw=true)
 
