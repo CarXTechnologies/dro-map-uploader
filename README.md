@@ -8,7 +8,7 @@
    3. [Assigning ambient sounds](https://github.com/CarXTechnologies/dro-map-uploader#assigning-ambient-sounds)
    4. [Adding a mini-map](https://github.com/CarXTechnologies/dro-map-uploader#adding-a-mini-map)
 4. [Uploading the track to the workshop](https://github.com/CarXTechnologies/dro-map-uploader#4-uploading-the-track-to-the-workshop)
-5. Recommendations
+5. [Recommendations](https://github.com/CarXTechnologies/dro-map-uploader#5-recommendations)
 
 # 1. Preparation of the track loading project
 
