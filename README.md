@@ -4,11 +4,11 @@
 2. [Import the 3D model of the alignment into the project](https://github.com/CarXTechnologies/dro-map-uploader#2-import-the-3d-model-of-the-alignment-into-the-project)
 3. [Adding core components](https://github.com/CarXTechnologies/dro-map-uploader#3-adding-core-components)
    1. [Assigning surface collisions](https://github.com/CarXTechnologies/dro-map-uploader#a-assigning-surface-collisions)
-   2. Assigning a spawn point on the map
-   3. Assigning ambient Sounds
-   4. Adding a mini-map</pre>
-4. Uploading the track to the workshop
-5. References
+   2. [Assigning a spawn point on the map](https://github.com/CarXTechnologies/dro-map-uploader#assigning-a-spawn-point-on-the-map)
+   3. [Assigning ambient sounds](https://github.com/CarXTechnologies/dro-map-uploader#assigning-ambient-sounds)
+   4. [Adding a mini-map](https://github.com/CarXTechnologies/dro-map-uploader#adding-a-mini-map)
+4. [Uploading the track to the workshop](https://github.com/CarXTechnologies/dro-map-uploader#4-uploading-the-track-to-the-workshop)
+5. Recommendations
 
 # 1. Preparation of the track loading project
 
@@ -118,7 +118,7 @@ If you need another helper script, you can write it yourself and add your own at
 
 ![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/2c2e6552-defa-40ce-b90d-688c6b264e23)
 
-# 5. References
+# 5. Recommendations
 
 1. Do not create multiple Directional light sources
 2. Do not exceed the Steam limit of 1mb per preview
