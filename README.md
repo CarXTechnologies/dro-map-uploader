@@ -50,7 +50,7 @@ These components are assigned through the **GameMarkerData helper.**
 To add a component to a GameObject or Prefab in the Inspector window, click the _Add Component button_ and type the name _GameMarkerData._
  There is also an option to add a mini-map.
 
-## a. Assigning surface collisions
+## Assigning surface collisions
 
 1. For the track object that represents the surface, select the GameMarkerData **Road** component type, and in the dropdown, select the type of material that will be used in the game when hitting this surface.
 
@@ -58,7 +58,7 @@ To add a component to a GameObject or Prefab in the Inspector window, click the 
 
 Note that any collision GameObject/Prefab must also be with some component of type Collider (Box/Sphere/Capsule/Mesh Collider). This condition is necessary for collisions to be correct.
 
-## b. Assigning a spawn point on the map
+## Assigning a spawn point on the map
 
 1. To assign a spawn point on the map, create an empty object: select the GameObect → Create Empty menu item (or Ctrl+Shift+N). In the Transform component, set the coordinates of the point that is most suitable for the car to appear in the game. Add the _GameMarkerData component_, and select the **SpawnPoint type**
 
@@ -66,7 +66,7 @@ Please note that only one **vehicle spawn point** should be placed on the map!
 
 ![image](https://github.com/CarXTechnologies/dro-map-uploader/assets/119846486/10999ae9-aef8-45c8-8f40-d5f5fe8f837e)
 
-## c. Assigning ambient sounds
+## Assigning ambient sounds
 
 1. To assign a spawn point on the map, select the GameObect → Create Empty menu item (or Ctrl+Shift+N). Add the _GameMarkerData component, and select the_ Ambient type. **Next, in the dropdown, select the sound type that best suits the situation on the map.**
 
@@ -78,7 +78,7 @@ When adding an Ambient marker, you can use the DrawZoneBehaviour component, whic
 
 If you need another helper script, you can write it yourself and add your own at Assets/Resources/MapSkipComponent
 
-## d. Adding a mini-map
+## Adding a mini-map
 
 1. It is also possible to add an optional minimap feature. To do this, you need to create an empty object in the scene (see above) and add a Minimap component. Next, you need to select the Minimap Layer. In the Textures field → Element 0, you need to assign at least one texture - MainTexture. Also, when configuring the map, you can use the auxiliary functions to create a template that you can upload to the graphical editor and draw your own mini-map based on it. Note that the map must be centered relative to zero coordinates.
 2. Bound center is the offset of the minimap relative to the center
