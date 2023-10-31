@@ -26,6 +26,7 @@ namespace Editor
         private static string m_scenePath;
         private static string m_titleIconPath;
         private static string m_assetPath;
+        private static PublishedFileId m_currentFileId;
 
         [MenuItem("Map/Create")]
         [Obsolete("Obsolete")]
@@ -61,13 +62,13 @@ namespace Editor
                 return;
             }
             
-   
             EditorUtility.DisplayProgressBar("Create Publisher Item", String.Empty, 0.5f);
             m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
             EditorCoroutineUtility.StartCoroutine(m_steamUgc.CreatePublisherItem(item =>
             {
+                m_currentFileId = item.FileId;
                 EditorUtility.ClearProgressBar();
-                CreateBundles(item.FileId);
+                CreateBundles(m_currentFileId);
                 
                 EditorUtility.DisplayProgressBar("Upload Publisher Item", String.Empty, 0.75f);
                 if (IsSizeValid())
@@ -216,6 +217,13 @@ namespace Editor
             ModMapTestTool.errorCallback = (name, error) =>
             {
                 Debug.LogError(error);
+                EditorUtility.ClearProgressBar();
+                if (m_currentFileId != 0)
+                {
+                    SteamUGC.DeleteFileAsync(m_currentFileId);
+                    m_currentFileId = 0;
+                }
+
                 isError = true;
             };
             
