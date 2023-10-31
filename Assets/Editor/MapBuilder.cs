@@ -5,6 +5,7 @@ using System.Linq;
 using GameOverlay;
 using Steamworks;
 using Steamworks.Data;
+using Steamworks.Ugc;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -82,12 +83,21 @@ namespace Editor
 
         [MenuItem("Map/Update exist publication")]
         [Obsolete("Obsolete")]
-        private static void UpdateExistPublication()
+        private static async void UpdateExistPublication()
         {
             InitPath();
             InitDirectories();
             InitSteamUGC();
             
+            var task = Item.GetAsync(MapManagerConfig.Value.itemWorkshopId);;
+            await task;
+
+            if (task.Result != null && task.Result.Value.Result != Result.OK)
+            {
+                Debug.LogError("Workshop error : " + task.Result.Value.Result);
+                return;
+            }
+
             if (CheckAndError())
             {
                 return;
