@@ -19,7 +19,7 @@ public struct MapMetaConfigValue
 {
     public string targetScene;
     [InspectorName("Map Name(only letters, 128 char)")] public string mapName;
-    [InspectorName("Steam description(8000 char)")] [TextArea] public string mapDescription;
+    [TextArea] public string mapDescription;
     [InspectorName("Icon(16:9)")] public Texture2D icon;
     [InspectorName("Large icon(16:9)")] public Texture2D largeIcon;
     [HideInInspector]public Texture2D miniMapIcon;
