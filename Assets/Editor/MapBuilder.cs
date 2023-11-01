@@ -33,6 +33,11 @@ namespace Editor
         [Obsolete("Obsolete")]
         private static void Create()
         {
+            if (IsCurrentSceneCheck())
+            {
+                return;
+            }
+            
             InitPath();
             InitDirectories();
             
@@ -49,6 +54,11 @@ namespace Editor
         [Obsolete("Obsolete")]
         private static void CreateAndPublication()
         {
+            if (IsCurrentSceneCheck())
+            {
+                return;
+            }
+            
             InitPath();
             InitDirectories();
             InitSteamUGC();
@@ -85,6 +95,11 @@ namespace Editor
         [Obsolete("Obsolete")]
         private static async void UpdateExistPublication()
         {
+            if (IsCurrentSceneCheck())
+            {
+                return;
+            }
+            
             InitPath();
             InitDirectories();
             InitSteamUGC();
@@ -135,6 +150,14 @@ namespace Editor
             Debug.Log("Export track id: " + id);
         }
 
+        private static bool IsCurrentSceneCheck()
+        {
+            var currentScene = EditorSceneManager.GetActiveScene().name;
+            return MapManagerConfig.Value.targetScene != currentScene && 
+                   !EditorUtility.DisplayDialog($"Build scene : {MapManagerConfig.Value.targetScene}", 
+                $"Close and save the current scene : {currentScene}", "Yes", "Cancel");
+        }
+        
         private static bool CheckAndError()
         {
             if (string.IsNullOrWhiteSpace(MapManagerConfig.Value.mapName))
