@@ -130,7 +130,7 @@ If you need another helper script, you can write it yourself and add your own at
 3. Do not exceed the Steam limit for a description of 8000 characters
 4. Do not exceed the Steam limit of 128 characters for the map name
 5. It is possible to use the name only from the Latin alphabet
-6. The maximum size of the card should not exceed 4GB
+6. The maximum size of the map should not exceed 4GB
 7. The maximum size of the meta should not exceed 24mb (preview, icon, description, title)
 8. Maximum number of vertices per 100 units = 30,000,000
 9. There is also a limitation on components

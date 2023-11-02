@@ -5,6 +5,7 @@ using System.Linq;
 using GameOverlay;
 using Steamworks;
 using Steamworks.Data;
+using Steamworks.Ugc;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -26,11 +27,17 @@ namespace Editor
         private static string m_scenePath;
         private static string m_titleIconPath;
         private static string m_assetPath;
+        private static PublishedFileId m_currentFileId;
 
         [MenuItem("Map/Create")]
         [Obsolete("Obsolete")]
         private static void Create()
         {
+            if (IsCurrentSceneCheck())
+            {
+                return;
+            }
+            
             InitPath();
             InitDirectories();
             
@@ -47,6 +54,11 @@ namespace Editor
         [Obsolete("Obsolete")]
         private static void CreateAndPublication()
         {
+            if (IsCurrentSceneCheck())
+            {
+                return;
+            }
+            
             InitPath();
             InitDirectories();
             InitSteamUGC();
@@ -61,13 +73,13 @@ namespace Editor
                 return;
             }
             
-   
             EditorUtility.DisplayProgressBar("Create Publisher Item", String.Empty, 0.5f);
             m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
             EditorCoroutineUtility.StartCoroutine(m_steamUgc.CreatePublisherItem(item =>
             {
+                m_currentFileId = item.FileId;
                 EditorUtility.ClearProgressBar();
-                CreateBundles(item.FileId);
+                CreateBundles(m_currentFileId);
                 
                 EditorUtility.DisplayProgressBar("Upload Publisher Item", String.Empty, 0.75f);
                 if (IsSizeValid())
@@ -81,12 +93,26 @@ namespace Editor
 
         [MenuItem("Map/Update exist publication")]
         [Obsolete("Obsolete")]
-        private static void UpdateExistPublication()
+        private static async void UpdateExistPublication()
         {
+            if (IsCurrentSceneCheck())
+            {
+                return;
+            }
+            
             InitPath();
             InitDirectories();
             InitSteamUGC();
             
+            var task = Item.GetAsync(MapManagerConfig.Value.itemWorkshopId);;
+            await task;
+
+            if (task.Result != null && task.Result.Value.Result != Result.OK)
+            {
+                Debug.LogError("Workshop error : " + task.Result.Value.Result);
+                return;
+            }
+
             if (CheckAndError())
             {
                 return;
@@ -124,6 +150,14 @@ namespace Editor
             Debug.Log("Export track id: " + id);
         }
 
+        private static bool IsCurrentSceneCheck()
+        {
+            var currentScene = EditorSceneManager.GetActiveScene().name;
+            return MapManagerConfig.Value.targetScene != currentScene && 
+                   !EditorUtility.DisplayDialog($"Build scene : {MapManagerConfig.Value.targetScene}", 
+                $"Close and save the current scene : {currentScene}", "Yes", "Cancel");
+        }
+        
         private static bool CheckAndError()
         {
             if (string.IsNullOrWhiteSpace(MapManagerConfig.Value.mapName))
@@ -216,6 +250,13 @@ namespace Editor
             ModMapTestTool.errorCallback = (name, error) =>
             {
                 Debug.LogError(error);
+                EditorUtility.ClearProgressBar();
+                if (m_currentFileId != 0)
+                {
+                    SteamUGC.DeleteFileAsync(m_currentFileId);
+                    m_currentFileId = 0;
+                }
+
                 isError = true;
             };
             
@@ -285,35 +326,40 @@ namespace Editor
                 
                 UnityEditorInternal.ComponentUtility.CopyComponent(component);
                 UnityEditorInternal.ComponentUtility.PasteComponentAsNew(go);
-                
-                switch (compType.Name)
-                {
-                    case nameof(GameMarkerData) :
-                        var comp = go.GetComponent<GameMarkerData>();
-                        m_cacheDataList.Add(comp);
-                        if (comp.markerData.GetHead() == "road")
-                        {
-                            var road = comp.gameObject;
-                            road.isStatic = true;
-                            GameObjectUtility.SetStaticEditorFlags(road, 
-                                StaticEditorFlags.BatchingStatic |
-                                StaticEditorFlags.NavigationStatic | 
-                                StaticEditorFlags.OccludeeStatic | 
-                                StaticEditorFlags.OccluderStatic | 
-                                StaticEditorFlags.ReflectionProbeStatic | 
-                                StaticEditorFlags.OffMeshLinkGeneration);
-                        }
-                        break;
-                    case nameof(LODGroup) :
-                        var groupLods = (component as LODGroup)?.GetLODs();
 
-                        for (int i = 0; i < groupLods.Length; i++)
-                        {
-                            groupLods[i].renderers = go.transform.FindAllComponent<Renderer>(groupLods[i].renderers);
-                        }
-                        
-                        go.GetComponent<LODGroup>().SetLODs(groupLods);
-                        break;
+                if (compType.Name == nameof(GameMarkerData))
+                {
+                    var comp = go.GetComponent<GameMarkerData>();
+                    m_cacheDataList.Add(comp);
+                    if (comp.markerData.GetHead() == "road")
+                    {
+                        var road = comp.gameObject;
+                        road.isStatic = true;
+                        GameObjectUtility.SetStaticEditorFlags(road,
+                            StaticEditorFlags.BatchingStatic |
+                            StaticEditorFlags.NavigationStatic |
+                            StaticEditorFlags.OccludeeStatic |
+                            StaticEditorFlags.OccluderStatic |
+                            StaticEditorFlags.ReflectionProbeStatic |
+                            StaticEditorFlags.OffMeshLinkGeneration);
+                    }
+                }
+
+                if (compType.Name == nameof(LODGroup))
+                {
+                    var groupLods = (component as LODGroup)?.GetLODs();
+
+                    for (int i = 0; i < groupLods.Length; i++)
+                    {
+                        groupLods[i].renderers = go.transform.FindAllComponent<Renderer>(groupLods[i].renderers);
+                    }
+
+                    go.GetComponent<LODGroup>().SetLODs(groupLods);
+                }
+                
+                if (compType.Name == nameof(ReflectionProbe))
+                {
+                    m_cacheData.reflectionProbe = go.GetComponent<ReflectionProbe>();
                 }
             });
             
@@ -410,3 +456,4 @@ namespace Editor
         }
     }
 }
+

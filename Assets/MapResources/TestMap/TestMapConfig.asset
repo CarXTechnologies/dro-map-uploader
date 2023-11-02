@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapMetaConfigValue:
     targetScene: TestMap
-    mapName: TestMapWorkShopName
+    mapName: TestMapWithReflection
     mapDescription: Workshop item description
     icon: {fileID: 2800000, guid: bc7c643291b371742baffd7e3bfc0fd5, type: 3}
     largeIcon: {fileID: 2800000, guid: bc7c643291b371742baffd7e3bfc0fd5, type: 3}
     miniMapIcon: {fileID: 0}
-    lastItemWorkshop: 0
-    UploadSteamDescription: 1
+    itemWorkshopId: 0
     UploadSteamName: 1
+    UploadSteamDescription: 1
     UploadSteamPreview: 1

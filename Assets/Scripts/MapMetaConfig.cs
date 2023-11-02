@@ -18,10 +18,10 @@ public class MapMetaConfig : ScriptableObject
 public struct MapMetaConfigValue
 {
     public string targetScene;
-    public string mapName;
+    [InspectorName("Map Name(only letters, 128 char)")] public string mapName;
     [TextArea] public string mapDescription;
-    public Texture2D icon;
-    public Texture2D largeIcon;
+    [InspectorName("Icon(16:9)")] public Texture2D icon;
+    [InspectorName("Large icon(16:9)")] public Texture2D largeIcon;
     [HideInInspector]public Texture2D miniMapIcon;
 
     public ulong itemWorkshopId;
@@ -30,4 +30,13 @@ public struct MapMetaConfigValue
     public bool UploadSteamPreview;
     
     public string GetTargetScenePath() => $"Assets/MapResources/{targetScene}/{targetScene}.unity";
+}
+
+public class InspectorNameAttribute : PropertyAttribute
+{
+    public string newName { get ; private set; }	
+    public InspectorNameAttribute( string name )
+    {
+        newName = name ;
+    }
 }
