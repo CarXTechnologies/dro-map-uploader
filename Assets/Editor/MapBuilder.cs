@@ -326,35 +326,40 @@ namespace Editor
                 
                 UnityEditorInternal.ComponentUtility.CopyComponent(component);
                 UnityEditorInternal.ComponentUtility.PasteComponentAsNew(go);
-                
-                switch (compType.Name)
-                {
-                    case nameof(GameMarkerData) :
-                        var comp = go.GetComponent<GameMarkerData>();
-                        m_cacheDataList.Add(comp);
-                        if (comp.markerData.GetHead() == "road")
-                        {
-                            var road = comp.gameObject;
-                            road.isStatic = true;
-                            GameObjectUtility.SetStaticEditorFlags(road, 
-                                StaticEditorFlags.BatchingStatic |
-                                StaticEditorFlags.NavigationStatic | 
-                                StaticEditorFlags.OccludeeStatic | 
-                                StaticEditorFlags.OccluderStatic | 
-                                StaticEditorFlags.ReflectionProbeStatic | 
-                                StaticEditorFlags.OffMeshLinkGeneration);
-                        }
-                        break;
-                    case nameof(LODGroup) :
-                        var groupLods = (component as LODGroup)?.GetLODs();
 
-                        for (int i = 0; i < groupLods.Length; i++)
-                        {
-                            groupLods[i].renderers = go.transform.FindAllComponent<Renderer>(groupLods[i].renderers);
-                        }
-                        
-                        go.GetComponent<LODGroup>().SetLODs(groupLods);
-                        break;
+                if (compType.Name == nameof(GameMarkerData))
+                {
+                    var comp = go.GetComponent<GameMarkerData>();
+                    m_cacheDataList.Add(comp);
+                    if (comp.markerData.GetHead() == "road")
+                    {
+                        var road = comp.gameObject;
+                        road.isStatic = true;
+                        GameObjectUtility.SetStaticEditorFlags(road,
+                            StaticEditorFlags.BatchingStatic |
+                            StaticEditorFlags.NavigationStatic |
+                            StaticEditorFlags.OccludeeStatic |
+                            StaticEditorFlags.OccluderStatic |
+                            StaticEditorFlags.ReflectionProbeStatic |
+                            StaticEditorFlags.OffMeshLinkGeneration);
+                    }
+                }
+
+                if (compType.Name == nameof(LODGroup))
+                {
+                    var groupLods = (component as LODGroup)?.GetLODs();
+
+                    for (int i = 0; i < groupLods.Length; i++)
+                    {
+                        groupLods[i].renderers = go.transform.FindAllComponent<Renderer>(groupLods[i].renderers);
+                    }
+
+                    go.GetComponent<LODGroup>().SetLODs(groupLods);
+                }
+                
+                if (compType.Name == nameof(ReflectionProbe))
+                {
+                    m_cacheData.reflectionProbe = go.GetComponent<ReflectionProbe>();
                 }
             });
             
@@ -451,3 +456,4 @@ namespace Editor
         }
     }
 }
+

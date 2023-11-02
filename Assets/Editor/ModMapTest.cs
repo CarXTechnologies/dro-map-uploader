@@ -12,12 +12,12 @@ namespace Editor
 {
     public struct ValidItem
     {
-        public Type type;
+        public string type;
         public int min;
         public int max;
         public int current;
 
-        public ValidItem(Type type, int min, int max, int current = 0)
+        public ValidItem(string type, int min, int max, int current = 0)
         {
             this.type = type;
             this.min = min;
@@ -29,12 +29,12 @@ namespace Editor
         {
             if (current < min)
             {
-                return $"There are less than {min} {type.Name}";
+                return $"There are less than {min} {type}";
             }
             
             if (current > max)
             {
-                return $"There are more than {max} {type.Name}";
+                return $"There are more than {max} {type}";
             }
 
             return string.Empty;
@@ -54,37 +54,38 @@ namespace Editor
 
         public static readonly ValidItemData Target = new ValidItemData
         (4096, 24f, 100f, 30000000,
-            new ValidItem(typeof(Transform), 1, 10000),
+            new ValidItem(nameof(Transform), 1, 10000),
             //Physics
-            new ValidItem(typeof(MeshCollider), 1, 2000),
-            new ValidItem(typeof(BoxCollider), 0, 2000),
-            new ValidItem(typeof(SphereCollider), 0, 1000),
-            new ValidItem(typeof(CapsuleCollider), 0, 1000),
-            new ValidItem(typeof(Rigidbody), 0, 1000),
+            new ValidItem(nameof(MeshCollider), 1, 2000),
+            new ValidItem(nameof(BoxCollider), 0, 2000),
+            new ValidItem(nameof(SphereCollider), 0, 1000),
+            new ValidItem(nameof(CapsuleCollider), 0, 1000),
+            new ValidItem(nameof(Rigidbody), 0, 1000),
             //Hdrp 
-            new ValidItem(typeof(ReflectionProbe), 1, 1),
-            new ValidItem(typeof(HDAdditionalLightData), 0, 200),
-            new ValidItem(typeof(HDAdditionalReflectionData), 0, 200),
-            new ValidItem(typeof(Volume), 1, 1),
+            new ValidItem(nameof(ReflectionProbe), 1, 1),
+            new ValidItem(nameof(HDAdditionalLightData), 0, 200),
+            new ValidItem(nameof(HDAdditionalReflectionData), 0, 200),
+            new ValidItem(nameof(Volume), 1, 1),
             //Render
-            new ValidItem(typeof(MeshRenderer), 0, 1000),
-            new ValidItem(typeof(MeshFilter), 0, 1000),
-            new ValidItem(typeof(Light), 0, 200),
-            new ValidItem(typeof(LODGroup), 0, 1000),
+            new ValidItem(nameof(MeshRenderer), 0, 1000),
+            new ValidItem(nameof(MeshFilter), 0, 1000),
+            new ValidItem(nameof(Light), 0, 200),
+            new ValidItem(nameof(LODGroup), 0, 1000),
             // UI
-            new ValidItem(typeof(Canvas), 0, 10),
-            new ValidItem(typeof(CanvasScaler), 0, 10),
-            new ValidItem(typeof(GraphicRaycaster), 0, 10),
-            new ValidItem(typeof(CanvasRenderer), 0, 100),
-            new ValidItem(typeof(RectTransform), 0, 100),
-            new ValidItem(typeof(TextMeshProUGUI), 0, 100),
+            new ValidItem(nameof(Canvas), 0, 10),
+            new ValidItem(nameof(CanvasScaler), 0, 10),
+            new ValidItem(nameof(GraphicRaycaster), 0, 10),
+            new ValidItem(nameof(CanvasRenderer), 0, 100),
+            new ValidItem(nameof(RectTransform), 0, 100),
+            new ValidItem(nameof(TextMeshProUGUI), 0, 100),
             //Particle
-            new ValidItem(typeof(ParticleSystem), 0, 100),
-            new ValidItem(typeof(ParticleSystemRenderer), 0, 100),
+            new ValidItem(nameof(ParticleSystem), 0, 100),
+            new ValidItem(nameof(ParticleSystemRenderer), 0, 100),
             //Other
-            new ValidItem(typeof(GameMarkerData), 1, 1000),
-            new ValidItem(typeof(CacheData), 0, 1),
-            new ValidItem(typeof(Minimap), 1, 1)
+            new ValidItem(nameof(GameMarkerData), 1, 1000),
+            new ValidItem(nameof(CacheData), 0, 1),
+            new ValidItem(nameof(Minimap), 1, 1),
+            new ValidItem("SceneObjectIDMapSceneAsset", 0, 1)
         );
 
         private GameObject m_root;
@@ -289,7 +290,7 @@ namespace Editor
             return modMapTool;
         }
 
-        public ModMapTestTool With((Type, int, int) value)
+        public ModMapTestTool With((string, int, int) value)
         {
             m_listValid.Add(new ValidItem(value.Item1, value.Item2, value.Item3));
             return this;
@@ -314,7 +315,7 @@ namespace Editor
 
                     if (!ValidType(compType, m_listValid))
                     {
-                        TryErrorMessage(m_currentName, new ValidItem(compType, Int32.MinValue, Int32.MaxValue, 1).ToString());
+                        TryErrorMessage(m_currentName, new ValidItem(compType.Name, Int32.MinValue, Int32.MaxValue, 1).ToString());
                         return;
                     }
                 }
@@ -347,7 +348,7 @@ namespace Editor
             var tryComp = false;
             for (var index = 0; index < types.Count; index++)
             {
-                if (type.Name == types[index].type.Name)
+                if (type.Name == types[index].type)
                 {
                     tryComp = true;
                     if (addToValidList)
