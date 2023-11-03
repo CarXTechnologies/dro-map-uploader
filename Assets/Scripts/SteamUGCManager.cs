@@ -13,7 +13,7 @@ namespace GameOverlay
 	{
 		public const ulong PUBLISH_ITEM_FAILED_CODE = 0u;
 		public const uint APP_ID = 635260;
-		private const string MAP_TAG = "3";
+		private const string MAP_TAG = "Map";
 		private Task<PublishResult> m_currentPublishResult;
 		private string m_itemName;
 		private string m_previewPath;
