@@ -135,7 +135,8 @@ If you need another helper script, you can write it yourself and add your own at
 7. Ensure the maximum size of the meta does not exceed 24MB (including preview, icon, description, title).
 8. Limit the number of vertices to 30,000,000 per 100 units.
 9. Be mindful of component limitations.
-
+10. Non-convex MeshColider with non-kinematic Rigidbody is no longer supported
+    
 If the map is configured incorrectly, an error will be displayed during uploading that will need to address the causes on your own.
 
 After completing these steps, the map will be published in the **steam workshop**. Initially, the visibility of the downloaded map will be "Private". For example, you can test the **created** map in the game, and it will be visible only to the author. To do this, you need to go _to the Workshop → Track Workshop menu in the game._ You can change the visibility to "Public" on the map page in the **workshop**.
