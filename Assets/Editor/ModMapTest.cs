@@ -61,7 +61,9 @@ namespace Editor
             new ValidItem(nameof(SphereCollider), 0, 1000),
             new ValidItem(nameof(CapsuleCollider), 0, 1000),
             new ValidItem(nameof(Rigidbody), 0, 1000),
-            new ValidItem(nameof(Joint), 0, 100),
+            new ValidItem(nameof(FixedJoint), 0, 100),
+            new ValidItem(nameof(SpringJoint), 0, 100),
+            new ValidItem(nameof(HingeJoint), 0, 100),
             //Hdrp 
             new ValidItem(nameof(ReflectionProbe), 1, 1),
             new ValidItem(nameof(HDAdditionalLightData), 0, 200),
