@@ -61,6 +61,7 @@ namespace Editor
             new ValidItem(nameof(SphereCollider), 0, 1000),
             new ValidItem(nameof(CapsuleCollider), 0, 1000),
             new ValidItem(nameof(Rigidbody), 0, 1000),
+            new ValidItem(nameof(Joint), 0, 100),
             //Hdrp 
             new ValidItem(nameof(ReflectionProbe), 1, 1),
             new ValidItem(nameof(HDAdditionalLightData), 0, 200),
@@ -78,7 +79,8 @@ namespace Editor
             new ValidItem(nameof(GraphicRaycaster), 0, 10),
             new ValidItem(nameof(CanvasRenderer), 0, 100),
             new ValidItem(nameof(RectTransform), 0, 100),
-            new ValidItem(nameof(TextMeshProUGUI), 0, 100),
+            new ValidItem(nameof(TextMeshProUGUI), 0, 50),
+            new ValidItem(nameof(RawImage), 0, 20),
             //Particle
             new ValidItem(nameof(ParticleSystem), 0, 100),
             new ValidItem(nameof(ParticleSystemRenderer), 0, 100),
