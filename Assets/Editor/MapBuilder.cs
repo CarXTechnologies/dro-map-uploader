@@ -434,7 +434,7 @@ namespace Editor
                         localRotation = parent.localRotation,
                         localScale = parent.localScale
                     },
-                    tag = o.tag,
+                    tag = "Untagged",
                     isStatic = o.isStatic,
                     layer = o.layer
                 };
