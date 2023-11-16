@@ -19,21 +19,22 @@ public class ReflectionProbeSwap : MonoBehaviour
         hdrpSettings.lightLoopSettings.reflectionCubemapSize = CubeReflectionResolution.CubeReflectionResolution512;
         var reflectProbe = GetComponent<ReflectionProbe>();
         var additionalData = reflectProbe.GetComponent<HDAdditionalReflectionData>();
-        
-        RenderTexture reflectionCube     = additionalData.realtimeTexture;
-        RenderTexture reflectionEquirect = new RenderTexture(1024, 512, 0, reflectionCube.graphicsFormat);
 
-        reflectionCube.ConvertToEquirect(reflectionEquirect, Camera.MonoOrStereoscopicEye.Mono);
+        var reflectionCube = additionalData.realtimeTexture;
+        var reflectionEquirect = new RenderTexture(1024, 512, 0, reflectionCube.graphicsFormat);
+
+        reflectionCube.ConvertToEquirect(reflectionEquirect);
 
         RenderTexture.active = reflectionEquirect;
 
-        Texture2D row = new Texture2D(reflectionEquirect.width, reflectionEquirect.height, reflectionCube.graphicsFormat, 0, TextureCreationFlags.None);
+        var row = new Texture2D(reflectionEquirect.width, reflectionEquirect.height, reflectionCube.graphicsFormat, 0, TextureCreationFlags.None);
         row.ReadPixels(new Rect(0, 0, reflectionEquirect.width, reflectionEquirect.height), 0, 0);
 
         RenderTexture.active = null;
 
-        string sceneName = SceneManager.GetActiveScene().name;
-        var filepath = EditorUtility.SaveFilePanel("Save Reflection Probe", null, sceneName, "exr");
+        var sceneName = SceneManager.GetActiveScene().name;
+        var filepath = EditorUtility.SaveFilePanel("Save Reflection Probe", Application.dataPath, sceneName, "exr");
+        
         if (!string.IsNullOrEmpty(filepath))
         {
             File.WriteAllBytes(filepath, row.EncodeToEXR(Texture2D.EXRFlags.CompressZIP));

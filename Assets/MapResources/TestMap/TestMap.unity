@@ -906,6 +906,8 @@ GameObject:
   - component: {fileID: 66814373}
   - component: {fileID: 66814372}
   - component: {fileID: 66814371}
+  - component: {fileID: 66814376}
+  - component: {fileID: 66814375}
   m_Layer: 0
   m_Name: PreviewScreen
   m_TagString: Untagged
@@ -1092,6 +1094,36 @@ Transform:
   m_Father: {fileID: 128467527}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -2.958, y: -47.947, z: 0}
+--- !u!114 &66814375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 66814370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac29e27bd764a8aa4019ba17c99ddb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_width: 480
+  m_height: 270
+  m_samples: 8
+--- !u!114 &66814376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 66814370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac29e27bd764a8aa4019ba17c99ddb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_width: 1920
+  m_height: 1080
+  m_samples: 4
 --- !u!1 &87529203
 GameObject:
   m_ObjectHideFlags: 0
@@ -8507,6 +8539,7 @@ GameObject:
   - component: {fileID: 1223707478}
   - component: {fileID: 1223707477}
   - component: {fileID: 1223707476}
+  - component: {fileID: 1223707480}
   m_Layer: 0
   m_Name: MinimapScreen
   m_TagString: Untagged
@@ -8693,6 +8726,21 @@ Transform:
   m_Father: {fileID: 128467527}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &1223707480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1223707475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac29e27bd764a8aa4019ba17c99ddb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_width: 1024
+  m_height: 1024
+  m_samples: 8
 --- !u!4 &1261025438 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2173215841612614181, guid: 460cb3001ad305c42bab77014b2088e5, type: 3}
@@ -40881,12 +40929,12 @@ ReflectionProbe:
   m_Enabled: 1
   serializedVersion: 2
   m_Type: 0
-  m_Mode: 1
+  m_Mode: 2
   m_RefreshMode: 2
   m_TimeSlicingMode: 0
   m_Resolution: 128
   m_UpdateFrequency: 0
-  m_BoxSize: {x: 1000, y: 1000, z: 10}
+  m_BoxSize: {x: 1000, y: 1000, z: 1000}
   m_BoxOffset: {x: 0, y: 0, z: 0}
   m_NearClip: 0.3
   m_FarClip: 1000

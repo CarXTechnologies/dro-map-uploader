@@ -16,7 +16,7 @@ MonoBehaviour:
     targetScene: TestMap
     mapName: TestMapWithReflection
     mapDescription: Workshop item description
-    icon: {fileID: 2800000, guid: bc7c643291b371742baffd7e3bfc0fd5, type: 3}
+    icon: {fileID: 2800000, guid: 1388575664025314181fca5840490974, type: 3}
     largeIcon: {fileID: 2800000, guid: bc7c643291b371742baffd7e3bfc0fd5, type: 3}
     miniMapIcon: {fileID: 0}
     itemWorkshopId: 0
