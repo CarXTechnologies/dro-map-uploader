@@ -8,7 +8,8 @@
    3. [Assigning ambient sounds](https://github.com/CarXTechnologies/dro-map-uploader#assigning-ambient-sounds)
    4. [Adding a mini-map](https://github.com/CarXTechnologies/dro-map-uploader#adding-a-mini-map)
 4. [Uploading the track to the workshop](https://github.com/CarXTechnologies/dro-map-uploader#4-uploading-the-track-to-the-workshop)
-5. [Recommendations](https://github.com/CarXTechnologies/dro-map-uploader#5-recommendations)
+5. [Supported Components](https://github.com/CarXTechnologies/dro-map-uploader#5-supported-components)
+6. [Recommendations](https://github.com/CarXTechnologies/dro-map-uploader#6-recommendations)
 
 # 1. Preparation of the track loading project
 
@@ -87,6 +88,14 @@ If you need another helper script, you can write it yourself and add your own at
 
 ![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/8.png?raw=true)
 
+## Capture prototypes : icon, preview, minimap
+
+1. Added component CaptureCamera for Camera GameObject.
+2. Set up your camera for your prototype.
+3. Open component contex menu, and press Capture.
+4. Save the prototype to disk.
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/14.png?raw=true)
+
 # 4. Uploading the track to the workshop
 
 1. To upload the track, you initially need to create a map configuration in the map folder. 
@@ -124,7 +133,14 @@ If you need another helper script, you can write it yourself and add your own at
 
 ![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/13.png?raw=true)
 
-# 5. Recommendations
+# 5. Supported Components
+
+1. Physics - MeshCollider, BoxCollider, SphereCollider, CapsuleCollider, Rigidbody.
+2. Graphics - ReflectionProbe, Volume.
+3. Renderer - MeshRenderer, MeshFilter, Light, LODGroup, ParticleSystemRenderer.
+4. UI - Canvas, RawImage, TextMeshProUGUI.
+
+# 6. Recommendations
 
 1. Avoid using multiple Directional light sources.
 2. Ensure the Steam preview does not exceed the limit of 1MB.
