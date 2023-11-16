@@ -93,7 +93,7 @@ If you need another helper script, you can write it yourself and add your own at
 2. Set up your camera for your prototype.
 3. Open component contex menu, and press Capture.
 4. Save the prototype to disk.
- ![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/9.png?raw=true)
+![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.0/Image/14.png?raw=true)
 
 # 4. Uploading the track to the workshop
 
