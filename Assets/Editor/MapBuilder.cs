@@ -192,14 +192,14 @@ namespace Editor
             
             if ((float)new FileInfo(m_titleIconPath).Length / ModMapTestTool.BYTES_TO_MEGABYTES > 1f)
             {
-                Debug.LogError($"Large icon more 1mb");
+                Debug.LogError($"Icon more 1mb");
                 return true;
             }
             
-            if ((float)new FileInfo(m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.icon)).Length 
-                / ModMapTestTool.BYTES_TO_MEGABYTES > 1f)
+            if ((float)new FileInfo(m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.largeIcon)).Length 
+                / ModMapTestTool.BYTES_TO_MEGABYTES > 10f)
             {
-                Debug.LogError($"Icon more 1mb");
+                Debug.LogError($"Large icon more 10mb");
                 return true;
             }
             
@@ -274,7 +274,7 @@ namespace Editor
         {
             m_scenePath = path + "/" + MapManagerConfig.Value.mapName + ".unity";
             m_assetPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
-            m_titleIconPath = m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.largeIcon);
+            m_titleIconPath = m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.icon);
         }
         
         private static bool ValidateSceneAndMirror()
