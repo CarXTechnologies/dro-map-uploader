@@ -7,6 +7,8 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.VFX;
+using UnityEngine.Video;
 
 namespace Editor
 {
@@ -83,9 +85,12 @@ namespace Editor
             new ValidItem(nameof(RectTransform), 0, 100),
             new ValidItem(nameof(TextMeshProUGUI), 0, 50),
             new ValidItem(nameof(RawImage), 0, 20),
+            new ValidItem(nameof(VideoPlayer), 0, 5),
             //Particle
             new ValidItem(nameof(ParticleSystem), 0, 100),
             new ValidItem(nameof(ParticleSystemRenderer), 0, 100),
+            new ValidItem(nameof(VisualEffect), 0, 100),
+            new ValidItem("VFXRenderer", 0, 100),
             //Other
             new ValidItem(nameof(GameMarkerData), 1, 1000),
             new ValidItem(nameof(CacheData), 0, 1),
