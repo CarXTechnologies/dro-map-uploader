@@ -156,21 +156,21 @@ MonoBehaviour:
   m_DefaultLookDevProfile: {fileID: 11400000, guid: 254c4fe87beb7be4fa72e1681edbed02, type: 2}
   m_RenderingPathDefaultCameraFrameSettings:
     bitDatas:
-      data1: 70282810731613
+      data1: 70351530733439
       data2: 4539628425463136256
     lodBias: 1
     lodBiasMode: 0
-    lodBiasQualityLevel: 0
+    lodBiasQualityLevel: 2
     maximumLODLevel: 0
     maximumLODLevelMode: 0
-    maximumLODLevelQualityLevel: 0
+    maximumLODLevelQualityLevel: 2
     sssQualityMode: 0
     sssQualityLevel: 0
     sssCustomSampleBudget: 20
     materialQuality: 0
   m_RenderingPathDefaultBakedOrCustomReflectionFrameSettings:
     bitDatas:
-      data1: 69340090094365
+      data1: 69340090094398
       data2: 4539628424389459992
     lodBias: 1
     lodBiasMode: 0
@@ -219,7 +219,7 @@ MonoBehaviour:
     lightLayerName7: Light Layer 7
     supportDistortion: 0
     supportTransparentBackface: 0
-    supportTransparentDepthPrepass: 0
+    supportTransparentDepthPrepass: 1
     supportTransparentDepthPostpass: 0
     colorBufferFormat: 74
     supportCustomPass: 1
@@ -241,10 +241,10 @@ MonoBehaviour:
     decalLayerName7: Decal Layer 7
     msaaSampleCount: 1
     supportMotionVectors: 1
-    supportRuntimeDebugDisplay: 0
-    supportRuntimeAOVAPI: 0
+    supportRuntimeDebugDisplay: 1
+    supportRuntimeAOVAPI: 1
     supportDitheringCrossFade: 1
-    supportTerrainHole: 0
+    supportTerrainHole: 1
     supportProbeVolume: 0
     supportRayTracing: 0
     supportedRayTracingMode: 3
@@ -341,7 +341,7 @@ MonoBehaviour:
       - 5
       - 8
       - 13
-      DoFResolution: 040000000200000001000000
+      DoFResolution: 040000000100000001000000
       DoFHighQualityFiltering: 000101
       DoFPhysicallyBased: 000000
       MotionBlurSampleCount: 04000000080000000c000000
@@ -435,7 +435,7 @@ MonoBehaviour:
       - 0.5
   allowShaderVariantStripping: 1
   enableSRPBatcher: 1
-  shaderVariantLogLevel: 0
+  shaderVariantLogLevel: 1
   availableMaterialQualityLevels: -1
   m_DefaultMaterialQualityLevel: 4
   diffusionProfileSettings: {fileID: 0}
