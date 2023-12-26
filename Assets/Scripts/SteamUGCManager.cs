@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
 using System.IO;
@@ -18,10 +19,94 @@ namespace GameOverlay
 		private string m_itemName;
 		private string m_previewPath;
 		private string m_desciption;
+		private List<Item> m_tempFetchResultList = new List<Item>();
 		
 		public void Update()
 		{
 			SteamClient.RunCallbacks();
+		}
+
+		public async Task PaggingQuery(Query query, List<Item> resultList)
+		{
+			const byte maxErrorCount = 5;
+			const int delayBetweenQuery = 500;
+
+			int estimatedQueryCountItems = int.MaxValue;
+			int page = 1;
+			byte errorCounter = 0;
+
+			while (estimatedQueryCountItems > 0 && errorCounter < maxErrorCount)
+			{
+				var searchingResult = await query.GetPageAsync(page);
+				if (searchingResult.HasValue)
+				{
+					var searchingResultPage = searchingResult.Value;
+					AddToResultList(searchingResultPage.Entries, resultList);
+					estimatedQueryCountItems = searchingResultPage.TotalCount - searchingResultPage.ResultCount;
+					searchingResultPage.Dispose();
+
+					if (searchingResultPage.ResultCount == 0)
+					{
+						errorCounter++;
+					}
+					else 
+					{
+						page++;
+						errorCounter = 0;
+					}
+				}
+				else 
+				{
+					errorCounter++;
+				}
+
+				if (estimatedQueryCountItems > 0)
+				{
+					await Task.Delay(delayBetweenQuery);            
+				}
+			}
+
+			void AddToResultList(IEnumerable<Item> queryList, List<Item> resultList)
+			{
+				m_tempFetchResultList.Clear();
+
+				foreach (var item in queryList)
+				{
+					if (item.Result != Steamworks.Result.OK || resultList.FindIndex(x => x.Id == item.Id) >= 0 || !IsTagMatching(item))
+					{
+						continue;
+					}
+
+					m_tempFetchResultList.Add(item);
+				}
+
+				m_tempFetchResultList.Sort((item1, item2) => item2.NumUniqueSubscriptions.CompareTo(item1.NumUniqueSubscriptions));
+				resultList.AddRange(m_tempFetchResultList);
+			}
+		}
+		
+		private bool IsTagMatching(Item item)
+		{
+			foreach (string tag in item.Tags)
+			{
+				if (EqualsTag(tag))
+				{
+					return true;
+				}
+			}
+			
+			return false;
+		}
+		
+		private bool EqualsTag(string tag)
+		{
+			return tag.Equals(MAP_TAG, StringComparison.OrdinalIgnoreCase);
+		}
+		
+		public async Task GetWorkshopItems(List<Item> items)
+		{
+			await PaggingQuery(Query.Items.WithTag(MAP_TAG).MatchAnyTag().CreatedByFriends(), items);
+			await PaggingQuery(Query.Items.WithTag(MAP_TAG).MatchAnyTag().WhereUserPublished(), items);
 		}
 
 		private IEnumerator UpdateItemCoroutine(string path, ulong id)

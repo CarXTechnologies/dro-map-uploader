@@ -5,6 +5,9 @@ public class SingletonScriptableObject<T> : ScriptableObject where T : Scriptabl
 {
     private static T m_instance;
     
+    protected virtual void OnCreate()
+    { }
+    
     public static T instance
     {
         get
@@ -23,6 +26,7 @@ public class SingletonScriptableObject<T> : ScriptableObject where T : Scriptabl
                 }
 
                 m_instance = instances[0];
+                (m_instance as SingletonScriptableObject<T>)?.OnCreate();
             }
 
             return m_instance;

@@ -10,37 +10,6 @@ using UnityEngine.UI;
 
 namespace Editor
 {
-    public struct ValidItem
-    {
-        public string type;
-        public int min;
-        public int max;
-        public int current;
-
-        public ValidItem(string type, int min, int max, int current = 0)
-        {
-            this.type = type;
-            this.min = min;
-            this.max = max;
-            this.current = current;
-        }
-
-        public override string ToString()
-        {
-            if (current < min)
-            {
-                return $"There are less than {min} {type}";
-            }
-            
-            if (current > max)
-            {
-                return $"There are more than {max} {type}";
-            }
-
-            return string.Empty;
-        }
-    }
-
     public class ModMapTestTool
     {
         public const float BYTES_TO_MEGABYTES = 1048576f;
@@ -52,12 +21,14 @@ namespace Editor
 
         private string m_currentName;
 
-        public static readonly ValidItemData Target = new ValidItemData
+        public static ValidItemData Target = default;
+        
+        public static readonly ValidItemData Steam = new ValidItemData
         (4096, 24f, 100f, 30000000,
-            new ValidItem(nameof(Transform), 1, 10000),
+            new ValidItem(nameof(Transform), 1, 20000),
             //Physics
-            new ValidItem(nameof(MeshCollider), 1, 2000),
-            new ValidItem(nameof(BoxCollider), 0, 2000),
+            new ValidItem(nameof(MeshCollider), 1, 10000),
+            new ValidItem(nameof(BoxCollider), 0, 10000),
             new ValidItem(nameof(SphereCollider), 0, 1000),
             new ValidItem(nameof(CapsuleCollider), 0, 1000),
             new ValidItem(nameof(Rigidbody), 0, 1000),
@@ -70,10 +41,10 @@ namespace Editor
             new ValidItem(nameof(HDAdditionalReflectionData), 0, 200),
             new ValidItem(nameof(Volume), 1, 1),
             //Render
-            new ValidItem(nameof(MeshRenderer), 0, 1000),
-            new ValidItem(nameof(MeshFilter), 0, 1000),
-            new ValidItem(nameof(Light), 0, 200),
-            new ValidItem(nameof(LODGroup), 0, 1000),
+            new ValidItem(nameof(MeshRenderer), 0, 10000),
+            new ValidItem(nameof(MeshFilter), 0, 10000),
+            new ValidItem(nameof(Light), 0, 500),
+            new ValidItem(nameof(LODGroup), 0, 10000),
             new ValidItem(nameof(Animator), 0, 100),
             // UI
             new ValidItem(nameof(Canvas), 0, 10),
@@ -84,8 +55,8 @@ namespace Editor
             new ValidItem(nameof(TextMeshProUGUI), 0, 50),
             new ValidItem(nameof(RawImage), 0, 20),
             //Particle
-            new ValidItem(nameof(ParticleSystem), 0, 100),
-            new ValidItem(nameof(ParticleSystemRenderer), 0, 100),
+            new ValidItem(nameof(ParticleSystem), 0, 500),
+            new ValidItem(nameof(ParticleSystemRenderer), 0, 500),
             //Other
             new ValidItem(nameof(GameMarkerData), 1, 1000),
             new ValidItem(nameof(CacheData), 0, 1),
@@ -227,26 +198,6 @@ namespace Editor
             }
         }
 
-        public struct ValidItemData
-        {
-            public List<ValidItem> data;
-            public readonly int vertexCountForDistance;
-            public readonly float vertexDistanceForMaxCount;
-            public readonly float maxSizeInMb;
-            public readonly float maxSizeInMbMeta;
-
-            public ValidItemData(float maxSizeInMb = 512f, float maxSizeInMbMeta = 24f, float vertexDistanceForMaxCount = 1f, 
-                int vertexCountForDistance = 10000000, params ValidItem[] data)
-            {
-                this.vertexCountForDistance = vertexCountForDistance;
-                this.vertexDistanceForMaxCount = vertexDistanceForMaxCount;
-                this.maxSizeInMb = maxSizeInMb;
-                this.maxSizeInMbMeta = maxSizeInMbMeta;
-                this.data = new List<ValidItem>(data);
-            }
-        }
-    
-    
         private static void AddTreeGameObjectToList(GameObject[] gameObjects)
         {
             foreach (var gmObject in gameObjects)
