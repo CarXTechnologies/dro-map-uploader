@@ -10258,14 +10258,23 @@ MonoBehaviour:
     value:
       id: 0
     index: 6
-    lastHeadObject: 
+    lastHeadObject: Road
     templateName: 
     templateIndex: 0
     templateConfig: {fileID: 0}
   references:
     version: 1
     00000000:
-      type: {class: , ns: , asm: }
+      type: {class: PhysicMaterialProperties, ns: , asm: Assembly-CSharp}
+      data:
+        friction: 0
+        rollFriction: 0
+        bumpMin: 0
+        bumpMax: 0
+        bumpScale: 0
+        bump2Min: 0
+        bump2Max: 0
+        bump2Scale: 0
 --- !u!64 &1408357960
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -48483,19 +48492,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   markerData:
-    head: SpawnPoint
-    param: SpawnPoint
+    head: Road
+    param: Road/asphalt
     value:
       id: 0
-    index: 0
-    lastHeadObject: 
+    index: 2
+    lastHeadObject: Road
     templateName: 
     templateIndex: 0
     templateConfig: {fileID: 0}
   references:
     version: 1
     00000000:
-      type: {class: , ns: , asm: }
+      type: {class: PhysicMaterialProperties, ns: , asm: Assembly-CSharp}
+      data:
+        friction: 0
+        rollFriction: 0
+        bumpMin: 0
+        bumpMax: 0
+        bumpScale: 0
+        bump2Min: 0
+        bump2Max: 0
+        bump2Scale: 0
 --- !u!4 &5589511445018055356
 Transform:
   m_ObjectHideFlags: 0
@@ -55669,14 +55687,23 @@ MonoBehaviour:
     value:
       id: 0
     index: 1
-    lastHeadObject: 
+    lastHeadObject: Road
     templateName: 
     templateIndex: 0
     templateConfig: {fileID: 0}
   references:
     version: 1
     00000000:
-      type: {class: , ns: , asm: }
+      type: {class: PhysicMaterialProperties, ns: , asm: Assembly-CSharp}
+      data:
+        friction: 0
+        rollFriction: 0
+        bumpMin: 0
+        bumpMax: 0
+        bumpScale: 0
+        bump2Min: 0
+        bump2Max: 0
+        bump2Scale: 0
 --- !u!4 &6917627706605721905
 Transform:
   m_ObjectHideFlags: 0
