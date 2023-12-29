@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: MapManagerConfig
   m_EditorClassIdentifier: 
   mapMetaConfigValue: {fileID: 11400000, guid: 654c3b0918c80c140a33e80139bdb4cb, type: 2}
+  attachingConfigs: []

@@ -14,16 +14,24 @@ using UnityEngine.SceneManagement;
 
 namespace Editor
 {
+    [Flags]
+    public enum TempData : int
+    {
+        Meta = 1,
+        Map = 2,
+    }
+    
     public class MapBuilder : MonoBehaviour
     {
         private static string assetDir = Application.temporaryCachePath + "/";
+        private static string assetBuildPath = assetDir + "Standalone";
+        private static string assetBuildPathTemporaryOrigin = assetDir + "StandaloneTemporary";
+        private static string assetBuildPathTemporary = assetBuildPathTemporaryOrigin;
         private const string path = "Assets";
-        private static string assetManifestPath = assetDir + "Standalone";
-        private const string meta = "Meta";
 
         private static List<GameMarkerData> m_cacheDataList = new List<GameMarkerData>();
         private static CacheData m_cacheData;
-        private static SteamUGCManager m_steamUgc;
+        public static SteamUGCManager steamUgc;
         private static string m_scenePath;
         private static string m_titleIconPath;
         private static string m_assetPath;
@@ -39,7 +47,8 @@ namespace Editor
             }
             
             InitPath();
-            InitDirectories();
+            ClearCacheScene();
+            ClearDirectory(assetBuildPath);
             
             if (CheckAndError())
             {
@@ -60,7 +69,8 @@ namespace Editor
             }
             
             InitPath();
-            InitDirectories();
+            ClearCacheScene();
+            ClearDirectory(assetBuildPath);
             InitSteamUGC();
             
             if (CheckAndError())
@@ -74,12 +84,13 @@ namespace Editor
             }
             
             EditorUtility.DisplayProgressBar("Create Publisher Item", String.Empty, 0.5f);
-            m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
-            EditorCoroutineUtility.StartCoroutine(m_steamUgc.CreatePublisherItem(item =>
+            steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
+            EditorCoroutineUtility.StartCoroutine(steamUgc.CreatePublisherItem(item =>
             {
                 m_currentFileId = item.FileId;
                 EditorUtility.ClearProgressBar();
                 CreateBundles(m_currentFileId);
+                BuildDataTransition();
                 
                 EditorUtility.DisplayProgressBar("Upload Publisher Item", String.Empty, 0.75f);
                 if (IsSizeValid())
@@ -87,8 +98,8 @@ namespace Editor
                     return;
                 }
                 
-                EditorCoroutineUtility.StartCoroutine(m_steamUgc.PublishItemCoroutine(assetManifestPath, PublishCallback), m_steamUgc);
-            }), m_steamUgc);
+                EditorCoroutineUtility.StartCoroutine(steamUgc.PublishItemCoroutine(assetBuildPath, PublishCallback), steamUgc);
+            }), steamUgc);
         }
 
         [MenuItem("Map/Update exist publication")]
@@ -101,7 +112,8 @@ namespace Editor
             }
             
             InitPath();
-            InitDirectories();
+            ClearCacheScene();
+            ClearDirectory(assetBuildPath);
             InitSteamUGC();
             
             var task = Item.GetAsync(MapManagerConfig.Value.itemWorkshopId);;
@@ -124,21 +136,23 @@ namespace Editor
             }
 
             CreateBundles(MapManagerConfig.Value.itemWorkshopId);
+            BuildDataTransition();
+            
             if (IsSizeValid())
             {
                 return;
             }
             
             EditorUtility.DisplayProgressBar("Upload Publisher Item", String.Empty, 0.5f);
-            m_steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
+            steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
             EditorCoroutineUtility.StartCoroutine(
-                m_steamUgc.UploadItemCoroutine(assetManifestPath, MapManagerConfig.Value.itemWorkshopId, PublishCallback), m_steamUgc);
+                steamUgc.UploadItemCoroutine(assetBuildPath, MapManagerConfig.Value.itemWorkshopId, PublishCallback), steamUgc);
         }
 
         private static void PublishCallback(ulong id)
         {
             EditorUtility.ClearProgressBar();
-            Directory.Delete(assetManifestPath, true);
+            Directory.Delete(assetBuildPath, true);
 
             if (id == SteamUGCManager.PUBLISH_ITEM_FAILED_CODE)
             {
@@ -211,35 +225,51 @@ namespace Editor
 
             return false;
         }
-        
-        private static void InitDirectories()
+
+        private static void ClearDirectory(string path)
         {
-            if (!Directory.Exists(path))
+            if (Directory.Exists(path))
             {
-                Directory.CreateDirectory(path);
+                Directory.Delete(path, true);
             }
-            
-            foreach (var file in Directory.GetFiles(path))
+
+            Directory.CreateDirectory(path);
+        }
+        
+        private static void CopyTemporary(string source, string dest, string searchPattern)
+        {
+            foreach (var file in Directory.GetFiles(source, searchPattern))
+            {
+                var fileName = file.Substring(source.Length + 1);
+                File.Copy(Path.Combine(source, fileName), Path.Combine(dest, fileName), true);
+            }
+        }
+        
+        private static void CopyTemporary(string source, string dest)
+        {
+            foreach (var file in Directory.GetFiles(source))
+            {
+                var fileName = file.Substring(source.Length + 1);
+                File.Copy(Path.Combine(source, fileName), Path.Combine(dest, fileName));
+            }
+        }
+
+        private static void ClearCacheScene()
+        {
+            foreach (var file in Directory.GetFiles(path, "*.unity"))
             {
                 File.Delete(file);
             }
-            
-            if (Directory.Exists(assetManifestPath))
-            {
-                Directory.Delete(assetManifestPath, true);
-            }
-
-            Directory.CreateDirectory(assetManifestPath);
         }
-        
-        private static void InitSteamUGC()
+
+        public static void InitSteamUGC()
         {
-            if (m_steamUgc == null)
+            if (steamUgc == null)
             {
                 SteamClient.Shutdown();
                 SteamClient.Init(SteamUGCManager.APP_ID, false);
-                m_steamUgc = new SteamUGCManager();
-                EditorApplication.update += m_steamUgc.Update;
+                steamUgc = new SteamUGCManager();
+                EditorApplication.update += steamUgc.Update;
             }
         }
 
@@ -295,6 +325,8 @@ namespace Editor
             m_cacheDataList.Clear();
             m_cacheData = new GameObject("CacheData", typeof(CacheData)).GetComponent<CacheData>();
 
+            ModMapTestTool.Target = (ValidItemData)ModMapTestTool.Steam.Clone();
+            
             if (IsValidate(scene))
             {
                 EditorSceneManager.OpenScene(MapManagerConfig.Value.GetTargetScenePath());
@@ -310,16 +342,20 @@ namespace Editor
                 DestroyImmediate(root);
                 return true;
             }
-            
+
+            bool noValidComp = false;
+
             DuplicateValidComponents(root.transform, null, "Garbage", (go, component) =>
             {
                 var compType = component.GetType();
-                if (!ModMapTestTool.ValidType(compType, ModMapTestTool.Target.data, false))
+                if (!ModMapTestTool.ValidType(compType, ModMapTestTool.Target.data, true))
                 {
                     if (ModMapTestTool.ValidType(compType, MapSkipComponentConfig.instance.valid))
                     {
                         return;
                     }
+
+                    noValidComp = true;
                     ModMapTestTool.TryErrorMessage(compType.Name, $"No valid component : {compType.Name}");
                     return;
                 }
@@ -330,6 +366,7 @@ namespace Editor
                 if (compType.Name == nameof(GameMarkerData))
                 {
                     var comp = go.GetComponent<GameMarkerData>();
+                    comp.markerData.Update();
                     m_cacheDataList.Add(comp);
                     if (comp.markerData.GetHead() == "road")
                     {
@@ -374,33 +411,145 @@ namespace Editor
             
             EditorSceneManager.SaveScene(mapScene, m_scenePath);
             SceneManager.UnloadScene(mapScene);
-
-            return false;
+            
+            return noValidComp;
         }
 
+        private static string GetTemporary(TempData name)
+        {
+            var pathDir = Path.Combine(assetBuildPathTemporary, name + "Temp");
+            if (!Directory.Exists(pathDir))
+            {
+                Directory.CreateDirectory(pathDir);
+            }
+
+            return pathDir;
+        }
+        
         private static void CreateBundles(PublishedFileId publishResult)
+        {
+            RenameCacheScene(publishResult);
+            CreateMapBundle();
+            CreateMetaBundle();
+        }
+
+        private static void RenameCacheScene(PublishedFileId publishResult)
         {
             var scenePathNew = path + "/" + MapManagerConfig.Value.mapName + publishResult.Value + ".unity";
             AssetDatabase.RenameAsset(m_scenePath, MapManagerConfig.Value.mapName + publishResult.Value);
             m_scenePath = scenePathNew;
-                
+        }
+
+        private static void CreateMapBundle()
+        {
             var bundleBuilds = CreateBundleArrayDataForOneElement(MapManagerConfig.Value.mapName, m_scenePath);
-            BuildPipeline.BuildAssetBundles(assetManifestPath,
+            BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Map),
                 bundleBuilds, BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.StandaloneWindows);
-            
-            bundleBuilds = CreateBundleArrayDataForOneElement(meta, "Assets/Resources/" + MapManagerConfig.instance.name + ".asset");
-            BuildPipeline.BuildAssetBundles(assetManifestPath, 
+        }
+
+        private static void CreateMetaBundle()
+        {
+            var bundleBuilds = CreateBundleArrayDataForOneElement(TempData.Meta.ToString().ToLower(), "Assets/Resources/" + MapManagerConfig.instance.name + ".asset");
+            BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Meta), 
                 bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+        }
+
+        private static void SelectCache(PublishedFileId published)
+        {
+            assetBuildPathTemporary = assetBuildPathTemporaryOrigin + published.Value;
+        }
+        
+        public static void BuildCustom(TempData target, TempData success, PublishedFileId published, Action<TempData> callback)
+        {
+            SelectCache(published);
+            if (target.HasFlag(TempData.Meta))
+            {
+                ClearDirectory(GetTemporary(TempData.Meta));
+                InitPath();
+                
+                if (!CheckAndError())
+                {
+                    CreateMetaBundle();
+                    success |= TempData.Meta;
+                }
+                else
+                {
+                    success = (TempData)((int)success &(~(int)TempData.Meta));
+                }
+            }
+
+            if (target.HasFlag(TempData.Map))
+            {
+                if (!IsCurrentSceneCheck())
+                {
+                    ClearDirectory(GetTemporary(TempData.Map));
+                    InitPath();
+
+                    if (!ValidateSceneAndMirror())
+                    {
+                        RenameCacheScene(published);
+                        CreateMapBundle();
+                        success |= TempData.Map;
+                    }
+                    else
+                    {
+                        success = (TempData)((int)success &(~(int)TempData.Map));
+                    }
+                }
+                else
+                {
+                    success = (TempData)((int)success &(~(int)TempData.Map));
+                }
+            }
+            
+            callback?.Invoke(success);
+        }
+
+        public static void CreateNewCommunityFile(Action<PublishResult> callback)
+        {
+            EditorUtility.DisplayProgressBar("Creating Community File...", string.Empty, 1f);
+            EditorCoroutineUtility.StartCoroutine(steamUgc.CreatePublisherItem(result =>
+            {
+                callback?.Invoke(result);
+                EditorUtility.ClearProgressBar();
+            }), steamUgc);
+        }
+        
+        public static void UploadCommunityFile(PublishedFileId published, Action<PublishedFileId> callback)
+        {
+            SelectCache(published);
+            EditorUtility.DisplayProgressBar("Uploading Community File...", string.Empty, 1f);
+            ClearCacheScene();
+            ClearDirectory(assetBuildPath);
+            BuildDataTransition();
+            if (IsSizeValid())
+            {
+                return;
+            }
+            
+            EditorCoroutineUtility.StartCoroutine(steamUgc.UploadItemCoroutine(assetBuildPath, published, 
+                publish =>
+                {
+                    PublishCallback(publish);
+                    callback?.Invoke(publish);
+                }), steamUgc);
+        }
+
+        private static void BuildDataTransition()
+        {
+            ClearDirectory(assetBuildPath);
+            CopyTemporary(GetTemporary(TempData.Map), assetBuildPath);
+            CopyTemporary(GetTemporary(TempData.Meta), assetBuildPath);
         }
 
         private static bool IsSizeValid()
         {
-            bool notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(MapManagerConfig.Value.mapName, assetManifestPath + "/" + MapManagerConfig.Value.mapName);
-            bool notMetaSize = ModMapTestTool.IsNotCorrectMetaFileSize(assetManifestPath + "/" + meta);
+            bool notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(MapManagerConfig.Value.mapName, assetBuildPath + "/" + MapManagerConfig.Value.mapName);
+            bool notMetaSize = ModMapTestTool.IsNotCorrectMetaFileSize(assetBuildPath + "/" + TempData.Meta.ToString().ToLower());
 
             if (notMapSize || notMetaSize)
             {
-                Directory.Delete(assetManifestPath, true);
+                Directory.Delete(assetBuildPath, true);
                 return true;
             }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameMarkerData : MonoBehaviour
@@ -7,7 +8,7 @@ public class GameMarkerData : MonoBehaviour
 }
 
 [Serializable]
-public struct MarkerData
+public class MarkerData
 {
     public static readonly string[] paramEditor =
     {
@@ -53,8 +54,57 @@ public struct MarkerData
     };
     
     public string head;
-    [TextArea] public string param;
+    public string param;
+    [SerializeReference] public object value;
     public int index;
+    public string lastHeadObject;
+    public string templateName;
+    public int templateIndex;
+    public GameMarkerTemplateConfig templateConfig;
+    
+    public static readonly Dictionary<string, Func<object>> paramObjectsEditor = new Dictionary<string, Func<object>>()
+    {
+        {"Road", () => new PhysicMaterialProperties()}
+    };
+    
+    public void Update()
+    {
+        if (templateConfig == null)
+        {
+            value = null;
+            return; 
+        }
+        
+        if (templateConfig.presets.presets.Length == 1)
+        {
+            return;
+        }
+        value = templateConfig.presets.presets[templateIndex].value;
+    }
     
     public string GetHead() => head.ToLower();
+    public static string GetHeadTarget(string param)
+    {
+        var group = param.IndexOf('/');
+        return group != -1 ? param.Substring(0, group) : param;
+    }
+}
+
+[Serializable]
+public struct PhysicMaterialProperties
+{
+    public float friction;
+	public float rollFriction;
+	public float bumpMin;
+	public float bumpMax;
+	public float bumpScale;
+	public float bump2Min;
+	public float bump2Max;
+	public float bump2Scale;
+}
+
+[Serializable]
+public struct FMODBunks
+{
+    public TextAsset[] fmodBunks;
 }
