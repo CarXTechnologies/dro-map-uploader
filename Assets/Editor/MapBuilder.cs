@@ -517,6 +517,7 @@ namespace Editor
         
         public static void UploadCommunityFile(PublishedFileId published, Action<PublishedFileId> callback)
         {
+            InitPath();
             SelectCache(published);
             EditorUtility.DisplayProgressBar("Uploading Community File...", string.Empty, 1f);
             ClearCacheScene();
@@ -526,7 +527,10 @@ namespace Editor
             {
                 return;
             }
+
+            var meta = MapManagerConfig.GetAttach(published).metaConfig.mapMetaConfigValue;
             
+            steamUgc.SetItemData(meta.mapName, m_titleIconPath, meta.mapDescription);
             EditorCoroutineUtility.StartCoroutine(steamUgc.UploadItemCoroutine(assetBuildPath, published, 
                 publish =>
                 {

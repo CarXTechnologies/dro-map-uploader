@@ -26,7 +26,7 @@ namespace GameOverlay
 			SteamClient.RunCallbacks();
 		}
 
-		public async Task PaggingQuery(Query query, List<Item> resultList)
+		public async Task PaggingQuery(Query query, List<Item> result, Action<Item> itemSuccess)
 		{
 			const byte maxErrorCount = 5;
 			const int delayBetweenQuery = 500;
@@ -41,7 +41,7 @@ namespace GameOverlay
 				if (searchingResult.HasValue)
 				{
 					var searchingResultPage = searchingResult.Value;
-					AddToResultList(searchingResultPage.Entries, resultList);
+					AddToResultList(searchingResultPage.Entries, result, itemSuccess);
 					estimatedQueryCountItems = searchingResultPage.TotalCount - searchingResultPage.ResultCount;
 					searchingResultPage.Dispose();
 
@@ -66,22 +66,17 @@ namespace GameOverlay
 				}
 			}
 
-			void AddToResultList(IEnumerable<Item> queryList, List<Item> resultList)
+			void AddToResultList(IEnumerable<Item> queryList, List<Item> resultList, Action<Item> success)
 			{
-				m_tempFetchResultList.Clear();
-
 				foreach (var item in queryList)
 				{
-					if (item.Result != Steamworks.Result.OK || resultList.FindIndex(x => x.Id == item.Id) >= 0 || !IsTagMatching(item))
+					if (item.Result != Result.OK || resultList.FindIndex(x => x.Id == item.Id) >= 0 || !IsTagMatching(item))
 					{
 						continue;
 					}
-
-					m_tempFetchResultList.Add(item);
+					success?.Invoke(item);
+					resultList.Add(item);
 				}
-
-				m_tempFetchResultList.Sort((item1, item2) => item2.NumUniqueSubscriptions.CompareTo(item1.NumUniqueSubscriptions));
-				resultList.AddRange(m_tempFetchResultList);
 			}
 		}
 		
@@ -103,10 +98,9 @@ namespace GameOverlay
 			return tag.Equals(MAP_TAG, StringComparison.OrdinalIgnoreCase);
 		}
 		
-		public async Task GetWorkshopItems(List<Item> items)
+		public async Task GetWorkshopItems(List<Item> result, Action<Item> callback)
 		{
-			await PaggingQuery(Query.Items.WithTag(MAP_TAG).MatchAnyTag().CreatedByFriends(), items);
-			await PaggingQuery(Query.Items.WithTag(MAP_TAG).MatchAnyTag().WhereUserPublished(), items);
+			await PaggingQuery(Query.Items.WithTag(MAP_TAG).MatchAnyTag().WhereUserPublished(), result, callback);
 		}
 
 		private IEnumerator UpdateItemCoroutine(string path, ulong id)

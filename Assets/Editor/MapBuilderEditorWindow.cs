@@ -18,47 +18,60 @@ namespace Editor
         private Task m_fetchTask;
         private SteamUGCManager m_steamUgc;
         private int m_selectItemIndex;
-        private Item m_selectItem => m_selectItemIndex >= 0 && m_selectItemIndex < m_fetchResultListItems.Count 
-            ? m_fetchResultListItems[m_selectItemIndex] : default;
-        
+
+        private Item m_selectItem => m_selectItemIndex >= 0 && m_selectItemIndex < m_fetchResultListItems.Count
+            ? m_fetchResultListItems[m_selectItemIndex]
+            : default;
+
         private readonly Dictionary<ulong, Texture2D> m_images = new Dictionary<ulong, Texture2D>();
         private readonly Dictionary<ulong, bool> m_loads = new Dictionary<ulong, bool>();
         private readonly Dictionary<ulong, bool> m_attahing = new Dictionary<ulong, bool>();
-        
+
         private Property m_configProperty;
         private int m_buildType;
+
         private string[] m_iconLoad =
         {
             "d_WaitSpin00", "d_WaitSpin01", "d_WaitSpin02", "d_WaitSpin03", "d_WaitSpin04", "d_WaitSpin05",
             "d_WaitSpin06", "d_WaitSpin07", "d_WaitSpin08", "d_WaitSpin09", "d_WaitSpin10", "d_WaitSpin11"
         };
-        
+
+        private void OnEnable()
+        {
+            Fetch();
+        }
+
         [MenuItem("Tools/MapBuilder")]
         public static void ShowMyEditor()
         {
             MapBuilderEditorWindow wnd = GetWindow<MapBuilderEditorWindow>();
             wnd.titleContent = new GUIContent("MapBuilder");
+        }
+
+        private void Fetch()
+        {
             MapBuilder.InitSteamUGC();
-            wnd.m_steamUgc = MapBuilder.steamUgc;
-            if (wnd.m_fetchTask != null)
+            m_steamUgc = MapBuilder.steamUgc;
+            if (m_fetchTask != null)
             {
                 try
                 {
-                    wnd.m_fetchTask.Dispose();
+                    m_fetchTask.Dispose();
                 }
                 finally
                 {
-                    wnd.m_fetchTask = null;
+                    m_fetchTask = null;
                 }
             }
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             foreach (var image in m_images)
             {
                 DestroyImmediate(image.Value);
             }
+
             m_images.Clear();
         }
 
@@ -66,26 +79,23 @@ namespace Editor
         {
             while (m_steamUgc != null)
             {
-                await m_steamUgc.GetWorkshopItems(m_fetchResultListItems);
-                
-                foreach (var item in m_fetchResultListItems)
-                {
-                    if(!m_images.TryGetValue(item.Id, out var t2D) || t2D == null)
-                    {
-                        await UIUtils.DownloadSprite(item.PreviewImageUrl, (sprite, texture2D) =>
-                        {
-                            m_images[item.Id] = texture2D;
-                        });
-                    }
-
-                    m_attahing[item.Id] = MapManagerConfig.IsAttach(item.Id);
-                }
-
+                await m_steamUgc.GetWorkshopItems(m_fetchResultListItems, DownloadSpriteAsync);
                 Repaint();
                 await Task.Delay(1000);
                 m_fetchTask = FetchItems();
                 await m_fetchTask;  
             }
+        }
+        
+        private async void DownloadSpriteAsync(Item item)
+        {
+            if (!m_images.TryGetValue(item.Id, out var t2D) || t2D == null)
+            {
+                await UIUtils.DownloadSprite(item.PreviewImageUrl,
+                    (sprite, texture2D) => { m_images[item.Id] = texture2D; });
+            }
+
+            m_attahing[item.Id] = MapManagerConfig.IsAttach(item.Id);
         }
         
         private void OnGUI()
