@@ -18,7 +18,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
         public ValidItemData lastValid;
     }
     
-    public static MapMetaConfigValue Value => instance.mapMetaConfigValue.mapMetaConfigValue;
+    public static MapMetaConfigValue Value => instance.mapMetaConfigValue.mapMeta;
 
     public static bool IsAttach(ulong id)
     {
@@ -34,6 +34,15 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
     {
         instance.attachingConfigs.Add(new AttachData{id = id, metaConfig = config});
         Save();
+    }
+    
+    public static void Detach(ulong id)
+    {
+        var index = instance.attachingConfigs.FindIndex(data => data.id == id);
+        if (index != -1)
+        {
+            instance.attachingConfigs.RemoveAt(index);
+        }
     }
 
     public static void Save()

@@ -160,7 +160,7 @@ namespace Editor
                 return;
             }
                 
-            MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.itemWorkshopId = id;
+            MapManagerConfig.instance.mapMetaConfigValue.mapMeta.itemWorkshopId = id;
             Debug.Log("Export track id: " + id);
         }
 
@@ -528,7 +528,7 @@ namespace Editor
                 return;
             }
 
-            var meta = MapManagerConfig.GetAttach(published).metaConfig.mapMetaConfigValue;
+            var meta = MapManagerConfig.GetAttach(published).metaConfig.mapMeta;
             
             steamUgc.SetItemData(meta.mapName, m_titleIconPath, meta.mapDescription);
             EditorCoroutineUtility.StartCoroutine(steamUgc.UploadItemCoroutine(assetBuildPath, published, 

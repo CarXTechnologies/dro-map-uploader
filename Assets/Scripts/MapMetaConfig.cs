@@ -1,17 +1,18 @@
 using System;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(menuName = "Map/MapMetaConfig", fileName = "MapMetaConfig", order = 0)]
 public class MapMetaConfig : ScriptableObject
 {
-    public MapMetaConfigValue mapMetaConfigValue;
+    [FormerlySerializedAs("mapMetaConfigValue")] public MapMetaConfigValue mapMeta;
 
     public event Action<MapMetaConfigValue> updateValue;
 
     private void OnValidate()
     {
-        updateValue?.Invoke(mapMetaConfigValue);
+        updateValue?.Invoke(mapMeta);
     }
 }
 

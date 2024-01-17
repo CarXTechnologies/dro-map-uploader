@@ -46,23 +46,14 @@ namespace Editor
         {
             MapBuilderEditorWindow wnd = GetWindow<MapBuilderEditorWindow>();
             wnd.titleContent = new GUIContent("MapBuilder");
+            wnd.Fetch();
         }
 
         private void Fetch()
         {
             MapBuilder.InitSteamUGC();
             m_steamUgc = MapBuilder.steamUgc;
-            if (m_fetchTask != null)
-            {
-                try
-                {
-                    m_fetchTask.Dispose();
-                }
-                finally
-                {
-                    m_fetchTask = null;
-                }
-            }
+            m_fetchTask ??= FetchItems();
         }
 
         private void OnDisable()
@@ -72,6 +63,21 @@ namespace Editor
                 DestroyImmediate(image.Value);
             }
 
+            if (m_fetchTask != null)
+            {
+                try
+                {
+                    if (m_fetchTask.IsCanceled || m_fetchTask.IsCompleted || m_fetchTask.IsFaulted)
+                    {
+                        m_fetchTask.Dispose();
+                    }
+                }
+                finally
+                {
+                    m_fetchTask = null;
+                }
+            }
+            
             m_images.Clear();
         }
 
@@ -106,7 +112,7 @@ namespace Editor
             var rectPreview = new Rect(16, 24, sizeImage * aspect, sizeImage);
             var rectCenter = new Rect((sizeImage * aspect) / 2f, sizeImage / 2f, 32f, 32f);
             var rectCenter2 = new Rect((sizeImage * aspect) / 2f - 64, sizeImage / 2f, 164f, 32f);
-            var rectItem = new Rect(rectPreview.width + rectPreview.x + 24, 0, position.width - 32 - (rectPreview.width + rectPreview.x + 16), 28);
+            var rectItem = new Rect(rectPreview.width + rectPreview.x + 16, 0, position.width - 32 - (rectPreview.width + rectPreview.x + 16), 28);
             const float space = 8;
             float elementHeight = space + rectItem.height;
             var iconSteam = EditorGUIUtility.IconContent("steam");
@@ -115,8 +121,8 @@ namespace Editor
             m_fetchTask ??= FetchItems();
          
             m_scrollPosition = GUI.BeginScrollView(
-                new Rect(rectItem.x - space, 0, rectItem.width + space * 2, position.height), m_scrollPosition, 
-                new Rect(rectItem.x - space, 0, rectItem.width, elementHeight * m_fetchResultListItems.Count));
+                new Rect(rectItem.x + space * 2, 0, rectItem.width + space * 2, position.height), m_scrollPosition, 
+                new Rect(rectItem.x - 2, 0, rectItem.width, elementHeight * (m_fetchResultListItems.Count + 1) + space));
             
             m_attahing.TryGetValue(m_selectItem.Id, out var isSelectAttach);
             
@@ -176,21 +182,29 @@ namespace Editor
                 rectPreview.x, rectConfig.y + rectConfig.height + 16,
                 rectPreview.width, sizeButton);
 
+            var rectDetach = new Rect(
+                rectButtons.x + rectButtons.width * 0.75f, rectButtons.y - 44,
+                rectButtons.width / 4, sizeButton);
+            
             SerializedObject prop = null;
             SerializedProperty propValue = null;
             MapManagerConfig.AttachData attachObj = null;
-            
+            float propHeight = 0;
             if (isSelectAttach)
             {
                 attachObj = MapManagerConfig.GetAttach(m_selectItem.Id);
                 if (attachObj != null)
                 {
                     prop = new SerializedObject(attachObj.metaConfig);
-                    propValue = prop.FindProperty("mapMetaConfigValue");
-                    rectButtons.y = EditorGUI.GetPropertyHeight(propValue) + rectPreview.height + rectPreview.y + space + 32;
+                    propValue = prop.FindProperty("mapMeta");
+                    if (propValue != null)
+                    {
+                        propHeight = EditorGUI.GetPropertyHeight(propValue);
+                        rectButtons.y = propHeight + rectPreview.height + rectPreview.y + space + 32;
+                    }
                 }
             }
-
+            
             var rectSplitRight = new Rect(
                 rectButtons.x + rectButtons.width / 2, rectButtons.y - 8,
                 rectButtons.width / 2, sizeButton);
@@ -235,12 +249,19 @@ namespace Editor
 
             if (propValue != null)
             {
+                GUI.color = Color.red;
+                if (GUI.Button(rectDetach, "Detach"))
+                {
+                    MapManagerConfig.Detach(m_selectItem.Id);
+                    m_attahing[m_selectItem.Id] = false;
+                }
+                GUI.color = Color.white;
                 EditorGUI.PropertyField(rectConfig, propValue, true);
                 prop.ApplyModifiedProperties();
             }
             
             GUI.Box(rectPreviewBack, string.Empty);
-
+            EditorGUI.DrawRect(rectPreview, Color.black);
             if (m_images.TryGetValue(m_selectItem.Id, out var image))
             {
                 if(image != null)
@@ -316,7 +337,7 @@ namespace Editor
                 }
             }
             EditorGUI.BeginDisabledGroup(!uploadState);
-            GUI.color = uploadState && isSelectAttach ? Color.green : Color.white;
+            GUI.color = uploadState && isSelectAttach ? new Color(0.55f, 0.6f, 0.9f) : Color.white;
             if (GUI.Button(rectUploadButtons, "Upload to steam") && uploadState)
             {
                 m_loads[m_selectItem.Id] = true;
