@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Steamworks.Ugc;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,12 +9,15 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 {
     public MapMetaConfig mapMetaConfigValue;
     public List<AttachData> attachingConfigs = new List<AttachData>();
+    public List<Item> fetchResultListItems = new List<Item>();
     
     [Serializable]
     public class AttachData
     {
         public ulong id;
         public MapMetaConfig metaConfig;
+        public Texture2D image;
+        public bool imageDownloading;
         public int buildSuccess;
         public ValidItemData lastValid;
     }
@@ -22,7 +26,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 
     public static bool IsAttach(ulong id)
     {
-        return instance.attachingConfigs.Exists(data => data.id == id);
+        return instance.attachingConfigs.Exists(data => data.id == id && data.metaConfig != null);
     }
     
     public static AttachData GetAttach(ulong id)
@@ -30,12 +34,42 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
         return instance.attachingConfigs.Find(data => data.id == id);
     }
     
-    public static void Attach(ulong id, MapMetaConfig config)
+    public static bool TryGetAttach(ulong id, out AttachData attachData)
     {
-        instance.attachingConfigs.Add(new AttachData{id = id, metaConfig = config});
-        Save();
+        attachData = GetAttach(id);
+        return attachData != null;
     }
     
+    public static bool GetOrAttach(ulong id, out AttachData attachData)
+    {
+        var result = GetAttach(id);
+        attachData = result;
+        if (attachData == null)
+        {
+            attachData = Attach(id, null);
+            return true;
+        }
+
+        return true;
+    }
+    
+    public static AttachData Attach(ulong id, MapMetaConfig config)
+    {
+        if (TryGetAttach(id, out var attachData))
+        {
+            attachData.id = id;
+            attachData.metaConfig = config;
+        }
+        else
+        {
+            attachData = new AttachData { id = id, metaConfig = config };
+            instance.attachingConfigs.Add(new AttachData { id = id, metaConfig = config });
+        }
+
+        Save();
+        return attachData;
+    }
+
     public static void Detach(ulong id)
     {
         var index = instance.attachingConfigs.FindIndex(data => data.id == id);

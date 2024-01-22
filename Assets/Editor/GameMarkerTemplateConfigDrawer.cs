@@ -74,8 +74,8 @@ namespace Editor
             {
                 amountRect.x += amountRect.width;
 
-                if (GetIndexTemplate(propTemplateName.stringValue, propPresets) == -1 && 
-                    GUI.Button(amountRect, "Add Template"))
+                EditorGUI.BeginDisabledGroup(GetIndexTemplate(propTemplateName.stringValue, propPresets) != -1);
+                if (GUI.Button(amountRect, "Add Template"))
                 {
                     propPresets.InsertArrayElementAtIndex(propPresets.arraySize - 1);
                     var propChild = propPresets.GetArrayElementAtIndex(propPresets.arraySize - 2);
@@ -101,6 +101,7 @@ namespace Editor
                         
                     propChildTemplateName.stringValue = propTemplateName.stringValue;
                 }
+                EditorGUI.EndDisabledGroup();
             }
 
             Space();
