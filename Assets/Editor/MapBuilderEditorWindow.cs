@@ -17,13 +17,15 @@ namespace Editor
         private Task m_fetchTask;
         private SteamUGCManager m_steamUgc;
         private int m_selectItemIndex;
+        private readonly List<Item> m_fetchResultListItems = new List<Item>();
 
-        private Item m_selectItem => m_selectItemIndex >= 0 && m_selectItemIndex < MapManagerConfig.instance.fetchResultListItems.Count
-            ? MapManagerConfig.instance.fetchResultListItems[m_selectItemIndex]
+        private Item m_selectItem => m_selectItemIndex >= 0 && m_selectItemIndex < m_fetchResultListItems.Count
+            ? m_fetchResultListItems[m_selectItemIndex]
             : default;
         
         private readonly Dictionary<ulong, bool> m_loads = new Dictionary<ulong, bool>();
         private readonly Dictionary<ulong, bool> m_attahing = new Dictionary<ulong, bool>();
+        private readonly Dictionary<ulong, (Texture2D, bool)> images = new Dictionary<ulong, (Texture2D, bool)>();
 
         private Property m_configProperty;
         private int m_buildType;
@@ -36,6 +38,7 @@ namespace Editor
 
         private void OnEnable()
         {
+            Clear();
             Fetch();
         }
 
@@ -49,65 +52,49 @@ namespace Editor
 
         private void Fetch()
         {
-            ClearLoad();
             MapBuilder.InitSteamUGC();
             m_steamUgc = MapBuilder.steamUgc;
-            m_fetchTask = FetchItems();
+            FetchItems();
         }
 
         private void OnDisable()
         {
-            ClearLoad();
+            Clear();
         }
 
-        private void ClearLoad()
+        public void Clear()
         {
-            if (m_fetchTask != null)
+            foreach (var image in images)
             {
-                try
-                {
-                    if (m_fetchTask.IsCanceled || m_fetchTask.IsCompleted || m_fetchTask.IsFaulted)
-                    {
-                        m_fetchTask.Dispose();
-                    }
-                }
-                finally
-                {
-                    m_fetchTask = null;
-                }
+                DestroyImmediate(image.Value.Item1);
             }
         }
 
         private async Task FetchItems()
         {
-            while (m_steamUgc != null)
+            await m_steamUgc.GetWorkshopItems(m_fetchResultListItems, DownloadSpriteAsync);
+            
+            foreach (var item in m_fetchResultListItems)
             {
-                await m_steamUgc.GetWorkshopItems(MapManagerConfig.instance.fetchResultListItems, DownloadSpriteAsync);
-                foreach (var item in MapManagerConfig.instance.fetchResultListItems)
-                {
-                    m_attahing[item.Id] = MapManagerConfig.IsAttach(item.Id);
-                }
-                await Task.Delay(1000);
+                m_attahing[item.Id] = MapManagerConfig.IsAttach(item.Id);
             }
-
-            Repaint();
-            ClearLoad();
         }
         
         private async void DownloadSpriteAsync(Item item)
         {
-            if (MapManagerConfig.GetOrAttach(item.Id, out var attachData) 
-                && attachData.imageDownloading == false)
+            await Task.Delay(1000);
+            if (images.TryGetValue(item.Id, out var image) && image.Item2)
             {
-                attachData.imageDownloading = true;
-                await UIUtils.DownloadSprite(item.PreviewImageUrl,
-                    (sprite, texture2D) =>
-                    {
-                        attachData.imageDownloading = false;
-                        attachData.image = texture2D;
-                        MapManagerConfig.Save();
-                    });
+                return;
             }
+
+            if (image.Item1 != null)
+            {
+                DestroyImmediate(image.Item1);
+            }
+
+            images[item.Id] = (null, true);
+            await UIUtils.DownloadSprite(item.PreviewImageUrl, (sprite, texture2D) => { images[item.Id] = (texture2D, false); });
         }
         
         private void OnGUI()
@@ -124,19 +111,17 @@ namespace Editor
             var iconSteam = EditorGUIUtility.IconContent("steam");
             bool uploadState = true;
             
-            m_fetchTask ??= FetchItems();
-         
             m_scrollPosition = GUI.BeginScrollView(
                 new Rect(rectItem.x + space * 2, 0, rectItem.width + space * 2, position.height), m_scrollPosition, 
-                new Rect(rectItem.x - 2, 0, rectItem.width, elementHeight * (MapManagerConfig.instance.fetchResultListItems.Count + 1) + space));
+                new Rect(rectItem.x - 2, 0, rectItem.width, elementHeight * (m_fetchResultListItems.Count + 1) + space));
             
             m_attahing.TryGetValue(m_selectItem.Id, out var isSelectAttach);
             
             var loadIcon = EditorGUIUtility.IconContent(m_iconLoad[Mathf.FloorToInt((Time.time * 12) % m_iconLoad.Length)]);
-            for (int i = 0; i < MapManagerConfig.instance.fetchResultListItems.Count; i++)
+            for (int i = 0; i < m_fetchResultListItems.Count; i++)
             {
                 rectItem.y += space;
-                var item = MapManagerConfig.instance.fetchResultListItems[i];
+                var item = m_fetchResultListItems[i];
                 GUI.Box(rectItem, string.Empty);
                 if (GUI.Button(rectItem, string.Empty))
                 {
@@ -184,33 +169,30 @@ namespace Editor
                 rectPreview.x, rectPreview.y + rectPreview.height + 16,
                 rectPreview.width, sizeButton);
 
-            var rectButtons = new Rect(
-                rectPreview.x, rectConfig.y + rectConfig.height + 16,
-                rectPreview.width, sizeButton);
-
-            var rectDetach = new Rect(
-                rectButtons.x + rectButtons.width * 0.75f, rectButtons.y - 44,
-                rectButtons.width / 4, sizeButton);
+            var rectConfigValue = new Rect(
+                rectConfig.x, rectConfig.y + rectConfig.height + 4,
+                rectConfig.width, sizeButton);
             
+            var rectButtons = new Rect(
+                rectConfigValue.x, rectConfigValue.y + rectConfigValue.height,
+                rectConfigValue.width, sizeButton);
+
             SerializedObject prop = null;
             SerializedProperty propValue = null;
-            MapManagerConfig.AttachData attachObj = null;
-            float propHeight = 0;
-            if (isSelectAttach)
+            float propHeight;
+            
+            MapManagerConfig.GetOrAttach(m_selectItem.Id, out var attachObj);
+            if (attachObj != null && attachObj.metaConfig != null)
             {
-                attachObj = MapManagerConfig.GetAttach(m_selectItem.Id);
-                if (attachObj != null && attachObj.metaConfig != null)
+                prop = new SerializedObject(attachObj.metaConfig);
+                propValue = prop.FindProperty("mapMeta");
+                if (propValue != null)
                 {
-                    prop = new SerializedObject(attachObj.metaConfig);
-                    propValue = prop.FindProperty("mapMeta");
-                    if (propValue != null)
-                    {
-                        propHeight = EditorGUI.GetPropertyHeight(propValue);
-                        rectButtons.y = propHeight + rectPreview.height + rectPreview.y + space + 32;
-                    }
+                    propHeight = EditorGUI.GetPropertyHeight(propValue);
+                    rectButtons.y = propHeight + rectPreview.height + rectPreview.y + space + 44;
                 }
             }
-            
+
             var rectSplitRight = new Rect(
                 rectButtons.x + rectButtons.width / 2, rectButtons.y - 8,
                 rectButtons.width / 2, sizeButton);
@@ -243,36 +225,43 @@ namespace Editor
             m_scrollPositionPreview = GUI.BeginScrollView(
                 new Rect(rectPreviewBack.x, 0, rectPreview.width + 24, position.height), m_scrollPositionPreview,
                 new Rect(rectPreviewBack.x, 0, rectPreview.width, rectButtons.y + messageHeight + validComponentsHeight + 52));
-            if (!isSelectAttach)
+
+            if (attachObj != null)
             {
-                var selectConfig = EditorGUI.ObjectField(rectConfig, null, typeof(MapMetaConfig), false);
-                if (selectConfig != null)
+                var old = attachObj.metaConfig;
+                attachObj.metaConfig =
+                    EditorGUI.ObjectField(rectConfig, old, typeof(MapMetaConfig), false) as MapMetaConfig;
+
+                if (old == null || attachObj.metaConfig == null || 
+                    attachObj.metaConfig.mapMeta.itemWorkshopId != old.mapMeta.itemWorkshopId)
                 {
-                    MapManagerConfig.Attach(m_selectItem.Id, selectConfig as MapMetaConfig);
-                    m_attahing[m_selectItem.Id] = true;
+                    if (old != null)
+                    {
+                        MapManagerConfig.Detach(old.mapMeta.itemWorkshopId);
+                        m_attahing[old.mapMeta.itemWorkshopId] = true;
+                    }
+                    
+                    if (attachObj.metaConfig != null)
+                    {
+                        MapManagerConfig.Attach(m_selectItem.Id, attachObj.metaConfig);
+                        m_attahing[m_selectItem.Id] = true;
+                    }
                 }
             }
 
             if (propValue != null)
             {
-                GUI.color = Color.red;
-                if (GUI.Button(rectDetach, "Detach"))
-                {
-                    MapManagerConfig.Detach(m_selectItem.Id);
-                    m_attahing[m_selectItem.Id] = false;
-                }
-                GUI.color = Color.white;
-                EditorGUI.PropertyField(rectConfig, propValue, true);
+                EditorGUI.PropertyField(rectConfigValue, propValue, true);
                 prop.ApplyModifiedProperties();
             }
             
             GUI.Box(rectPreviewBack, string.Empty);
             EditorGUI.DrawRect(rectPreview, Color.black);
-            if (MapManagerConfig.GetOrAttach(m_selectItem.Id, out var attachData) && !attachData.imageDownloading)
+            if (images.TryGetValue(m_selectItem.Id, out var attachData) && !attachData.Item2)
             {
-                if(attachData.image != null)
+                if(attachData.Item1 != null)
                 {
-                    GUI.DrawTexture(rectPreview, attachData.image);
+                    GUI.DrawTexture(rectPreview, attachData.Item1);
                 }
                 else
                 {
@@ -297,27 +286,30 @@ namespace Editor
             m_buildType = EditorGUI.MaskField(rectSplitRight, m_buildType, Enum.GetNames(typeof(TempData)));
             
             GUI.color = Color.white;
-            if (GUI.Button(rectSplitLeft, "Build"))
+            if (GUI.Button(rectSplitLeft, "Build") && !IsDownloadAnyIcon())
             {
                 m_loads[m_selectItem.Id] = true;
                 int buildType = m_buildType;
-                if (attachObj != null && ((TempData)buildType).HasFlag(TempData.Map))
+                if (attachObj != null && buildType != 0)
                 {
                     attachObj.lastValid = default;
                     MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-                }
-                
-                MapBuilder.BuildCustom((TempData)buildType, (TempData)attachObj.buildSuccess, m_selectItem.Id, complete =>
-                {
-                    m_loads[m_selectItem.Id] = false;
-                    if (attachObj != null)
-                    {
-                        attachObj.lastValid = ModMapTestTool.Target;
-                    }
-
-                    attachObj.buildSuccess = (int)complete;
                     MapManagerConfig.Save();
-                });
+                    
+                    MapBuilder.BuildCustom((TempData)buildType, (TempData)attachObj.buildSuccess, m_selectItem.Id,
+                        complete =>
+                        {
+                            m_loads[m_selectItem.Id] = false;
+                            if (attachObj != null)
+                            {
+                                attachObj.lastValid = ModMapTestTool.Target;
+                            }
+
+                            attachObj.buildSuccess = (int)complete;
+                            Fetch();
+                            MapManagerConfig.Save();
+                        });
+                }
             };
             
             GUI.color = Color.white;
@@ -358,6 +350,19 @@ namespace Editor
             GUI.color = Color.white;
             EditorGUI.EndDisabledGroup();
             GUI.EndScrollView();
+        }
+
+        private bool IsDownloadAnyIcon()
+        {
+            foreach (var item in m_fetchResultListItems)
+            {
+                if (images[item.Id].Item2)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

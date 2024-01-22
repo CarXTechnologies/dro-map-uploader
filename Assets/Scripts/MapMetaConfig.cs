@@ -24,7 +24,12 @@ public struct MapMetaConfigValue
     [TextArea] public string mapDescription;
     [InspectorName("Icon(16:9)")] public Texture2D icon;
     [InspectorName("Large icon(16:9)")] public Texture2D largeIcon;
-    [HideInInspector]public Texture2D miniMapIcon;
+    [HideInInspector] public Texture2D miniMapIcon;
+    
+#if UNITY_EDITOR
+    [HideInInspector] public int buildSuccess;
+    [HideInInspector] public ValidItemData lastValid;
+#endif
 
     public ulong itemWorkshopId;
     public bool UploadSteamName;

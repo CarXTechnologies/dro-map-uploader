@@ -266,7 +266,6 @@ namespace Editor
         {
             if (steamUgc == null)
             {
-                SteamClient.Shutdown();
                 SteamClient.Init(SteamUGCManager.APP_ID, false);
                 steamUgc = new SteamUGCManager();
                 EditorApplication.update += steamUgc.Update;

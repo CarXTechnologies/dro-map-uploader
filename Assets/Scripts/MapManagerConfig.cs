@@ -9,17 +9,41 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 {
     public MapMetaConfig mapMetaConfigValue;
     public List<AttachData> attachingConfigs = new List<AttachData>();
-    public List<Item> fetchResultListItems = new List<Item>();
-    
+
     [Serializable]
     public class AttachData
     {
         public ulong id;
         public MapMetaConfig metaConfig;
-        public Texture2D image;
-        public bool imageDownloading;
-        public int buildSuccess;
-        public ValidItemData lastValid;
+#if UNITY_EDITOR
+        public int buildSuccess
+        {
+            get => metaConfig == null ? 0 : metaConfig.mapMeta.buildSuccess;
+            set
+            {
+                if (metaConfig == null)
+                {
+                    return;
+                }
+
+                metaConfig.mapMeta.buildSuccess = value;
+            }
+        }
+
+        public ValidItemData lastValid
+        {
+            get => metaConfig == null ? default : metaConfig.mapMeta.lastValid;
+            set
+            {
+                if (metaConfig == null)
+                {
+                    return;
+                }
+
+                metaConfig.mapMeta.lastValid = value;
+            }
+        }
+#endif
     }
     
     public static MapMetaConfigValue Value => instance.mapMetaConfigValue.mapMeta;
@@ -55,6 +79,11 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
     
     public static AttachData Attach(ulong id, MapMetaConfig config)
     {
+        if (id == 0)
+        {
+            return null;
+        }
+        
         if (TryGetAttach(id, out var attachData))
         {
             attachData.id = id;
@@ -64,6 +93,11 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
         {
             attachData = new AttachData { id = id, metaConfig = config };
             instance.attachingConfigs.Add(new AttachData { id = id, metaConfig = config });
+        }
+        
+        if (attachData.metaConfig != null)
+        {
+            attachData.metaConfig.mapMeta.itemWorkshopId = id;
         }
 
         Save();
@@ -75,8 +109,15 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
         var index = instance.attachingConfigs.FindIndex(data => data.id == id);
         if (index != -1)
         {
-            instance.attachingConfigs.RemoveAt(index);
+            if (instance.attachingConfigs[index].metaConfig != null)
+            {
+                instance.attachingConfigs[index].metaConfig.mapMeta.itemWorkshopId = 0;
+            }
+
+            instance.attachingConfigs[index].metaConfig = null;
         }
+
+        Save();
     }
 
     public static void Save()
