@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fcbec40bef0404b8fe17c79016a66fb, type: 3}
   m_Name: TestMapConfig
   m_EditorClassIdentifier: 
+  id: ee5e9dec-bf15-4e5e-8d39-34478ee58e8e
   mapMetaConfigValue:
     targetScene: TestMap
     mapName: TestMap
