@@ -1,18 +1,18 @@
 using System;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 [CreateAssetMenu(menuName = "Map/MapMetaConfig", fileName = "MapMetaConfig", order = 0)]
 public class MapMetaConfig : ScriptableObject
 {
-    [FormerlySerializedAs("mapMetaConfigValue")] public MapMetaConfigValue mapMeta;
+    [Identifier] public string id;
+    public MapMetaConfigValue mapMetaConfigValue;
 
     public event Action<MapMetaConfigValue> updateValue;
 
     private void OnValidate()
     {
-        updateValue?.Invoke(mapMeta);
+        updateValue?.Invoke(mapMetaConfigValue);
     }
 }
 
@@ -25,11 +25,6 @@ public struct MapMetaConfigValue
     [InspectorName("Icon(16:9)")] public Texture2D icon;
     [InspectorName("Large icon(16:9)")] public Texture2D largeIcon;
     [HideInInspector] public Texture2D miniMapIcon;
-    
-#if UNITY_EDITOR
-    [HideInInspector] public int buildSuccess;
-    [HideInInspector] public ValidItemData lastValid;
-#endif
 
     public ulong itemWorkshopId;
     public bool UploadSteamName;

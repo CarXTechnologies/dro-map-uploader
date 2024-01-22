@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Steamworks.Ugc;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,44 +9,82 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 {
     public MapMetaConfig mapMetaConfigValue;
     public List<AttachData> attachingConfigs = new List<AttachData>();
-
+    public List<BuildData> builds = new List<BuildData>();
+    
     [Serializable]
     public class AttachData
     {
         public ulong id;
         public MapMetaConfig metaConfig;
-#if UNITY_EDITOR
-        public int buildSuccess
-        {
-            get => metaConfig == null ? 0 : metaConfig.mapMeta.buildSuccess;
-            set
-            {
-                if (metaConfig == null)
-                {
-                    return;
-                }
-
-                metaConfig.mapMeta.buildSuccess = value;
-            }
-        }
-
-        public ValidItemData lastValid
-        {
-            get => metaConfig == null ? default : metaConfig.mapMeta.lastValid;
-            set
-            {
-                if (metaConfig == null)
-                {
-                    return;
-                }
-
-                metaConfig.mapMeta.lastValid = value;
-            }
-        }
-#endif
     }
     
-    public static MapMetaConfigValue Value => instance.mapMetaConfigValue.mapMeta;
+    [Serializable]
+    public struct BuildData
+    {
+        public ulong publishId;
+        public MapMetaConfig config;
+        public string path;
+        public int buildSuccess;
+        public ValidItemData lastValid;
+
+        public BuildData(ulong publishId, MapMetaConfig config, string path, int buildSuccess, ValidItemData lastValid)
+        {
+            this.publishId = publishId;
+            this.config = config;
+            this.path = path;
+            this.buildSuccess = buildSuccess;
+            this.lastValid = lastValid;
+        }
+    }
+
+    protected override void OnCreate()
+    {
+        base.OnCreate();
+#if UNITY_EDITOR
+        EditorUtility.SetDirty(instance);
+        Save();
+#endif
+    }
+
+    public static void AddBuild(BuildData buildData)
+    {
+        instance.builds.Add(buildData);
+        Save();
+    }
+
+    public static BuildData GetBuildOrEmpty(ulong publishId, MapMetaConfig config)
+    {
+        if (config == null)
+        {
+            return default;
+        }
+        
+        var result = instance.builds.Find(b => b.config.id == config.id && publishId == b.publishId);
+        return result;
+    }
+    
+    public static void ClearBuild(ulong publishId, MapMetaConfig config)
+    {
+        var buildIndex = instance.builds.FindIndex(b => b.config.id == config.id && publishId == b.publishId);
+        if (buildIndex != -1)
+        {
+            ClearDirectory(instance.builds[buildIndex].path);
+            instance.builds.RemoveAt(buildIndex);
+            Save();
+        }
+    }
+    
+    private static void ClearDirectory(string path)
+    {
+        if (Directory.Exists(path))
+        {
+            Directory.Delete(path, true);
+        }
+
+        Directory.CreateDirectory(path);
+    }
+    
+    public static MapMetaConfigValue Value => instance.mapMetaConfigValue.mapMetaConfigValue;
 
     public static bool IsAttach(ulong id)
     {
@@ -97,7 +135,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
         
         if (attachData.metaConfig != null)
         {
-            attachData.metaConfig.mapMeta.itemWorkshopId = id;
+            attachData.metaConfig.mapMetaConfigValue.itemWorkshopId = id;
         }
 
         Save();
@@ -111,7 +149,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
         {
             if (instance.attachingConfigs[index].metaConfig != null)
             {
-                instance.attachingConfigs[index].metaConfig.mapMeta.itemWorkshopId = 0;
+                instance.attachingConfigs[index].metaConfig.mapMetaConfigValue.itemWorkshopId = 0;
             }
 
             instance.attachingConfigs[index].metaConfig = null;
@@ -124,6 +162,18 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
     {
 #if UNITY_EDITOR
         AssetDatabase.SaveAssetIfDirty(instance);
+        AssetDatabase.Refresh();
+#endif
+    }
+    
+    public static void SaveForce()
+    {
+#if UNITY_EDITOR
+        EditorUtility.SetDirty(instance);
+        AssetDatabase.SaveAssetIfDirty(instance);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        EditorUtility.FocusProjectWindow();
 #endif
     }
 }

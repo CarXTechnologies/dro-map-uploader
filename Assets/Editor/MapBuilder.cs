@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using GameOverlay;
 using Steamworks;
 using Steamworks.Data;
@@ -160,7 +161,7 @@ namespace Editor
                 return;
             }
                 
-            MapManagerConfig.instance.mapMetaConfigValue.mapMeta.itemWorkshopId = id;
+            MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.itemWorkshopId = id;
             Debug.Log("Export track id: " + id);
         }
 
@@ -439,6 +440,11 @@ namespace Editor
             m_scenePath = scenePathNew;
         }
 
+        private static string GetPublishName(PublishedFileId publishResult)
+        {
+            return publishResult.Value + "_" + MapManagerConfig.instance.mapMetaConfigValue.id;
+        }
+        
         private static void CreateMapBundle()
         {
             var bundleBuilds = CreateBundleArrayDataForOneElement(MapManagerConfig.Value.mapName, m_scenePath);
@@ -455,10 +461,10 @@ namespace Editor
 
         private static void SelectCache(PublishedFileId published)
         {
-            assetBuildPathTemporary = assetBuildPathTemporaryOrigin + published.Value;
+            assetBuildPathTemporary = assetBuildPathTemporaryOrigin + GetPublishName(published);
         }
         
-        public static void BuildCustom(TempData target, TempData success, PublishedFileId published, Action<TempData> callback)
+        public static void BuildCustom(TempData target, TempData success, PublishedFileId published, Action<string, TempData> callback)
         {
             SelectCache(published);
             if (target.HasFlag(TempData.Meta))
@@ -501,7 +507,8 @@ namespace Editor
                 }
             }
             
-            callback?.Invoke(success);
+            callback?.Invoke(assetBuildPathTemporary, success);
+            MapManagerConfig.SaveForce();
         }
 
         public static void CreateNewCommunityFile(Action<PublishResult> callback)
@@ -527,7 +534,7 @@ namespace Editor
                 return;
             }
 
-            var meta = MapManagerConfig.GetAttach(published).metaConfig.mapMeta;
+            var meta = MapManagerConfig.GetAttach(published).metaConfig.mapMetaConfigValue;
             
             steamUgc.SetItemData(meta.mapName, m_titleIconPath, meta.mapDescription);
             EditorCoroutineUtility.StartCoroutine(steamUgc.UploadItemCoroutine(assetBuildPath, published, 

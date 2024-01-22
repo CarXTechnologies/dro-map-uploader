@@ -72,6 +72,7 @@ namespace Editor
 
         private async Task FetchItems()
         {
+            await Task.Delay(1000);
             await m_steamUgc.GetWorkshopItems(m_fetchResultListItems, DownloadSpriteAsync);
             
             foreach (var item in m_fetchResultListItems)
@@ -82,7 +83,6 @@ namespace Editor
         
         private async void DownloadSpriteAsync(Item item)
         {
-            await Task.Delay(1000);
             if (images.TryGetValue(item.Id, out var image) && image.Item2)
             {
                 return;
@@ -159,7 +159,13 @@ namespace Editor
             rectItem.y += space;
             if (GUI.Button(rectItem, "New Workshop Item"))
             {
-                MapBuilder.CreateNewCommunityFile(null);
+                MapBuilder.CreateNewCommunityFile(result =>
+                {
+                    if (result.Success)
+                    {
+                        Fetch();
+                    }
+                });
             };
             GUI.Label(rectItem, iconSteam);
             
@@ -179,16 +185,22 @@ namespace Editor
 
             SerializedObject prop = null;
             SerializedProperty propValue = null;
-            float propHeight;
+            MapManagerConfig.BuildData buildData = default;
             
             MapManagerConfig.GetOrAttach(m_selectItem.Id, out var attachObj);
+            
+            if (attachObj != null)
+            {
+                buildData = MapManagerConfig.GetBuildOrEmpty(m_selectItem.Id, attachObj.metaConfig);
+            }
+
             if (attachObj != null && attachObj.metaConfig != null)
             {
                 prop = new SerializedObject(attachObj.metaConfig);
-                propValue = prop.FindProperty("mapMeta");
+                propValue = prop.FindProperty("mapMetaConfigValue");
                 if (propValue != null)
                 {
-                    propHeight = EditorGUI.GetPropertyHeight(propValue);
+                    var propHeight = EditorGUI.GetPropertyHeight(propValue);
                     rectButtons.y = propHeight + rectPreview.height + rectPreview.y + space + 44;
                 }
             }
@@ -212,12 +224,12 @@ namespace Editor
             
             if (attachObj != null)
             {
-                message = attachObj.lastValid.ToString();
+                message = buildData.lastValid.ToString();
                 int numLines = message.Split('\n').Length;
                 validComponentsHeight = 12 * numLines;
                 messageHeight = (Enum.GetValues(typeof(TempData))
                     .Cast<Enum>()
-                    .Count(val =>!((TempData)attachObj.buildSuccess).HasFlag(val))) * (rectUploadButtons.height + space);
+                    .Count(val =>!((TempData)buildData.buildSuccess).HasFlag(val))) * (rectUploadButtons.height + space);
             }
             
             var rectPreviewBack = new Rect(12, 4, rectPreview.width + 8, rectButtons.y + messageHeight + validComponentsHeight + 52);
@@ -233,12 +245,12 @@ namespace Editor
                     EditorGUI.ObjectField(rectConfig, old, typeof(MapMetaConfig), false) as MapMetaConfig;
 
                 if (old == null || attachObj.metaConfig == null || 
-                    attachObj.metaConfig.mapMeta.itemWorkshopId != old.mapMeta.itemWorkshopId)
+                    attachObj.metaConfig.mapMetaConfigValue.itemWorkshopId != old.mapMetaConfigValue.itemWorkshopId)
                 {
                     if (old != null)
                     {
-                        MapManagerConfig.Detach(old.mapMeta.itemWorkshopId);
-                        m_attahing[old.mapMeta.itemWorkshopId] = true;
+                        MapManagerConfig.Detach(old.mapMetaConfigValue.itemWorkshopId);
+                        m_attahing[old.mapMetaConfigValue.itemWorkshopId] = true;
                     }
                     
                     if (attachObj.metaConfig != null)
@@ -290,24 +302,22 @@ namespace Editor
             {
                 m_loads[m_selectItem.Id] = true;
                 int buildType = m_buildType;
-                if (attachObj != null && buildType != 0)
+                if (attachObj != null && attachObj.metaConfig != null && buildType != 0)
                 {
-                    attachObj.lastValid = default;
                     MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-                    MapManagerConfig.Save();
+                    MapManagerConfig.ClearBuild(m_selectItem.Id, attachObj.metaConfig);
                     
-                    MapBuilder.BuildCustom((TempData)buildType, (TempData)attachObj.buildSuccess, m_selectItem.Id,
-                        complete =>
+                    MapBuilder.BuildCustom((TempData)buildType, (TempData)buildData.buildSuccess, m_selectItem.Id,
+                        (path,complete) =>
                         {
                             m_loads[m_selectItem.Id] = false;
                             if (attachObj != null)
                             {
-                                attachObj.lastValid = ModMapTestTool.Target;
+                                MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(m_selectItem.Id,
+                                    attachObj.metaConfig, path, (int)complete, ModMapTestTool.Target));
                             }
-
-                            attachObj.buildSuccess = (int)complete;
+                            
                             Fetch();
-                            MapManagerConfig.Save();
                         });
                 }
             };
@@ -318,7 +328,7 @@ namespace Editor
                 var buildNames = Enum.GetNames(typeof(TempData));
                 for (int i = 0; i < buildNames.Length; i++)
                 {
-                    var has = ((TempData)attachObj.buildSuccess).HasFlag((TempData)Enum.Parse(typeof(TempData), buildNames[i]));
+                    var has = ((TempData)buildData.buildSuccess).HasFlag((TempData)Enum.Parse(typeof(TempData), buildNames[i]));
                     uploadState = has && uploadState;
                     if (!has)
                     {
