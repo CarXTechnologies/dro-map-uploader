@@ -94,7 +94,10 @@ namespace Editor
             }
 
             images[item.Id] = (null, true);
-            await UIUtils.DownloadSprite(item.PreviewImageUrl, (sprite, texture2D) => { images[item.Id] = (texture2D, false); });
+            await UIUtils.DownloadSprite(item.PreviewImageUrl, (sprite, texture2D) =>
+            {
+                images[item.Id] = (texture2D == null ? new Texture2D(1, 1) : texture2D, false);
+            });
         }
         
         private void OnGUI()
@@ -271,13 +274,17 @@ namespace Editor
             EditorGUI.DrawRect(rectPreview, Color.black);
             if (images.TryGetValue(m_selectItem.Id, out var attachData) && !attachData.Item2)
             {
-                if(attachData.Item1 != null)
+                if(attachData.Item1 != null && attachData.Item1.width > 1)
                 {
                     GUI.DrawTexture(rectPreview, attachData.Item1);
                 }
                 else
                 {
                     EditorGUI.HelpBox(rectCenter2, "Steam preview is missed", MessageType.Warning);
+                }
+                
+                if (attachData.Item1 == null)
+                {
                     DownloadSpriteAsync(m_selectItem);
                 }
             }

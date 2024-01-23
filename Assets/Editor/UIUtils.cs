@@ -9,8 +9,10 @@ public class UIUtils
     {
         using UnityWebRequest webRequest = UnityWebRequestTexture.GetTexture(url);
         var webRequestSend = webRequest.SendWebRequest();
-        while (!webRequestSend.webRequest.isDone)
+        float timeOut = 10f;
+        while (!webRequestSend.webRequest.isDone && timeOut > 0)
         {
+            timeOut -= 0.01f;
             await Task.Delay(10);
         }
 
