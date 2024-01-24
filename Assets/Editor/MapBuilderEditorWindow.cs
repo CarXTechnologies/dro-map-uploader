@@ -297,11 +297,6 @@ namespace Editor
                 {
                     EditorGUI.HelpBox(rectCenter2, "Steam preview is missed", MessageType.Warning);
                 }
-                
-                if (attachData.Item1 == null)
-                {
-                    DownloadSpriteAsync(m_selectItem);
-                }
             }
             else
             {
