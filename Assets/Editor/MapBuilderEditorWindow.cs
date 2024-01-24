@@ -328,7 +328,6 @@ namespace Editor
                     m_loads[m_selectItem.Id] = true;
                     m_buildProcess = true;
                     MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-                    MapManagerConfig.ClearBuild(attachObj.metaConfig);
                     MapBuilder.BuildCustom((TempData)buildType, (TempData)buildData.buildSuccess, m_selectItem.Id,
                         (path,complete) =>
                         {
