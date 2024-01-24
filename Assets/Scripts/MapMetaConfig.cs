@@ -34,6 +34,23 @@ public struct MapMetaConfigValue
     public string GetTargetScenePath() => $"Assets/MapResources/{targetScene}/{targetScene}.unity";
 }
 
+[Serializable]
+public struct MapMetaBuildConfigValue
+{
+    [InspectorName("Map Name(only letters, 128 char)")] public string mapName;
+    [TextArea] public string mapDescription;
+    [InspectorName("Icon(16:9)")] public Texture2D icon;
+    [InspectorName("Large icon(16:9)")] public Texture2D largeIcon;
+
+    public MapMetaBuildConfigValue(string mapName, string mapDescription, Texture2D icon, Texture2D largeIcon)
+    {
+        this.mapName = mapName;
+        this.mapDescription = mapDescription;
+        this.icon = icon;
+        this.largeIcon = largeIcon;
+    }
+}
+
 public class InspectorNameAttribute : PropertyAttribute
 {
     public string newName { get ; private set; }	

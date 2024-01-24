@@ -207,12 +207,17 @@ namespace Editor
 
             if (attachObj != null && attachObj.metaConfig != null)
             {
-                prop = new SerializedObject(attachObj.metaConfig);
-                propValue = prop.FindProperty("mapMetaConfigValue");
-                if (propValue != null)
+                prop = new SerializedObject(MapManagerConfig.instance);
+                var indexBuild = MapManagerConfig.FindIndexBuild(attachObj.metaConfig);
+                if (indexBuild != -1)
                 {
-                    var propHeight = EditorGUI.GetPropertyHeight(propValue);
-                    rectButtons.y = propHeight + rectPreview.height + rectPreview.y + space + 44;
+                    propValue = prop.FindProperty("builds").GetArrayElementAtIndex(indexBuild).FindPropertyRelative("lastMeta");
+                    if (propValue != null)
+                    {
+                        rectButtons.y = rectPreview.height + rectPreview.y + space + 44;
+                        var propHeight = EditorGUI.GetPropertyHeight(propValue);
+                        rectButtons.y += propHeight;
+                    }
                 }
             }
 
@@ -274,8 +279,10 @@ namespace Editor
 
             if (propValue != null)
             {
+                EditorGUI.BeginDisabledGroup(true);
+                propValue.isExpanded = true;
                 EditorGUI.PropertyField(rectConfigValue, propValue, true);
-                prop.ApplyModifiedProperties();
+                EditorGUI.EndDisabledGroup();
             }
             
             GUI.Box(rectPreviewBack, string.Empty);

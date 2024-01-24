@@ -26,6 +26,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
         public string path;
         public int buildSuccess;
         public ValidItemData lastValid;
+        public MapMetaBuildConfigValue lastMeta;
 
         public BuildData(MapMetaConfig config, string path, int buildSuccess, ValidItemData lastValid)
         {
@@ -33,6 +34,17 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
             this.path = path;
             this.buildSuccess = buildSuccess;
             this.lastValid = lastValid;
+            lastMeta = default;
+            lastMeta = GetBuildValue();
+        }
+        
+        public MapMetaBuildConfigValue GetBuildValue()
+        {
+            return new MapMetaBuildConfigValue(
+                config.mapMetaConfigValue.mapName, 
+                config.mapMetaConfigValue.mapDescription, 
+                config.mapMetaConfigValue.icon,
+                config.mapMetaConfigValue.largeIcon);
         }
     }
 
@@ -87,6 +99,17 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
         }
         
         var result = instance.builds.Find(b => b.config.id == config.id);
+        return result;
+    }
+    
+    public static int FindIndexBuild(MapMetaConfig config)
+    {
+        if (config == null)
+        {
+            return -1;
+        }
+        
+        var result = instance.builds.FindIndex(b => b.config.id == config.id);
         return result;
     }
     
