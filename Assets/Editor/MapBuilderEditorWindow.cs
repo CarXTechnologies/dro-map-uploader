@@ -205,18 +205,42 @@ namespace Editor
                 buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
             }
 
+            bool successMeta = ((TempData)buildData.buildSuccess).HasFlag(TempData.Meta);
+            
             if (attachObj != null && attachObj.metaConfig != null)
             {
-                prop = new SerializedObject(MapManagerConfig.instance);
-                var indexBuild = MapManagerConfig.FindIndexBuild(attachObj.metaConfig);
-                if (indexBuild != -1)
+                if (successMeta)
                 {
-                    propValue = prop.FindProperty("builds").GetArrayElementAtIndex(indexBuild).FindPropertyRelative("lastMeta");
-                    if (propValue != null)
+                    prop = new SerializedObject(MapManagerConfig.instance);
+
+                    var indexBuild = MapManagerConfig.FindIndexBuild(attachObj.metaConfig);
+                    if (indexBuild != -1)
                     {
-                        rectButtons.y = rectPreview.height + rectPreview.y + space + 44;
-                        var propHeight = EditorGUI.GetPropertyHeight(propValue);
-                        rectButtons.y += propHeight;
+                        propValue = prop.FindProperty("builds").GetArrayElementAtIndex(indexBuild)
+                            .FindPropertyRelative("lastMeta");
+
+                        if (propValue != null)
+                        {
+                            rectButtons.y = rectPreview.height + rectPreview.y + space + 44;
+                            var propHeight = EditorGUI.GetPropertyHeight(propValue);
+                            rectButtons.y += propHeight;
+                        }
+                    }
+                }
+                else
+                {
+                    prop = new SerializedObject(attachObj.metaConfig);
+
+                    if (prop != null)
+                    {
+                        propValue = prop.FindProperty("mapMetaConfigValue");
+
+                        if (propValue != null)
+                        {
+                            rectButtons.y = rectPreview.height + rectPreview.y + space + 44;
+                            var propHeight = EditorGUI.GetPropertyHeight(propValue);
+                            rectButtons.y += propHeight;
+                        }
                     }
                 }
             }
@@ -279,9 +303,12 @@ namespace Editor
 
             if (propValue != null)
             {
-                EditorGUI.BeginDisabledGroup(true);
-                propValue.isExpanded = true;
+                EditorGUI.BeginDisabledGroup(successMeta);
                 EditorGUI.PropertyField(rectConfigValue, propValue, true);
+                if (!successMeta)
+                {
+                    prop.ApplyModifiedProperties();
+                }
                 EditorGUI.EndDisabledGroup();
             }
             
