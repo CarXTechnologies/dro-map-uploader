@@ -70,9 +70,15 @@ namespace Editor
             }
         }
 
+        private bool m_buildProcess;
+        
         private async Task FetchItems()
         {
-            await Task.Delay(1000);
+            while (m_buildProcess)
+            {
+                await Task.Delay(100);
+            }
+            
             await m_steamUgc.GetWorkshopItems(m_fetchResultListItems, DownloadSpriteAsync);
             
             foreach (var item in m_fetchResultListItems)
@@ -307,13 +313,13 @@ namespace Editor
             GUI.color = Color.white;
             if (GUI.Button(rectSplitLeft, "Build") && !IsDownloadAnyIcon())
             {
-                m_loads[m_selectItem.Id] = true;
                 int buildType = m_buildType;
                 if (attachObj != null && attachObj.metaConfig != null && buildType != 0)
                 {
+                    m_loads[m_selectItem.Id] = true;
+                    m_buildProcess = true;
                     MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
                     MapManagerConfig.ClearBuild(m_selectItem.Id, attachObj.metaConfig);
-                    
                     MapBuilder.BuildCustom((TempData)buildType, (TempData)buildData.buildSuccess, m_selectItem.Id,
                         (path,complete) =>
                         {
@@ -323,8 +329,8 @@ namespace Editor
                                 MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(m_selectItem.Id,
                                     attachObj.metaConfig, path, (int)complete, ModMapTestTool.Target));
                             }
-                            
-                            Fetch();
+
+                            m_buildProcess = false;
                         });
                 }
             };
