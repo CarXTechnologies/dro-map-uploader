@@ -85,6 +85,8 @@ namespace Editor
             {
                 m_attahing[item.Id] = MapManagerConfig.IsAttach(item.Id);
             }
+            
+            MapManagerConfig.ValidBuildsAndAttaching(m_fetchResultListItems);
         }
         
         private async void DownloadSpriteAsync(Item item)
@@ -200,7 +202,7 @@ namespace Editor
             
             if (attachObj != null)
             {
-                buildData = MapManagerConfig.GetBuildOrEmpty(m_selectItem.Id, attachObj.metaConfig);
+                buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
             }
 
             if (attachObj != null && attachObj.metaConfig != null)
@@ -319,15 +321,14 @@ namespace Editor
                     m_loads[m_selectItem.Id] = true;
                     m_buildProcess = true;
                     MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-                    MapManagerConfig.ClearBuild(m_selectItem.Id, attachObj.metaConfig);
+                    MapManagerConfig.ClearBuild(attachObj.metaConfig);
                     MapBuilder.BuildCustom((TempData)buildType, (TempData)buildData.buildSuccess, m_selectItem.Id,
                         (path,complete) =>
                         {
                             m_loads[m_selectItem.Id] = false;
                             if (attachObj != null)
                             {
-                                MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(m_selectItem.Id,
-                                    attachObj.metaConfig, path, (int)complete, ModMapTestTool.Target));
+                                MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(attachObj.metaConfig, path, (int)complete, ModMapTestTool.Target));
                             }
 
                             m_buildProcess = false;

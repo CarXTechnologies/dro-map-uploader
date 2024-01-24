@@ -37,8 +37,7 @@ namespace Editor
         private static string m_titleIconPath;
         private static string m_assetPath;
         private static PublishedFileId m_currentFileId;
-
-        [MenuItem("Map/Create")]
+        
         [Obsolete("Obsolete")]
         private static void Create()
         {
@@ -59,8 +58,7 @@ namespace Editor
             ValidateSceneAndMirror();
             CreateBundles(new PublishedFileId());
         }
-
-        [MenuItem("Map/Create and publication")]
+        
         [Obsolete("Obsolete")]
         private static void CreateAndPublication()
         {
@@ -102,8 +100,7 @@ namespace Editor
                 EditorCoroutineUtility.StartCoroutine(steamUgc.PublishItemCoroutine(assetBuildPath, PublishCallback), steamUgc);
             }), steamUgc);
         }
-
-        [MenuItem("Map/Update exist publication")]
+        
         [Obsolete("Obsolete")]
         private static async void UpdateExistPublication()
         {
@@ -440,9 +437,9 @@ namespace Editor
             m_scenePath = scenePathNew;
         }
 
-        private static string GetPublishName(PublishedFileId publishResult)
+        private static string GetCacheName()
         {
-            return publishResult.Value + "_" + MapManagerConfig.instance.mapMetaConfigValue.id;
+            return MapManagerConfig.instance.mapMetaConfigValue.id;
         }
         
         private static void CreateMapBundle()
@@ -459,14 +456,14 @@ namespace Editor
                 bundleBuilds, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
         }
 
-        private static void SelectCache(PublishedFileId published)
+        private static void SelectCache()
         {
-            assetBuildPathTemporary = assetBuildPathTemporaryOrigin + GetPublishName(published);
+            assetBuildPathTemporary = assetBuildPathTemporaryOrigin + GetCacheName();
         }
         
         public static void BuildCustom(TempData target, TempData success, PublishedFileId published, Action<string, TempData> callback)
         {
-            SelectCache(published);
+            SelectCache();
             if (target.HasFlag(TempData.Meta))
             {
                 ClearDirectory(GetTemporary(TempData.Meta));
@@ -524,7 +521,7 @@ namespace Editor
         public static void UploadCommunityFile(PublishedFileId published, Action<PublishedFileId> callback)
         {
             InitPath();
-            SelectCache(published);
+            SelectCache();
             EditorUtility.DisplayProgressBar("Uploading Community File...", string.Empty, 1f);
             ClearCacheScene();
             ClearDirectory(assetBuildPath);

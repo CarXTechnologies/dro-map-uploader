@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Steamworks.Ugc;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,15 +22,13 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
     [Serializable]
     public struct BuildData
     {
-        public ulong publishId;
         public MapMetaConfig config;
         public string path;
         public int buildSuccess;
         public ValidItemData lastValid;
 
-        public BuildData(ulong publishId, MapMetaConfig config, string path, int buildSuccess, ValidItemData lastValid)
+        public BuildData(MapMetaConfig config, string path, int buildSuccess, ValidItemData lastValid)
         {
-            this.publishId = publishId;
             this.config = config;
             this.path = path;
             this.buildSuccess = buildSuccess;
@@ -46,32 +45,62 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 #endif
     }
 
+    public static void ValidBuildsAndAttaching(List<Item> validationBuilds)
+    {
+        if (validationBuilds == null || validationBuilds.Count < 1)
+        {
+            return;
+        }
+        
+        for (var index = 0; index < instance.attachingConfigs.Count; index++)
+        {
+            if (validationBuilds.FindIndex(data => data.Id == instance.attachingConfigs[index].id) == -1)
+            {
+                instance.attachingConfigs.RemoveAt(index);
+            }
+        }
+        
+        for (var index = 0; index < instance.builds.Count; index++)
+        {
+            if (instance.builds[index].config == null)
+            {
+                ClearDirectory(instance.builds[index].path);
+                instance.builds.RemoveAt(index);
+                Save();
+            }
+        }
+        
+        SaveForce();
+    }
+    
     public static void AddBuild(BuildData buildData)
     {
         instance.builds.Add(buildData);
         Save();
     }
 
-    public static BuildData GetBuildOrEmpty(ulong publishId, MapMetaConfig config)
+    public static BuildData GetBuildOrEmpty(MapMetaConfig config)
     {
         if (config == null)
         {
             return default;
         }
         
-        var result = instance.builds.Find(b => b.config.id == config.id && publishId == b.publishId);
+        var result = instance.builds.Find(b => b.config.id == config.id);
         return result;
     }
     
-    public static void ClearBuild(ulong publishId, MapMetaConfig config)
+    public static void ClearBuild(MapMetaConfig config)
     {
-        var buildIndex = instance.builds.FindIndex(b => b.config.id == config.id && publishId == b.publishId);
-        if (buildIndex != -1)
+        var buildIndex = instance.builds.FindIndex(b => b.config.id == config.id);
+        if (buildIndex == -1)
         {
-            ClearDirectory(instance.builds[buildIndex].path);
-            instance.builds.RemoveAt(buildIndex);
-            Save();
+            return;
         }
+        
+        ClearDirectory(instance.builds[buildIndex].path);
+        instance.builds.RemoveAt(buildIndex);
+        Save();
     }
     
     private static void ClearDirectory(string path)
