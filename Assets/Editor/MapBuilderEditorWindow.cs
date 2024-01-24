@@ -205,46 +205,6 @@ namespace Editor
                 buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
             }
 
-            bool successMeta = ((TempData)buildData.buildSuccess).HasFlag(TempData.Meta);
-            
-            if (attachObj != null && attachObj.metaConfig != null)
-            {
-                if (successMeta)
-                {
-                    prop = new SerializedObject(MapManagerConfig.instance);
-
-                    var indexBuild = MapManagerConfig.FindIndexBuild(attachObj.metaConfig);
-                    if (indexBuild != -1)
-                    {
-                        propValue = prop.FindProperty("builds").GetArrayElementAtIndex(indexBuild)
-                            .FindPropertyRelative("lastMeta");
-
-                        if (propValue != null)
-                        {
-                            rectButtons.y = rectPreview.height + rectPreview.y + space + 44;
-                            var propHeight = EditorGUI.GetPropertyHeight(propValue);
-                            rectButtons.y += propHeight;
-                        }
-                    }
-                }
-                else
-                {
-                    prop = new SerializedObject(attachObj.metaConfig);
-
-                    if (prop != null)
-                    {
-                        propValue = prop.FindProperty("mapMetaConfigValue");
-
-                        if (propValue != null)
-                        {
-                            rectButtons.y = rectPreview.height + rectPreview.y + space + 44;
-                            var propHeight = EditorGUI.GetPropertyHeight(propValue);
-                            rectButtons.y += propHeight;
-                        }
-                    }
-                }
-            }
-
             var rectSplitRight = new Rect(
                 rectButtons.x + rectButtons.width / 2, rectButtons.y - 8,
                 rectButtons.width / 2, sizeButton);
@@ -301,17 +261,6 @@ namespace Editor
                 }
             }
 
-            if (propValue != null)
-            {
-                EditorGUI.BeginDisabledGroup(successMeta);
-                EditorGUI.PropertyField(rectConfigValue, propValue, true);
-                if (!successMeta)
-                {
-                    prop.ApplyModifiedProperties();
-                }
-                EditorGUI.EndDisabledGroup();
-            }
-            
             GUI.Box(rectPreviewBack, string.Empty);
             EditorGUI.DrawRect(rectPreview, Color.black);
             if (images.TryGetValue(m_selectItem.Id, out var attachData) && !attachData.Item2)
