@@ -12,6 +12,7 @@ public class IdentifierDrawer : PropertyDrawer
         if (string.IsNullOrEmpty(property.stringValue)) 
         {
             property.stringValue = Guid.NewGuid().ToString();
+            property.serializedObject.ApplyModifiedProperties();
         }
         EditorGUI.PropertyField(position, property, label, true);
         EditorGUI.EndDisabledGroup();

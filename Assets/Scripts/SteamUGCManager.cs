@@ -157,18 +157,19 @@ namespace GameOverlay
 			if (metaFileInfo != null)
 			{
 				editor.WithMetaData(metaFileInfo.DirectoryName + "/" + metaFileInfo.Name);
-				
-				if (MapManagerConfig.Value.UploadSteamName)
+
+				var build = MapManagerConfig.instance;
+				if (build.uploadSteamName)
 				{
 					editor.WithTitle(m_itemName);
 				}
 
-				if (MapManagerConfig.Value.UploadSteamPreview)
+				if (build.uploadSteamPreview)
 				{
 					editor.WithPreviewFile(m_previewPath);
 				}
 
-				if (MapManagerConfig.Value.UploadSteamDescription)
+				if (build.uploadSteamDescription)
 				{
 					editor.WithDescription(m_desciption);
 				}
@@ -203,7 +204,7 @@ namespace GameOverlay
 			onCreate?.Invoke(m_currentPublishResult.Result);
 		}
 		
-		public IEnumerator PublishItemCoroutine(string path, Action<ulong> uploadedId)
+		public IEnumerator PublishItemCoroutine(string path, Func<ulong, bool> uploadedId)
 		{
 			yield return m_currentPublishResult.AsIEnumerator();
 
@@ -226,7 +227,7 @@ namespace GameOverlay
 			}
 		}
 
-		public IEnumerator UploadItemCoroutine(string path, PublishedFileId itemId, Action<ulong> uploadedId = null)
+		public IEnumerator UploadItemCoroutine(string path, PublishedFileId itemId, Func<ulong, bool> uploadedId = null)
 		{
 			yield return UpdateItemCoroutine(path, itemId);
 			uploadedId?.Invoke(itemId);

@@ -5,12 +5,40 @@ using Steamworks.Ugc;
 using UnityEditor;
 using UnityEngine;
 
+[Flags]
+public enum TempData : int
+{
+    Meta = 1,
+    Map = 2,
+}
+    
+public enum PlatformBuild : int
+{
+    Steam = 0,
+    //EpicGames = 1,
+    //PS4 = 100,
+    //PS5 = 101,
+    //XboxOne = 1004,
+    //XboxSeriesS = 1005,
+    //XboxSeriesX = 1006,
+}
+    
+public enum CompressBuild : int
+{
+    NoCompress = 0,
+    Compress = 10,
+}
+
 [CreateAssetMenu(menuName = "Map/MapManagerConfig", fileName = "MapManagerConfig", order = 0)]
 public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 {
-    public MapMetaConfig mapMetaConfigValue;
-    public List<AttachData> attachingConfigs = new List<AttachData>();
-    public List<BuildData> builds = new List<BuildData>();
+    [InspectorSetting(isLock: true)] public MapMetaConfig mapMetaConfigValue;
+    [InspectorSetting(isLock: true)] public List<AttachData> attachingConfigs = new List<AttachData>();
+    [InspectorSetting(isLock: true)] public List<BuildData> builds = new List<BuildData>();
+    [HideInInspector] public string targetScene;
+    [HideInInspector] public bool uploadSteamName;
+    [HideInInspector] public bool uploadSteamDescription;
+    [HideInInspector] public bool uploadSteamPreview;
     
     [Serializable]
     public class AttachData
@@ -27,14 +55,23 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
         public int buildSuccess;
         public ValidItemData lastValid;
         public MapMetaConfigValue lastMeta;
-
-        public BuildData(MapMetaConfig config, string path, int buildSuccess, ValidItemData lastValid)
+        public PlatformBuild platform;
+        public CompressBuild compress;
+        
+        public BuildData(MapMetaConfig config, 
+            string path, 
+            int buildSuccess, 
+            ValidItemData lastValid,
+            PlatformBuild platform,
+            CompressBuild compress)
         {
             this.config = config;
             this.path = path;
             this.buildSuccess = buildSuccess;
             this.lastValid = lastValid;
             lastMeta = config.mapMetaConfigValue;
+            this.platform = platform;
+            this.compress = compress;
         }
     }
 
@@ -77,7 +114,15 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
     
     public static void AddBuild(BuildData buildData)
     {
-        instance.builds.Add(buildData);
+        var index = FindIndexBuild(buildData.config);
+        if (index == -1)
+        {
+            instance.builds.Add(buildData);
+            Save();
+            return;
+        }
+        
+        instance.builds[index] = buildData;
         Save();
     }
 
@@ -127,7 +172,8 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
     }
     
     public static MapMetaConfigValue Value => instance.mapMetaConfigValue.mapMetaConfigValue;
-
+    public static BuildData Build => GetBuildOrEmpty(instance.mapMetaConfigValue);
+    
     public static bool IsAttach(ulong id)
     {
         return instance.attachingConfigs.Exists(data => data.id == id && data.metaConfig != null);
@@ -173,11 +219,6 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
         {
             attachData = new AttachData { id = id, metaConfig = config };
             instance.attachingConfigs.Add(new AttachData { id = id, metaConfig = config });
-        }
-        
-        if (attachData.metaConfig != null)
-        {
-            attachData.metaConfig.mapMetaConfigValue.itemWorkshopId = id;
         }
 
         Save();

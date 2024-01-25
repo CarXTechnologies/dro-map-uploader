@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Codice.Client.BaseCommands;
 using GameOverlay;
 using Steamworks.Ugc;
 using UnityEditor;
 using UnityEditor.Graphs;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Editor
 {
@@ -29,7 +32,10 @@ namespace Editor
 
         private Property m_configProperty;
         private int m_buildType;
-
+        private PlatformBuild m_platformBuild;
+        private CompressBuild m_compressBuild;
+        private string m_targetScene;
+        
         private string[] m_iconLoad =
         {
             "d_WaitSpin00", "d_WaitSpin01", "d_WaitSpin02", "d_WaitSpin03", "d_WaitSpin04", "d_WaitSpin05",
@@ -96,6 +102,11 @@ namespace Editor
                 return;
             }
 
+            while (m_buildProcess)
+            {
+                await Task.Delay(100);
+            }
+            
             if (image.Item1 != null)
             {
                 DestroyImmediate(image.Item1);
@@ -117,7 +128,7 @@ namespace Editor
             var rectCenter = new Rect((sizeImage * aspect) / 2f, sizeImage / 2f, 32f, 32f);
             var rectCenter2 = new Rect((sizeImage * aspect) / 2f - 64, sizeImage / 2f, 164f, 32f);
             var rectItem = new Rect(rectPreview.width + rectPreview.x + 16, 0, position.width - 32 - (rectPreview.width + rectPreview.x + 16), 28);
-            const float space = 8;
+            const float space = 6;
             float elementHeight = space + rectItem.height;
             var iconSteam = EditorGUIUtility.IconContent("steam");
             bool uploadState = true;
@@ -183,15 +194,15 @@ namespace Editor
             GUI.EndScrollView();
             
             var rectConfig = new Rect(
-                rectPreview.x, rectPreview.y + rectPreview.height + 16,
+                rectPreview.x, rectPreview.y + rectPreview.height + space,
                 rectPreview.width, sizeButton);
 
             var rectConfigValue = new Rect(
-                rectConfig.x, rectConfig.y + rectConfig.height + 4,
+                rectConfig.x, rectConfig.y + rectConfig.height,
                 rectConfig.width, sizeButton);
             
             var rectButtons = new Rect(
-                rectConfigValue.x, rectConfigValue.y + rectConfigValue.height,
+                rectConfigValue.x, rectConfigValue.y + space * 2,
                 rectConfigValue.width, sizeButton);
 
             SerializedObject prop = null;
@@ -204,18 +215,78 @@ namespace Editor
             {
                 buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
             }
+            
+            var rectPlatform = new Rect(
+                rectPreview.x + rectPreview.width / 2, rectButtons.y,
+                rectPreview.width / 2, sizeButton);
+            
+            var rectScene = new Rect(
+                rectPlatform.x, rectPlatform.y + sizeButton + space,
+                rectPlatform.width, sizeButton);
 
+            var rectCompress = new Rect(
+                rectScene.x, rectScene.y + sizeButton + space,
+                rectScene.width, sizeButton);
+
+            var rectPlatformName = new Rect(
+                rectPreview.x, rectPlatform.y,
+                rectPreview.width / 2, sizeButton);
+            
+            var rectCompressName = new Rect(
+                rectPlatformName.x, rectCompress.y,
+                rectPlatformName.width, sizeButton);
+            
+            var rectSceneName = new Rect(
+                rectPlatformName.x, rectScene.y,
+                rectPlatformName.width, sizeButton);
+
+            var rectUploadSteamNameToggle = new Rect(
+                rectPreview.x + rectPreview.width / 2, rectCompress.y + sizeButton + space,
+                rectPreview.width / 2, sizeButton);
+            
+            var rectUploadSteamDescriptionToggle = new Rect(
+                rectUploadSteamNameToggle.x, rectUploadSteamNameToggle.y + sizeButton + space,
+                rectUploadSteamNameToggle.width / 2, sizeButton);
+            
+            var rectUploadSteamPreviewToggle = new Rect(
+                rectUploadSteamDescriptionToggle.x, rectUploadSteamDescriptionToggle.y + sizeButton + space,
+                rectUploadSteamDescriptionToggle.width, sizeButton);
+            
+            
+            var rectUploadSteamName = new Rect(
+                rectPreview.x, rectCompress.y + sizeButton + space,
+                rectPreview.width, sizeButton);
+            
+            var rectUploadSteamDescription = new Rect(
+                rectUploadSteamName.x, rectUploadSteamName.y + sizeButton + space,
+                rectUploadSteamName.width, sizeButton);
+            
+            var rectUploadSteamPreview = new Rect(
+                rectUploadSteamDescription.x, rectUploadSteamDescription.y + sizeButton + space,
+                rectUploadSteamDescription.width, sizeButton);
+            
+            
             var rectSplitRight = new Rect(
-                rectButtons.x + rectButtons.width / 2, rectButtons.y - 8,
-                rectButtons.width / 2, sizeButton);
+                rectUploadSteamPreview.x + rectUploadSteamPreview.width / 2, rectUploadSteamPreview.y + sizeButton + space * 3,
+                rectUploadSteamPreview.width / 2, sizeButton);
 
             var rectSplitLeft = new Rect(
-                rectButtons.x, rectButtons.y - space,
-                rectButtons.width / 2, sizeButton);
-
+                rectUploadSteamPreview.x, rectUploadSteamPreview.y + sizeButton + space * 3,
+                rectUploadSteamPreview.width / 2, sizeButton);
+            
+            var rectSplitBuild = new Rect(
+                rectUploadSteamPreview.x, rectSplitRight.y + sizeButton + space,
+                rectUploadSteamPreview.width / 2, sizeButton * 1.5f);
+            
             var rectUploadButtons = new Rect(
-                rectPreview.x, rectButtons.y + space * 2,
-                rectPreview.width, sizeButton * 2);
+                rectUploadSteamPreview.x + rectUploadSteamPreview.width / 2, rectSplitBuild.y,
+                rectUploadSteamPreview.width / 2, sizeButton * 1.5f);
+            
+            var rectInfo = new Rect(
+                rectButtons.x, rectUploadButtons.y + rectUploadButtons.height + space,
+                rectButtons.width, sizeButton * 2);
+            
+            var lastRect = rectInfo;
             
             string message = string.Empty;
             
@@ -225,18 +296,17 @@ namespace Editor
             if (attachObj != null)
             {
                 message = buildData.lastValid.ToString();
-                int numLines = message.Split('\n').Length;
-                validComponentsHeight = 12 * numLines;
+                validComponentsHeight = EditorStyles.helpBox.CalcSize(new GUIContent(message)).y - space;
                 messageHeight = (Enum.GetValues(typeof(TempData))
                     .Cast<Enum>()
-                    .Count(val =>!((TempData)buildData.buildSuccess).HasFlag(val))) * (rectUploadButtons.height + space);
+                    .Count(val =>!((TempData)buildData.buildSuccess).HasFlag(val))) * (rectInfo.height + space);
             }
-            
-            var rectPreviewBack = new Rect(12, 4, rectPreview.width + 8, rectButtons.y + messageHeight + validComponentsHeight + 52);
+           
+            var rectPreviewBack = new Rect(12, 4, rectPreview.width + 8, lastRect.y + messageHeight + validComponentsHeight);
             var rectLabelId = new Rect(rectPreviewBack.width / 2 - 16, 2, 128, 24);
             m_scrollPositionPreview = GUI.BeginScrollView(
                 new Rect(rectPreviewBack.x, 0, rectPreview.width + 24, position.height), m_scrollPositionPreview,
-                new Rect(rectPreviewBack.x, 0, rectPreview.width, rectButtons.y + messageHeight + validComponentsHeight + 52));
+                new Rect(rectPreviewBack.x, 0, rectPreview.width, lastRect.y + messageHeight + validComponentsHeight));
 
             if (attachObj != null)
             {
@@ -244,20 +314,10 @@ namespace Editor
                 attachObj.metaConfig =
                     EditorGUI.ObjectField(rectConfig, old, typeof(MapMetaConfig), false) as MapMetaConfig;
 
-                if (old == null || attachObj.metaConfig == null || 
-                    attachObj.metaConfig.mapMetaConfigValue.itemWorkshopId != old.mapMetaConfigValue.itemWorkshopId)
+                if (attachObj.metaConfig != null && !m_attahing[m_selectItem.Id])
                 {
-                    if (old != null)
-                    {
-                        MapManagerConfig.Detach(old.mapMetaConfigValue.itemWorkshopId);
-                        m_attahing[old.mapMetaConfigValue.itemWorkshopId] = true;
-                    }
-                    
-                    if (attachObj.metaConfig != null)
-                    {
-                        MapManagerConfig.Attach(m_selectItem.Id, attachObj.metaConfig);
-                        m_attahing[m_selectItem.Id] = true;
-                    }
+                    MapManagerConfig.Attach(m_selectItem.Id, attachObj.metaConfig);
+                    m_attahing[m_selectItem.Id] = true;
                 }
             }
 
@@ -273,6 +333,11 @@ namespace Editor
                 {
                     EditorGUI.HelpBox(rectCenter2, "Steam preview is missed", MessageType.Warning);
                 }
+
+                if (attachData.Item1 == null)
+                {
+                    DownloadSpriteAsync(m_selectItem);
+                }
             }
             else
             {
@@ -286,12 +351,13 @@ namespace Editor
                 GUI.Label(rectLabelId, iconSteam);
             }
 
-            EditorGUI.BeginDisabledGroup(!isSelectAttach);
-
+            EditorGUI.BeginDisabledGroup(!isSelectAttach || attachObj == null || attachObj.metaConfig == null);
+            GUI.Label(rectSplitLeft, "Build Targets");
             m_buildType = EditorGUI.MaskField(rectSplitRight, m_buildType, Enum.GetNames(typeof(TempData)));
             
             GUI.color = Color.white;
-            if (GUI.Button(rectSplitLeft, "Build") && !IsDownloadAnyIcon())
+
+            if (GUI.Button(rectSplitBuild, "Build") && !IsDownloadAnyIcon())
             {
                 int buildType = m_buildType;
                 if (attachObj != null && attachObj.metaConfig != null && buildType != 0)
@@ -299,19 +365,64 @@ namespace Editor
                     m_loads[m_selectItem.Id] = true;
                     m_buildProcess = true;
                     MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-                    MapBuilder.BuildCustom((TempData)buildType, (TempData)buildData.buildSuccess, m_selectItem.Id,
+                    MapBuilder.BuildCustom((TempData)buildType, 
+                        (TempData)buildData.buildSuccess, 
+                        m_selectItem.Id, 
+                        buildData.compress,
+                        buildData.platform,
                         (path,complete) =>
                         {
                             m_loads[m_selectItem.Id] = false;
-                            if (attachObj != null)
-                            {
-                                MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(attachObj.metaConfig, path, (int)complete, ModMapTestTool.Target));
-                            }
-
+                            MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(
+                                attachObj.metaConfig, 
+                                path, 
+                                (int)complete, 
+                                ModMapTestTool.Target,
+                                m_platformBuild,
+                                m_compressBuild));
                             m_buildProcess = false;
                         });
                 }
             };
+            
+            if (attachObj != null && attachObj.metaConfig != null)
+            {
+                var flagScene = ((TempData)m_buildType).HasFlag(TempData.Map);
+                
+                EditorGUI.BeginDisabledGroup(!flagScene);
+                GUI.Label(rectSceneName, "Target Scene");
+                var editorScenes = EditorBuildSettings.scenes;
+                if (editorScenes.Length > 0)
+                {
+                    int index = FindSceneIndex(editorScenes, MapManagerConfig.instance.targetScene);
+                    var scenes = GetScenesName(editorScenes);
+                    MapManagerConfig.instance.targetScene = editorScenes[EditorGUI.Popup(rectScene, index, scenes)].path;
+                }
+                
+
+                EditorGUI.EndDisabledGroup();
+                
+                var flagPlat = (buildData.buildSuccess & m_buildType) == buildData.buildSuccess;
+                EditorGUI.BeginDisabledGroup(!flagPlat);
+                GUI.Label(rectPlatformName, "Platform");
+                m_platformBuild = (PlatformBuild)EditorGUI.EnumPopup(rectPlatform, flagPlat ? m_platformBuild : buildData.platform);
+                EditorGUI.EndDisabledGroup();
+                
+                GUI.Label(rectCompressName, "Compression");
+                m_compressBuild = (CompressBuild)EditorGUI.EnumPopup(rectCompress, m_compressBuild);
+            
+                GUI.Label(rectUploadSteamName, "Upload Name");
+                GUI.Label(rectUploadSteamDescription, "Upload Description");
+                GUI.Label(rectUploadSteamPreview, "Upload Name");
+
+                var mapMen = MapManagerConfig.instance;
+                
+                mapMen.uploadSteamName = EditorGUI.Toggle(rectUploadSteamNameToggle, mapMen.uploadSteamName);
+                mapMen.uploadSteamDescription = EditorGUI.Toggle(rectUploadSteamDescriptionToggle, mapMen.uploadSteamDescription);
+                mapMen.uploadSteamPreview = EditorGUI.Toggle(rectUploadSteamPreviewToggle, mapMen.uploadSteamPreview);
+            
+                EditorGUI.EndDisabledGroup();
+            }
             
             GUI.color = Color.white;
             if (attachObj != null)
@@ -323,27 +434,30 @@ namespace Editor
                     uploadState = has && uploadState;
                     if (!has)
                     {
-                        EditorGUI.HelpBox(rectUploadButtons, buildNames[i] + " is not build", MessageType.Error);
-                        rectUploadButtons.y += rectUploadButtons.height + space;
+                        EditorGUI.HelpBox(rectInfo, buildNames[i] + " is not build", MessageType.Error);
+                        rectInfo.y += rectInfo.height + space;
                     }
                     
                     if (buildNames[i] == TempData.Map.ToString() && !string.IsNullOrWhiteSpace(message))
                     {
-                        rectUploadButtons.height = validComponentsHeight;
-                        EditorGUI.HelpBox(rectUploadButtons, message, has ? MessageType.Info : MessageType.Error);
-                        rectUploadButtons.y += rectUploadButtons.height + space;
-                        rectUploadButtons.height = 24;
+                        rectInfo.height = validComponentsHeight;
+                        EditorGUI.HelpBox(rectInfo, message, has ? MessageType.Info : MessageType.Error);
+                        rectInfo.y += rectInfo.height + space;
+                        rectInfo.height = 24;
                     }
                 }
             }
+            
             EditorGUI.BeginDisabledGroup(!uploadState);
             GUI.color = uploadState && isSelectAttach ? new Color(0.55f, 0.6f, 0.9f) : Color.white;
             if (GUI.Button(rectUploadButtons, "Upload to steam") && uploadState)
             {
                 m_loads[m_selectItem.Id] = true;
-                MapBuilder.UploadCommunityFile(m_selectItem.Id, item =>
+                MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
+                MapBuilder.UploadCommunityFile(m_selectItem.Id, id =>
                 {
-                    m_loads[item] = false;
+                    m_loads[id] = false;
+                    DownloadSpriteAsync(m_fetchResultListItems.Find(itemFind => itemFind.Id == id));
                 });
             };
             GUI.Label(rectUploadButtons, iconSteam);
@@ -353,6 +467,31 @@ namespace Editor
             GUI.EndScrollView();
         }
 
+        private string[] GetScenesName(EditorBuildSettingsScene[] editorScenes)
+        {
+            return editorScenes.Select(
+                editorScene =>
+                {
+                    var pos = editorScene.path.LastIndexOf('/');
+                    return pos == -1 ? 
+                        editorScene.path : 
+                        editorScene.path.Substring(pos + 1, editorScene.path.Length - pos - 7);
+                }).ToArray();
+        }
+
+        private int FindSceneIndex(EditorBuildSettingsScene[] scenes, string path)
+        {
+            for (int index = 0; index < scenes.Length; index++)
+            {
+                if (scenes[index].path == path)
+                {
+                    return index;
+                }
+            }
+
+            return 0;
+        }
+        
         private bool IsDownloadAnyIcon()
         {
             foreach (var item in m_fetchResultListItems)
