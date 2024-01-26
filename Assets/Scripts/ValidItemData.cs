@@ -19,7 +19,7 @@ public struct ValidItemData : ICloneable
         this.vertexDistanceForMaxCount = vertexDistanceForMaxCount;
         this.maxSizeInMb = maxSizeInMb;
         this.maxSizeInMbMeta = maxSizeInMbMeta;
-        this.data = new List<ValidItem>(data);
+        this.data = data == null ? new List<ValidItem>() : new List<ValidItem>(data);
     }
 
     public override string ToString()

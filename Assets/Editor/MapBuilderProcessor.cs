@@ -7,8 +7,6 @@ namespace Editor
 {
     public class MapBuilderProcessor : UnityEditor.AssetModificationProcessor
     {
-        private static List<string> ignorePaths = new List<string>();
-
         public static void OnWillCreateAsset(string path)
         {
             if (path.EndsWith(".unity.meta"))
@@ -45,7 +43,7 @@ namespace Editor
                 }
             }
 
-            EditorBuildSettings.scenes = scenesAcc.Distinct(SceneEqualityComparer.Default).ToArray();
+            EditorBuildSettings.scenes = scenesAcc.Where(scene => scene.enabled).Distinct(SceneEqualityComparer.Default).ToArray();
             return paths;
         }
 
