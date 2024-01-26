@@ -56,7 +56,6 @@ namespace Editor
             MapBuilderEditorWindow wnd = GetWindow<MapBuilderEditorWindow>();
             wnd.titleContent = new GUIContent("MapBuilder");
             wnd.Fetch();
-            GUI.skin.box.normal.textColor = Color.white;
         }
 
         private async void Fetch()
@@ -125,6 +124,7 @@ namespace Editor
         [Obsolete("Obsolete")]
         private void OnGUI()
         {
+            GUI.skin.box.normal.textColor = Color.white;
             const float aspect = 16.0f / 9.0f;
             const float sizeImage = 200;
             const float sizeButton = 18;
