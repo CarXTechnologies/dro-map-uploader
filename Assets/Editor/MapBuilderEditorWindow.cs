@@ -324,7 +324,7 @@ namespace Editor
                         rectInfo.y += rectInfo.height + space;
                     }
                     
-                    if (buildNames[i] == TempData.Meta.ToString() && !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
+                    if (buildNames[i] == TempData.Meta.ToString() && attachObj.metaConfig != null && !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
                     {
                         Rect localRect = rectInfo;
                         m_queueActionDraw.Enqueue(() =>
