@@ -340,7 +340,7 @@ namespace Editor
 
             string message;
 
-            if (attachObj != null)
+            if (attachObj != null && attachObj.metaConfig != null)
             {
                 message = buildData.lastValid.ToString();
                 var validComponentsHeight = EditorStyles.helpBox.CalcSize(new GUIContent(message)).y - space;
@@ -358,7 +358,7 @@ namespace Editor
                             EditorGUI.HelpBox(localRect, buildNames[i1] + " is not build", MessageType.Error));
                         rectInfo.y += rectInfo.height + space;
                     }
-                    else if (buildNames[i] == TempData.Meta.ToString() && attachObj.metaConfig != null && !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
+                    else if (buildNames[i] == TempData.Meta.ToString() && !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
                     {
                         Rect localRect = rectInfo;
                         m_queueActionDraw.Enqueue(() =>
@@ -385,7 +385,7 @@ namespace Editor
             m_scrollPositionPreview = GUI.BeginScrollView(
                 new Rect(rectPreviewBack.x, 0, rectPreview.width + 44, position.height), m_scrollPositionPreview,
                 new Rect(rectPreviewBack.x, 0, rectPreview.width, lastRect.y));
-
+            
             EditorGUI.DrawRect(rectPreviewBack, new Color(0.22f, 0.22f, 0.22f));
             
             if (m_queueActionDraw != null)
@@ -412,7 +412,7 @@ namespace Editor
            
             EditorGUI.DrawRect(rectPreview, Color.black);
             
-            if(attachObj!=null && attachObj.metaConfig != null)
+            if(attachObj != null && attachObj.metaConfig != null)
             {
                 GUI.DrawTexture(rectPreview, attachObj.metaConfig.mapMetaConfigValue.largeIcon);
             }
@@ -429,44 +429,46 @@ namespace Editor
                 GUI.Label(rectLabelId, iconSteam);
             }
 
-            EditorGUI.BeginDisabledGroup(!isSelectAttach || attachObj == null || attachObj.metaConfig == null);
-            GUI.Label(rectSplitLeft, "Build Targets");
-            m_buildType = EditorGUI.MaskField(rectSplitRight, m_buildType, Enum.GetNames(typeof(TempData)));
-
-            GUI.Box(rectBuildSettings, "Build Settings");
-            
-            if (GUI.Button(rectSplitBuild, "Build") && !IsDownloadAnyIcon())
-            {
-                int buildType = m_buildType;
-                if (attachObj != null && attachObj.metaConfig != null && buildType != 0)
-                {
-                    m_loads[m_selectItem.Id] = true;
-                    m_buildProcess = true;
-                    MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-                    MapBuilder.BuildCustom((TempData)buildType, 
-                        (TempData)buildData.buildSuccess, 
-                        m_selectItem.Id, 
-                        buildData.compress,
-                        buildData.platform,
-                        (path,complete) =>
-                        {
-                            m_loads[m_selectItem.Id] = false;
-                            MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(
-                                attachObj.metaConfig, 
-                                path, 
-                                (int)complete, 
-                                ((TempData)buildType).HasFlag(TempData.Map) ? ModMapTestTool.Target : buildData.lastValid,
-                                m_platformBuild,
-                                m_compressBuild));
-                            m_buildProcess = false;
-                        });
-                }
-            }
-
             if (attachObj != null && attachObj.metaConfig != null)
             {
+                EditorGUI.BeginDisabledGroup(!isSelectAttach || attachObj == null || attachObj.metaConfig == null);
+                GUI.Label(rectSplitLeft, "Build Targets");
+                m_buildType = EditorGUI.MaskField(rectSplitRight, m_buildType, Enum.GetNames(typeof(TempData)));
+
+                GUI.Box(rectBuildSettings, "Build Settings");
+
+                if (GUI.Button(rectSplitBuild, "Build") && !IsDownloadAnyIcon())
+                {
+                    int buildType = m_buildType;
+                    if (attachObj != null && attachObj.metaConfig != null && buildType != 0)
+                    {
+                        m_loads[m_selectItem.Id] = true;
+                        m_buildProcess = true;
+                        MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
+                        MapBuilder.BuildCustom((TempData)buildType,
+                            (TempData)buildData.buildSuccess,
+                            m_selectItem.Id,
+                            buildData.compress,
+                            buildData.platform,
+                            (path, complete) =>
+                            {
+                                m_loads[m_selectItem.Id] = false;
+                                MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(
+                                    attachObj.metaConfig,
+                                    path,
+                                    (int)complete,
+                                    ((TempData)buildType).HasFlag(TempData.Map)
+                                        ? ModMapTestTool.Target
+                                        : buildData.lastValid,
+                                    m_platformBuild,
+                                    m_compressBuild));
+                                m_buildProcess = false;
+                            });
+                    }
+                }
+
                 var flagScene = ((TempData)m_buildType).HasFlag(TempData.Map);
-                
+
                 EditorGUI.BeginDisabledGroup(!flagScene);
                 GUI.Label(rectSceneName, "Target Scene");
                 var editorScenes = EditorBuildSettings.scenes;
@@ -474,52 +476,57 @@ namespace Editor
                 {
                     int index = FindSceneIndex(editorScenes, MapManagerConfig.instance.targetScene);
                     var scenes = GetScenesName(editorScenes);
-                    MapManagerConfig.instance.targetScene = editorScenes[EditorGUI.Popup(rectScene, index, scenes)].path;
+                    MapManagerConfig.instance.targetScene =
+                        editorScenes[EditorGUI.Popup(rectScene, index, scenes)].path;
                 }
 
                 EditorGUI.EndDisabledGroup();
-                
+
                 var flagPlat = (buildData.buildSuccess & m_buildType) == buildData.buildSuccess;
                 EditorGUI.BeginDisabledGroup(!flagPlat);
                 GUI.Label(rectPlatformName, "Platform");
-                m_platformBuild = (PlatformBuild)EditorGUI.EnumPopup(rectPlatform, flagPlat ? m_platformBuild : buildData.platform);
+                m_platformBuild =
+                    (PlatformBuild)EditorGUI.EnumPopup(rectPlatform, flagPlat ? m_platformBuild : buildData.platform);
                 EditorGUI.EndDisabledGroup();
-                
+
                 //GUI.Label(rectCompressName, "Compression");
                 //m_compressBuild = (CompressBuild)EditorGUI.EnumPopup(rectCompress, m_compressBuild);
                 m_compressBuild = CompressBuild.NoCompress;
-                
+
                 GUI.Label(rectUploadSteamName, "Upload Name");
                 GUI.Label(rectUploadSteamDescription, "Upload Description");
                 GUI.Label(rectUploadSteamPreview, "Upload Preview");
 
                 var mapMen = MapManagerConfig.instance;
-                
+
                 mapMen.uploadSteamName = EditorGUI.Toggle(rectUploadSteamNameToggle, mapMen.uploadSteamName);
-                mapMen.uploadSteamDescription = EditorGUI.Toggle(rectUploadSteamDescriptionToggle, mapMen.uploadSteamDescription);
+                mapMen.uploadSteamDescription =
+                    EditorGUI.Toggle(rectUploadSteamDescriptionToggle, mapMen.uploadSteamDescription);
                 mapMen.uploadSteamPreview = EditorGUI.Toggle(rectUploadSteamPreviewToggle, mapMen.uploadSteamPreview);
-            
+
+                EditorGUI.EndDisabledGroup();
+                
+                GUI.Box(rectUploadSettings, "Upload Settings");
+
+                EditorGUI.BeginDisabledGroup(!uploadState);
+                GUI.color = uploadState && isSelectAttach ? new Color(0.55f, 0.6f, 0.9f) : Color.white;
+                if (GUI.Button(rectUploadButtons, "Upload to steam") && uploadState)
+                {
+                    m_loads[m_selectItem.Id] = true;
+                    MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
+                    MapBuilder.UploadCommunityFile(m_selectItem.Id, id =>
+                    {
+                        m_loads[id] = false;
+                        DownloadSpriteAsync(m_fetchResultListItems.Find(itemFind => itemFind.Id == id));
+                    });
+                }
+                
+                GUI.Label(rectUploadButtons, iconSteam);
+                EditorGUI.EndDisabledGroup();
+                GUI.color = Color.white;
                 EditorGUI.EndDisabledGroup();
             }
-            
-            GUI.Box(rectUploadSettings, "Upload Settings");
-            
-            EditorGUI.BeginDisabledGroup(!uploadState);
-            GUI.color = uploadState && isSelectAttach ? new Color(0.55f, 0.6f, 0.9f) : Color.white;
-            if (GUI.Button(rectUploadButtons, "Upload to steam") && uploadState)
-            {
-                m_loads[m_selectItem.Id] = true;
-                MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-                MapBuilder.UploadCommunityFile(m_selectItem.Id, id =>
-                {
-                    m_loads[id] = false;
-                    DownloadSpriteAsync(m_fetchResultListItems.Find(itemFind => itemFind.Id == id));
-                });
-            };
-            GUI.Label(rectUploadButtons, iconSteam);
-            EditorGUI.EndDisabledGroup();
-            GUI.color = Color.white;
-            EditorGUI.EndDisabledGroup();
+
             GUI.EndScrollView();
         }
 
