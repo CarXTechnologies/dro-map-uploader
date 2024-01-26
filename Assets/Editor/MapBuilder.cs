@@ -301,6 +301,7 @@ namespace Editor
             m_titleIconPath = m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.icon);
         }
         
+        [Obsolete("Obsolete")]
         private static bool ValidateSceneAndMirror()
         {
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
@@ -460,6 +461,7 @@ namespace Editor
             assetBuildPathTemporary = assetBuildPathTemporaryOrigin + GetCacheName();
         }
         
+        [Obsolete("Obsolete")]
         public static async void BuildCustom(
             TempData target, 
             TempData success, 

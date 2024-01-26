@@ -22,6 +22,13 @@ namespace Editor
             var name = inspectAttr.newName == string.Empty ? label : new GUIContent(inspectAttr.newName);
 
             EditorGUI.BeginDisabledGroup(inspectAttr.isLock);
+            
+            if (inspectAttr.isTextArea)
+            {
+                property.stringValue = GUI.TextArea(position , property.stringValue);
+                return;
+            }
+            
             if (inspectAttr.isExpand)
             {
                 EditorGUI.PropertyField(position, property, name, true);
@@ -40,8 +47,7 @@ namespace Editor
                     return;
                 }
             }
-
-            EditorGUI.indentLevel += 1;
+            
             while (property.NextVisible(property.hasVisibleChildren))
             {
                 position.height = EditorGUI.GetPropertyHeight(property);

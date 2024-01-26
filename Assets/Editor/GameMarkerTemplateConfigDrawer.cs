@@ -9,7 +9,6 @@ namespace Editor
     {
         private float m_height;
         
-        [Obsolete]
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
