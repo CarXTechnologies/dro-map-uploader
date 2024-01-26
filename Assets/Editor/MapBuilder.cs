@@ -12,6 +12,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Video;
 
 namespace Editor
 {
@@ -374,6 +375,17 @@ namespace Editor
                             StaticEditorFlags.OccluderStatic |
                             StaticEditorFlags.ReflectionProbeStatic |
                             StaticEditorFlags.OffMeshLinkGeneration);
+                    }
+                }
+
+                if (compType.Name == nameof(VideoPlayer))
+                {
+                    var videoPlayer = go.GetComponent<VideoPlayer>();
+                    if (videoPlayer != null && videoPlayer.source == VideoSource.Url)
+                    {
+                        ModMapTestTool.TryErrorMessage(compType.Name, $"No support : {videoPlayer.source}");
+                        noValidComp = true;
+                        return;
                     }
                 }
 

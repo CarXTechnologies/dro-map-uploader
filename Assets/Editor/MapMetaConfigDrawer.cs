@@ -36,7 +36,7 @@ namespace Editor
             rectLabelDesc.x += rectLabelDesc.width;
             GUI.Box(rectLabelDesc, " Preview, Icon (16:9)");
             rectView.y += rectLabelDesc.height * 3 + 4;
-            
+
             TextArea(ref rectView, ref m_target.mapMetaConfigValue.mapDescription, new Vector2(position.width / 2, 128), Vector2.right);
             TextureProp(ref rectView, ref m_target.mapMetaConfigValue.largeIcon, new Vector2(128, 128), Vector2.up);
             TextureProp(ref rectView, ref m_target.mapMetaConfigValue.icon, new Vector2(96, 96), Vector2.up);

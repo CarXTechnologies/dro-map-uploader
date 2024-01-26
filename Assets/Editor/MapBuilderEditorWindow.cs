@@ -30,6 +30,8 @@ namespace Editor
         private readonly Dictionary<ulong, bool> m_attahing = new Dictionary<ulong, bool>();
         private readonly Dictionary<ulong, (Texture2D, bool)> images = new Dictionary<ulong, (Texture2D, bool)>();
 
+        private readonly Queue<Action> m_queueActionDraw = new Queue<Action>();
+        
         private Property m_configProperty;
         private int m_buildType;
         private PlatformBuild m_platformBuild;
@@ -304,13 +306,11 @@ namespace Editor
                 message = buildData.lastValid.ToString();
                 validComponentsHeight = EditorStyles.helpBox.CalcSize(new GUIContent(message)).y - space;
             }
-
-            Action[] listActionDraw = null;
+            
             GUI.color = Color.white;
             if (attachObj != null)
             {
                 var buildNames = Enum.GetNames(typeof(TempData));
-                listActionDraw = new Action[buildNames.Length];
                 for (int i = 0; i < buildNames.Length; i++)
                 {
                     var i1 = i;
@@ -319,16 +319,16 @@ namespace Editor
                     if (!has)
                     {
                         Rect localRect = rectInfo;
-                        listActionDraw[i] = () =>
-                            EditorGUI.HelpBox(localRect, buildNames[i1] + " is not build", MessageType.Error);
+                        m_queueActionDraw.Enqueue(() =>
+                            EditorGUI.HelpBox(localRect, buildNames[i1] + " is not build", MessageType.Error));
                         rectInfo.y += rectInfo.height + space;
                     }
-                    else if (buildNames[i] == TempData.Meta.ToString() && 
-                             !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
+                    
+                    if (buildNames[i] == TempData.Meta.ToString() && !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
                     {
                         Rect localRect = rectInfo;
-                        listActionDraw[i] = () =>
-                            EditorGUI.HelpBox(localRect, $"Is Changed {buildNames[i1]}! Please build {buildNames[i1]}.", MessageType.Warning);
+                        m_queueActionDraw.Enqueue(() =>
+                            EditorGUI.HelpBox(localRect, $"Is Changed {buildNames[i1]}! Please build {buildNames[i1]}.", MessageType.Warning));
                         rectInfo.y += rectInfo.height + space;
                     }
 
@@ -336,8 +336,8 @@ namespace Editor
                     {
                         rectInfo.height = validComponentsHeight;
                         Rect localRect = rectInfo;
-                        listActionDraw[i] = () =>
-                            EditorGUI.HelpBox(localRect, message, has ? MessageType.Info : MessageType.Error);
+                        m_queueActionDraw.Enqueue(() =>
+                            EditorGUI.HelpBox(localRect, message, has ? MessageType.Info : MessageType.Error));
                         rectInfo.y += rectInfo.height + space;
                         rectInfo.height = 24;
                     }
@@ -354,11 +354,11 @@ namespace Editor
 
             EditorGUI.DrawRect(rectPreviewBack, new Color(0.22f, 0.22f, 0.22f));
             
-            if (listActionDraw != null)
+            if (m_queueActionDraw != null)
             {
-                foreach (var action in listActionDraw)
+                while (m_queueActionDraw.Count > 0)
                 {
-                    action?.Invoke();
+                    m_queueActionDraw.Dequeue()?.Invoke(); 
                 }
             }
             
