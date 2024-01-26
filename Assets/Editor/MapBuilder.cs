@@ -344,7 +344,7 @@ namespace Editor
             DuplicateValidComponents(root.transform, null, "Garbage", (go, component) =>
             {
                 var compType = component.GetType();
-                if (!ModMapTestTool.ValidType(compType, ModMapTestTool.Target.data, true))
+                if (!ModMapTestTool.ValidType(component, ModMapTestTool.Target.data))
                 {
                     if (ModMapTestTool.ValidType(compType, MapSkipComponentConfig.instance.valid))
                     {
@@ -375,17 +375,6 @@ namespace Editor
                             StaticEditorFlags.OccluderStatic |
                             StaticEditorFlags.ReflectionProbeStatic |
                             StaticEditorFlags.OffMeshLinkGeneration);
-                    }
-                }
-
-                if (compType.Name == nameof(VideoPlayer))
-                {
-                    var videoPlayer = go.GetComponent<VideoPlayer>();
-                    if (videoPlayer != null && videoPlayer.source == VideoSource.Url)
-                    {
-                        ModMapTestTool.TryErrorMessage(compType.Name, $"No support : {videoPlayer.source}");
-                        noValidComp = true;
-                        return;
                     }
                 }
 

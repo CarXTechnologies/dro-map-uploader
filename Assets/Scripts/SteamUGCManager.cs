@@ -6,7 +6,10 @@ using Steamworks;
 using System.IO;
 using System.Threading.Tasks;
 using Steamworks.Data;
+using Steamworks.Parser;
 using Steamworks.Ugc;
+using Unity.Collections.LowLevel.Unsafe;
+using Item = Steamworks.Ugc.Item;
 
 namespace GameOverlay
 {
@@ -147,6 +150,12 @@ namespace GameOverlay
 			}
 
 			return null;
+		}
+		
+		public static SteamUGCDetails_t GetItemDetail(Item item)
+		{
+			var result = UnsafeUtility.As<Item, Steamworks.Parser.Item>(ref item);
+			return result.details;
 		}
 		
 		protected virtual Editor EditItemContent(Item item, DirectoryInfo dirInfo)

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Video;
 
 [Serializable]
 public struct ValidItemData : ICloneable
@@ -45,20 +47,41 @@ public struct ValidItemData : ICloneable
     }
 }
 
+public interface IValidComponentProcess
+{
+    public bool isSuccess { get;}
+    public string processMessage { get;}
+    public void ValidProcess(Component comp);
+
+    public void Reset();
+}
+
 [Serializable]
-public struct ValidItem
+public struct ValidItem : IValidComponentProcess
 {
     public string type;
     public int min;
     public int max;
     public int current;
-
-    public ValidItem(string type, int min, int max, int current = 0)
+    public IValidComponentProcess validComponentProcess;
+    public List<Component> components;
+    private bool m_isSuccess;
+    
+    public ValidItem(
+        string type, 
+        int min, 
+        int max, 
+        IValidComponentProcess validComponentProcess = null, 
+        int current = 0, 
+        List<Component> components = null)
     {
         this.type = type;
         this.min = min;
         this.max = max;
         this.current = current;
+        this.validComponentProcess = validComponentProcess;
+        this.components = components ?? new List<Component>();
+        m_isSuccess = true;
     }
 
     public string ToStat()
@@ -68,16 +91,106 @@ public struct ValidItem
     
     public override string ToString()
     {
+        var result = string.Empty;
+        if (validComponentProcess is { isSuccess: false })
+        {
+            result += validComponentProcess.processMessage + "\n";
+        }
+        
         if (current < min)
         {
-            return $"There are less than {min} {type}";
+            result += $"There are less than {min} {type}\n";
         }
             
         if (current > max)
         {
-            return $"There are more than {max} {type}";
+            result += $"There are more than {max} {type}\n";
         }
 
-        return string.Empty;
+        return result;
+    }
+
+    public void ValidProcess()
+    {
+        foreach (var component in components)
+        {
+            ValidProcess(component);
+        }
+        
+        m_isSuccess = m_isSuccess && (current >= min && current <= max);
+    }
+    
+    public void ValidProcess(Component comp)
+    {
+        validComponentProcess?.ValidProcess(comp);
+        m_isSuccess = m_isSuccess && (validComponentProcess?.isSuccess ?? true);
+    }
+
+    public void Reset()
+    {
+        validComponentProcess?.Reset();
+        components.Clear();
+        m_isSuccess = true;
+    }
+
+    public bool isSuccess => m_isSuccess;
+    public string processMessage => ToString();
+}
+
+public class ValidVideoPlayer : IValidComponentProcess
+{
+    public bool isSuccess { get; private set; } = true;
+
+    public string processMessage { get; private set; }
+
+    public void Reset()
+    {
+        processMessage = String.Empty;
+        isSuccess = true;
+    }
+
+    public void ValidProcess(Component comp)
+    {
+        const float videoMaxWidth = 1280;
+        const float videoMaxHeight = 720;
+        const int maxFramerate = 30;
+        const int maxTimeInSecond = 15;
+        
+        var compType = comp.GetType();
+        if (compType.Name == nameof(VideoPlayer))
+        {
+            var videoPlayer = comp.gameObject.GetComponent<VideoPlayer>();
+            var message = string.Empty;
+
+            if (videoPlayer.clip != null)
+            {
+                if (videoPlayer.clip.length > maxTimeInSecond)
+                {
+                    message += $"{comp.gameObject.name} | Video max duration is {maxTimeInSecond} sec\n";
+                }
+
+                if (videoPlayer.clip.frameRate > maxFramerate)
+                {
+                    message += $"{comp.gameObject.name} | Video max framerate is {maxFramerate}\n";
+                }
+
+                if (videoPlayer.clip.width > videoMaxWidth || videoPlayer.clip.height > videoMaxHeight)
+                {
+                    message += $"{comp.gameObject.name} | Video max size is {videoMaxWidth} / {videoMaxHeight}\n";
+                }
+            }
+            
+            if (videoPlayer != null && videoPlayer.source == VideoSource.Url)
+            {
+                message += $"{comp.gameObject.name} | No support : {videoPlayer.source}";
+            }
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                isSuccess = false;
+                processMessage = message;
+                return;
+            }
+        }
     }
 }

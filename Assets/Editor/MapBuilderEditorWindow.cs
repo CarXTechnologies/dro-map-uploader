@@ -2,14 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Codice.Client.BaseCommands;
 using GameOverlay;
 using Steamworks.Ugc;
 using UnityEditor;
 using UnityEditor.Graphs;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Editor
 {
@@ -131,7 +128,8 @@ namespace Editor
             var rectPreview = new Rect(16, 28, sizeImage * aspect, sizeImage);
             var rectCenter = new Rect((sizeImage * aspect) / 2f, sizeImage / 2f, 32f, 32f);
             var rectCenter2 = new Rect((sizeImage * aspect) / 2f - 64, sizeImage / 2f, 164f, 32f);
-            var rectItem = new Rect(rectPreview.width + rectPreview.x + 32, 0, position.width - 48 - (rectPreview.width + rectPreview.x + 16), 28);
+            var rectItem = new Rect(rectPreview.width + rectPreview.x + 32, 0, position.width - 48 - (rectPreview.width + rectPreview.x + 16), 80);
+
             const float space = 6;
             float elementHeight = space + rectItem.height;
             var iconSteam = EditorGUIUtility.IconContent("steam");
@@ -153,9 +151,21 @@ namespace Editor
                 {
                     m_selectItemIndex = i;
                 }
-                rectItem.x += 24;
-                GUI.Label(rectItem, string.IsNullOrWhiteSpace(item.Title)? item.Id.ToString() : item.Title);
-                rectItem.x -= 24;
+                rectItem.x += rectItem.height + space;
+                rectItem.height /= 2;
+                var oldSize = GUI.skin.label.fontSize;
+                GUI.skin.label.fontSize = 16;
+                GUI.Label(rectItem, string.IsNullOrWhiteSpace(item.Title)? $"Blank {i}" : item.Title);
+                GUI.skin.label.fontSize = oldSize;
+                rectItem.y += rectItem.height;
+                SteamUGCManager.GetItemDetail(item);
+                GUI.Label(rectItem, 
+                    $"{Mathf.FloorToInt(SteamUGCManager.GetItemDetail(item).FileSize / ModMapTestTool.BYTES_TO_MEGABYTES)} / " +
+                    $"{(ModMapTestTool.Steam.maxSizeInMb + ModMapTestTool.Steam.maxSizeInMbMeta)} mb");
+                rectItem.y -= rectItem.height;
+                rectItem.height *= 2;
+                rectItem.x -= rectItem.height + space;
+                
                 var rectItemWarning = new Rect(rectItem.x + rectItem.width - 48, rectItem.y, 48, 18);
                 
                 if (m_selectItemIndex == i)
@@ -172,17 +182,49 @@ namespace Editor
                     GUI.color = Color.white;
                 }
                 
-                rectItem.x += space / 2;
-                if (m_loads.TryGetValue(item.Id, out var state) && state)
-                {
-                    GUI.Label(rectItem, loadIcon);
-                }
+                rectItem.x += space;
 
-                rectItem.x -= space / 2;
+                var rectItemPreview = rectItem;
+                rectItemPreview.width = 128 * (9f / 16f);
+
+                if (images.TryGetValue(item.Id, out var attachData) && !attachData.Item2)
+                {
+                    if(attachData.Item1 != null && attachData.Item1.width > 1)
+                    {
+                        rectItemPreview.y += space;
+                        rectItemPreview.height -= space * 2;
+                        EditorGUI.DrawRect(rectItemPreview, Color.black);
+                        rectItemPreview.y -= space;
+                        rectItemPreview.height = rectItemPreview.width * ((float)attachData.Item1.height / attachData.Item1.width);
+                        rectItemPreview.y += rectItem.height / 2 - rectItemPreview.height / 2;
+                        GUI.DrawTexture(rectItemPreview, attachData.Item1);
+                    }
+                    else
+                    {
+                        rectItemPreview.y += space;
+                        rectItemPreview.height -= space * 2;
+                        GUI.Box(rectItemPreview, String.Empty);
+                        rectItemPreview.x += rectItemPreview.width / 4;
+                        GUI.Label(rectItemPreview, "Empty");
+                        rectItemPreview.x -= rectItemPreview.width / 4;
+                    }
+
+                    if (attachData.Item1 == null)
+                    {
+                        DownloadSpriteAsync(item);
+                    }
+                }
+                else if (m_loads.TryGetValue(item.Id, out var state) && state)
+                {
+                    GUI.Label(rectItemPreview, loadIcon);
+                }
+                
+                rectItem.x -= space;
                 rectItem.y += rectItem.height;
             }
 
             rectItem.y += space;
+            rectItem.height = 40;
             if (GUI.Button(rectItem, "New Workshop Item"))
             {
                 MapBuilder.CreateNewCommunityFile(result =>
@@ -292,24 +334,17 @@ namespace Editor
                 rectUploadSteamDescription.x, rectUploadSteamDescription.y + sizeButton + space,
                 rectUploadSteamDescription.width, sizeButton);
             
-            
             var rectInfo = new Rect(
                 rectButtons.x, rectUploadButtons.y + rectUploadButtons.height + space,
                 rectButtons.width, sizeButton * 2);
 
-            string message = string.Empty;
-            
-            float validComponentsHeight = 0f;
-            float messageHeight = 0f;
-            
+            string message;
+
             if (attachObj != null)
             {
                 message = buildData.lastValid.ToString();
-                validComponentsHeight = EditorStyles.helpBox.CalcSize(new GUIContent(message)).y - space;
-            }
+                var validComponentsHeight = EditorStyles.helpBox.CalcSize(new GUIContent(message)).y - space;
             
-            if (attachObj != null)
-            {
                 var buildNames = Enum.GetNames(typeof(TempData));
                 for (int i = 0; i < buildNames.Length; i++)
                 {
@@ -323,8 +358,7 @@ namespace Editor
                             EditorGUI.HelpBox(localRect, buildNames[i1] + " is not build", MessageType.Error));
                         rectInfo.y += rectInfo.height + space;
                     }
-                    
-                    if (buildNames[i] == TempData.Meta.ToString() && attachObj.metaConfig != null && !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
+                    else if (buildNames[i] == TempData.Meta.ToString() && attachObj.metaConfig != null && !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
                     {
                         Rect localRect = rectInfo;
                         m_queueActionDraw.Enqueue(() =>
@@ -377,25 +411,14 @@ namespace Editor
 
            
             EditorGUI.DrawRect(rectPreview, Color.black);
-            if (images.TryGetValue(m_selectItem.Id, out var attachData) && !attachData.Item2)
+            
+            if(attachObj!=null && attachObj.metaConfig != null)
             {
-                if(attachData.Item1 != null && attachData.Item1.width > 1)
-                {
-                    GUI.DrawTexture(rectPreview, attachData.Item1);
-                }
-                else
-                {
-                    EditorGUI.HelpBox(rectCenter2, "Steam preview is missed", MessageType.Warning);
-                }
-
-                if (attachData.Item1 == null)
-                {
-                    DownloadSpriteAsync(m_selectItem);
-                }
+                GUI.DrawTexture(rectPreview, attachObj.metaConfig.mapMetaConfigValue.largeIcon);
             }
             else
             {
-                GUI.Label(rectCenter, loadIcon);
+                EditorGUI.HelpBox(rectCenter2, "Preview is missed", MessageType.Warning);
             }
 
             if (m_selectItem.Id != 0)
@@ -432,7 +455,7 @@ namespace Editor
                                 attachObj.metaConfig, 
                                 path, 
                                 (int)complete, 
-                                ModMapTestTool.Target,
+                                ((TempData)buildType).HasFlag(TempData.Map) ? ModMapTestTool.Target : buildData.lastValid,
                                 m_platformBuild,
                                 m_compressBuild));
                             m_buildProcess = false;

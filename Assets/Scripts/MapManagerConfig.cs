@@ -68,7 +68,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
             this.config = config;
             this.path = path;
             this.buildSuccess = buildSuccess;
-            this.lastValid = lastValid;
+            this.lastValid = (ValidItemData)lastValid.Clone();
             lastMeta = config.mapMetaConfigValue;
             this.platform = platform;
             this.compress = compress;

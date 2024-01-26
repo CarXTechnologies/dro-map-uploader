@@ -56,7 +56,7 @@ namespace Editor
             new ValidItem(nameof(RectTransform), 0, 100),
             new ValidItem(nameof(TextMeshProUGUI), 0, 50),
             new ValidItem(nameof(RawImage), 0, 20),
-            new ValidItem(nameof(VideoPlayer), 0, 5),
+            new ValidItem(nameof(VideoPlayer), 0, 5, new ValidVideoPlayer()),
             //Particle
             new ValidItem(nameof(ParticleSystem), 0, 500),
             new ValidItem(nameof(ParticleSystemRenderer), 0, 500),
@@ -272,11 +272,10 @@ namespace Editor
             {
                 if (component != null)
                 {
-                    var compType = component.GetType();
-
-                    if (!ValidType(compType, m_listValid))
+                    if (!ValidType(component, m_listValid))
                     {
-                        TryErrorMessage(m_currentName, new ValidItem(compType.Name, Int32.MinValue, Int32.MaxValue, 1).ToString());
+                        var compType = component.GetType();
+                        TryErrorMessage(m_currentName, new ValidItem(compType.Name, Int32.MinValue, Int32.MaxValue, null, 1).ToString());
                         return;
                     }
                 }
@@ -291,12 +290,18 @@ namespace Editor
     
         public void ValidComponents()
         {
+            foreach (var valid in m_listValid)
+            {
+                valid.Reset();
+            }
+
             var parent = m_root.transform;
             ValidComponents(parent);
 
             foreach (var valid in m_listValid)
             {
-                if (valid.current < valid.min || valid.current > valid.max)
+                valid.ValidProcess();
+                if (!valid.isSuccess)
                 {
                     TryErrorMessage(m_currentName, valid.ToString());
                     return;
@@ -304,9 +309,10 @@ namespace Editor
             }
         }
     
-        public static bool ValidType(Type type, List<ValidItem> types, bool addToValidList = true)
+        public static bool ValidType(Component component, List<ValidItem> types, bool addToValidList = true)
         {
             var tryComp = false;
+            var type = component.GetType();
             for (var index = 0; index < types.Count; index++)
             {
                 if (type.Name == types[index].type)
@@ -314,9 +320,11 @@ namespace Editor
                     tryComp = true;
                     if (addToValidList)
                     {
-                        types[index] = new ValidItem(types[index].type, types[index].min, types[index].max, types[index].current + 1);
+                        types[index] = new ValidItem(types[index].type, types[index].min, types[index].max, 
+                            types[index].validComponentProcess, types[index].current + 1, types[index].components);
                     }
 
+                    types[index].components.Add(component);
                     break;
                 }
             }
