@@ -345,7 +345,7 @@ namespace Editor
                 var validComponentsHeight = EditorStyles.helpBox.CalcSize(new GUIContent(message)).y - space;
             
                 var buildNames = Enum.GetNames(typeof(TempData));
-                for (int i = 0; i < buildNames.Length; i++)
+                for (int i = 0; i < buildNames.Length - 1; i++)
                 {
                     var i1 = i;
                     var has = ((TempData)buildData.buildSuccess).HasFlag((TempData)Enum.Parse(typeof(TempData), buildNames[i]));
@@ -452,6 +452,11 @@ namespace Editor
                             (path, complete) =>
                             {
                                 m_loads[m_selectItem.Id] = false;
+                                if (complete == TempData.Everything)
+                                {
+                                    Debug.Log($"Build Complete : {complete}");
+                                }
+                                
                                 MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(
                                     attachObj.metaConfig,
                                     MapManagerConfig.instance.targetScene,
@@ -537,21 +542,23 @@ namespace Editor
 
         private string[] GetScenesName(EditorBuildSettingsScene[] editorScenes)
         {
-            return editorScenes.Select(
-                editorScene =>
+            return editorScenes
+                .Where(scene => scene.enabled)
+                .Select(editorScene =>
                 {
                     var pos = editorScene.path.LastIndexOf('/');
                     return pos == -1 ? 
                         editorScene.path : 
                         editorScene.path.Substring(pos + 1, editorScene.path.Length - pos - 7);
-                }).ToArray();
+                })
+                .ToArray();
         }
 
         private int FindSceneIndex(EditorBuildSettingsScene[] scenes, string path)
         {
             for (int index = 0; index < scenes.Length; index++)
             {
-                if (scenes[index].path == path)
+                if (scenes[index].path == path && scenes[index].enabled)
                 {
                     return index;
                 }
