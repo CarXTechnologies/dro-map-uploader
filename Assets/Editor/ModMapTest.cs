@@ -58,8 +58,8 @@ namespace Editor
             new ValidItem(nameof(RawImage), 0, 20),
             new ValidItem(nameof(VideoPlayer), 0, 5, new ValidVideoPlayer()),
             //Particle
-            new ValidItem(nameof(ParticleSystem), 0, 500),
-            new ValidItem(nameof(ParticleSystemRenderer), 0, 500),
+            new ValidItem(nameof(ParticleSystem), 0, 200),
+            new ValidItem(nameof(ParticleSystemRenderer), 0, 200),
             new ValidItem(nameof(VisualEffect), 0, 200),
             new ValidItem("VFXRenderer", 0, 200),
             //Other

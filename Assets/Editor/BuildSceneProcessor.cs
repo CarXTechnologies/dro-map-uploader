@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 
 namespace Editor
 {
     public class BuildSceneProcessor : UnityEditor.AssetModificationProcessor
     {
-        private const string DIALOG_TITLE = "Add to Build Settings?";
-        private const string DIALOG_MSG = "Add to build settings for inclusion in future builds?";
-        private const string DIALOG_OK = "Yes";
-        private const string DIALOG_NO = "Not now";
-
         private static List<string> ignorePaths = new List<string>();
 
         public static void OnWillCreateAsset(string path)
@@ -26,39 +23,34 @@ namespace Editor
         {
             return ProcessAssetsForScenes(paths);
         }
-
+        
         private static string[] ProcessAssetsForScenes(string[] paths)
         {
-            var scenePath = string.Empty;
-
+            var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+                
             foreach (var path in paths)
             {
-                if (path.Contains(".unity"))
+                if (path.Contains(".unity") && path.Contains("Assets/MapResources"))
                 {
-                    scenePath = path;
+                    AddSceneToBuildSettings(ref scenes, path);
                 }
             }
-        
-            if (!string.IsNullOrEmpty(scenePath) && !ignorePaths.Contains(scenePath))
+            
+            var scenesAcc = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+            for (var index = 0; index < scenes.Count; index++)
             {
-                AddSceneToBuildSettings(scenePath);
+                if (paths.FirstOrDefault(val => scenes[index].path == val) != null)
+                {
+                    scenesAcc.Add(scenes[index]);
+                }
             }
 
+            EditorBuildSettings.scenes = scenesAcc.Distinct(SceneEqualityComparer.Default).ToArray();
             return paths;
         }
 
-        private static void AddSceneToBuildSettings(string scenePath)
+        private static void AddSceneToBuildSettings(ref List<EditorBuildSettingsScene> scenes, string scenePath)
         {
-            var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
-
-            foreach (var scene in scenes)
-            {
-                if (scene.path == scenePath)
-                {
-                    return;
-                }
-            }
-        
             var newScene = new EditorBuildSettingsScene
             {
                 path = scenePath,
@@ -66,7 +58,21 @@ namespace Editor
             };
 
             scenes.Add(newScene);
-            EditorBuildSettings.scenes = scenes.ToArray();
+        }
+    }
+    
+    public class SceneEqualityComparer : IEqualityComparer<EditorBuildSettingsScene>
+    {
+        public static readonly SceneEqualityComparer Default = new SceneEqualityComparer();
+ 
+        public bool Equals(EditorBuildSettingsScene x, EditorBuildSettingsScene y)
+        {
+            return x.path == y.path;
+        }
+ 
+        public int GetHashCode(EditorBuildSettingsScene obj)
+        {
+            return obj.path != null ? obj.path.GetHashCode() : 0;
         }
     }
 }
