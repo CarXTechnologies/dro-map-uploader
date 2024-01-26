@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 public struct MapMetaConfigValue
 {
     public string mapName;
-    [TextArea]  public string mapDescription;
+    [TextArea] public string mapDescription;
     public Texture2D icon;
     public Texture2D largeIcon;
 

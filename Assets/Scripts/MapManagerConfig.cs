@@ -57,8 +57,9 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
         public MapMetaConfigValue lastMeta;
         public PlatformBuild platform;
         public CompressBuild compress;
+        public string targetScene;
         
-        public BuildData(MapMetaConfig config, 
+        public BuildData(MapMetaConfig config, string targetScene, 
             string path, 
             int buildSuccess, 
             ValidItemData lastValid,
@@ -72,6 +73,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
             lastMeta = config.mapMetaConfigValue;
             this.platform = platform;
             this.compress = compress;
+            this.targetScene = targetScene;
         }
     }
 

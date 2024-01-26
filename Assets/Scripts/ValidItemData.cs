@@ -43,7 +43,7 @@ public struct ValidItemData : ICloneable
     public object Clone()
     {
         return new ValidItemData(maxSizeInMb, maxSizeInMbMeta, vertexDistanceForMaxCount, vertexCountForDistance, 
-            (ValidItem[])data.ToArray().Clone());
+            (ValidItem[])data?.ToArray().Clone());
     }
 }
 

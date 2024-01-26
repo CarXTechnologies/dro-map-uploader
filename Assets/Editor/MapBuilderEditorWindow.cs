@@ -33,8 +33,7 @@ namespace Editor
         private int m_buildType;
         private PlatformBuild m_platformBuild;
         private CompressBuild m_compressBuild;
-        private string m_targetScene;
-        
+
         private string[] m_iconLoad =
         {
             "d_WaitSpin00", "d_WaitSpin01", "d_WaitSpin02", "d_WaitSpin03", "d_WaitSpin04", "d_WaitSpin05",
@@ -455,6 +454,7 @@ namespace Editor
                                 m_loads[m_selectItem.Id] = false;
                                 MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(
                                     attachObj.metaConfig,
+                                    MapManagerConfig.instance.targetScene,
                                     path,
                                     (int)complete,
                                     ((TempData)buildType).HasFlag(TempData.Map)
@@ -474,6 +474,11 @@ namespace Editor
                 var editorScenes = EditorBuildSettings.scenes;
                 if (editorScenes.Length > 0)
                 {
+                    if (!flagScene)
+                    {
+                        MapManagerConfig.instance.targetScene = buildData.targetScene;
+                    }
+                    
                     int index = FindSceneIndex(editorScenes, MapManagerConfig.instance.targetScene);
                     var scenes = GetScenesName(editorScenes);
                     MapManagerConfig.instance.targetScene =
