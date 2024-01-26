@@ -307,7 +307,6 @@ namespace Editor
                 validComponentsHeight = EditorStyles.helpBox.CalcSize(new GUIContent(message)).y - space;
             }
             
-            GUI.color = Color.white;
             if (attachObj != null)
             {
                 var buildNames = Enum.GetNames(typeof(TempData));
@@ -409,8 +408,6 @@ namespace Editor
             EditorGUI.BeginDisabledGroup(!isSelectAttach || attachObj == null || attachObj.metaConfig == null);
             GUI.Label(rectSplitLeft, "Build Targets");
             m_buildType = EditorGUI.MaskField(rectSplitRight, m_buildType, Enum.GetNames(typeof(TempData)));
-            
-            GUI.color = Color.white;
 
             GUI.Box(rectBuildSettings, "Build Settings");
             
