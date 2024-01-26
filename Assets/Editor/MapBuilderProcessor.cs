@@ -5,7 +5,7 @@ using UnityEditor;
 
 namespace Editor
 {
-    public class BuildSceneProcessor : UnityEditor.AssetModificationProcessor
+    public class MapBuilderProcessor : UnityEditor.AssetModificationProcessor
     {
         private static List<string> ignorePaths = new List<string>();
 

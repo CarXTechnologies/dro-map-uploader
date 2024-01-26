@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class MapMetaConfig : ScriptableObject
 {
-    [Identifier] public string id;
+    [Lock] public string id;
     public MapMetaConfigValue mapMetaConfigValue;
 
     public event Action<MapMetaConfigValue> updateValue;
@@ -14,6 +14,7 @@ public class MapMetaConfig : ScriptableObject
     private void OnValidate()
     {
         updateValue?.Invoke(mapMetaConfigValue);
+        id = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(this));
     }
     
     public void SaveForce()
