@@ -14,7 +14,9 @@ public class MapMetaConfig : ScriptableObject
     private void OnValidate()
     {
         updateValue?.Invoke(mapMetaConfigValue);
+#if UNITY_EDITOR
         id = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(this));
+#endif
     }
     
     public void SaveForce()
