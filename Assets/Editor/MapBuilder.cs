@@ -474,6 +474,7 @@ namespace Editor
             try
             {
                 MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.itemWorkshopId = published.Value;
+                MapManagerConfig.instance.mapMetaConfigValue.SaveForce();
                 
                 switch (compressBuild)
                 {

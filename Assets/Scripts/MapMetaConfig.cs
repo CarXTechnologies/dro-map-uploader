@@ -1,4 +1,7 @@
 using System;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 public class MapMetaConfig : ScriptableObject
@@ -11,5 +14,15 @@ public class MapMetaConfig : ScriptableObject
     private void OnValidate()
     {
         updateValue?.Invoke(mapMetaConfigValue);
+    }
+    
+    public void SaveForce()
+    {
+#if UNITY_EDITOR
+        EditorUtility.SetDirty(this);
+        AssetDatabase.SaveAssetIfDirty(this);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+#endif
     }
 }
