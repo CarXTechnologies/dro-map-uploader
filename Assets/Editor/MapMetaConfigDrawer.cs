@@ -11,6 +11,7 @@ namespace Editor
         
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            GUI.skin.box.normal.textColor = Color.white;
             m_target = property.serializedObject.targetObject as MapMetaConfig;
             if (m_target == null)
             {

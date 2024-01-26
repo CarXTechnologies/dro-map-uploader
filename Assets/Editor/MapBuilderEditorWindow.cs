@@ -56,6 +56,7 @@ namespace Editor
             MapBuilderEditorWindow wnd = GetWindow<MapBuilderEditorWindow>();
             wnd.titleContent = new GUIContent("MapBuilder");
             wnd.Fetch();
+            GUI.skin.box.normal.textColor = Color.white;
         }
 
         private async void Fetch()
