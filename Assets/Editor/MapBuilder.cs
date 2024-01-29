@@ -74,7 +74,7 @@ namespace Editor
             
             if (!GetSceneNameFromPath(MapManagerConfig.Build.targetScene).All(char.IsLetter))
             {
-                Debug.LogError($"Track name only letters");
+                Debug.LogError($"Target scene only letters");
                 return true;
             }
             
