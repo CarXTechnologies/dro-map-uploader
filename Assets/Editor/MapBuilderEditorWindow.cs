@@ -174,7 +174,8 @@ namespace Editor
                     GUI.color = Color.white;
                 }
 
-                if (!m_attahing.TryGetValue(item.Id, out var attach) || !attach)
+                if (MapManagerConfig.GetOrAttach(m_fetchResultListItems[i].Id, out var attachData) && 
+                    attachData.metaConfig == null)
                 {
                     GUI.color = Color.red;
                     GUI.Box(rectItemWarning, "Detach");
@@ -186,17 +187,17 @@ namespace Editor
                 var rectItemPreview = rectItem;
                 rectItemPreview.width = 128 * (9f / 16f);
 
-                if (images.TryGetValue(item.Id, out var attachData) && !attachData.Item2)
+                if (images.TryGetValue(item.Id, out var imageData) && !imageData.Item2)
                 {
-                    if(attachData.Item1 != null && attachData.Item1.width > 1)
+                    if(imageData.Item1 != null && imageData.Item1.width > 1)
                     {
                         rectItemPreview.y += space;
                         rectItemPreview.height -= space * 2;
                         EditorGUI.DrawRect(rectItemPreview, Color.black);
                         rectItemPreview.y -= space;
-                        rectItemPreview.height = rectItemPreview.width * ((float)attachData.Item1.height / attachData.Item1.width);
+                        rectItemPreview.height = rectItemPreview.width * ((float)imageData.Item1.height / imageData.Item1.width);
                         rectItemPreview.y += rectItem.height / 2 - rectItemPreview.height / 2;
-                        GUI.DrawTexture(rectItemPreview, attachData.Item1);
+                        GUI.DrawTexture(rectItemPreview, imageData.Item1);
                     }
                     else
                     {
@@ -208,7 +209,7 @@ namespace Editor
                         rectItemPreview.x -= rectItemPreview.width / 4;
                     }
 
-                    if (attachData.Item1 == null)
+                    if (imageData.Item1 == null)
                     {
                         DownloadSpriteAsync(item);
                     }
