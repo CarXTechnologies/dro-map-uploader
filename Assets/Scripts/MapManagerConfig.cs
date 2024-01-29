@@ -10,8 +10,6 @@ public enum TempData : int
 {
     Meta = 1,
     Map = 2,
-    
-    Everything = Meta | Map,
 }
     
 public enum PlatformBuild : int

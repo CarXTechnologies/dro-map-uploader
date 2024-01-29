@@ -452,9 +452,9 @@ namespace Editor
                             (path, complete) =>
                             {
                                 m_loads[m_selectItem.Id] = false;
-                                if (complete == TempData.Everything)
+                                if (complete == (TempData.Map | TempData.Meta))
                                 {
-                                    Debug.Log($"Build Complete : {complete}");
+                                    Debug.Log($"Build Complete : Everything");
                                 }
                                 
                                 MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(
