@@ -182,9 +182,14 @@ public class ValidVideoPlayer : IValidComponentProcess
             
             if (videoPlayer != null && videoPlayer.source == VideoSource.Url)
             {
-                message += $"{comp.gameObject.name} | No support : {videoPlayer.source}";
+                message += $"{comp.gameObject.name} | No support : {videoPlayer.source}\n";
             }
 
+            if (message.Length > 2)
+            {
+                message = message.Substring(0, message.LastIndexOf("\n", StringComparison.Ordinal));
+            }
+            
             if (!string.IsNullOrEmpty(message))
             {
                 isSuccess = false;

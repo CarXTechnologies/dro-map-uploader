@@ -51,10 +51,17 @@ namespace Editor
 
         private static bool IsCurrentSceneCheck()
         {
-            var currentScene = EditorSceneManager.GetActiveScene().path;
-            return MapManagerConfig.instance.targetScene != currentScene && 
-                   !EditorUtility.DisplayDialog($"Build scene : {MapManagerConfig.instance.targetScene}", 
-                       $"Close and save the current scene : {currentScene}", "Yes", "Cancel");
+            var currentScene = SceneManager.GetActiveScene();
+            
+            return MapManagerConfig.instance.targetScene != currentScene.path && 
+                   !EditorUtility.DisplayDialog($"Build scene : {GetSceneNameFromPath(MapManagerConfig.instance.targetScene)}", 
+                       $"Close and save the current scene : {currentScene.name}", "Yes", "Cancel");
+        }
+
+        public static string GetSceneNameFromPath(string path)
+        {
+            var pos = path.LastIndexOf('/');
+            return pos == -1 ? path : path.Substring(pos + 1, path.Length - pos - 7);
         }
         
         private static bool CheckAndError()
@@ -65,7 +72,7 @@ namespace Editor
                 return true;
             }
             
-            if (!MapManagerConfig.Build.targetScene.All(char.IsLetter))
+            if (!GetSceneNameFromPath(MapManagerConfig.Build.targetScene).All(char.IsLetter))
             {
                 Debug.LogError($"Track name only letters");
                 return true;

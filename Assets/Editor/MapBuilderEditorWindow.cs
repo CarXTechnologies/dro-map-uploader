@@ -545,13 +545,7 @@ namespace Editor
         {
             return editorScenes
                 .Where(scene => scene.enabled)
-                .Select(editorScene =>
-                {
-                    var pos = editorScene.path.LastIndexOf('/');
-                    return pos == -1 ? 
-                        editorScene.path : 
-                        editorScene.path.Substring(pos + 1, editorScene.path.Length - pos - 7);
-                })
+                .Select(editorScene => MapBuilder.GetSceneNameFromPath(editorScene.path))
                 .ToArray();
         }
 
