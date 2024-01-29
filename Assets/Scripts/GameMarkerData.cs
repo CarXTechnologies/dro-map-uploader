@@ -56,6 +56,7 @@ public class MarkerData
     public string head;
     public string param;
     [SerializeReference] public object value;
+    [SerializeReference] public object customValue;
     public int index;
     public string lastHeadObject;
     public string templateName;

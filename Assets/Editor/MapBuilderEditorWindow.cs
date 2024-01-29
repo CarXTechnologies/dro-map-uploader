@@ -346,7 +346,7 @@ namespace Editor
                 var validComponentsHeight = EditorStyles.helpBox.CalcSize(new GUIContent(message)).y - space;
             
                 var buildNames = Enum.GetNames(typeof(TempData));
-                for (int i = 0; i < buildNames.Length - 1; i++)
+                for (int i = 0; i < buildNames.Length; i++)
                 {
                     var i1 = i;
                     var has = ((TempData)buildData.buildSuccess).HasFlag((TempData)Enum.Parse(typeof(TempData), buildNames[i]));
