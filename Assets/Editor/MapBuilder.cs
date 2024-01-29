@@ -34,115 +34,6 @@ namespace Editor
         private static BuildAssetBundleOptions m_assetBundleOption = BuildAssetBundleOptions.UncompressedAssetBundle;
         private static BuildTarget m_buildTarget = BuildTarget.StandaloneWindows;
         
-        [Obsolete("Obsolete")]
-        private static void Create()
-        {
-            if (IsCurrentSceneCheck())
-            {
-                return;
-            }
-            
-            InitPath();
-            ClearCacheScene();
-            ClearDirectory(assetBuildPath);
-            
-            if (CheckAndError())
-            {
-                return;
-            }
-            
-            ValidateSceneAndMirror();
-            CreateBundles(new PublishedFileId());
-        }
-        
-        [Obsolete("Obsolete")]
-        private static void CreateAndPublication()
-        {
-            if (IsCurrentSceneCheck())
-            {
-                return;
-            }
-            
-            InitPath();
-            ClearCacheScene();
-            ClearDirectory(assetBuildPath);
-            InitSteamUGC();
-            
-            if (CheckAndError())
-            {
-                return;
-            }
-
-            if (ValidateSceneAndMirror())
-            {
-                return;
-            }
-            
-            EditorUtility.DisplayProgressBar("Create Publisher Item", String.Empty, 0.5f);
-            steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
-            EditorCoroutineUtility.StartCoroutine(steamUgc.CreatePublisherItem(item =>
-            {
-                m_currentFileId = item.FileId;
-                EditorUtility.ClearProgressBar();
-                CreateBundles(m_currentFileId);
-                BuildDataTransition();
-                
-                EditorUtility.DisplayProgressBar("Upload Publisher Item", String.Empty, 0.75f);
-                if (IsSizeValid())
-                {
-                    return;
-                }
-                
-                EditorCoroutineUtility.StartCoroutine(steamUgc.PublishItemCoroutine(assetBuildPath, PublishCallback), steamUgc);
-            }), steamUgc);
-        }
-        
-        [Obsolete("Obsolete")]
-        private static async void UpdateExistPublication()
-        {
-            if (IsCurrentSceneCheck())
-            {
-                return;
-            }
-            
-            InitPath();
-            ClearCacheScene();
-            ClearDirectory(assetBuildPath);
-            InitSteamUGC();
-            
-            var task = Item.GetAsync(MapManagerConfig.Value.itemWorkshopId);;
-            await task;
-
-            if (task.Result != null && task.Result.Value.Result != Result.OK)
-            {
-                Debug.LogError("Workshop error : " + task.Result.Value.Result);
-                return;
-            }
-
-            if (CheckAndError())
-            {
-                return;
-            }
-            
-            if (ValidateSceneAndMirror())
-            {
-                return;
-            }
-
-            CreateBundles(MapManagerConfig.Value.itemWorkshopId);
-            BuildDataTransition();
-            
-            if (IsSizeValid())
-            {
-                return;
-            }
-            
-            EditorUtility.DisplayProgressBar("Upload Publisher Item", String.Empty, 0.5f);
-            steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
-            EditorCoroutineUtility.StartCoroutine(
-                steamUgc.UploadItemCoroutine(assetBuildPath, MapManagerConfig.Value.itemWorkshopId, PublishCallback), steamUgc);
-        }
-
         private static bool PublishCallback(ulong id)
         {
             EditorUtility.ClearProgressBar();
@@ -153,8 +44,7 @@ namespace Editor
                 Debug.LogError("Publish failed");
                 return false;
             }
-                
-            MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.itemWorkshopId = id;
+            
             Debug.Log("Export track id: " + id);
             return true;
         }
@@ -174,8 +64,13 @@ namespace Editor
                 Debug.LogError($"Please name your track");
                 return true;
             }
-
-            var build = MapManagerConfig.Build;
+            
+            if (!MapManagerConfig.Build.targetScene.All(char.IsLetter))
+            {
+                Debug.LogError($"Track name only letters");
+                return true;
+            }
+            
             if (!MapManagerConfig.Value.mapName.All(char.IsLetter))
             {
                 Debug.LogError($"Track name only letters");
@@ -422,13 +317,6 @@ namespace Editor
             return pathDir;
         }
         
-        private static void CreateBundles(PublishedFileId publishResult)
-        {
-            RenameCacheScene(publishResult);
-            CreateMapBundle();
-            CreateMetaBundle();
-        }
-
         private static void RenameCacheScene(PublishedFileId publishResult)
         {
             var scenePathNew = path + "/" + MapManagerConfig.Value.mapName + publishResult.Value + ".unity";
@@ -473,9 +361,6 @@ namespace Editor
         {
             try
             {
-                MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.itemWorkshopId = published.Value;
-                MapManagerConfig.instance.mapMetaConfigValue.SaveForce();
-                
                 switch (compressBuild)
                 {
                     case CompressBuild.NoCompress :

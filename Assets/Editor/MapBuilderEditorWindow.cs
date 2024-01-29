@@ -443,10 +443,11 @@ namespace Editor
                     {
                         m_loads[m_selectItem.Id] = true;
                         m_buildProcess = true;
+                        var selectId = (ulong)m_selectItem.Id;
                         MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
                         MapBuilder.BuildCustom((TempData)buildType,
                             (TempData)buildData.buildSuccess,
-                            m_selectItem.Id,
+                            selectId,
                             buildData.compress,
                             buildData.platform,
                             (path, complete) =>

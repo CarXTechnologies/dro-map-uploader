@@ -13,8 +13,6 @@ public struct MapMetaConfigValue
 
     public PlatformBuild platform;
     public CompressBuild compress;
-    
-    public ulong itemWorkshopId;
 
     public override bool Equals(object obj)
     {

@@ -232,11 +232,6 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
         var index = instance.attachingConfigs.FindIndex(data => data.id == id);
         if (index != -1)
         {
-            if (instance.attachingConfigs[index].metaConfig != null)
-            {
-                instance.attachingConfigs[index].metaConfig.mapMetaConfigValue.itemWorkshopId = 0;
-            }
-
             instance.attachingConfigs[index].metaConfig = null;
         }
 
