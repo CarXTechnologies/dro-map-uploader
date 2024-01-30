@@ -58,7 +58,7 @@ namespace Editor
             amountRect.x += amountRect.width;
             propTemplateName.stringValue = EditorGUI.TextField(amountRect, propTemplateName.stringValue);
 
-            if (propTemplateName.stringValue == string.Empty)
+            if (string.IsNullOrWhiteSpace(propTemplateName.stringValue))
             {
                 var style = new GUIStyle();
                 style.fontStyle = FontStyle.Italic;
