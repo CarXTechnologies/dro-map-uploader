@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameMarkerData : MonoBehaviour
@@ -80,11 +81,9 @@ public class MarkerData
         {
             return;
         }
-
-        if (templateConfig.presets.presets.Length - 1 != templateIndex)
-        {
-            value = templateConfig.presets.presets[templateIndex].value;
-        }
+        
+        var templateFind = templateConfig.presets.presets.FirstOrDefault(template => template.templateName == templateName);
+        value = templateFind != default && templateFind.templateName != "Custom" ? templateFind.value : customValue;
     }
     
     public string GetHead() => head.ToLower();

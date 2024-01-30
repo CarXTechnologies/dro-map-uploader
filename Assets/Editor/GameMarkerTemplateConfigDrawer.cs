@@ -52,6 +52,7 @@ namespace Editor
             }
 
             Space();
+            amountRect.x -= 16;
             amountRect.width /= 3;
             propSelectHead.intValue = EditorGUI.Popup(amountRect, propSelectHead.intValue, MarkerData.paramEditor);
             amountRect.x += amountRect.width;
@@ -76,7 +77,14 @@ namespace Editor
                 EditorGUI.BeginDisabledGroup(GetIndexTemplate(propTemplateName.stringValue, propPresets) != -1);
                 if (GUI.Button(amountRect, "Add Template"))
                 {
-                    propPresets.InsertArrayElementAtIndex(propPresets.arraySize - 1);
+                    if (propPresets.arraySize == 0)
+                    {
+                        propPresets.InsertArrayElementAtIndex(0);
+                    }
+                    else
+                    {
+                        propPresets.InsertArrayElementAtIndex(propPresets.arraySize - 1);
+                    }
                     var propChild = propPresets.GetArrayElementAtIndex(propPresets.arraySize - 2);
                     var propChildTemplateName = propChild.FindPropertyRelative("templateName");
                     var propHead = propChild.FindPropertyRelative("head");

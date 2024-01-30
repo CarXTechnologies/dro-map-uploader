@@ -55,8 +55,23 @@ namespace Editor
                 if (obj != null && obj is GameMarkerTemplateConfig gameMarkerTemplateConfig)
                 {
                     var templates = gameMarkerTemplateConfig.presets.presets.Select(i => i.templateName).ToArray();
+                    bool find = false;
+                    for (var index = 0; index < templates.Length; index++)
+                    {
+                        if (templates[index] == propTemplateName.stringValue)
+                        {
+                            propTemplateIndex.intValue = index;
+                            find = true;
+                            break;
+                        }
+                    }
 
-                    propTemplateIndex.intValue = Mathf.Clamp(propTemplateIndex.intValue, 0, templates.Length - 1);
+                    if (!find)
+                    {
+                        propTemplateIndex.intValue = templates.Length - 1;
+                        propValue.managedReferenceValue = gameMarkerData.markerData.customValue;
+                    }
+                    
                     m_oldTemplate = templates[propTemplateIndex.intValue];
                     
                     templates[templates.Length - 1] = "Custom";
