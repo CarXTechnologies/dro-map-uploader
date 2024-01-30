@@ -46,7 +46,9 @@ namespace Editor
             propHead.stringValue = MarkerData.GetHeadTarget(propParam.stringValue);
             bool drawTemplatePopup = false;
             bool drawTemplate = false;
-            if (MarkerData.paramObjectsEditor.ContainsKey(propHead.stringValue))
+            
+            if (MarkerData.paramObjectsEditor.ContainsKey(propHead.stringValue) && 
+                !property.serializedObject.isEditingMultipleObjects)
             {
                 Space();
                 EditorGUI.ObjectField(amountRect, propTemplateConfig);
