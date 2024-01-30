@@ -80,7 +80,11 @@ public class MarkerData
         {
             return;
         }
-        value = templateConfig.presets.presets[templateIndex].value;
+
+        if (templateConfig.presets.presets.Length - 1 != templateIndex)
+        {
+            value = templateConfig.presets.presets[templateIndex].value;
+        }
     }
     
     public string GetHead() => head.ToLower();
