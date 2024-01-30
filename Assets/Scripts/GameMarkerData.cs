@@ -100,7 +100,7 @@ public struct PhysicMaterialProperties
 {
     [Range(0, 5)] public float friction;
     [Range(0, 1)] public float rollFriction;
-    [Range(-1, 0)] public float bumpMin;
+    [Range(-1, 0.1f)] public float bumpMin;
     [Range(0, 1)] public float bumpMax;
     [Range(0, 100)] public float bumpScale;
     [Range(-1, 0)] public float bump2Min;
