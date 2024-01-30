@@ -386,23 +386,7 @@ namespace Editor
                 }
                 
                 SelectCache();
-                if (target.HasFlag(TempData.Meta))
-                {
-                    ClearDirectory(GetTemporary(TempData.Meta));
-                    InitPath();
-
-                    if (!CheckAndError())
-                    {
-                        CreateMetaBundle();
-                        ClearCacheScene();
-                        success |= TempData.Meta;
-                    }
-                    else
-                    {
-                        success = (TempData)((int)success & (~(int)TempData.Meta));
-                    }
-                }
-
+                
                 if (target.HasFlag(TempData.Map))
                 {
                     if (!IsCurrentSceneCheck())
@@ -424,6 +408,23 @@ namespace Editor
                     else
                     {
                         success = (TempData)((int)success & (~(int)TempData.Map));
+                    }
+                }
+                
+                if (target.HasFlag(TempData.Meta))
+                {
+                    ClearDirectory(GetTemporary(TempData.Meta));
+                    InitPath();
+
+                    if (!CheckAndError())
+                    {
+                        CreateMetaBundle();
+                        ClearCacheScene();
+                        success |= TempData.Meta;
+                    }
+                    else
+                    {
+                        success = (TempData)((int)success & (~(int)TempData.Meta));
                     }
                 }
             }

@@ -64,9 +64,10 @@ public class MarkerData
     public int templateIndex;
     public GameMarkerTemplateConfig templateConfig;
     
-    public static readonly Dictionary<string, Func<object>> paramObjectsEditor = new Dictionary<string, Func<object>>()
+    public static readonly Dictionary<string, Func<string, object>> paramObjectsEditor = new Dictionary<string, Func<string, object>>()
     {
-        {"Road", () => new PhysicMaterialProperties()}
+        {"Road", name => 
+            AssetUtils.GetDBConfig<SurfaceTemplate>(name.Replace("Road/",string.Empty)).physicMaterial}
     };
     
     public void Update()
@@ -97,18 +98,12 @@ public class MarkerData
 [Serializable]
 public struct PhysicMaterialProperties
 {
-    public float friction;
-	public float rollFriction;
-	public float bumpMin;
-	public float bumpMax;
-	public float bumpScale;
-	public float bump2Min;
-	public float bump2Max;
-	public float bump2Scale;
-}
-
-[Serializable]
-public struct FMODBunks
-{
-    public TextAsset[] fmodBunks;
+    [Range(0, 5)] public float friction;
+    [Range(0, 1)] public float rollFriction;
+    [Range(-1, 0)] public float bumpMin;
+    [Range(0, 1)] public float bumpMax;
+    [Range(0, 100)] public float bumpScale;
+    [Range(-1, 0)] public float bump2Min;
+    [Range(0, 1)] public float bump2Max;
+    [Range(-1, 100)] public float bump2Scale;
 }

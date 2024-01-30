@@ -4,6 +4,7 @@ using UnityEditor;
 #endif
 using UnityEngine;
 
+[CreateAssetMenu(menuName = "Map/MapMetaConfig", fileName = "MapMetaConfig", order = 0)]
 public class MapMetaConfig : ScriptableObject
 {
     [Lock] public string id;

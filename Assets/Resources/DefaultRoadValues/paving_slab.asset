@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f34082f4a6849aa90cf4395a93ad420, type: 3}
+  m_Name: paving_slab
+  m_EditorClassIdentifier: 
+  physicMaterial:
+    friction: 0
+    rollFriction: 0
+    bumpMin: 0
+    bumpMax: 0
+    bumpScale: 0
+    bump2Min: 0
+    bump2Max: 0
+    bump2Scale: 0

@@ -47,7 +47,10 @@ namespace Editor
             bool drawTemplatePopup = false;
             bool drawTemplate = false;
             
-            if (MarkerData.paramObjectsEditor.ContainsKey(propHead.stringValue) && 
+            string paramPath = MarkerData.paramObjectsEditor.ContainsKey(propParam.stringValue) ?
+                propParam.stringValue : propHead.stringValue;
+            
+            if (MarkerData.paramObjectsEditor.ContainsKey(paramPath) && 
                 !property.serializedObject.isEditingMultipleObjects)
             {
                 Space();
@@ -87,7 +90,7 @@ namespace Editor
                         propValue.managedReferenceValue = gameMarkerTemplateConfig.presets.presets[propTemplateIndex.intValue].value;
                         drawTemplatePopup = true;
                     }
-                    else if (m_oldTemplate != "Custom" && MarkerData.paramObjectsEditor.TryGetValue(propHead.stringValue, out var getValue))
+                    else if (m_oldTemplate != "Custom" && MarkerData.paramObjectsEditor.TryGetValue(paramPath, out var getValue))
                     {
                         propValue.managedReferenceValue = gameMarkerData.markerData.customValue;
                     }
@@ -96,19 +99,19 @@ namespace Editor
                 }
             }
 
-            if (propLastHead.stringValue != propHead.stringValue)
+            if (propLastHead.stringValue != propParam.stringValue)
             {
-                if (MarkerData.paramObjectsEditor.TryGetValue(propHead.stringValue, out var getValue))
+                if (MarkerData.paramObjectsEditor.TryGetValue(paramPath, out var getValue))
                 {
-                    propValue.managedReferenceValue = getValue?.Invoke();
-                    propCustomValue.managedReferenceValue = getValue?.Invoke();
+                    propValue.managedReferenceValue = getValue?.Invoke(propParam.stringValue);
+                    propCustomValue.managedReferenceValue = getValue?.Invoke(propParam.stringValue);
                 }
                 else
                 {
                     propValue.managedReferenceValue = null;
                 }
 
-                propLastHead.stringValue = propHead.stringValue;
+                propLastHead.stringValue = propParam.stringValue;
             }
 
             if (drawTemplate)

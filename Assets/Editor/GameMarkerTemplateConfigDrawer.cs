@@ -97,7 +97,7 @@ namespace Editor
 
                     if (MarkerData.paramObjectsEditor.TryGetValue(propHead.stringValue, out var getValue))
                     {
-                        propValue.managedReferenceValue = getValue?.Invoke();
+                        propValue.managedReferenceValue = getValue?.Invoke(propParam.stringValue);
                     }
                     else 
                     {
