@@ -47,11 +47,11 @@ namespace Editor
             bool drawTemplatePopup = false;
             bool drawTemplate = false;
             
-            if (MarkerData.paramObjectsEditor.ContainsKey(propHead.stringValue))
+            if (MarkerData.paramObjectsEditor.ContainsKey(propHead.stringValue) && 
+                !property.serializedObject.isEditingMultipleObjects)
             {
                 Space();
                 EditorGUI.ObjectField(amountRect, propTemplateConfig);
-
                 var obj = propTemplateConfig.objectReferenceValue;
                 
                 if (obj != null && obj is GameMarkerTemplateConfig gameMarkerTemplateConfig)
@@ -111,7 +111,7 @@ namespace Editor
                 propLastHead.stringValue = propHead.stringValue;
             }
 
-            if (drawTemplate && !property.serializedObject.isEditingMultipleObjects)
+            if (drawTemplate)
             {
                 EditorGUI.BeginDisabledGroup(drawTemplatePopup);
                 EditorGUI.PropertyField(amountRect, propValue, GUIContent.none, true);
