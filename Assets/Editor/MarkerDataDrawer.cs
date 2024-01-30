@@ -55,7 +55,10 @@ namespace Editor
                 if (obj != null && obj is GameMarkerTemplateConfig gameMarkerTemplateConfig)
                 {
                     var templates = gameMarkerTemplateConfig.presets.presets.Select(i => i.templateName).ToArray();
+
+                    propTemplateIndex.intValue = Mathf.Clamp(propTemplateIndex.intValue, 0, templates.Length - 1);
                     m_oldTemplate = templates[propTemplateIndex.intValue];
+                    
                     templates[templates.Length - 1] = "Custom";
                     Space();
                     propTemplateIndex.intValue = EditorGUI.Popup(amountRect, propTemplateIndex.intValue, templates);
