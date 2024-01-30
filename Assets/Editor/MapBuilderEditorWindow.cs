@@ -140,6 +140,15 @@ namespace Editor
             
             m_attahing.TryGetValue(m_selectItem.Id, out var isSelectAttach);
             
+            MapManagerConfig.BuildData buildData = default;
+            
+            MapManagerConfig.GetOrAttach(m_selectItem.Id, out var attachObj);
+            
+            if (attachObj != null)
+            {
+                buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
+            }
+
             var loadIcon = EditorGUIUtility.IconContent(m_iconLoad[Mathf.FloorToInt((Time.time * 12) % m_iconLoad.Length)]);
             for (int i = 0; i < m_fetchResultListItems.Count; i++)
             {
@@ -148,6 +157,10 @@ namespace Editor
                 GUI.Box(rectItem, string.Empty);
                 if (GUI.Button(rectItem, string.Empty))
                 {
+                    if (i != m_selectItemIndex && !string.IsNullOrWhiteSpace(buildData.targetScene))
+                    {
+                        MapManagerConfig.instance.targetScene = buildData.targetScene;
+                    }
                     m_selectItemIndex = i;
                 }
                 rectItem.x += rectItem.height + space;
@@ -250,15 +263,6 @@ namespace Editor
             var rectButtons = new Rect(
                 rectConfigValue.x, rectConfigValue.y + space * 2,
                 rectConfigValue.width, sizeButton);
-
-            MapManagerConfig.BuildData buildData = default;
-            
-            MapManagerConfig.GetOrAttach(m_selectItem.Id, out var attachObj);
-            
-            if (attachObj != null)
-            {
-                buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
-            }
             
             var rectBuildSettings = new Rect(
                 rectPreview.x, rectButtons.y - space,
@@ -481,7 +485,7 @@ namespace Editor
                 var editorScenes = EditorBuildSettings.scenes;
                 if (editorScenes.Length > 0)
                 {
-                    if (!flagScene)
+                    if (!flagScene && !string.IsNullOrWhiteSpace(buildData.targetScene))
                     {
                         MapManagerConfig.instance.targetScene = buildData.targetScene;
                     }

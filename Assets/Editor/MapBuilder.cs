@@ -72,7 +72,7 @@ namespace Editor
                 return true;
             }
             
-            if (!GetSceneNameFromPath(MapManagerConfig.Build.targetScene).All(char.IsLetter))
+            if (!GetSceneNameFromPath(MapManagerConfig.instance.targetScene).All(char.IsLetter))
             {
                 Debug.LogError($"Target scene only letters");
                 return true;
