@@ -66,18 +66,18 @@ namespace Editor
         
         private static bool CheckAndError()
         {
-            if (string.IsNullOrWhiteSpace(MapManagerConfig.Value.mapName))
-            {
-                Debug.LogError($"Please name your track");
-                return true;
-            }
-            
             if (!GetSceneNameFromPath(MapManagerConfig.instance.targetScene).All(char.IsLetter))
             {
                 Debug.LogError($"Target scene only letters");
                 return true;
             }
             
+            if (string.IsNullOrWhiteSpace(MapManagerConfig.Value.mapName))
+            {
+                Debug.LogError($"Please name your track");
+                return true;
+            }
+
             if (!MapManagerConfig.Value.mapName.All(char.IsLetter))
             {
                 Debug.LogError($"Track name only letters");
@@ -458,12 +458,7 @@ namespace Editor
         {
             InitPath();
             ModMapTestTool.Target = (ValidItemData)ModMapTestTool.Steam.Clone();
-            if (CheckAndError())
-            {
-                EditorUtility.ClearProgressBar();
-                return;
-            }
-            
+
             SelectCache();
             EditorUtility.DisplayProgressBar("Uploading Community File...", string.Empty, 1f);
             ClearDirectory(assetBuildPath);
