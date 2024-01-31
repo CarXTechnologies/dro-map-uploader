@@ -19,14 +19,4 @@ public class MapMetaConfig : ScriptableObject
         id = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(this));
 #endif
     }
-    
-    public void SaveForce()
-    {
-#if UNITY_EDITOR
-        EditorUtility.SetDirty(this);
-        AssetDatabase.SaveAssetIfDirty(this);
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
-#endif
-    }
 }

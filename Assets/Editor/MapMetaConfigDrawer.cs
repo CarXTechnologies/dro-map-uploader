@@ -13,6 +13,12 @@ namespace Editor
         {
             GUI.skin.box.normal.textColor = Color.white;
             m_target = property.serializedObject.targetObject as MapMetaConfig;
+
+            var propMapName = property.FindPropertyRelative("mapName");
+            var propMapDescription = property.FindPropertyRelative("mapDescription");
+            var propIcon = property.FindPropertyRelative("icon");
+            var propLargeIcon = property.FindPropertyRelative("largeIcon");
+
             if (m_target == null)
             {
                 base.OnGUI(position, property, label);
@@ -30,7 +36,7 @@ namespace Editor
             
             GUI.Box(rectName, "Workshop Name(only letters, 128 char)");
             rectName.y += 22;
-            m_target.mapMetaConfigValue.mapName = EditorGUI.TextField(rectName, m_target.mapMetaConfigValue.mapName);
+            propMapName.stringValue = EditorGUI.TextField(rectName, propMapName.stringValue);
             
             rectLabelDesc.y += rectLabelDesc.height * 2;
             GUI.Box(rectLabelDesc, "Workshop Description");
@@ -38,9 +44,9 @@ namespace Editor
             GUI.Box(rectLabelDesc, " Preview, Icon (16:9)");
             rectView.y += rectLabelDesc.height * 3 + 4;
 
-            TextArea(ref rectView, ref m_target.mapMetaConfigValue.mapDescription, new Vector2(position.width / 2, 128), Vector2.right);
-            TextureProp(ref rectView, ref m_target.mapMetaConfigValue.largeIcon, new Vector2(128, 128), Vector2.up);
-            TextureProp(ref rectView, ref m_target.mapMetaConfigValue.icon, new Vector2(96, 96), Vector2.up);
+            TextArea(ref rectView, propMapDescription, new Vector2(position.width / 2, 128), Vector2.right);
+            TextureProp(ref rectView, propLargeIcon, new Vector2(128, 128), Vector2.up);
+            TextureProp(ref rectView, propIcon, new Vector2(96, 96), Vector2.up);
 
             var build = MapManagerConfig.GetBuildOrEmpty(m_target);
             m_height = rectView.height + 64;
@@ -52,27 +58,27 @@ namespace Editor
                 m_height += 54;
             }
 
+            propMapName.serializedObject.ApplyModifiedPropertiesWithoutUndo();
+            propMapDescription.serializedObject.ApplyModifiedPropertiesWithoutUndo();
+            propIcon.serializedObject.ApplyModifiedPropertiesWithoutUndo();
+            propLargeIcon.serializedObject.ApplyModifiedPropertiesWithoutUndo();
+
             EditorGUI.indentLevel = indent;
             EditorGUI.EndProperty();
         }
 
-        private void TextureProp(ref Rect position, ref Texture2D property, Vector2 size, Vector2 space)
+        private void TextureProp(ref Rect position, SerializedProperty property, Vector2 size, Vector2 space)
         {
-            if (property == null)
-            {
-                property = Texture2D.grayTexture;
-            }
-
             var rectTexture = new Rect(position.position, new Vector2(size.x, size.y * ((float)9 / 16)));
-            property = (Texture2D)EditorGUI.ObjectField(rectTexture, property, typeof(Texture2D), false);
+            property.objectReferenceValue = (Texture2D)EditorGUI.ObjectField(rectTexture, property.objectReferenceValue, typeof(Texture2D), false);
             position.position += rectTexture.size * space;
             position.size += rectTexture.size * space;
         }
         
-        private void TextArea(ref Rect position, ref string property, Vector2 size, Vector2 space)
+        private void TextArea(ref Rect position, SerializedProperty property, Vector2 size, Vector2 space)
         {
             var rectTexture = new Rect(position.position, size);
-            property = EditorGUI.TextArea(rectTexture, property);
+            property.stringValue = EditorGUI.TextArea(rectTexture, property.stringValue);
             position.position += rectTexture.size * space;
             position.size += rectTexture.size * space;
         }
