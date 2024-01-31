@@ -199,7 +199,8 @@ namespace Editor
 
         private static void InitPath()
         {
-            m_scenePath = path + "/" + MapManagerConfig.Value.mapName + ".unity";
+            var sceneName = GetSceneNameFromPath(MapManagerConfig.instance.targetScene);
+            m_scenePath = path + "/" + sceneName + ".unity";
             m_assetPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
             m_titleIconPath = m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.icon);
         }
@@ -326,8 +327,9 @@ namespace Editor
         
         private static void RenameCacheScene(PublishedFileId publishResult)
         {
-            var scenePathNew = path + "/" + MapManagerConfig.Value.mapName + publishResult.Value + ".unity";
-            AssetDatabase.RenameAsset(m_scenePath, MapManagerConfig.Value.mapName + publishResult.Value);
+            var sceneName = GetSceneNameFromPath(MapManagerConfig.instance.targetScene);
+            var scenePathNew = path + "/" + sceneName + publishResult.Value + ".unity";
+            AssetDatabase.RenameAsset(m_scenePath, sceneName + publishResult.Value);
             m_scenePath = scenePathNew;
         }
 
@@ -338,7 +340,8 @@ namespace Editor
         
         private static void CreateMapBundle()
         {
-            var bundleBuilds = CreateBundleArrayDataForOneElement(MapManagerConfig.Value.mapName, m_scenePath);
+            var sceneName = GetSceneNameFromPath(MapManagerConfig.instance.targetScene);
+            var bundleBuilds = CreateBundleArrayDataForOneElement(sceneName, m_scenePath);
             BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Map),
                 bundleBuilds, m_assetBundleOption, m_buildTarget);
         }
@@ -485,12 +488,6 @@ namespace Editor
                 }), steamUgc);
         }
 
-        public static string GetSceneName(string path)
-        {
-            var pos = path.LastIndexOf('/');
-            return pos == -1 ? path : path.Substring(pos + 1, path.Length - pos - 7);
-        }
-
         private static void BuildDataTransition()
         {
             ClearDirectory(assetBuildPath);
@@ -500,7 +497,8 @@ namespace Editor
 
         private static bool IsSizeValid()
         {
-            bool notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(MapManagerConfig.Value.mapName, assetBuildPath + "/" + MapManagerConfig.Value.mapName);
+            var sceneName = GetSceneNameFromPath(MapManagerConfig.instance.targetScene);
+            bool notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(sceneName, assetBuildPath + "/" + sceneName);
             bool notMetaSize = ModMapTestTool.IsNotCorrectMetaFileSize(assetBuildPath + "/" + TempData.Meta.ToString().ToLower());
 
             if (notMapSize || notMetaSize)

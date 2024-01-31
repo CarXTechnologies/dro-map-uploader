@@ -78,7 +78,7 @@ public class MarkerData
             return; 
         }
         
-        if (templateConfig.presets.presets.Length == 1)
+        if (templateConfig.presets.presets.Length < 1)
         {
             return;
         }
