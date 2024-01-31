@@ -55,7 +55,8 @@ namespace Editor
             new ValidItem(nameof(RectTransform), 0, 100),
             new ValidItem(nameof(TextMeshProUGUI), 0, 50),
             new ValidItem(nameof(RawImage), 0, 20),
-            new ValidItem(nameof(VideoPlayer), 0, 5, new ValidVideoPlayer()),
+            new ValidItem(nameof(VideoPlayer), 0, 5, 
+                new ValidVideoPlayer(1280, 720, 30, 15)),
             //Particle
             new ValidItem(nameof(ParticleSystem), 0, 200),
             new ValidItem(nameof(ParticleSystemRenderer), 0, 200),
