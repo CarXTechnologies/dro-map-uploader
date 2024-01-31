@@ -530,7 +530,7 @@ namespace Editor
                 {
                     m_loads[m_selectItem.Id] = true;
                     MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-                    MapBuilder.UploadCommunityFile(m_selectItem.Id, id =>
+                    MapBuilder.UploadCommunityFile(buildData, m_selectItem.Id, id =>
                     {
                         m_loads[id] = false;
                         DownloadSpriteAsync(m_fetchResultListItems.Find(itemFind => itemFind.Id == id));

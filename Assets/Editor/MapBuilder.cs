@@ -12,7 +12,6 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Video;
 
 namespace Editor
 {
@@ -33,6 +32,8 @@ namespace Editor
         private static PublishedFileId m_currentFileId;
         private static BuildAssetBundleOptions m_assetBundleOption = BuildAssetBundleOptions.UncompressedAssetBundle;
         private static BuildTarget m_buildTarget = BuildTarget.StandaloneWindows;
+        private static string m_uploadScene;
+        private static string m_targetScene => MapManagerConfig.instance.targetScene;
         
         private static bool PublishCallback(ulong id)
         {
@@ -53,8 +54,8 @@ namespace Editor
         {
             var currentScene = SceneManager.GetActiveScene();
             
-            return MapManagerConfig.instance.targetScene != currentScene.path && 
-                   !EditorUtility.DisplayDialog($"Build scene : {GetSceneNameFromPath(MapManagerConfig.instance.targetScene)}", 
+            return m_targetScene != currentScene.path && 
+                   !EditorUtility.DisplayDialog($"Build scene : {GetSceneNameFromPath(m_targetScene)}", 
                        $"Close and save the current scene : {currentScene.name}", "Yes", "Cancel");
         }
 
@@ -66,7 +67,7 @@ namespace Editor
         
         private static bool CheckAndError()
         {
-            if (!GetSceneNameFromPath(MapManagerConfig.instance.targetScene).All(char.IsLetter))
+            if (!GetSceneNameFromPath(m_targetScene).All(char.IsLetter))
             {
                 Debug.LogError($"Target scene only letters");
                 return true;
@@ -192,15 +193,23 @@ namespace Editor
                 .ValidComponents();
 
             ModMapTestTool.InitTestsEditor(scene);
-            ModMapTestTool.RunTest(MapManagerConfig.instance.targetScene);
+            ModMapTestTool.RunTest(m_targetScene);
 
             return isError;
         }
 
         private static void InitPath()
         {
-            var sceneName = GetSceneNameFromPath(MapManagerConfig.instance.targetScene);
-            m_scenePath = path + "/" + sceneName + ".unity";
+            var targetScene = GetSceneNameFromPath(m_targetScene);
+            m_scenePath = path + "/" + targetScene + ".unity";
+            m_assetPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
+            m_titleIconPath = m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.icon);
+        }
+        
+        private static void InitPathUpload(MapManagerConfig.BuildData scenePath)
+        {
+            m_uploadScene = GetSceneNameFromPath(scenePath.targetScene);
+            m_scenePath = path + "/" + m_uploadScene + ".unity";
             m_assetPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
             m_titleIconPath = m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.icon);
         }
@@ -209,7 +218,7 @@ namespace Editor
         private static bool ValidateSceneAndMirror()
         {
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
-            EditorSceneManager.OpenScene(MapManagerConfig.instance.targetScene);
+            EditorSceneManager.OpenScene(m_targetScene);
             var scene = SceneManager.GetActiveScene();
             var sceneObjects = scene.GetRootGameObjects();
             var root = new GameObject("root");
@@ -228,7 +237,7 @@ namespace Editor
             
             if (IsValidate(scene))
             {
-                EditorSceneManager.OpenScene(MapManagerConfig.instance.targetScene);
+                EditorSceneManager.OpenScene(m_targetScene);
                 try
                 {
                     SceneManager.UnloadSceneAsync(mapScene);
@@ -327,7 +336,7 @@ namespace Editor
         
         private static void RenameCacheScene(PublishedFileId publishResult)
         {
-            var sceneName = GetSceneNameFromPath(MapManagerConfig.instance.targetScene);
+            var sceneName = GetSceneNameFromPath(m_targetScene);
             var scenePathNew = path + "/" + sceneName + publishResult.Value + ".unity";
             AssetDatabase.RenameAsset(m_scenePath, sceneName + publishResult.Value);
             m_scenePath = scenePathNew;
@@ -340,7 +349,7 @@ namespace Editor
         
         private static void CreateMapBundle()
         {
-            var sceneName = GetSceneNameFromPath(MapManagerConfig.instance.targetScene);
+            var sceneName = GetSceneNameFromPath(m_targetScene);
             var bundleBuilds = CreateBundleArrayDataForOneElement(sceneName, m_scenePath);
             BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Map),
                 bundleBuilds, m_assetBundleOption, m_buildTarget);
@@ -458,9 +467,9 @@ namespace Editor
             }), steamUgc);
         }
         
-        public static void UploadCommunityFile(PublishedFileId published, Action<PublishedFileId> callback)
+        public static void UploadCommunityFile(MapManagerConfig.BuildData buildData, PublishedFileId published, Action<PublishedFileId> callback)
         {
-            InitPath();
+            InitPathUpload(buildData);
             ModMapTestTool.Target = (ValidItemData)ModMapTestTool.Steam.Clone();
 
             SelectCache();
@@ -497,7 +506,7 @@ namespace Editor
 
         private static bool IsSizeValid()
         {
-            var sceneName = GetSceneNameFromPath(MapManagerConfig.instance.targetScene);
+            var sceneName = GetSceneNameFromPath(m_uploadScene);
             bool notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(sceneName, assetBuildPath + "/" + sceneName);
             bool notMetaSize = ModMapTestTool.IsNotCorrectMetaFileSize(assetBuildPath + "/" + TempData.Meta.ToString().ToLower());
 
