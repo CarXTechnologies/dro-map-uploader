@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: brick
   m_EditorClassIdentifier: 
   physicMaterial:
-    friction: 0
-    rollFriction: 0
-    bumpMin: 0
+    friction: 1
+    rollFriction: 0.015
+    bumpMin: -0.003
     bumpMax: 0
-    bumpScale: 0
+    bumpScale: 15
     bump2Min: 0
     bump2Max: 0
     bump2Scale: 0

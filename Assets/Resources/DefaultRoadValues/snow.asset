@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: snow
   m_EditorClassIdentifier: 
   physicMaterial:
-    friction: 0
-    rollFriction: 0
-    bumpMin: 0
-    bumpMax: 0
-    bumpScale: 0
+    friction: 2
+    rollFriction: 0.1
+    bumpMin: -0.01
+    bumpMax: -0.01
+    bumpScale: 30
     bump2Min: 0
     bump2Max: 0
     bump2Scale: 0

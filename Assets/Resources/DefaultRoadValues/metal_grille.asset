@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: metal_grille
   m_EditorClassIdentifier: 
   physicMaterial:
-    friction: 0
-    rollFriction: 0
+    friction: 0.73
+    rollFriction: 0.03
     bumpMin: 0
     bumpMax: 0
-    bumpScale: 0
+    bumpScale: 30
     bump2Min: 0
     bump2Max: 0
     bump2Scale: 0

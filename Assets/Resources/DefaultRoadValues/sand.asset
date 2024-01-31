@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: sand
   m_EditorClassIdentifier: 
   physicMaterial:
-    friction: 0
-    rollFriction: 0
-    bumpMin: 0
-    bumpMax: 0
-    bumpScale: 0
+    friction: 1
+    rollFriction: 0.13
+    bumpMin: 0.06
+    bumpMax: 0.05
+    bumpScale: 25
     bump2Min: 0
     bump2Max: 0
     bump2Scale: 0

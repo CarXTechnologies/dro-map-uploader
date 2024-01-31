@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: wood_plank
   m_EditorClassIdentifier: 
   physicMaterial:
-    friction: 0
-    rollFriction: 0
-    bumpMin: 0
+    friction: 0.85
+    rollFriction: 0.01
+    bumpMin: -0.005
     bumpMax: 0
-    bumpScale: 0
+    bumpScale: 12
     bump2Min: 0
     bump2Max: 0
     bump2Scale: 0

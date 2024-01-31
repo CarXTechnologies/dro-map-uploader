@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: asphalt
   m_EditorClassIdentifier: 
   physicMaterial:
-    friction: 2.02
-    rollFriction: 0.225
-    bumpMin: -0.26
-    bumpMax: 0.608
-    bumpScale: 56.1
+    friction: 1
+    rollFriction: 0.01
+    bumpMin: 0
+    bumpMax: 0
+    bumpScale: 100
     bump2Min: 0
     bump2Max: 0
     bump2Scale: 0

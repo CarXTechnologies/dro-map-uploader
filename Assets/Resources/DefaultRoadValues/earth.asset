@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: earth
   m_EditorClassIdentifier: 
   physicMaterial:
-    friction: 0
-    rollFriction: 0
-    bumpMin: 0
+    friction: 1
+    rollFriction: 0.06
+    bumpMin: -0.03
     bumpMax: 0
-    bumpScale: 0
+    bumpScale: 25
     bump2Min: 0
     bump2Max: 0
     bump2Scale: 0
