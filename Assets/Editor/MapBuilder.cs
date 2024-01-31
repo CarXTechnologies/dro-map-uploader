@@ -350,7 +350,7 @@ namespace Editor
         private static void CreateMapBundle()
         {
             var sceneName = GetSceneNameFromPath(m_targetScene);
-            var bundleBuilds = CreateBundleArrayDataForOneElement(sceneName, m_scenePath);
+            var bundleBuilds = CreateBundleArrayDataForOneElement(sceneName + ".bundle", m_scenePath);
             BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Map),
                 bundleBuilds, m_assetBundleOption, m_buildTarget);
         }
@@ -507,7 +507,7 @@ namespace Editor
         private static bool IsSizeValid()
         {
             var sceneName = GetSceneNameFromPath(m_uploadScene);
-            bool notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(sceneName, assetBuildPath + "/" + sceneName);
+            bool notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(sceneName + ".bundle", assetBuildPath + "/" + sceneName + ".bundle");
             bool notMetaSize = ModMapTestTool.IsNotCorrectMetaFileSize(assetBuildPath + "/" + TempData.Meta.ToString().ToLower());
 
             if (notMapSize || notMetaSize)
