@@ -506,6 +506,10 @@ namespace Editor
                 EditorGUI.BeginDisabledGroup(!existItemDirectory);
                 manager.buildLocal = EditorGUI.Toggle(rectBuildLocal, manager.buildLocal) && existItemDirectory;
                 EditorGUI.EndDisabledGroup();
+
+                rectBuildLocal.x += 22;
+                rectBuildLocal.width -= 22;
+                EditorGUI.HelpBox(rectBuildLocal, "don`t use the map restart", MessageType.Warning);
                 //GUI.Label(rectCompressName, "Compression");
                 //m_compressBuild = (CompressBuild)EditorGUI.EnumPopup(rectCompress, m_compressBuild);
                 m_compressBuild = CompressBuild.NoCompress;
