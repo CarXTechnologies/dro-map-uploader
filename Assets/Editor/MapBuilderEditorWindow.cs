@@ -500,7 +500,7 @@ namespace Editor
                 m_platformBuild = (PlatformBuild)EditorGUI.EnumPopup(rectPlatform, flagPlat ? m_platformBuild : buildData.platform);
                 EditorGUI.EndDisabledGroup();
 
-                GUI.Label(rectBuildLocalName, "LocalBuild");
+                GUI.Label(rectBuildLocalName, "Local Build (*only test build)");
                 
                 var existItemDirectory = Directory.Exists(m_selectItem.Directory);
                 EditorGUI.BeginDisabledGroup(!existItemDirectory);

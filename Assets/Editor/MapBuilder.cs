@@ -125,14 +125,24 @@ namespace Editor
             return false;
         }
 
-        private static void ClearDirectory(string path)
+        private static void ClearDirectory(string path, bool recursive = true)
         {
-            if (Directory.Exists(path))
+            if (recursive)
             {
-                Directory.Delete(path, true);
-            }
+                if (Directory.Exists(path))
+                {
+                    Directory.Delete(path, recursive);
+                }
 
-            Directory.CreateDirectory(path);
+                Directory.CreateDirectory(path);
+            }
+            else
+            {
+                foreach (var file in Directory.GetFiles(path))
+                {
+                    File.Delete(file);
+                }
+            }
         }
         
         private static void CopyTemporary(string source, string dest, string searchPattern)
@@ -521,7 +531,7 @@ namespace Editor
         
         private static void BuildDataTransitionLocal(Item item)
         {
-            //ClearDirectory(item.Directory);
+            ClearDirectory(item.Directory, false);
             CopyTemporary(GetTemporary(TempData.Map), item.Directory);
             CopyTemporary(GetTemporary(TempData.Meta), item.Directory);
             ClearManifest(item.Directory);
