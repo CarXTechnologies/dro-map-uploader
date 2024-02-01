@@ -149,7 +149,7 @@ namespace Editor
             foreach (var file in Directory.GetFiles(source))
             {
                 var fileName = file.Substring(source.Length + 1);
-                File.Copy(Path.Combine(source, fileName), Path.Combine(dest, fileName));
+                File.Copy(Path.Combine(source, fileName), Path.Combine(dest, fileName), true);
             }
         }
 
@@ -467,34 +467,48 @@ namespace Editor
             }), steamUgc);
         }
         
-        public static void UploadCommunityFile(MapManagerConfig.BuildData buildData, PublishedFileId published, Action<PublishedFileId> callback)
+        public static void UploadCommunityFile(
+            MapManagerConfig.BuildData buildData,
+            Item published, 
+            bool localBuild, 
+            Action<PublishedFileId> callback)
         {
             InitPathUpload(buildData);
             ModMapTestTool.Target = (ValidItemData)ModMapTestTool.Steam.Clone();
 
             SelectCache();
-            EditorUtility.DisplayProgressBar("Uploading Community File...", string.Empty, 1f);
-            ClearDirectory(assetBuildPath);
-            BuildDataTransition();
-            
-            if (IsSizeValid())
+
+            if (localBuild)
             {
-                EditorUtility.ClearProgressBar();
-                return;
+                BuildDataTransitionLocal(published);
+                Debug.Log($"Move build to folder successful ({published.Directory})");
             }
-            
-            steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
-            EditorCoroutineUtility.StartCoroutine(steamUgc.UploadItemCoroutine(assetBuildPath, published, 
-                publish =>
+            else
+            {
+                EditorUtility.DisplayProgressBar("Uploading Community File...", string.Empty, 1f);
+                ClearDirectory(assetBuildPath);
+                BuildDataTransition();
+
+                if (IsSizeValid())
                 {
-                    if (!PublishCallback(publish))
+                    EditorUtility.ClearProgressBar();
+                    return;
+                }
+
+                steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath,
+                    MapManagerConfig.Value.mapDescription);
+                EditorCoroutineUtility.StartCoroutine(steamUgc.UploadItemCoroutine(assetBuildPath, published.Id,
+                    publish =>
                     {
-                        return false;
-                    }
-                    
-                    callback?.Invoke(publish);
-                    return true;
-                }), steamUgc);
+                        if (!PublishCallback(publish))
+                        {
+                            return false;
+                        }
+
+                        callback?.Invoke(publish);
+                        return true;
+                    }), steamUgc);
+            }
         }
 
         private static void BuildDataTransition()
@@ -502,6 +516,30 @@ namespace Editor
             ClearDirectory(assetBuildPath);
             CopyTemporary(GetTemporary(TempData.Map), assetBuildPath);
             CopyTemporary(GetTemporary(TempData.Meta), assetBuildPath);
+            ClearManifest(assetBuildPath);
+        }
+        
+        private static void BuildDataTransitionLocal(Item item)
+        {
+            //ClearDirectory(item.Directory);
+            CopyTemporary(GetTemporary(TempData.Map), item.Directory);
+            CopyTemporary(GetTemporary(TempData.Meta), item.Directory);
+            ClearManifest(item.Directory);
+        }
+
+        private static void ClearManifest(string directory)
+        {
+            var dir = new DirectoryInfo(directory);
+
+            foreach (var file in dir.EnumerateFiles("*.manifest")) 
+            {
+                file.Delete();
+            }
+            
+            foreach (var file in dir.EnumerateFiles("*Temp")) 
+            {
+                file.Delete();
+            }
         }
 
         private static bool IsSizeValid()

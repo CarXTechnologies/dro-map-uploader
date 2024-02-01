@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GameOverlay;
@@ -125,8 +126,7 @@ namespace Editor
             const float sizeImage = 200;
             const float sizeButton = 18;
             var rectPreview = new Rect(16, 28, sizeImage * aspect, sizeImage);
-            var rectCenter = new Rect((sizeImage * aspect) / 2f, sizeImage / 2f, 32f, 32f);
-            var rectCenter2 = new Rect((sizeImage * aspect) / 2f - 64, sizeImage / 2f, 164f, 32f);
+            var rectCenter = new Rect((sizeImage * aspect) / 2f - 64, sizeImage / 2f, 164f, 32f);
             var rectItem = new Rect(rectPreview.width + rectPreview.x + 32, 0, position.width - 48 - (rectPreview.width + rectPreview.x + 16), 80);
 
             const float space = 6;
@@ -252,6 +252,8 @@ namespace Editor
             
             GUI.EndScrollView();
             
+            Rect lastRect;
+            
             var rectConfig = new Rect(
                 rectPreview.x, rectPreview.y + rectPreview.height + space,
                 rectPreview.width, sizeButton);
@@ -300,11 +302,12 @@ namespace Editor
                 rectSceneName.x, rectSceneName.y + sizeButton + space,
                 rectSceneName.width, sizeButton);
             
+            lastRect = rectSplitLeft;
+            
             var rectSplitBuild = new Rect(
-                rectSceneName.x, rectSplitLeft.y + sizeButton + space,
+                rectSceneName.x, lastRect.y + sizeButton + space,
                 rectBuildSettings.width, sizeButton * 1.5f);
-            
-            
+
             var rectUploadSettings = new Rect(
                 rectBuildSettings.x, rectSplitBuild.y + sizeButton + space * 3,
                 rectBuildSettings.width, sizeButton + space / 2);
@@ -322,10 +325,6 @@ namespace Editor
                 rectUploadSteamDescriptionToggle.width, sizeButton);
             
             
-            var rectUploadButtons = new Rect(
-                rectSplitBuild.x, rectUploadSteamPreviewToggle.y + sizeButton + space,
-                rectSplitBuild.width, sizeButton * 1.5f);
-            
             var rectUploadSteamName = new Rect(
                 rectBuildSettings.x, rectUploadSteamNameToggle.y,
                 rectBuildSettings.width, sizeButton);
@@ -338,6 +337,19 @@ namespace Editor
                 rectUploadSteamDescription.x, rectUploadSteamDescription.y + sizeButton + space,
                 rectUploadSteamDescription.width, sizeButton);
             
+            
+            var rectBuildLocalName = new Rect(
+                rectSceneName.x, rectUploadSteamPreviewToggle.y + sizeButton + space,
+                rectBuildSettings.width / 2, sizeButton * 1.5f);
+            
+            var rectBuildLocal = new Rect(
+                rectSceneName.x + rectBuildLocalName.width, rectBuildLocalName.y,
+                rectBuildSettings.width / 2, sizeButton * 1.5f);
+            
+            var rectUploadButtons = new Rect(
+                rectSplitBuild.x, rectBuildLocalName.y + sizeButton + space * 2,
+                rectUploadSettings.width, sizeButton * 1.5f);
+
             var rectInfo = new Rect(
                 rectButtons.x, rectUploadButtons.y + rectUploadButtons.height + space,
                 rectButtons.width, sizeButton * 2);
@@ -382,7 +394,7 @@ namespace Editor
                 }
             }
             
-            var lastRect = rectInfo;
+            lastRect = rectInfo;
             
             var rectPreviewBack = new Rect(0, 0, rectPreview.width + 31, lastRect.y);
             var rectLabelId = new Rect(rectPreviewBack.width / 2 - 16, 2, 128, 24);
@@ -413,16 +425,15 @@ namespace Editor
                 }
             }
 
-           
             EditorGUI.DrawRect(rectPreview, Color.black);
             
-            if(attachObj != null && attachObj.metaConfig != null)
+            if (attachObj != null && attachObj.metaConfig != null)
             {
                 GUI.DrawTexture(rectPreview, attachObj.metaConfig.mapMetaConfigValue.largeIcon);
             }
             else
             {
-                EditorGUI.HelpBox(rectCenter2, "Preview is missed", MessageType.Warning);
+                EditorGUI.HelpBox(rectCenter, "Preview is missed", MessageType.Warning);
             }
 
             if (m_selectItem.Id != 0)
@@ -432,52 +443,37 @@ namespace Editor
                 rectLabelId.x -= 24;
                 GUI.Label(rectLabelId, iconSteam);
             }
-
+            var manager = MapManagerConfig.instance;
+            
             if (attachObj != null && attachObj.metaConfig != null)
             {
-                EditorGUI.BeginDisabledGroup(!isSelectAttach || attachObj == null || attachObj.metaConfig == null);
+                EditorGUI.BeginDisabledGroup(!isSelectAttach || 
+                                             attachObj == null || 
+                                             attachObj.metaConfig == null);
+                
                 GUI.Label(rectSplitLeft, "Build Targets");
                 m_buildType = EditorGUI.MaskField(rectSplitRight, m_buildType, Enum.GetNames(typeof(TempData)));
-
+                
                 GUI.Box(rectBuildSettings, "Build Settings");
 
+                EditorGUI.BeginDisabledGroup(m_buildType == 0);
                 if (GUI.Button(rectSplitBuild, "Build") && !IsDownloadAnyIcon())
                 {
-                    int buildType = m_buildType;
-                    if (attachObj != null && attachObj.metaConfig != null && buildType != 0)
-                    {
-                        m_loads[m_selectItem.Id] = true;
-                        m_buildProcess = true;
-                        var selectId = (ulong)m_selectItem.Id;
-                        MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-                        MapBuilder.BuildCustom((TempData)buildType,
-                            (TempData)buildData.buildSuccess,
-                            selectId,
-                            buildData.compress,
-                            buildData.platform,
-                            (path, complete) =>
-                            {
-                                m_loads[m_selectItem.Id] = false;
-                                if (complete == (TempData.Map | TempData.Meta))
-                                {
-                                    Debug.Log($"Build Complete : Everything");
-                                }
-                                
-                                MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(
-                                    attachObj.metaConfig,
-                                    MapManagerConfig.instance.targetScene,
-                                    path,
-                                    (int)complete,
-                                    ((TempData)buildType).HasFlag(TempData.Map)
-                                        ? ModMapTestTool.Target
-                                        : buildData.lastValid,
-                                    m_platformBuild,
-                                    m_compressBuild));
-                                m_buildProcess = false;
-                            });
-                    }
-                }
+                    m_loads[m_selectItem.Id] = true;
+                    m_buildProcess = true;
+                    var selectId = (ulong)m_selectItem.Id;
+                    MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
 
+                    MapBuilder.BuildCustom((TempData)m_buildType,
+                        (TempData)buildData.buildSuccess,
+                        selectId,
+                        buildData.compress,
+                        buildData.platform,
+                        (path, success) 
+                            => AddBuild(attachObj.metaConfig, buildData, path, success));
+                }
+                EditorGUI.EndDisabledGroup();
+                
                 var flagScene = ((TempData)m_buildType).HasFlag(TempData.Map);
 
                 EditorGUI.BeginDisabledGroup(!flagScene);
@@ -501,36 +497,40 @@ namespace Editor
                 var flagPlat = (buildData.buildSuccess & m_buildType) == buildData.buildSuccess;
                 EditorGUI.BeginDisabledGroup(!flagPlat);
                 GUI.Label(rectPlatformName, "Platform");
-                m_platformBuild =
-                    (PlatformBuild)EditorGUI.EnumPopup(rectPlatform, flagPlat ? m_platformBuild : buildData.platform);
+                m_platformBuild = (PlatformBuild)EditorGUI.EnumPopup(rectPlatform, flagPlat ? m_platformBuild : buildData.platform);
                 EditorGUI.EndDisabledGroup();
 
+                GUI.Label(rectBuildLocalName, "LocalBuild");
+                
+                var existItemDirectory = Directory.Exists(m_selectItem.Directory);
+                EditorGUI.BeginDisabledGroup(!existItemDirectory);
+                manager.buildLocal = EditorGUI.Toggle(rectBuildLocal, manager.buildLocal) && existItemDirectory;
+                EditorGUI.EndDisabledGroup();
                 //GUI.Label(rectCompressName, "Compression");
                 //m_compressBuild = (CompressBuild)EditorGUI.EnumPopup(rectCompress, m_compressBuild);
                 m_compressBuild = CompressBuild.NoCompress;
-
+                
                 GUI.Label(rectUploadSteamName, "Upload Name");
                 GUI.Label(rectUploadSteamDescription, "Upload Description");
                 GUI.Label(rectUploadSteamPreview, "Upload Preview");
 
-                var mapMen = MapManagerConfig.instance;
+                manager.uploadSteamName = EditorGUI.Toggle(rectUploadSteamNameToggle, manager.uploadSteamName);
+                manager.uploadSteamDescription =
+                    EditorGUI.Toggle(rectUploadSteamDescriptionToggle, manager.uploadSteamDescription);
+                manager.uploadSteamPreview = EditorGUI.Toggle(rectUploadSteamPreviewToggle, manager.uploadSteamPreview);
 
-                mapMen.uploadSteamName = EditorGUI.Toggle(rectUploadSteamNameToggle, mapMen.uploadSteamName);
-                mapMen.uploadSteamDescription =
-                    EditorGUI.Toggle(rectUploadSteamDescriptionToggle, mapMen.uploadSteamDescription);
-                mapMen.uploadSteamPreview = EditorGUI.Toggle(rectUploadSteamPreviewToggle, mapMen.uploadSteamPreview);
-
-                EditorGUI.EndDisabledGroup();
-                
                 GUI.Box(rectUploadSettings, "Upload Settings");
 
                 EditorGUI.BeginDisabledGroup(!uploadState);
                 GUI.color = uploadState && isSelectAttach ? new Color(0.55f, 0.6f, 0.9f) : Color.white;
-                if (GUI.Button(rectUploadButtons, "Upload to steam") && uploadState)
+                if (GUI.Button(rectUploadButtons, manager.buildLocal ? "Upload to local exist" : "Upload to steam") && uploadState)
                 {
                     m_loads[m_selectItem.Id] = true;
                     MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-                    MapBuilder.UploadCommunityFile(buildData, m_selectItem.Id, id =>
+                    MapBuilder.UploadCommunityFile(buildData,
+                        m_selectItem, 
+                        manager.buildLocal, 
+                        id =>
                     {
                         m_loads[id] = false;
                         DownloadSpriteAsync(m_fetchResultListItems.Find(itemFind => itemFind.Id == id));
@@ -546,6 +546,20 @@ namespace Editor
             GUI.EndScrollView();
         }
 
+        private void AddBuild(MapMetaConfig config, MapManagerConfig.BuildData buildData, string path, TempData complete)
+        {
+            m_loads[m_selectItem.Id] = false;
+            if (complete == (TempData.Map | TempData.Meta))
+            {
+                Debug.Log($"Build Complete : Everything");
+            }
+
+            MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(config, MapManagerConfig.instance.targetScene, path, (int)complete, ((TempData)m_buildType).HasFlag(TempData.Map)
+                ? ModMapTestTool.Target
+                : buildData.lastValid, m_platformBuild, m_compressBuild));
+            m_buildProcess = false;
+        }
+        
         private string[] GetScenesName(EditorBuildSettingsScene[] editorScenes)
         {
             return editorScenes

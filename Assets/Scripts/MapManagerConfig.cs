@@ -39,6 +39,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
     [HideInInspector] public bool uploadSteamName;
     [HideInInspector] public bool uploadSteamDescription;
     [HideInInspector] public bool uploadSteamPreview;
+    [HideInInspector] public bool buildLocal;
     
     [Serializable]
     public class AttachData
