@@ -187,7 +187,7 @@ namespace Editor
                     GUI.color = Color.white;
                 }
 
-                if (MapManagerConfig.GetOrAttach(m_fetchResultListItems[i].Id, out var attachData) && 
+                if (MapManagerConfig.TryGetAttach(m_fetchResultListItems[i].Id, out var attachData) && 
                     attachData.metaConfig == null)
                 {
                     GUI.color = Color.red;
