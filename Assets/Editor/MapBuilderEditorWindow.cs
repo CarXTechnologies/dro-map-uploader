@@ -142,12 +142,6 @@ namespace Editor
             
             MapManagerConfig.BuildData buildData = default;
             
-            MapManagerConfig.GetOrAttach(m_selectItem.Id, out var attachObj);
-            
-            if (attachObj != null)
-            {
-                buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
-            }
 
             var loadIcon = EditorGUIUtility.IconContent(m_iconLoad[Mathf.FloorToInt((Time.time * 12) % m_iconLoad.Length)]);
             for (int i = 0; i < m_fetchResultListItems.Count; i++)
@@ -356,6 +350,13 @@ namespace Editor
 
             string message;
 
+            MapManagerConfig.GetOrAttach(m_selectItem.Id, out var attachObj);
+            
+            if (attachObj != null)
+            {
+                buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
+            }
+            
             if (attachObj != null && attachObj.metaConfig != null)
             {
                 message = buildData.lastValid.ToString();
