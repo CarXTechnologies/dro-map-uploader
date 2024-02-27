@@ -65,6 +65,8 @@ namespace Editor
         private void OnDisable()
         {
             Clear();
+            MapManagerConfig.SaveForce();
+            SaveChanges();
         }
 
         private void OnDestroy()
