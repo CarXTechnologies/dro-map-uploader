@@ -558,6 +558,14 @@ namespace Editor
             }
 
             GUI.EndScrollView();
+            
+            GUI.color = new Color(1f, 1f, 1f, 0.7f);
+
+            var version = Version.GetFullVersion();
+            var versionSize = GUI.skin.label.CalcSize(new GUIContent(version));
+            
+            EditorGUI.DropShadowLabel(new Rect(position.width - sizeButton * 2 - versionSize.x, position.height - sizeButton * 2, versionSize.x + sizeButton, sizeButton), version);
+            GUI.color = Color.white;
         }
 
         private void AddBuild(MapMetaConfig config, MapManagerConfig.BuildData buildData, string path, TempData complete)
