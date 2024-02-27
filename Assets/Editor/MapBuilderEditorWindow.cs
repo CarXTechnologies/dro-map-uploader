@@ -67,6 +67,13 @@ namespace Editor
             Clear();
         }
 
+        private void OnDestroy()
+        {
+            Clear();
+            MapManagerConfig.SaveForce();
+            SaveChanges();
+        }
+
         public void Clear()
         {
             foreach (var image in images)
