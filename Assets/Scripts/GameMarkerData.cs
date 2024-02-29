@@ -29,6 +29,7 @@ public class MarkerData
         "Road/liquid_water",
         "Road/metal",
         "Road/metal_grille",
+        "Road/pavement",
         "Road/paving_slab",
         "Road/plastic",
         "Road/road_icy",
