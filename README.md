@@ -1,18 +1,19 @@
 # Instructions for uploading tracks to workshop</h1>
 
-1. [Preparation of the track loading project](https://github.com/CarXTechnologies/dro-map-uploader#1-preparation-of-the-track-loading-project-)
-2. [Import the 3D model of the alignment into the project](https://github.com/CarXTechnologies/dro-map-uploader#2-import-the-3d-model-of-the-alignment-into-the-project-)
-3. [Adding core components](https://github.com/CarXTechnologies/dro-map-uploader#3-adding-core-components-)
-   1. [Assigning surface collisions](https://github.com/CarXTechnologies/dro-map-uploader#a-assigning-surface-collisions)
-   2. [Assigning a spawn point on the map](https://github.com/CarXTechnologies/dro-map-uploader#assigning-a-spawn-point-on-the-map)
-   3. [Assigning ambient sounds](https://github.com/CarXTechnologies/dro-map-uploader#assigning-ambient-sounds)
-   4. [Adding a mini-map](https://github.com/CarXTechnologies/dro-map-uploader#adding-a-mini-map)
-   5. [Capture prototypes](https://github.com/CarXTechnologies/dro-map-uploader#capture-prototypes--icon-preview-minimap)
-4. [Uploading the track to the workshop](https://github.com/CarXTechnologies/dro-map-uploader#4-uploading-the-track-to-the-workshop-)
-5. [Supported Components](https://github.com/CarXTechnologies/dro-map-uploader#5-supported-components-)
-6. [Recommendations](https://github.com/CarXTechnologies/dro-map-uploader#6-requirements-)
+- [Preparation of the track loading project](https://github.com/CarXTechnologies/dro-map-uploader#-preparation-of-the-track-loading-project-)
+- [Import the 3D model of the alignment into the project](https://github.com/CarXTechnologies/dro-map-uploader#-import-the-3d-model-of-the-alignment-into-the-project-)
+- [Adding core components](https://github.com/CarXTechnologies/dro-map-uploader#-adding-core-components-)
+   - [Assigning surface collisions](https://github.com/CarXTechnologies/dro-map-uploader#-assigning-surface-collisions)
+   - [Assigning a spawn point on the map](https://github.com/CarXTechnologies/dro-map-uploader#assigning-a-spawn-point-on-the-map)
+   - [Assigning ambient sounds](https://github.com/CarXTechnologies/dro-map-uploader#assigning-ambient-sounds)
+   - [Template system](https://github.com/CarXTechnologies/dro-map-uploader#template-system-road-only)
+   - [Adding a mini-map](https://github.com/CarXTechnologies/dro-map-uploader#adding-a-mini-map)
+   - [Capture prototypes](https://github.com/CarXTechnologies/dro-map-uploader#capture-prototypes--icon-preview-minimap)
+- [Uploading the track to the workshop](https://github.com/CarXTechnologies/dro-map-uploader#-uploading-the-track-to-the-workshop-)
+- [Supported Components](https://github.com/CarXTechnologies/dro-map-uploader#-supported-components-)
+- [Recommendations](https://github.com/CarXTechnologies/dro-map-uploader#-requirements-)
 
-## 1. Preparation of the track loading project 🛠
+## Preparation of the track loading project 🛠
 - To get started, you need to download the project archive. You can find the download link here: **[Project](https://github.com/CarXTechnologies/dro-map-uploader)**. Once you have downloaded the archive, extract it to any location on your computer (Code → Download ZIP).
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/1.png?raw=true" alt="drawing" style="width:600px;"/> <br>
@@ -21,7 +22,7 @@
 - The next step is to launch Unity. Go to the File → Open Project menu, then choose the folder that contains the unpacked project (ensure this folder includes the Assets, Packages, etc. folders).
 - When the project is set up, we can proceed to the next step.
 
-## 2. Import the 3D model of the alignment into the project 🚁
+## Import the 3D model of the alignment into the project 🚁
 
 - In the _Assets/MapResources/ folder,_ create a folder with the working name of the map.
 - Within the created folder, generate a scene through the "Assets → Create → Scene" menu.
@@ -38,7 +39,7 @@
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/3.png?raw=true" alt="drawing" style="width:300px;"/> <br>
 
-## 3. Adding core components ⚙
+## Adding core components ⚙
 
 - The project supports several types of components that are ported into the game. The main ones are:
    - the point where the car appears on the map,
@@ -79,18 +80,18 @@
 - If you need another helper script, you can write it yourself and add your own at Assets/Resources/MapSkipComponent
 
 ### Template system (*road only)
-#### 1. To start using you need to create a template config<br>
+- To start using you need to create a template config<br>
    
-<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/22.png?raw=true" alt="drawing" style="width:500px;"/> <br><br>
-#### 2. Create and redefine template parameters<br>
+<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/22.png?raw=true" alt="drawing" style="width:500px;"/> <br>
+- Create and redefine template parameters<br>
 
-<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/23.png?raw=true" alt="drawing" style="width:350px;"/> <br><br>
-#### 3. Select the desired template config in the GameMarkerData component<br>
+<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/23.png?raw=true" alt="drawing" style="width:350px;"/> <br>
+- Select the desired template config in the GameMarkerData component<br>
 
-<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/24.png?raw=true" alt="drawing" style="width:500px;"/> <br><br>
-#### 4. Select a template for reassigning parameters<br>
+<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/24.png?raw=true" alt="drawing" style="width:500px;"/> <br>
+- Select a template for reassigning parameters<br>
 
-<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/25.png?raw=true" alt="drawing" style="width:400px;"/> <br><br>
+<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/25.png?raw=true" alt="drawing" style="width:400px;"/> <br>
 
 ### Adding a mini-map
 
@@ -109,31 +110,31 @@
    
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/14.png?raw=true" alt="drawing" style="width:300px;"/> <br>
 
-## 4. Uploading the track to the workshop ✈
+## Uploading the track to the workshop ✈
 
-#### 1. Open window "_Tools/MapBuilder_". <br>
+- Open window "_Tools/MapBuilder_". <br>
 
 ![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/17.png?raw=true)<br>
 
-#### 2. Create or select community item. <br>
+- Create or select community item. <br>
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/18.png?raw=true" alt="drawing" style="width:600px;"/> <br>
 
 > Note! Be sure to add your scenes to your build settings, otherwise they won't be visible in MapBuilder. <br>
-> <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/15.png?raw=true" alt="drawing" style="width:500px;"/> <br>
+> <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/15.png?raw=true" alt="drawing" style="width:400px;"/> <br>
 
-#### 3. To upload the track, you initially need to create a map configuration in the map folder. 
+- To upload the track, you initially need to create a map configuration in the map folder. 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/26.png?raw=true" alt="drawing" style="width:600px;"/> <br>
 
-#### 4. Next, you should configure the settings in the configuration file. To do this, you need to:
- - Workshop Name - enter the map name that will be displayed in the workshop<br>
- - Workshop Description(Optional) - description that will be displayed in the workshop<br>
- - Set an **Icon** -the icon of the map that will be displayed in the list of workshop maps in the game itself (read/write enabled item required, png only)<br>
- - Set a **Preview** - map preview, which will be displayed in the workshop and when entering the map in the game itself (read/write enabled item required, png only)
+- Next, you should configure the settings in the configuration file. To do this, you need to:
+  - Workshop Name - enter the map name that will be displayed in the workshop<br>
+  - Workshop Description(Optional) - description that will be displayed in the workshop<br>
+  - Set an **Icon** -the icon of the map that will be displayed in the list of workshop maps in the game itself (read/write enabled item required, png only)<br>
+  - Set a **Preview** - map preview, which will be displayed in the workshop and when entering the map in the game itself (read/write enabled item required, png only)
 
 ![image](https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/16.png?raw=true)
 
-#### 5. To set up a scene as a build, select MapMetaConfig in the MapBuilder window<br>
+- To set up a scene as a build, select MapMetaConfig in the MapBuilder window<br>
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/27.png?raw=true" alt="drawing" style="width:600px;"/> <br>
 
@@ -152,7 +153,7 @@
   - *Upload To ...* - Upload to current workshop, of successful all "Build Targets" for selected config<br>
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/21.png?raw=true" alt="drawing" style="width:400px;"/> <br>
 
-## 5. Supported Components 📜
+## Supported Components 📜
 
 - Physics - MeshCollider, BoxCollider, SphereCollider, CapsuleCollider, Rigidbody.
 - Graphics - ReflectionProbe, Volume.
@@ -160,7 +161,7 @@
 - UI - Canvas, RawImage, TextMeshProUGUI.
 - Other - VideoPlayer (1280x720, 30fps, 15sec)
 
-## 6. Requirements 🎈
+## Requirements 🎈
 
 - Avoid using multiple Directional light sources.
 - Ensure the Steam preview does not exceed the limit of 1MB.
