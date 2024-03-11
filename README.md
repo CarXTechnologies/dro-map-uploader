@@ -1,4 +1,4 @@
-# Instructions for uploading tracks to workshop</h1>
+# Instructions for uploading tracks to workshop 🗺</h1>
 
 - [Preparation of the track loading project](https://github.com/CarXTechnologies/dro-map-uploader#-preparation-of-the-track-loading-project-)
 - [Import the 3D model of the alignment into the project](https://github.com/CarXTechnologies/dro-map-uploader#-import-the-3d-model-of-the-alignment-into-the-project-)
