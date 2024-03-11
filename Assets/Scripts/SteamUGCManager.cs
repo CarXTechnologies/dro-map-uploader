@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
 using System.IO;
 using System.Threading.Tasks;
 using Steamworks.Data;
+using Steamworks.Parser;
 using Steamworks.Ugc;
+using Unity.Collections.LowLevel.Unsafe;
+using Item = Steamworks.Ugc.Item;
 
 namespace GameOverlay
 {
@@ -18,10 +22,88 @@ namespace GameOverlay
 		private string m_itemName;
 		private string m_previewPath;
 		private string m_desciption;
+		private List<Item> m_tempFetchResultList = new List<Item>();
 		
 		public void Update()
 		{
 			SteamClient.RunCallbacks();
+		}
+
+		public async Task PaggingQuery(Query query, List<Item> result, Action<Item> itemSuccess)
+		{
+			const byte maxErrorCount = 5;
+			const int delayBetweenQuery = 500;
+
+			int estimatedQueryCountItems = int.MaxValue;
+			int page = 1;
+			byte errorCounter = 0;
+
+			while (estimatedQueryCountItems > 0 && errorCounter < maxErrorCount)
+			{
+				var searchingResult = await query.GetPageAsync(page);
+				if (searchingResult.HasValue)
+				{
+					var searchingResultPage = searchingResult.Value;
+					AddToResultList(searchingResultPage.Entries, result, itemSuccess);
+					estimatedQueryCountItems = searchingResultPage.TotalCount - searchingResultPage.ResultCount;
+					searchingResultPage.Dispose();
+
+					if (searchingResultPage.ResultCount == 0)
+					{
+						errorCounter++;
+					}
+					else 
+					{
+						page++;
+						errorCounter = 0;
+					}
+				}
+				else 
+				{
+					errorCounter++;
+				}
+
+				if (estimatedQueryCountItems > 0)
+				{
+					await Task.Delay(delayBetweenQuery);            
+				}
+			}
+
+			void AddToResultList(IEnumerable<Item> queryList, List<Item> resultList, Action<Item> success)
+			{
+				foreach (var item in queryList)
+				{
+					if (item.Result != Result.OK || resultList.FindIndex(x => x.Id == item.Id) >= 0 || !IsTagMatching(item))
+					{
+						continue;
+					}
+					success?.Invoke(item);
+					resultList.Add(item);
+				}
+			}
+		}
+		
+		private bool IsTagMatching(Item item)
+		{
+			foreach (string tag in item.Tags)
+			{
+				if (EqualsTag(tag))
+				{
+					return true;
+				}
+			}
+			
+			return false;
+		}
+		
+		private bool EqualsTag(string tag)
+		{
+			return tag.Equals(MAP_TAG, StringComparison.OrdinalIgnoreCase);
+		}
+		
+		public async Task GetWorkshopItems(List<Item> result, Action<Item> callback)
+		{
+			await PaggingQuery(Query.Items.WithTag(MAP_TAG).MatchAnyTag().WhereUserPublished(), result, callback);
 		}
 
 		private IEnumerator UpdateItemCoroutine(string path, ulong id)
@@ -70,6 +152,12 @@ namespace GameOverlay
 			return null;
 		}
 		
+		public static SteamUGCDetails_t GetItemDetail(Item item)
+		{
+			var result = UnsafeUtility.As<Item, Steamworks.Parser.Item>(ref item);
+			return result.details;
+		}
+		
 		protected virtual Editor EditItemContent(Item item, DirectoryInfo dirInfo)
 		{
 			var editor = item.Edit().WithContent(dirInfo);
@@ -78,18 +166,19 @@ namespace GameOverlay
 			if (metaFileInfo != null)
 			{
 				editor.WithMetaData(metaFileInfo.DirectoryName + "/" + metaFileInfo.Name);
-				
-				if (MapManagerConfig.Value.UploadSteamName)
+
+				var build = MapManagerConfig.instance;
+				if (build.uploadSteamName)
 				{
 					editor.WithTitle(m_itemName);
 				}
 
-				if (MapManagerConfig.Value.UploadSteamPreview)
+				if (build.uploadSteamPreview)
 				{
 					editor.WithPreviewFile(m_previewPath);
 				}
 
-				if (MapManagerConfig.Value.UploadSteamDescription)
+				if (build.uploadSteamDescription)
 				{
 					editor.WithDescription(m_desciption);
 				}
@@ -124,7 +213,7 @@ namespace GameOverlay
 			onCreate?.Invoke(m_currentPublishResult.Result);
 		}
 		
-		public IEnumerator PublishItemCoroutine(string path, Action<ulong> uploadedId)
+		public IEnumerator PublishItemCoroutine(string path, Func<ulong, bool> uploadedId)
 		{
 			yield return m_currentPublishResult.AsIEnumerator();
 
@@ -147,7 +236,7 @@ namespace GameOverlay
 			}
 		}
 
-		public IEnumerator UploadItemCoroutine(string path, PublishedFileId itemId, Action<ulong> uploadedId = null)
+		public IEnumerator UploadItemCoroutine(string path, PublishedFileId itemId, Func<ulong, bool> uploadedId = null)
 		{
 			yield return UpdateItemCoroutine(path, itemId);
 			uploadedId?.Invoke(itemId);

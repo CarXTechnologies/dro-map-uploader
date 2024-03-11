@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameMarkerData : MonoBehaviour
@@ -7,7 +9,7 @@ public class GameMarkerData : MonoBehaviour
 }
 
 [Serializable]
-public struct MarkerData
+public class MarkerData
 {
     public static readonly string[] paramEditor =
     {
@@ -53,8 +55,55 @@ public struct MarkerData
     };
     
     public string head;
-    [TextArea] public string param;
+    public string param;
+    [SerializeReference] public object value;
+    [SerializeReference] public object customValue;
     public int index;
+    public string lastHeadObject;
+    public string templateName;
+    public int templateIndex;
+    public GameMarkerTemplateConfig templateConfig;
+    
+    public static readonly Dictionary<string, Func<string, object>> paramObjectsEditor = new Dictionary<string, Func<string, object>>()
+    {
+        {"Road", name => 
+            AssetUtils.GetDBConfig<SurfaceTemplate>(name.Replace("Road/",string.Empty)).physicMaterial}
+    };
+    
+    public void Update()
+    {
+        if (templateConfig == null)
+        {
+            value = null;
+            return; 
+        }
+        
+        if (templateConfig.presets.presets.Length < 1)
+        {
+            return;
+        }
+        
+        var templateFind = templateConfig.presets.presets.FirstOrDefault(template => template.templateName == templateName);
+        value = templateFind != default && templateFind.templateName != "Custom" ? templateFind.value : customValue;
+    }
     
     public string GetHead() => head.ToLower();
+    public static string GetHeadTarget(string param)
+    {
+        var group = param.IndexOf('/');
+        return group != -1 ? param.Substring(0, group) : param;
+    }
+}
+
+[Serializable]
+public struct PhysicMaterialProperties
+{
+    [Range(0, 5)] public float friction;
+    [Range(0, 1)] public float rollFriction;
+    [Range(-1, 0.05f)] public float bumpMin;
+    [Range(-0.2f, 1)] public float bumpMax;
+    [Range(0, 100)] public float bumpScale;
+    [Range(-1, 0)] public float bump2Min;
+    [Range(0, 1)] public float bump2Max;
+    [Range(-1, 100)] public float bump2Scale;
 }

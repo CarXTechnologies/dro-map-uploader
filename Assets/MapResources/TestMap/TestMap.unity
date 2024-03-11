@@ -221,7 +221,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &4421020
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -334,7 +344,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &6047567
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -429,7 +449,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &25366538
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -636,7 +666,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &31719886
 GameObject:
   m_ObjectHideFlags: 0
@@ -749,7 +789,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &39487283
 GameObject:
   m_ObjectHideFlags: 0
@@ -893,7 +943,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &66814370
 GameObject:
   m_ObjectHideFlags: 0
@@ -1336,7 +1396,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &100619822
 GameObject:
   m_ObjectHideFlags: 0
@@ -1466,7 +1536,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &105973038
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -1579,7 +1659,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &108201214
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -1643,7 +1733,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &127422554
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -1837,7 +1937,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &129462053
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -1932,7 +2042,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &152245067
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -1996,63 +2116,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 152245064}
   m_Mesh: {fileID: 8950745636350237586, guid: dda8f08f4586e5046a87597f3494402f, type: 3}
---- !u!1001 &159367488
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 5424431528397242375, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
-      propertyPath: m_RootOrder
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 5424431528397242375, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5424431528397242375, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5424431528397242375, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5424431528397242375, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5424431528397242375, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5424431528397242375, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5424431528397242375, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5424431528397242375, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5424431528397242375, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5424431528397242375, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5958072160682140666, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
-      propertyPath: m_Name
-      value: nightOvercast
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 9ba63daecb494e84ba862873d8cc3941, type: 3}
 --- !u!1 &219900827
 GameObject:
   m_ObjectHideFlags: 0
@@ -2151,7 +2214,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &219900832
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -2264,7 +2337,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &222018110
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -2391,7 +2474,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &265818639
 GameObject:
   m_ObjectHideFlags: 0
@@ -2490,7 +2583,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &265818644
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -2616,7 +2719,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &297790725
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -2729,7 +2842,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &309283129
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -2936,7 +3059,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &347544200
 GameObject:
   m_ObjectHideFlags: 0
@@ -3142,7 +3275,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &442432216
 GameObject:
   m_ObjectHideFlags: 0
@@ -3241,7 +3384,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &442432221
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -3354,7 +3507,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &450173831
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -3481,7 +3644,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &472209413
 GameObject:
   m_ObjectHideFlags: 0
@@ -3560,7 +3733,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &472258639
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -3673,7 +3856,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &482387410
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -3800,7 +3993,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &489097976
 GameObject:
   m_ObjectHideFlags: 19
@@ -3830,6 +4033,7 @@ MonoBehaviour:
   m_Script: {fileID: 764987095}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Entries: []
 --- !u!4 &489097978
 Transform:
   m_ObjectHideFlags: 19
@@ -3893,7 +4097,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &493432378
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -4055,7 +4269,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &502166894
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -4150,7 +4374,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &511210498
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -4312,7 +4546,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &522181416
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -4456,7 +4700,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &565788146
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -4551,7 +4805,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &575859195
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -4713,7 +4977,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &576946492
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -4826,7 +5100,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &577234445
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -5001,7 +5285,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &628788578
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -5393,7 +5687,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &668124839
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -5537,7 +5841,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &707225879
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -5890,7 +6204,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &759189571
 GameObject:
   m_ObjectHideFlags: 0
@@ -5940,7 +6264,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &759189574
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -6098,7 +6432,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &789820906
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -6260,7 +6604,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &799948158
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -6463,7 +6817,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &891352215
 GameObject:
   m_ObjectHideFlags: 0
@@ -6593,7 +6957,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &891512136
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -6751,7 +7125,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &912739088
 GameObject:
   m_ObjectHideFlags: 0
@@ -6863,7 +7247,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &965374900
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -7025,7 +7419,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &977068064
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -7089,7 +7493,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &981997805
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -7251,7 +7665,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1003342322
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -7471,7 +7895,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &1023097961
 GameObject:
   m_ObjectHideFlags: 0
@@ -7521,7 +7955,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1023097964
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -7683,7 +8127,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1023397738
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -7841,7 +8295,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &1077641630
 GameObject:
   m_ObjectHideFlags: 0
@@ -7954,7 +8418,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1001 &1093641007
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8233,7 +8707,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &1159845927
 GameObject:
   m_ObjectHideFlags: 0
@@ -8332,7 +8816,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1159845932
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -8507,7 +9001,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1180122020
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -8603,7 +9107,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1223707476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8883,7 +9387,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1271190381
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -9045,7 +9559,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1275481595
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -9158,7 +9682,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1276033140
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -9321,6 +9855,80 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2173215841612614181, guid: 460cb3001ad305c42bab77014b2088e5, type: 3}
   m_PrefabInstance: {fileID: 1318026614}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1339440259
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1339440262}
+  - component: {fileID: 1339440261}
+  - component: {fileID: 1339440260}
+  m_Layer: 0
+  m_Name: SpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1339440260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339440259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e579fe3e36ad41499c314b964c1bbb64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_form: 1
+  m_isEmpty: 0
+  m_castToFloor: 1
+  m_color: {r: 0, g: 1, b: 0, a: 1}
+--- !u!114 &1339440261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339440259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  markerData:
+    head: SpawnPoint
+    param: SpawnPoint
+    value:
+      id: 0
+    index: 0
+    lastHeadObject: SpawnPoint
+    templateName: Custom
+    templateIndex: 1
+    templateConfig: {fileID: 11400000, guid: a37184661f9902f44b968a52c7f72827, type: 2}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
+--- !u!4 &1339440262
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1339440259}
+  m_LocalRotation: {x: -0, y: -0.8622325, z: -0, w: 0.5065127}
+  m_LocalPosition: {x: 51.300003, y: 0.51000154, z: -44.9}
+  m_LocalScale: {x: 15.000009, y: 1, z: 15.000009}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: -119.136, z: 0}
 --- !u!1 &1365433643
 GameObject:
   m_ObjectHideFlags: 0
@@ -9464,7 +10072,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &1396761242
 GameObject:
   m_ObjectHideFlags: 0
@@ -9563,7 +10181,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1396761247
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -9627,7 +10255,26 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: Road
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: PhysicMaterialProperties, ns: , asm: Assembly-CSharp}
+      data:
+        friction: 0
+        rollFriction: 0
+        bumpMin: 0
+        bumpMax: 0
+        bumpScale: 0
+        bump2Min: 0
+        bump2Max: 0
+        bump2Scale: 0
 --- !u!64 &1408357960
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -9789,7 +10436,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1413756279
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -9884,7 +10541,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1429625103
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -9997,7 +10664,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1444980438
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -10159,7 +10836,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1445432783
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -10223,7 +10910,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1449524643
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -10385,7 +11082,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1459922541
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -10449,7 +11156,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1468604338
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -10611,7 +11328,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1485129082
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -10724,7 +11451,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1489787533
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -11035,7 +11772,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1556914540
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -11148,7 +11895,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1557846677
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -11261,7 +12018,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1587811218
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -11418,7 +12185,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1645461791
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -11580,7 +12357,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1646633885
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -11706,7 +12493,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1666539883
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -11899,7 +12696,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1686964263
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -12043,7 +12850,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1726578257
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -12107,7 +12924,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1735218769
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -12220,7 +13047,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1765861718
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -12382,7 +13219,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1787350373
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -12509,7 +13356,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &1792230924
 GameObject:
   m_ObjectHideFlags: 0
@@ -12622,7 +13479,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &1798224946
 GameObject:
   m_ObjectHideFlags: 0
@@ -12780,7 +13647,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1813309003
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -12924,7 +13801,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1825711346
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -13035,7 +13922,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1852796781
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -13130,7 +14027,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1872487354
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -13385,7 +14292,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &1947174965
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -13438,6 +14355,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 659944115}
     m_Modifications:
+    - target: {fileID: 2173215841612614171, guid: 460cb3001ad305c42bab77014b2088e5, type: 3}
+      propertyPath: markerData.lastHeadObject
+      value: Ambient
+      objectReference: {fileID: 0}
     - target: {fileID: 2173215841612614181, guid: 460cb3001ad305c42bab77014b2088e5, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -13617,7 +14538,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &1993198746
 GameObject:
   m_ObjectHideFlags: 0
@@ -13761,7 +14692,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &2000742559
 GameObject:
   m_ObjectHideFlags: 0
@@ -13874,7 +14815,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &2019878835
 GameObject:
   m_ObjectHideFlags: 0
@@ -13973,7 +14924,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &2019878840
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -14068,7 +15029,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &2044834975
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -14181,7 +15152,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &2071234225
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -14294,7 +15275,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &2108107741
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -15089,7 +16080,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!33 &110536166491063347
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -15546,7 +16547,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &184013089657962167
 GameObject:
   m_ObjectHideFlags: 0
@@ -16009,7 +17020,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &280290588572394079
 Transform:
   m_ObjectHideFlags: 0
@@ -16871,7 +17892,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &397640261420811695
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -17266,7 +18297,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &446840571861977151
 GameObject:
   m_ObjectHideFlags: 0
@@ -18423,7 +19464,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &672641466646675568
 Transform:
   m_ObjectHideFlags: 0
@@ -19208,7 +20259,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &765606703768772808
 Transform:
   m_ObjectHideFlags: 0
@@ -19338,7 +20399,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &786889260222788559
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -19683,7 +20754,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!136 &835485457017137741
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -20144,7 +21225,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &901254016791082232
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -20409,7 +21500,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!33 &937987561548543436
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -20607,7 +21708,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &1004638419172967494
 GameObject:
   m_ObjectHideFlags: 0
@@ -21083,7 +22194,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!33 &1059383289342435414
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -21554,7 +22675,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &1159075408032153657
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -22436,7 +23567,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &1312687533278676081
 GameObject:
   m_ObjectHideFlags: 0
@@ -23607,7 +24748,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!205 &1497490666269423279
 LODGroup:
   m_ObjectHideFlags: 0
@@ -23914,7 +25065,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &1535497939290548329
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -26224,7 +27385,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &1939045994460451052
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -27084,7 +28255,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &2097471656606386005
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -27449,7 +28630,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &2170268042374851498
 GameObject:
   m_ObjectHideFlags: 0
@@ -27474,6 +28665,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 659944115}
     m_Modifications:
+    - target: {fileID: 2173215841612614171, guid: 460cb3001ad305c42bab77014b2088e5, type: 3}
+      propertyPath: markerData.lastHeadObject
+      value: Ambient
+      objectReference: {fileID: 0}
     - target: {fileID: 2173215841612614181, guid: 460cb3001ad305c42bab77014b2088e5, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -27950,7 +29145,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &2242121269119054427
 GameObject:
   m_ObjectHideFlags: 0
@@ -28323,7 +29528,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &2333040482254597200
 Transform:
   m_ObjectHideFlags: 0
@@ -28513,7 +29728,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &2366288423590925937
 Transform:
   m_ObjectHideFlags: 0
@@ -29462,7 +30687,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!205 &2560474457859046471
 LODGroup:
   m_ObjectHideFlags: 0
@@ -30131,7 +31366,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!205 &2654376033962543222
 LODGroup:
   m_ObjectHideFlags: 0
@@ -30223,7 +31468,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &2670201190947885687
 GameObject:
   m_ObjectHideFlags: 0
@@ -32540,7 +33795,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!64 &3053648771611920772
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -34228,7 +35493,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &3383025863045352219
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -34573,7 +35848,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!33 &3435913674870491097
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -34714,7 +35999,26 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/asphalt
+    value:
+      id: 0
     index: 2
+    lastHeadObject: Road
+    templateName: AsphaultDef
+    templateIndex: 0
+    templateConfig: {fileID: 11400000, guid: a37184661f9902f44b968a52c7f72827, type: 2}
+  references:
+    version: 1
+    00000000:
+      type: {class: PhysicMaterialProperties, ns: , asm: Assembly-CSharp}
+      data:
+        friction: 1
+        rollFriction: 0.01
+        bumpMin: 0
+        bumpMax: 0
+        bumpScale: 100
+        bump2Min: 0
+        bump2Max: 0
+        bump2Scale: 0
 --- !u!4 &3450219626877173528
 Transform:
   m_ObjectHideFlags: 0
@@ -34810,7 +36114,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &3465446724413748849
 GameObject:
   m_ObjectHideFlags: 0
@@ -35758,7 +37072,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &3622669148737755151
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -36139,7 +37463,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &3667451249167382748
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -38007,6 +39341,22 @@ Transform:
   m_Father: {fileID: 6630103854785871809}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3993819308459257232
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5066290139852838033}
+  m_Layer: 0
+  m_Name: 'sunlight (Missing Prefab with guid: 05609c9de416e4b49b09137d29bf5ff5)'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!23 &3995370613051398486
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -38205,7 +39555,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &4032225716749470877
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -40946,7 +42306,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!33 &4453354606700121340
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -42502,7 +43872,7 @@ Transform:
   m_GameObject: {fileID: 5217420615432706361}
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -63.1, y: -1.87, z: -5.1}
-  m_LocalScale: {x: 1, y: 1.0000043, z: 1.0000043}
+  m_LocalScale: {x: 1, y: 1.0000343, z: 1.0000343}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -43619,7 +44989,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &5024749716066162138
 GameObject:
   m_ObjectHideFlags: 0
@@ -43956,6 +45336,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5260965669825058359}
   m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &5066290139852838033
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3993819308459257232}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 5424431528555036999}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!205 &5067973870063856651
 LODGroup:
@@ -45230,7 +46624,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &5364646682516524197
 Transform:
   m_ObjectHideFlags: 0
@@ -45627,7 +47031,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &5421630903932458735
 GameObject:
   m_ObjectHideFlags: 0
@@ -45687,6 +47101,21 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!4 &5424431528555036999
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5958072160536076986}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 5066290139852838033}
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5429379954236923491
 GameObject:
   m_ObjectHideFlags: 0
@@ -46181,7 +47610,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!108 &5480017486498591888
 Light:
   m_ObjectHideFlags: 0
@@ -47054,8 +48493,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   markerData:
     head: Road
-    param: Road/dirt
-    index: 7
+    param: Road/asphalt
+    value:
+      id: 0
+    index: 2
+    lastHeadObject: Road
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: PhysicMaterialProperties, ns: , asm: Assembly-CSharp}
+      data:
+        friction: 0
+        rollFriction: 0
+        bumpMin: 0
+        bumpMax: 0
+        bumpScale: 0
+        bump2Min: 0
+        bump2Max: 0
+        bump2Scale: 0
 --- !u!4 &5589511445018055356
 Transform:
   m_ObjectHideFlags: 0
@@ -47219,7 +48677,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &5614432814886175805
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -47484,7 +48952,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &5652387552483280088
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -49214,6 +50692,23 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
   m_IsActive: 1
+--- !u!1 &5958072160536076986
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5424431528555036999}
+  - component: {fileID: 7195260469319237345}
+  m_Layer: 0
+  m_Name: nightOvercast
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!33 &5959726039978339161
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -50353,7 +51848,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &6182787846200856553
 GameObject:
   m_ObjectHideFlags: 0
@@ -50689,7 +52194,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &6262212492242995485
 GameObject:
   m_ObjectHideFlags: 0
@@ -50923,7 +52438,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!1 &6316707547997353555
 GameObject:
   m_ObjectHideFlags: 0
@@ -51787,7 +53312,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &6468879733399623138
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -52400,7 +53935,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &6597792220174154645
 Transform:
   m_ObjectHideFlags: 0
@@ -52813,7 +54358,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!33 &6671470255374358410
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -54129,7 +55684,26 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/default
+    value:
+      id: 0
     index: 1
+    lastHeadObject: Road
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: PhysicMaterialProperties, ns: , asm: Assembly-CSharp}
+      data:
+        friction: 0
+        rollFriction: 0
+        bumpMin: 0
+        bumpMax: 0
+        bumpScale: 0
+        bump2Min: 0
+        bump2Max: 0
+        bump2Scale: 0
 --- !u!4 &6917627706605721905
 Transform:
   m_ObjectHideFlags: 0
@@ -55344,7 +56918,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &7153643839552569983
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -55717,6 +57301,23 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 129922386121565164}
   m_Mesh: {fileID: 6172360313768262660, guid: d71802e0d90f29344848ed910b585a89, type: 3}
+--- !u!114 &7195260469319237345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5958072160536076986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: 5958b1b8891d7a84d97036d5abc2c3b1, type: 2}
 --- !u!23 &7200024427319169149
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -57599,7 +59200,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &7489755231896192890
 Transform:
   m_ObjectHideFlags: 0
@@ -60441,7 +62052,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/concrete
+    value:
+      id: 0
     index: 6
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &8035513955943683387
 Transform:
   m_ObjectHideFlags: 0
@@ -60861,7 +62482,26 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/asphalt
+    value:
+      id: 0
     index: 2
+    lastHeadObject: Road
+    templateName: AsphaultDef
+    templateIndex: 0
+    templateConfig: {fileID: 11400000, guid: a37184661f9902f44b968a52c7f72827, type: 2}
+  references:
+    version: 1
+    00000000:
+      type: {class: PhysicMaterialProperties, ns: , asm: Assembly-CSharp}
+      data:
+        friction: 1
+        rollFriction: 0.01
+        bumpMin: 0
+        bumpMax: 0
+        bumpScale: 100
+        bump2Min: 0
+        bump2Max: 0
+        bump2Scale: 0
 --- !u!4 &8139446777150389040
 Transform:
   m_ObjectHideFlags: 0
@@ -61036,7 +62676,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!33 &8166951582340859817
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -61078,7 +62728,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &8171356089517915918
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -61293,7 +62953,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &8204584951005536180
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -61663,7 +63333,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!33 &8259700262803146435
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -62891,7 +64571,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &8501899632304751458
 Transform:
   m_ObjectHideFlags: 0
@@ -64040,7 +65730,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!33 &8706857396864982591
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -64661,7 +66361,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &8819703641405254888
 Transform:
   m_ObjectHideFlags: 0
@@ -64786,7 +66496,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &8835661346964286093
 Transform:
   m_ObjectHideFlags: 0
@@ -64992,7 +66712,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &8855509600593546582
 Transform:
   m_ObjectHideFlags: 0
@@ -65732,71 +67462,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1866712404142415919}
   m_Mesh: {fileID: 6172360313768262660, guid: d71802e0d90f29344848ed910b585a89, type: 3}
---- !u!1001 &8929527419512820451
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 8929527420449074784, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_Name
-      value: SpawnPoint
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 15.000009
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 15.000009
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 51.300003
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.51000154
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -44.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.5065127
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0.8622325
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: -119.136
-      objectReference: {fileID: 0}
-    - target: {fileID: 8929527420449074789, guid: 453bc855cea951943acb787d6332b502, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 453bc855cea951943acb787d6332b502, type: 3}
 --- !u!4 &8939802874735375914
 Transform:
   m_ObjectHideFlags: 0
@@ -66328,7 +67993,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/wood
+    value:
+      id: 0
     index: 25
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &9050113759721436189
 Transform:
   m_ObjectHideFlags: 0
@@ -66513,7 +68188,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!23 &9081030059099629977
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -66728,7 +68413,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!33 &9097000051140274748
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -67174,7 +68869,17 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/metal
+    value:
+      id: 0
     index: 14
+    lastHeadObject: 
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!4 &9192326989024410049
 Transform:
   m_ObjectHideFlags: 0
