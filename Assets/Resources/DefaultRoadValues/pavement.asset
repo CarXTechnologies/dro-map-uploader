@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f34082f4a6849aa90cf4395a93ad420, type: 3}
-  m_Name: asphalt
+  m_Name: pavement
   m_EditorClassIdentifier: 
   physicMaterial:
     friction: 1
