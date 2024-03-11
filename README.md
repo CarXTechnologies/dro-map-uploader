@@ -10,6 +10,8 @@
    - [Adding a mini-map](https://github.com/CarXTechnologies/dro-map-uploader#adding-a-mini-map)
    - [Capture prototypes](https://github.com/CarXTechnologies/dro-map-uploader#capture-prototypes--icon-preview-minimap)
 - [Uploading the track to the workshop](https://github.com/CarXTechnologies/dro-map-uploader#-uploading-the-track-to-the-workshop-)
+   - [Build Setting](https://github.com/CarXTechnologies/dro-map-uploader#build-setting)
+   - [Upload Setting](https://github.com/CarXTechnologies/dro-map-uploader#upload-setting)
 - [Supported Components](https://github.com/CarXTechnologies/dro-map-uploader#-supported-components-)
 - [Recommendations](https://github.com/CarXTechnologies/dro-map-uploader#-requirements-)
 
@@ -138,14 +140,14 @@
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/27.png?raw=true" alt="drawing" style="width:600px;"/> <br>
 
-- #### Build Setting
+#### Build Setting
   - Platform - only steam support.
   - Target Scene - selected scene for build map bundle. (*the scene must be in build settings).
   - Build Targets(flags) - select build targets what you want to build/rebuild.
   - *Build* - builds all selected "Build Targets" <br>
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/new-components/Image/20.png?raw=true" alt="drawing" style="width:400px;"/><br>
 
-- #### Upload Setting
+#### Upload Setting
   - Upload Steam Description - if enabled, the description on the workshop page will be updated
   - Upload Steam Name - if enabled, the map name on the workshop page will be updated.
   - Upload Steam Preview - If enabled, the map icon on the Workshop page will be updated.
