@@ -1,19 +1,19 @@
 # Instructions for uploading tracks to workshop 🗺</h1>
 
-- [Preparation of the track loading project](https://github.com/CarXTechnologies/dro-map-uploader#-preparation-of-the-track-loading-project-)
-- [Import the 3D model of the alignment into the project](https://github.com/CarXTechnologies/dro-map-uploader#-import-the-3d-model-of-the-alignment-into-the-project-)
-- [Adding core components](https://github.com/CarXTechnologies/dro-map-uploader#-adding-core-components-)
-   - [Assigning surface collisions](https://github.com/CarXTechnologies/dro-map-uploader#-assigning-surface-collisions)
-   - [Assigning a spawn point on the map](https://github.com/CarXTechnologies/dro-map-uploader#assigning-a-spawn-point-on-the-map)
-   - [Assigning ambient sounds](https://github.com/CarXTechnologies/dro-map-uploader#assigning-ambient-sounds)
-   - [Template system](https://github.com/CarXTechnologies/dro-map-uploader#template-system-road-only)
-   - [Adding a mini-map](https://github.com/CarXTechnologies/dro-map-uploader#adding-a-mini-map)
-   - [Capture prototypes](https://github.com/CarXTechnologies/dro-map-uploader#capture-prototypes--icon-preview-minimap)
-- [Uploading the track to the workshop](https://github.com/CarXTechnologies/dro-map-uploader#-uploading-the-track-to-the-workshop-)
-   - [Build Setting](https://github.com/CarXTechnologies/dro-map-uploader#build-setting)
-   - [Upload Setting](https://github.com/CarXTechnologies/dro-map-uploader#upload-setting)
-- [Supported Components](https://github.com/CarXTechnologies/dro-map-uploader#-supported-components-)
-- [Recommendations](https://github.com/CarXTechnologies/dro-map-uploader#-requirements-)
+- [Preparation of the track loading project](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#-preparation-of-the-track-loading-project-)
+- [Import the 3D model of the alignment into the project](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#-import-the-3d-model-of-the-alignment-into-the-project-)
+- [Adding core components](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#-adding-core-components-)
+   - [Assigning surface collisions](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#-assigning-surface-collisions)
+   - [Assigning a spawn point on the map](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#assigning-a-spawn-point-on-the-map)
+   - [Assigning ambient sounds](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#assigning-ambient-sounds)
+   - [Template system](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#template-system-road-only)
+   - [Adding a mini-map](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#adding-a-mini-map)
+   - [Capture prototypes](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#capture-prototypes--icon-preview-minimap)
+- [Uploading the track to the workshop](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#-uploading-the-track-to-the-workshop-)
+   - [Build Setting](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#build-setting)
+   - [Upload Setting](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#upload-setting)
+- [Supported Components](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#-supported-components-)
+- [Recommendations](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1#-requirements-)
 
 ## Preparation of the track loading project 🛠
 - To get started, you need to download the project archive. You can find the download link here: **[Project](https://github.com/CarXTechnologies/dro-map-uploader)**. Once you have downloaded the archive, extract it to any location on your computer (Code → Download ZIP).
