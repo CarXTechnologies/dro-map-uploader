@@ -9,7 +9,7 @@
    - [Template system](#template-system-road-only)
    - [Adding a mini-map](#adding-a-mini-map)
    - [Capture prototypes](#capture-prototypes--icon-preview-minimap)
-- [Uploading the track to the workshop](#-uploading-the-track-to-the-workshop)
+- [Uploading the track to the workshop](#uploading-the-track-to-the-workshop)
    - [Build Setting](#build-setting)
    - [Upload Setting](#upload-setting)
 - [Supported Components](#supported-components)
@@ -112,7 +112,7 @@
    
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/14.png?raw=true" alt="drawing" style="width:300px;"/> <br>
 
-## Uploading the track to the workshop ✈
+## Uploading the track to the workshop
 
 - Open window "_Tools/MapBuilder_". <br>
 
