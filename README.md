@@ -1,21 +1,21 @@
 # Instructions for uploading tracks to workshop 🗺</h1>
 
-- [Preparation of the track loading project](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-preparation-of-the-track-loading-project-)
-- [Import the 3D model of the alignment into the project](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-import-the-3d-model-of-the-alignment-into-the-project-)
-- [Adding core components](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-adding-core-components-)
+- [Preparation of the track loading project](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-preparation-of-the-track-loading-project)
+- [Import the 3D model of the alignment into the project](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-import-the-3d-model-of-the-alignment-into-the-project)
+- [Adding core components](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-adding-core-components)
    - [Assigning surface collisions](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-assigning-surface-collisions)
    - [Assigning a spawn point on the map](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#assigning-a-spawn-point-on-the-map)
    - [Assigning ambient sounds](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#assigning-ambient-sounds)
    - [Template system](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#template-system-road-only)
    - [Adding a mini-map](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#adding-a-mini-map)
    - [Capture prototypes](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#capture-prototypes--icon-preview-minimap)
-- [Uploading the track to the workshop](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-uploading-the-track-to-the-workshop-)
+- [Uploading the track to the workshop](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-uploading-the-track-to-the-workshop)
    - [Build Setting](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#build-setting)
    - [Upload Setting](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#upload-setting)
-- [Supported Components](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-supported-components-)
-- [Recommendations](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-requirements-)
+- [Supported Components](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-supported-components)
+- [Recommendations](https://github.com/CarXTechnologies/dro-map-uploader/tree/target/1.1?tab=readme-ov-file#-requirements)
 
-## Preparation of the track loading project 🛠
+## Preparation of the track loading project
 - To get started, you need to download the project archive. You can find the download link here: **[Project](https://github.com/CarXTechnologies/dro-map-uploader)**. Once you have downloaded the archive, extract it to any location on your computer (Code → Download ZIP).
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/1.png?raw=true" alt="drawing" style="width:600px;"/> <br>
@@ -24,7 +24,7 @@
 - The next step is to launch Unity. Go to the File → Open Project menu, then choose the folder that contains the unpacked project (ensure this folder includes the Assets, Packages, etc. folders).
 - When the project is set up, we can proceed to the next step.
 
-## Import the 3D model of the alignment into the project 🚁
+## Import the 3D model of the alignment into the project
 
 - In the _Assets/MapResources/ folder,_ create a folder with the working name of the map.
 - Within the created folder, generate a scene through the "Assets → Create → Scene" menu.
@@ -41,7 +41,7 @@
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/3.png?raw=true" alt="drawing" style="width:300px;"/> <br>
 
-## Adding core components ⚙
+## Adding core components
 
 - The project supports several types of components that are ported into the game. The main ones are:
    - the point where the car appears on the map,
@@ -155,7 +155,7 @@
   - *Upload To ...* - Upload to current workshop, of successful all "Build Targets" for selected config<br>
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/21.png?raw=true" alt="drawing" style="width:400px;"/> <br>
 
-## Supported Components 📜
+## Supported Components
 
 - Physics - MeshCollider, BoxCollider, SphereCollider, CapsuleCollider, Rigidbody.
 - Graphics - ReflectionProbe, Volume.
@@ -163,7 +163,7 @@
 - UI - Canvas, RawImage, TextMeshProUGUI.
 - Other - VideoPlayer (1280x720, 30fps, 15sec)
 
-## Requirements 🎈
+## Requirements
 
 - Avoid using multiple Directional light sources.
 - Ensure the Steam preview does not exceed the limit of 1MB.
