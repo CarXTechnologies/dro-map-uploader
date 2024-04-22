@@ -15,8 +15,8 @@ public class ReflectionProbeSwap : MonoBehaviour
         var hdrpAsset = GraphicsSettings.renderPipelineAsset as HDRenderPipelineAsset;
         var hdrpSettings = hdrpAsset.currentPlatformRenderPipelineSettings;
 
-        var savedCubemapSize = hdrpSettings.lightLoopSettings.reflectionCubemapSize;
-        hdrpSettings.lightLoopSettings.reflectionCubemapSize = CubeReflectionResolution.CubeReflectionResolution512;
+        var savedCubemapSize = hdrpSettings.lightLoopSettings.reflectionProbeTexCacheSize;
+        hdrpSettings.lightLoopSettings.reflectionProbeTexCacheSize = ReflectionProbeTextureCacheResolution.Resolution512x512;
         var reflectProbe = GetComponent<ReflectionProbe>();
         var additionalData = reflectProbe.GetComponent<HDAdditionalReflectionData>();
 
@@ -40,7 +40,7 @@ public class ReflectionProbeSwap : MonoBehaviour
             File.WriteAllBytes(filepath, row.EncodeToEXR(Texture2D.EXRFlags.CompressZIP));
         }
 
-        hdrpSettings.lightLoopSettings.reflectionCubemapSize = savedCubemapSize;
+        hdrpSettings.lightLoopSettings.reflectionProbeTexCacheSize = savedCubemapSize;
     }
 #endif
 }
