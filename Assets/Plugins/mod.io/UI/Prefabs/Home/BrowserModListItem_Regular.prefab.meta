@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6dab28ac97efe3645a00cfa31697b3e0
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Prefabs/Home/BrowserModListItem_Regular.prefab
+  uploadId: 603954

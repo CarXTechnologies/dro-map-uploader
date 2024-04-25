@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 28c79f6171a406f4d8672f60f57401e3
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Glyphs/Action_Buttons_Bottom.asset
+  uploadId: 603954

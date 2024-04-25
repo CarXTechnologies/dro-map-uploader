@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0a464bb150d6dbe46b938abf56a57201
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Prefabs/Uninstall Confirmation Menu/Uninstall
+    Confirmation Menu.prefab
+  uploadId: 603954

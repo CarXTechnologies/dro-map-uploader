@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 459ab804e2a5892468991873ccf21071
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/ListItems/GalleryImageButtonListItem.cs
+  uploadId: 603954

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 46651c87421014362b1d700bf51631c2
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/Runtime/ModIO.Implementation/Implementation.API/Implementation.API.Objects/UserObject.cs
+  uploadId: 603954

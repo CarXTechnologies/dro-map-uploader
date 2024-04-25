@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 5197bd263d7fe4d80b3330b3546a6942
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/Runtime/ModIO.Implementation/Implementation.API/Classes/ResponseTranslator.cs
+  uploadId: 603954

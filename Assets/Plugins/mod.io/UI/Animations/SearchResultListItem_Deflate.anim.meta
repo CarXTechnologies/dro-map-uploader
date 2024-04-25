@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: bea4d68d182aca14288a3ed40c52c43c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Animations/SearchResultListItem_Deflate.anim
+  uploadId: 603954

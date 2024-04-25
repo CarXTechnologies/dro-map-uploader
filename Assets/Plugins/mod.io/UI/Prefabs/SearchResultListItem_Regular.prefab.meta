@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6d729eff984d2fc4fa8a660fff6d3a13
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Prefabs/SearchResultListItem_Regular.prefab
+  uploadId: 603954

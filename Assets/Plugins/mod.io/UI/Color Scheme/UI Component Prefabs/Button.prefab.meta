@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9bde00a16f32d6d42a1280198365e78b
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Color Scheme/UI Component Prefabs/Button.prefab
+  uploadId: 603954

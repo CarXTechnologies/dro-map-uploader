@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 3261082e64b114043b4bc3643e221a44
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Scripts/Panels/5Digits/KeyInput5DigitsUi.cs
+  uploadId: 603954

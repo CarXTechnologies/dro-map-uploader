@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ea21e48f38da76543b756b26384f53b2
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Prefabs/SelectionManager.prefab
+  uploadId: 603954

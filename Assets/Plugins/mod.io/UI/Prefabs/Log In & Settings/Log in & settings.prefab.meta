@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4e3560bff46556f4b8dcdd3e31f54a32
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Prefabs/Log In & Settings/Log in & settings.prefab
+  uploadId: 603954

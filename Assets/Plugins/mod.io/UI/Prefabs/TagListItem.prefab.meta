@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 35365a29917c91d4680499b1230f172b
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Prefabs/TagListItem.prefab
+  uploadId: 603954

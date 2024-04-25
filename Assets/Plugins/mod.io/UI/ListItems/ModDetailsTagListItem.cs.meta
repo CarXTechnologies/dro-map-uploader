@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6d3d46ab18cf543488af7ea44612529f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/ListItems/ModDetailsTagListItem.cs
+  uploadId: 603954

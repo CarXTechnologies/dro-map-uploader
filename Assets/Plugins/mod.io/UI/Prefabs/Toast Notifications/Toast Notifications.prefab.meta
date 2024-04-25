@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4ebcda84dcabb7c478414af24f21764b
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Prefabs/Toast Notifications/Toast Notifications.prefab
+  uploadId: 603954

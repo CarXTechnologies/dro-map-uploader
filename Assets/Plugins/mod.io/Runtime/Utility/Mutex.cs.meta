@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e94f09a6c1f87ba4984bd4945e9cc1f1
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/Runtime/Utility/Mutex.cs
+  uploadId: 603954

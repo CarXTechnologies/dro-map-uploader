@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6efb24684032ee44c9f65e778026d42f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/ThirdParty/QRCoder/Framework4.0Methods/Stream4Methods.cs
+  uploadId: 603954

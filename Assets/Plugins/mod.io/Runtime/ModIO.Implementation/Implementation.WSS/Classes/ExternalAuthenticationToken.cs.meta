@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 655c7e3337b11f648aae9cf61f51276e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/Runtime/ModIO.Implementation/Implementation.WSS/Classes/ExternalAuthenticationToken.cs
+  uploadId: 603954

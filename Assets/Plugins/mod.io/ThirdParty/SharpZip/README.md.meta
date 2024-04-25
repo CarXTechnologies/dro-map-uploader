@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: be6a88b4579994eb4b4651abd24fe42e
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/ThirdParty/SharpZip/README.md
+  uploadId: 603954

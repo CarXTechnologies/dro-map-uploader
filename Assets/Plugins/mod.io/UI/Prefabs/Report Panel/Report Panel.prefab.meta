@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b453efa2342c8cd42bacda122d59b301
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Prefabs/Report Panel/Report Panel.prefab
+  uploadId: 603954

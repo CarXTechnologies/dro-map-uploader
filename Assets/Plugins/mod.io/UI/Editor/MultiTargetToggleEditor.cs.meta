@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 0c9612e1315bc2e4ca56d1d3b94d816f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Editor/MultiTargetToggleEditor.cs
+  uploadId: 603954

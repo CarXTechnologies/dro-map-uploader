@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: cf2c157d5b2714e55b9a46c7844ba8cb
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/Runtime/ModIO.Implementation/Implementation.API/Implementation.API.Objects/TermsButtonObject.cs
+  uploadId: 603954

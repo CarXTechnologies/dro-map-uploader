@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 0eaf0c980d8d34cd391be6f8e9a24a9c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/Runtime/Delegates/ModManagementEventDelegate.cs
+  uploadId: 603954

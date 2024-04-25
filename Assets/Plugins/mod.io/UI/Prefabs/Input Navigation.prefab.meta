@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8c6ca06ea3133cd4f8c7798a423b65f8
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Prefabs/Input Navigation.prefab
+  uploadId: 603954

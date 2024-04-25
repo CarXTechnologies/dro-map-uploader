@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e0420b28badf13c4aacb5ff5743e5fdd
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Glyphs/Menu_Background.asset
+  uploadId: 603954

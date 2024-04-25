@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 3ce45ae16d55f4b47a42da33e9748956
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/ThirdParty/SharpZip/src/ICSharpCode.SharpZipLib/Core/InvalidNameException.cs
+  uploadId: 603954

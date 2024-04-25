@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 4efea456ff56d164ea53e82b983a0e24
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/Runtime/ModIO.Implementation/Implementation.WSS/Implementation.WSS.Messages/WssMessage.cs
+  uploadId: 603954

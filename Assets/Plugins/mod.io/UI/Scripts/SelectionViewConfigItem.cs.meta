@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 282c5400d21b4bb4eb409e050d525542
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Scripts/SelectionViewConfigItem.cs
+  uploadId: 603954

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: fb11aa92a8bf14c40a4f846d52a9caeb
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Prefabs/ProgressTab.prefab
+  uploadId: 603954

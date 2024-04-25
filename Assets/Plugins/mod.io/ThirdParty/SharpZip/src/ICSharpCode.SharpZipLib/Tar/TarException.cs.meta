@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: dc7e15c22d5e449c2ac79a8aa95244fb
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/ThirdParty/SharpZip/src/ICSharpCode.SharpZipLib/Tar/TarException.cs
+  uploadId: 603954

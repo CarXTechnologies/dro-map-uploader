@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a8f403eda942e1540a59cd647b9e063f
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/Documentation/UPGRADING.md
+  uploadId: 603954

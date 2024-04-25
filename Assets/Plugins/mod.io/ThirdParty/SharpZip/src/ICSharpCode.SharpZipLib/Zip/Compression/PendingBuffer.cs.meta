@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 2a6367048f9ee4d4f963aac9fe78c69e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/ThirdParty/SharpZip/src/ICSharpCode.SharpZipLib/Zip/Compression/PendingBuffer.cs
+  uploadId: 603954

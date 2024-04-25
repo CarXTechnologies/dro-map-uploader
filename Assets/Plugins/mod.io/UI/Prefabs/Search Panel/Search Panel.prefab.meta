@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 767ce36082d6519459c23650a28a5f29
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Prefabs/Search Panel/Search Panel.prefab
+  uploadId: 603954

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 245d14b54e4a2b24d8caf0f965aabcb6
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Scripts/Panels/Authentication/Avatar.cs
+  uploadId: 603954

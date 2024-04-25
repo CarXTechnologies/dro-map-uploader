@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 41734941304f2e843ac339b5227f4c8b
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/UI/Color Scheme/UI Component Prefabs/InputField.prefab
+  uploadId: 603954

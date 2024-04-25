@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 65112bea60e9544dea4905e876d61428
+timeCreated: 1574150746
+licenseType: Store
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/modio.UnityPlugin.asmdef
+  uploadId: 603954

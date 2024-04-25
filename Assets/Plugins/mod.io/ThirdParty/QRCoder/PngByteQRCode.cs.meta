@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 8cddbb8d69a21c144b41ecd3cfd363fc
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 138866
+  packageName: Mod Browser & Manager by mod.io
+  packageVersion: v2023.7.1
+  assetPath: Assets/Plugins/mod.io/ThirdParty/QRCoder/PngByteQRCode.cs
+  uploadId: 603954
