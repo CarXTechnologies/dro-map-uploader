@@ -27,11 +27,12 @@ public struct ValidItemData : ICloneable
 
         if (data != null)
         {
-            foreach (var item in data)
+            for (var index = 0; index < data.Count; index++)
             {
+                var item = data[index];
                 if (item.current != 0)
                 {
-                    result += item.ToStat() + "\n";
+                    result += item.ToStat() + (index < data.Count - 2 ? "\n" : String.Empty);
                 }
             }
         }

@@ -14,13 +14,12 @@ public enum TempData : int
     
 public enum PlatformBuild : int
 {
-    Steam = 0,
-    //EpicGames = 1,
-    //PS4 = 100,
-    //PS5 = 101,
-    //XboxOne = 1004,
-    //XboxSeriesS = 1005,
-    //XboxSeriesX = 1006,
+    StandaloneWindows = 0,
+    Switch = 1,
+    PS4 = 100,
+    PS5 = 101,
+    XboxOne = 1004,
+    XboxSeries = 1005,
 }
     
 public enum CompressBuild : int
@@ -33,8 +32,8 @@ public enum CompressBuild : int
 public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 {
     [InspectorSetting(isLock: true)] public MapMetaConfig mapMetaConfigValue;
-    [InspectorSetting(isLock: true)] public List<AttachData> attachingConfigs = new List<AttachData>();
-    [InspectorSetting(isLock: true)] public List<BuildData> builds = new List<BuildData>();
+    [InspectorSetting(isLock: true)] public List<AttachData> attachingConfigs = new ();
+    [InspectorSetting(isLock: true)] public List<BuildData> builds = new ();
     [HideInInspector] public string targetScene;
     [HideInInspector] public bool uploadSteamName;
     [HideInInspector] public bool uploadSteamDescription;

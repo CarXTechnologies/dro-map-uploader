@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using GameOverlay;
 using Steamworks;
 using Steamworks.Data;
 using Steamworks.Ugc;
@@ -402,8 +401,23 @@ namespace Editor
                 
                 switch (platformBuild)
                 {
-                    case PlatformBuild.Steam :
+                    case PlatformBuild.StandaloneWindows :
                         m_buildTarget = BuildTarget.StandaloneWindows;
+                        break;
+                    case PlatformBuild.PS4 :
+                        m_buildTarget = BuildTarget.PS4;
+                        break;
+                    case PlatformBuild.PS5 :
+                        m_buildTarget = BuildTarget.PS5;
+                        break;
+                    case PlatformBuild.XboxOne :
+                        m_buildTarget = BuildTarget.XboxOne;
+                        break;
+                    case PlatformBuild.XboxSeries :
+                        m_buildTarget = BuildTarget.GameCoreXboxSeries;
+                        break;
+                    case PlatformBuild.Switch :
+                        m_buildTarget = BuildTarget.Switch;
                         break;
                 }
                 
@@ -477,7 +491,7 @@ namespace Editor
             }), steamUgc);
         }
         
-        public static void UploadCommunityFile(
+        public static void UploadSteamCommunityItem(
             MapManagerConfig.BuildData buildData,
             Item published, 
             bool localBuild, 
@@ -490,7 +504,7 @@ namespace Editor
 
             if (localBuild)
             {
-                BuildDataTransitionLocal(published);
+                BuildDataTransitionLocal(published.Directory);
                 Debug.Log($"Move build to folder successful ({published.Directory})");
             }
             else
@@ -529,12 +543,23 @@ namespace Editor
             ClearManifest(assetBuildPath);
         }
         
-        private static void BuildDataTransitionLocal(Item item)
+        private static void BuildDataTransitionLocal(string directory)
         {
-            ClearDirectory(item.Directory, false);
-            CopyTemporary(GetTemporary(TempData.Map), item.Directory);
-            CopyTemporary(GetTemporary(TempData.Meta), item.Directory);
-            ClearManifest(item.Directory);
+            ClearDirectory(directory, false);
+            CopyTemporary(GetTemporary(TempData.Map), directory);
+            CopyTemporary(GetTemporary(TempData.Meta), directory);
+            ClearManifest(directory);
+        }
+        
+        public static void BuildDataTransitionToDirectory(MapManagerConfig.BuildData buildData, string directory)
+        {
+            InitPathUpload(buildData);
+            ModMapTestTool.Target = (ValidItemData)ModMapTestTool.Steam.Clone();
+            SelectCache();
+            
+            CopyTemporary(GetTemporary(TempData.Map), directory);
+            CopyTemporary(GetTemporary(TempData.Meta), directory);
+            ClearManifest(directory);
         }
 
         private static void ClearManifest(string directory)
