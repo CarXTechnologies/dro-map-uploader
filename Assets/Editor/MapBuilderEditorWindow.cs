@@ -33,6 +33,8 @@ namespace Editor
         private int m_buildType;
         private PlatformBuild m_platformBuild;
         private CompressBuild m_compressBuild;
+        private PlatformBuild m_platformBuildCached;
+        private CompressBuild m_compressBuildCached;
         private bool m_buildProcess;
         private int m_selectionUploadSetting;
         
@@ -469,12 +471,14 @@ namespace Editor
                     m_buildProcess = true;
                     var selectId = (ulong)SelectItem.Id;
                     MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
+                    m_compressBuildCached = m_compressBuild;
+                    m_platformBuildCached = m_platformBuild;
 
                     MapBuilder.BuildCustom((TempData)m_buildType,
                         (TempData)buildData.buildSuccess,
                         selectId,
-                        buildData.compress,
-                        buildData.platform,
+                        m_compressBuildCached,
+                        m_platformBuildCached,
                         (path, success) => AddBuild(attachObj.metaConfig, buildData, path, success));
                 }
 
