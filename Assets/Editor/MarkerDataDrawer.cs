@@ -117,6 +117,7 @@ namespace Editor
             if (drawTemplate)
             {
                 EditorGUI.BeginDisabledGroup(drawTemplatePopup);
+                amountRect.x -= 16;
                 EditorGUI.PropertyField(amountRect, propValue, GUIContent.none, true);
                 EditorGUI.EndDisabledGroup();
 
