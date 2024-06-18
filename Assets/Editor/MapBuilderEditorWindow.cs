@@ -507,8 +507,7 @@ namespace Editor
                 var flagPlat = (buildData.buildSuccess & m_buildType) == buildData.buildSuccess;
                 EditorGUI.BeginDisabledGroup(!flagPlat);
                 GUI.Label(rectPlatformName, "Platform");
-                m_platformBuild =
-                    (PlatformBuild)EditorGUI.EnumPopup(rectPlatform, flagPlat ? m_platformBuild : buildData.platform);
+                m_platformBuild = (PlatformBuild)EditorGUI.EnumPopup(rectPlatform, flagPlat ? m_platformBuild : buildData.platform);
                 EditorGUI.EndDisabledGroup();
 
                 var variants = Enum.GetNames(typeof(UploadSettingVariant));

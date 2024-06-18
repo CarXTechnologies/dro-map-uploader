@@ -7,6 +7,11 @@ public class UIUtils
 {
     public static async Task DownloadSprite(string url, Action<Sprite, Texture2D> callback)
     {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return;
+        }
+        
         using UnityWebRequest webRequest = UnityWebRequestTexture.GetTexture(url);
         var webRequestSend = webRequest.SendWebRequest();
         float timeOut = 10f;
