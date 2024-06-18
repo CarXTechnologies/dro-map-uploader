@@ -16,23 +16,30 @@ namespace Editor
         
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            EditorGUI.BeginProperty(position, label, property);
             var gameMarkerData = (property.serializedObject.targetObject as GameMarkerData);
-
             var propHeight = base.GetPropertyHeight(property, label);
             var amountRect = new Rect(position.x + 16, position.y, position.width - 16, propHeight);
-            var indent = EditorGUI.indentLevel;
-            EditorGUI.indentLevel = 0;
             
             void Space(float power = 1)
             {
                 amountRect.y += propHeight * power;
                 m_height += propHeight * power;
             }
+            
+            var indent = EditorGUI.indentLevel;
+            
             m_height = 0;
-
+            EditorGUI.indentLevel = 0;
+            
+            EditorGUI.BeginProperty(position, label, property);
             if (property.serializedObject.isEditingMultipleObjects)
             {
+      
+                position.size = new Vector2(256, 18);
+                EditorGUI.HelpBox(position, "Multi-object editing not supported.", MessageType.Info);
+                Space();
+                EditorGUI.indentLevel = indent;
+                EditorGUI.EndProperty();
                 return;
             }
             
