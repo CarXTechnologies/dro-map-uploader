@@ -37,6 +37,7 @@ namespace Editor
         private CompressBuild m_compressBuildCached;
         private bool m_buildProcess;
         private int m_selectionUploadSetting;
+        private bool m_buttonLastClickOnAnyItem = true;
         
         private enum UploadSettingVariant
         {
@@ -128,7 +129,12 @@ namespace Editor
             {
                 DestroyImmediate(image.Item1);
             }
-
+            
+            if (string.IsNullOrWhiteSpace(item.PreviewImageUrl))
+            {
+                return;
+            }
+            
             m_images[item.Id] = (null, true);
             await UIUtils.DownloadSprite(item.PreviewImageUrl, (_, texture2D) =>
             {
@@ -161,6 +167,21 @@ namespace Editor
             
             MapManagerConfig.BuildData buildData = default;
             
+            MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj);
+            
+            if (attachObj != null)
+            {
+                buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
+                if (m_buttonLastClickOnAnyItem)
+                {
+                    m_compressBuild = buildData.compress;
+                    m_platformBuild = buildData.platform;
+                    m_buildType = buildData.buildSuccess;
+                    MapManagerConfig.instance.targetScene = buildData.targetScene;
+                    m_buttonLastClickOnAnyItem = false;
+                }
+            }
+            
             var loadIcon = EditorGUIUtility.IconContent(m_iconLoad[Mathf.FloorToInt((Time.time * 12) % m_iconLoad.Length)]);
             for (int i = 0; i < m_fetchResultListItems.Count; i++)
             {
@@ -169,10 +190,7 @@ namespace Editor
                 GUI.Box(rectItem, string.Empty);
                 if (GUI.Button(rectItem, string.Empty))
                 {
-                    if (i != m_selectItemIndex && !string.IsNullOrWhiteSpace(buildData.targetScene))
-                    {
-                        MapManagerConfig.instance.targetScene = buildData.targetScene;
-                    }
+                    m_buttonLastClickOnAnyItem = true;
                     m_selectItemIndex = i;
                 }
                 rectItem.x += rectItem.height + space;
@@ -266,13 +284,6 @@ namespace Editor
             GUI.Label(rectItem, iconSteam);
             
             GUI.EndScrollView();
-            
-            MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj);
-            
-            if (attachObj != null)
-            {
-                buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
-            }
             
             Rect lastRect;
             
@@ -400,8 +411,7 @@ namespace Editor
             }
             else
             {
-                lastRect = new Rect(rectUploadToExternalPath.position + Vector2.up * sizeButton * 2f, 
-                    rectUploadToExternalPath.size);
+                lastRect = new Rect(rectUploadToExternalPath.position + Vector2.up * sizeButton * 2f, rectUploadToExternalPath.size);
             }
             
             var rectPreviewBack = new Rect(0, 0, rectPreview.width + 31, lastRect.y);
@@ -423,8 +433,7 @@ namespace Editor
             if (attachObj != null)
             {
                 var old = attachObj.metaConfig;
-                attachObj.metaConfig =
-                    EditorGUI.ObjectField(rectConfig, old, typeof(MapMetaConfig), false) as MapMetaConfig;
+                attachObj.metaConfig = EditorGUI.ObjectField(rectConfig, old, typeof(MapMetaConfig), false) as MapMetaConfig;
 
                 if (attachObj.metaConfig != null && !m_attaching[SelectItem.Id])
                 {
@@ -455,9 +464,7 @@ namespace Editor
 
             if (attachObj != null && attachObj.metaConfig != null)
             {
-                EditorGUI.BeginDisabledGroup(!isSelectAttach ||
-                                             attachObj == null ||
-                                             attachObj.metaConfig == null);
+                EditorGUI.BeginDisabledGroup(!isSelectAttach || attachObj == null || attachObj.metaConfig == null);
 
                 GUI.Label(rectSplitLeft, "Build Targets");
                 m_buildType = EditorGUI.MaskField(rectSplitRight, m_buildType, Enum.GetNames(typeof(TempData)));
@@ -473,7 +480,7 @@ namespace Editor
                     MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
                     m_compressBuildCached = m_compressBuild;
                     m_platformBuildCached = m_platformBuild;
-
+                    
                     MapBuilder.BuildCustom((TempData)m_buildType,
                         (TempData)buildData.buildSuccess,
                         selectId,
@@ -538,21 +545,16 @@ namespace Editor
                     GUI.Label(rectUploadSteamPreview, "Upload Preview");
 
                     manager.uploadSteamName = EditorGUI.Toggle(rectUploadSteamNameToggle, manager.uploadSteamName);
-                    manager.uploadSteamDescription =
-                        EditorGUI.Toggle(rectUploadSteamDescriptionToggle, manager.uploadSteamDescription);
-                    manager.uploadSteamPreview =
-                        EditorGUI.Toggle(rectUploadSteamPreviewToggle, manager.uploadSteamPreview);
+                    manager.uploadSteamDescription = EditorGUI.Toggle(rectUploadSteamDescriptionToggle, manager.uploadSteamDescription);
+                    manager.uploadSteamPreview = EditorGUI.Toggle(rectUploadSteamPreviewToggle, manager.uploadSteamPreview);
 
                     EditorGUI.BeginDisabledGroup(!uploadState);
                     GUI.color = uploadState && isSelectAttach ? new Color(0.55f, 0.6f, 0.9f) : Color.white;
-                    if (GUI.Button(rectUploadButtons,
-                            manager.buildLocal ? "Upload to local exist" : "Upload to steam") && uploadState)
+                    if (GUI.Button(rectUploadButtons, manager.buildLocal ? "Upload to local exist" : "Upload to steam") && uploadState)
                     {
                         m_loads[SelectItem.Id] = true;
                         MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-                        MapBuilder.UploadSteamCommunityItem(buildData,
-                            SelectItem,
-                            manager.buildLocal,
+                        MapBuilder.UploadSteamCommunityItem(buildData, SelectItem, manager.buildLocal,
                             id =>
                             {
                                 m_loads[id] = false;
@@ -639,14 +641,17 @@ namespace Editor
         private void AddBuild(MapMetaConfig config, MapManagerConfig.BuildData buildData, string path, TempData complete)
         {
             m_loads[SelectItem.Id] = false;
+            
             if (complete == (TempData.Map | TempData.Meta))
             {
                 Debug.Log($"Build Complete : Everything");
             }
-
+            
+            buildData.compress = m_compressBuildCached;
+            buildData.platform = m_platformBuildCached;
+            
             MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(config, MapManagerConfig.instance.targetScene, path, (int)complete, ((TempData)m_buildType).HasFlag(TempData.Map)
-                ? ModMapTestTool.Target
-                : buildData.lastValid, m_platformBuild, m_compressBuild));
+                ? ModMapTestTool.Target : buildData.lastValid, m_platformBuildCached, m_compressBuildCached));
             m_buildProcess = false;
         }
         
@@ -675,7 +680,7 @@ namespace Editor
         {
             foreach (var item in m_fetchResultListItems)
             {
-                if (m_images[item.Id].Item2)
+                if (m_images.TryGetValue(item.Id, out var itemImage) && itemImage.Item2)
                 {
                     return true;
                 }
