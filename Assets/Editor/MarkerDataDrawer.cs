@@ -30,6 +30,11 @@ namespace Editor
                 m_height += propHeight * power;
             }
             m_height = 0;
+
+            if (property.serializedObject.isEditingMultipleObjects)
+            {
+                return;
+            }
             
             var propHead = property.FindPropertyRelative("head");
             var propIndex = property.FindPropertyRelative("index");
@@ -50,8 +55,7 @@ namespace Editor
             string paramPath = MarkerData.paramObjectsEditor.ContainsKey(propParam.stringValue) ?
                 propParam.stringValue : propHead.stringValue;
             
-            if (MarkerData.paramObjectsEditor.ContainsKey(paramPath) && 
-                !property.serializedObject.isEditingMultipleObjects)
+            if (MarkerData.paramObjectsEditor.ContainsKey(paramPath))
             {
                 Space();
                 EditorGUI.ObjectField(amountRect, propTemplateConfig);
