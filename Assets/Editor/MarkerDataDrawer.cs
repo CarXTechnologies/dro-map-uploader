@@ -101,7 +101,7 @@ namespace Editor
                         propValue.managedReferenceValue = gameMarkerTemplateConfig.presets.presets[propTemplateIndex.intValue].value;
                         drawTemplatePopup = true;
                     }
-                    else if (m_oldTemplate != "Custom" && MarkerData.paramObjectsEditor.TryGetValue(paramPath, out var getValue))
+                    else if (m_oldTemplate != "Custom")
                     {
                         propValue.managedReferenceValue = gameMarkerData.markerData.customValue;
                     }

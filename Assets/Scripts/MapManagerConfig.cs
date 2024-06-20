@@ -15,11 +15,11 @@ public enum TempData : int
 public enum PlatformBuild : int
 {
     StandaloneWindows = 0,
-    Switch = 1,
-    PS4 = 100,
-    PS5 = 101,
-    XboxOne = 1004,
-    XboxSeries = 1005,
+    //Switch = 1,
+    //PS4 = 100,
+    //PS5 = 101,
+    //XboxOne = 1004,
+    //XboxSeries = 1005,
 }
     
 public enum CompressBuild : int
