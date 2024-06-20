@@ -404,7 +404,7 @@ namespace Editor
                     case PlatformBuild.StandaloneWindows :
                         m_buildTarget = BuildTarget.StandaloneWindows;
                         break;
-                    case PlatformBuild.PS4 :
+                   /* case PlatformBuild.PS4 :
                         m_buildTarget = BuildTarget.PS4;
                         break;
                     case PlatformBuild.PS5 :
@@ -418,7 +418,7 @@ namespace Editor
                         break;
                     case PlatformBuild.Switch :
                         m_buildTarget = BuildTarget.Switch;
-                        break;
+                        break;*/
                 }
                 
                 SelectCache();
