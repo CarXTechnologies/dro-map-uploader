@@ -67,7 +67,7 @@ public class MarkerData
     public static readonly Dictionary<string, Func<string, object>> paramObjectsEditor = new Dictionary<string, Func<string, object>>()
     {
         {"Road", name => 
-            AssetUtils.GetDBConfig<SurfaceTemplate>(name.Replace("Road/",string.Empty)).physicMaterial}
+            AssetUtils.GetDBConfig<SurfaceTemplate>(name.Replace("Road/", string.Empty)).physicMaterial}
     };
     
     public void Update()
@@ -75,19 +75,11 @@ public class MarkerData
         if (templateConfig == null)
         {
             value = null;
-            return; 
         }
-        
-        if (templateConfig.presets.presets.Length < 1)
-        {
-            return;
-        }
-        
-        var templateFind = templateConfig.presets.presets.FirstOrDefault(template => template.templateName == templateName);
-        value = templateFind != default && templateFind.templateName != "Custom" ? templateFind.value : customValue;
     }
     
     public string GetHead() => head.ToLower();
+    
     public static string GetHeadTarget(string param)
     {
         var group = param.IndexOf('/');
