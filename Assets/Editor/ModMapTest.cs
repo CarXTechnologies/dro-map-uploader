@@ -39,7 +39,7 @@ namespace Editor
             new ValidItem(nameof(HingeJoint), 0, 100),
             //Hdrp 
             new ValidItem(nameof(ReflectionProbe), 1, 1),
-            new ValidItem(nameof(HDAdditionalLightData), 0, 200),
+            new ValidItem(nameof(HDAdditionalLightData), 0, 500),
             new ValidItem(nameof(HDAdditionalReflectionData), 0, 200),
             new ValidItem(nameof(Volume), 1, 1),
             //Render
