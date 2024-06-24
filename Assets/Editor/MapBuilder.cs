@@ -64,7 +64,7 @@ namespace Editor
             return pos == -1 ? path : path.Substring(pos + 1, path.Length - pos - 7);
         }
         
-        private static bool CheckAndError()
+        private static bool CheckMetaAndError()
         {
             if (!GetSceneNameFromPath(m_targetScene).All(char.IsLetter))
             {
@@ -422,46 +422,46 @@ namespace Editor
                 }
                 
                 SelectCache();
-                
-                if (target.HasFlag(TempData.Map))
-                {
-                    if (!IsCurrentSceneCheck())
-                    {
-                        ClearDirectory(GetTemporary(TempData.Map));
-                        InitPath();
 
-                        if (!ValidateSceneAndMirror())
+                if (!CheckMetaAndError())
+                {
+                    if (target.HasFlag(TempData.Map))
+                    {
+                        if (!IsCurrentSceneCheck())
                         {
-                            RenameCacheScene(published);
-                            CreateMapBundle();
-                            success |= TempData.Map;
+                            ClearDirectory(GetTemporary(TempData.Map));
+                            InitPath();
+
+                            if (!ValidateSceneAndMirror())
+                            {
+                                RenameCacheScene(published);
+                                CreateMapBundle();
+                                success |= TempData.Map;
+                            }
+                            else
+                            {
+                                success = (TempData)((int)success & (~(int)TempData.Map));
+                            }
                         }
                         else
                         {
                             success = (TempData)((int)success & (~(int)TempData.Map));
                         }
                     }
-                    else
-                    {
-                        success = (TempData)((int)success & (~(int)TempData.Map));
-                    }
-                }
-                
-                if (target.HasFlag(TempData.Meta))
-                {
-                    ClearDirectory(GetTemporary(TempData.Meta));
-                    InitPath();
 
-                    if (!CheckAndError())
+                    if (target.HasFlag(TempData.Meta))
                     {
+                        ClearDirectory(GetTemporary(TempData.Meta));
+                        InitPath();
+                        
                         CreateMetaBundle();
                         ClearCacheScene();
                         success |= TempData.Meta;
                     }
-                    else
-                    {
-                        success = (TempData)((int)success & (~(int)TempData.Meta));
-                    }
+                }
+                else
+                {
+                    success = (TempData)((int)success & (~(int)TempData.Meta));
                 }
             }
             catch (Exception e)
