@@ -54,6 +54,25 @@ public class MarkerData
         "Ambient/Winter",
     };
     
+    public static string[] paramEditorOnlyParameters
+    {
+        get
+        {
+            m_paramEditorOnlyParameters ??= paramEditor.Where(s =>
+            {
+                var split = s.Split('/');
+                if (split.Length > 0)
+                {
+                    return paramObjectsEditor.ContainsKey(split[0]);
+                }
+
+                return false;
+            }).ToArray();
+            
+            return m_paramEditorOnlyParameters;
+        }
+    }
+
     public string head;
     public string param;
     [SerializeReference] public object value;
@@ -64,10 +83,11 @@ public class MarkerData
     public int templateIndex;
     public GameMarkerTemplateConfig templateConfig;
     
+    private static string[] m_paramEditorOnlyParameters;
+    
     public static readonly Dictionary<string, Func<string, object>> paramObjectsEditor = new Dictionary<string, Func<string, object>>()
     {
-        {"Road", name => 
-            AssetUtils.GetDBConfig<SurfaceTemplate>(name.Replace("Road/", string.Empty)).physicMaterial}
+        {"Road", name => AssetUtils.GetDBConfig<SurfaceTemplate>(name.Replace("Road/", string.Empty)).physicMaterial}
     };
     
     public void Update()
