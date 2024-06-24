@@ -51,7 +51,7 @@ namespace Editor
             // UI
             new ValidItem(nameof(Canvas), 0, 10),
             new ValidItem(nameof(CanvasScaler), 0, 10),
-            new ValidItem(nameof(CanvasRenderer), 0, 100),
+            new ValidItem(nameof(CanvasRenderer), 0, 10),
             new ValidItem(nameof(RectTransform), 0, 100),
             new ValidItem(nameof(TextMeshProUGUI), 0, 50),
             new ValidItem(nameof(RawImage), 0, 20),
@@ -63,7 +63,7 @@ namespace Editor
             new ValidItem(nameof(VisualEffect), 0, 200),
             new ValidItem("VFXRenderer", 0, 200),
             //Other
-            new ValidItem(nameof(GameMarkerData), 1, 1000),
+            new ValidItem(nameof(GameMarkerData), 1, 10000),
             new ValidItem(nameof(CacheData), 0, 1),
             new ValidItem(nameof(Minimap), 1, 1),
             new ValidItem("SceneObjectIDMapSceneAsset", 0, 1)
