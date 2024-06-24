@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Steamworks;
 using Steamworks.Ugc;
 using UnityEditor;
 using UnityEditor.Graphs;
@@ -98,6 +99,11 @@ namespace Editor
 
         private async Task FetchItems()
         {
+            if (!SteamClient.IsValid)
+            {
+                return;
+            }
+            
             while (m_buildProcess)
             {
                 await Task.Delay(100);
@@ -158,6 +164,12 @@ namespace Editor
             float elementHeight = space + rectItem.height;
             var iconSteam = EditorGUIUtility.IconContent("steam");
             bool uploadState = true;
+
+            if (!SteamClient.IsValid)
+            {
+                EditorGUI.HelpBox(new Rect(rectWindow.width / 2, rectWindow.height / 2, 128, 64), "Please open steam", MessageType.Error);
+                return;
+            }
             
             m_scrollPosition = GUI.BeginScrollView(
                 new Rect(rectItem.x + space * 2, 0, rectItem.width + space * 2, position.height), m_scrollPosition, 
@@ -538,7 +550,14 @@ namespace Editor
 
                     rectBuildLocal.x += 22;
                     rectBuildLocal.width -= 22;
-                    EditorGUI.HelpBox(rectBuildLocal, "don`t use the map restart", MessageType.Warning);
+                    if (existItemDirectory)
+                    {
+                        EditorGUI.HelpBox(rectBuildLocal, "don`t use the map restart", MessageType.Warning);
+                    }
+                    else
+                    {
+                        EditorGUI.HelpBox(rectBuildLocal, "need subscribe this item", MessageType.Error);
+                    }
 
                     GUI.Label(rectUploadSteamName, "Upload Name");
                     GUI.Label(rectUploadSteamDescription, "Upload Description");

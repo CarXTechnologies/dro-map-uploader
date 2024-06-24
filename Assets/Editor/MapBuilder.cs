@@ -172,11 +172,18 @@ namespace Editor
 
         public static void InitSteamUGC()
         {
-            if (steamUgc == null)
+            try
             {
-                SteamClient.Init(SteamUGCManager.APP_ID, false);
-                steamUgc = new SteamUGCManager();
-                EditorApplication.update += steamUgc.Update;
+                if (steamUgc == null)
+                {
+                    SteamClient.Init(SteamUGCManager.APP_ID, false);
+                    steamUgc = new SteamUGCManager();
+                    EditorApplication.update += steamUgc.Update;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning(e);
             }
         }
 
