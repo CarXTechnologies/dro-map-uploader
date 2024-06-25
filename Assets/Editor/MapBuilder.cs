@@ -430,15 +430,24 @@ namespace Editor
                 
                 SelectCache();
 
+                if (target.HasFlag(TempData.Meta))
+                {
+                    ClearDirectory(GetTemporary(TempData.Meta));
+                }
+
+                if (target.HasFlag(TempData.Map))
+                {
+                    ClearDirectory(GetTemporary(TempData.Map));
+                }
+
+                InitPath();
+
                 if (!CheckMetaAndError())
                 {
                     if (target.HasFlag(TempData.Map))
                     {
                         if (!IsCurrentSceneCheck())
                         {
-                            ClearDirectory(GetTemporary(TempData.Map));
-                            InitPath();
-
                             if (!ValidateSceneAndMirror())
                             {
                                 RenameCacheScene(published);
@@ -458,9 +467,6 @@ namespace Editor
 
                     if (target.HasFlag(TempData.Meta))
                     {
-                        ClearDirectory(GetTemporary(TempData.Meta));
-                        InitPath();
-                        
                         CreateMetaBundle();
                         ClearCacheScene();
                         success |= TempData.Meta;
