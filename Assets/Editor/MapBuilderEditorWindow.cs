@@ -199,12 +199,22 @@ namespace Editor
             {
                 rectItem.y += space;
                 var item = m_fetchResultListItems[i];
+                
                 GUI.Box(rectItem, string.Empty);
-                if (GUI.Button(rectItem, string.Empty))
+
+                var hasOldFlag = item.HasTag(SteamUGCManager.MAP_TAG_OLD);
+                if (hasOldFlag)
+                {
+                    GUI.color = new Color(0.2f, 0.5f, 0.3f, 1f);
+                }
+
+                if (GUI.Button(rectItem, hasOldFlag ? "Old version!": string.Empty))
                 {
                     m_buttonLastClickOnAnyItem = true;
                     m_selectItemIndex = i;
                 }
+                
+                GUI.color = Color.white;
                 rectItem.x += rectItem.height + space;
                 rectItem.height /= 2;
                 var oldSize = GUI.skin.label.fontSize;

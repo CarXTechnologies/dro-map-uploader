@@ -15,7 +15,8 @@ public class SteamUGCManager
 {
 	public const ulong PUBLISH_ITEM_FAILED_CODE = 0u;
 	public const uint APP_ID = 635260;
-	private const string MAP_TAG = "map_2.0";
+	public const string MAP_TAG_OLD = "Map";
+	public const string MAP_TAG = "map_2.0";
 	private Task<PublishResult> m_currentPublishResult;
 	private string m_itemName;
 	private string m_previewPath;
@@ -96,11 +97,12 @@ public class SteamUGCManager
 		
 	private bool EqualsTag(string tag)
 	{
-		return tag.Equals(MAP_TAG, StringComparison.OrdinalIgnoreCase);
+		return tag.Equals(MAP_TAG, StringComparison.OrdinalIgnoreCase) || tag.Equals(MAP_TAG_OLD, StringComparison.OrdinalIgnoreCase) ;
 	}
 		
 	public async Task GetWorkshopItems(List<Item> result, Action<Item> callback)
 	{
+		await PaggingQuery(Query.Items.WithTag(MAP_TAG_OLD).MatchAnyTag().WhereUserPublished(), result, callback);
 		await PaggingQuery(Query.Items.WithTag(MAP_TAG).MatchAnyTag().WhereUserPublished(), result, callback);
 	}
 
