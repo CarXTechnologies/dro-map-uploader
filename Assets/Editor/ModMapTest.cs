@@ -51,7 +51,7 @@ namespace Editor
             // UI
             new ValidItem(nameof(Canvas), 0, 10),
             new ValidItem(nameof(CanvasScaler), 0, 10),
-            new ValidItem(nameof(CanvasRenderer), 0, 10),
+            new ValidItem(nameof(CanvasRenderer), 0, 50),
             new ValidItem(nameof(RectTransform), 0, 100),
             new ValidItem(nameof(TextMeshProUGUI), 0, 50),
             new ValidItem(nameof(RawImage), 0, 20),
