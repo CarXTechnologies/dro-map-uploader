@@ -158,6 +158,7 @@ namespace Editor
             const float space = 6;
             
             var rectPreview = new Rect(16, 28, sizeImage * aspect, sizeImage);
+            var rectExport = new Rect(space + sizeButton, 12 + space + sizeButton, 128, sizeButton);
             var rectCenterPreview = new Rect((sizeImage * aspect) / 2f - 64, sizeImage / 2f, 164f, 32f);
             var rectItem = new Rect(rectPreview.width + rectPreview.x + 32, 0, position.width - 48 - (rectPreview.width + rectPreview.x + 16), 80);
             var rectWindow = rootVisualElement.contentRect;
@@ -474,9 +475,16 @@ namespace Editor
             {
                 EditorGUI.HelpBox(rectCenterPreview, "Preview is missed", MessageType.Warning);
             }
-
+            
             if (SelectItem.Id != 0)
             {
+                EditorGUI.BeginDisabledGroup(!Application.isPlaying);
+                if (GUI.Button(rectExport, "Play Map"))
+                {
+                    MapBuilder.LoadAssetBundles(SelectItem);
+                }
+                EditorGUI.EndDisabledGroup();
+
                 rectLabelId.x -= 16;
                 GUI.Label(rectLabelId, SelectItem.Id.ToString());
                 rectLabelId.x -= 24;
