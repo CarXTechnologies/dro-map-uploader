@@ -204,7 +204,7 @@ namespace Editor
 
             ModMapTestTool.InitTestsEditor(scene);
             ModMapTestTool.RunTest(m_targetScene);
-
+            
             return isError;
         }
 
@@ -262,7 +262,7 @@ namespace Editor
             }
 
             bool noValidComp = false;
-
+    
             DuplicateValidComponents(root.transform, null, "Garbage", (go, component) =>
             {
                 var compType = component.GetType();
@@ -372,6 +372,62 @@ namespace Editor
             var bundleBuilds = CreateBundleArrayDataForOneElement(TempData.Meta.ToString().ToLower(), "Assets/Resources/" + MapManagerConfig.instance.name + ".asset");
             BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Meta), 
                 bundleBuilds, m_assetBundleOption, m_buildTarget);
+        }
+
+        public static void LoadAssetBundles(Item item)
+        {
+            var pathToMeta = Path.Combine(item.Directory, TempData.Meta.ToString().ToLower());
+            
+            var metaBundle = AssetBundle.LoadFromFile(pathToMeta);
+
+            var metaConfigs = metaBundle.LoadAllAssets<MapManagerConfig>();
+
+            if (metaConfigs.Length < 1)
+            {
+                return;
+            }
+
+            var mapBundlePath = GetPublishMapBundle(item, metaConfigs[0].mapMetaConfigValue.mapMetaConfigValue.mapName);
+
+            var mapBundlePathItem = GetSubPathFromPackage(mapBundlePath, item);
+            
+            var requestMapBundle = AssetBundle.LoadFromFile(mapBundlePathItem);
+
+            LoadSceneFromBundle(requestMapBundle);
+            
+            AssetBundle.UnloadAllAssetBundles(true);
+        }
+        
+        private static string GetSubPathFromPackage(string assetName, Item packageItem)
+        {
+            return packageItem.Directory + "/" + assetName;
+        }
+        
+        public static string GetPublishMapBundle(Item item, string nameSceneBundle)
+        {
+            nameSceneBundle = nameSceneBundle.ToLower();
+            if (!File.Exists(GetSubPathFromPackage(nameSceneBundle, item)))
+            {
+                var files = Directory.GetFiles(
+                    item.Directory, 
+                    "*.bundle", 
+                    SearchOption.TopDirectoryOnly);
+
+                if (files.Length > 0)
+                {
+                    int index = files[0].LastIndexOf('\\');
+                    nameSceneBundle = files[0].Substring(index, files[0].Length - index);
+                }
+            }
+
+            return nameSceneBundle;
+        }
+        
+        public static void LoadSceneFromBundle(AssetBundle assetBundle)
+        {
+            var assets = assetBundle.GetAllScenePaths();
+            var split = assets[0].Substring(0, assets[0].Length - 6).Split('/');
+            SceneManager.LoadScene(split[split.Length - 1]);
         }
 
         private static void SelectCache()

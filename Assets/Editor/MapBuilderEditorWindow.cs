@@ -134,11 +134,14 @@ namespace Editor
             const float aspect = 16.0f / 9.0f;
             const float sizeImage = 200;
             const float sizeButton = 18;
+            const float space = 6;
+            
             var rectPreview = new Rect(16, 28, sizeImage * aspect, sizeImage);
             var rectCenter = new Rect((sizeImage * aspect) / 2f - 64, sizeImage / 2f, 164f, 32f);
-            var rectItem = new Rect(rectPreview.width + rectPreview.x + 32, 0, position.width - 48 - (rectPreview.width + rectPreview.x + 16), 80);
 
-            const float space = 6;
+            var rectExport = new Rect(space + sizeButton, 12 + space + sizeButton, 128, sizeButton);
+ 		    var rectItem = new Rect(rectPreview.width + rectPreview.x + 32, 0, position.width - 48 - (rectPreview.width + rectPreview.x + 16), 80);
+           
             float elementHeight = space + rectItem.height;
             var iconSteam = EditorGUIUtility.IconContent("steam");
             bool uploadState = true;
@@ -448,6 +451,13 @@ namespace Editor
 
             if (m_selectItem.Id != 0)
             {
+                EditorGUI.BeginDisabledGroup(!Application.isPlaying);
+                if (GUI.Button(rectExport, "Play Map"))
+                {
+                    MapBuilder.LoadAssetBundles(m_selectItem);
+                }
+                EditorGUI.EndDisabledGroup();
+
                 rectLabelId.x -= 16;
                 GUI.Label(rectLabelId, m_selectItem.Id.ToString());
                 rectLabelId.x -= 24;
