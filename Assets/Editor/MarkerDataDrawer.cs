@@ -32,16 +32,6 @@ namespace Editor
             EditorGUI.indentLevel = 0;
             
             EditorGUI.BeginProperty(position, label, property);
-            if (property.serializedObject.isEditingMultipleObjects)
-            {
-      
-                position.size = new Vector2(256, 18);
-                EditorGUI.HelpBox(position, "Multi-object editing not supported.", MessageType.Info);
-                Space();
-                EditorGUI.indentLevel = indent;
-                EditorGUI.EndProperty();
-                return;
-            }
             
             var propHead = property.FindPropertyRelative("head");
             var propIndex = property.FindPropertyRelative("index");
@@ -56,8 +46,21 @@ namespace Editor
             propIndex.intValue = EditorGUI.Popup(amountRect, propIndex.intValue, MarkerData.paramEditor);
             propParam.stringValue = MarkerData.paramEditor[propIndex.intValue];
             propHead.stringValue = MarkerData.GetHeadTarget(propParam.stringValue);
+
+            var popup = new Rect(position.x, position.y, position.width, 18);
+            EditorGUI.DrawRect(popup, new Color(0.3f, 0.3f, 0.3f, 1.0f));
+            GUI.Label(popup, propParam.stringValue);
+            
             bool drawTemplatePopup = false;
             bool drawTemplate = false;
+            
+            if (property.serializedObject.isEditingMultipleObjects)
+            {
+                Space();
+                EditorGUI.indentLevel = indent;
+                EditorGUI.EndProperty();
+                return;
+            }
             
             string paramPath = MarkerData.paramObjectsEditor.ContainsKey(propParam.stringValue) ?
                 propParam.stringValue : propHead.stringValue;
