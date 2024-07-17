@@ -13,6 +13,9 @@ namespace Editor
     {
         private float m_height;
         private string m_oldTemplate;
+        private int m_msPropIndex;
+        private string m_msPropParam;
+        private string m_msPropHead;
         
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -42,14 +45,35 @@ namespace Editor
             var propValue = property.FindPropertyRelative("value");
             var propCustomValue = property.FindPropertyRelative("customValue");
             var propLastHead = property.FindPropertyRelative("lastHeadObject");
-
-            propIndex.intValue = EditorGUI.Popup(amountRect, propIndex.intValue, MarkerData.paramEditor);
-            propParam.stringValue = MarkerData.paramEditor[propIndex.intValue];
-            propHead.stringValue = MarkerData.GetHeadTarget(propParam.stringValue);
-
-            var popup = new Rect(position.x, position.y, position.width, 18);
+            
+            var popup = new Rect(position.x, propHeight, position.width, 18);
+            
+            if (property.serializedObject.isEditingMultipleObjects)
+            {
+                m_msPropIndex = EditorGUI.Popup(popup, m_msPropIndex, MarkerData.paramEditor);
+                m_msPropParam = MarkerData.paramEditor[m_msPropIndex];
+                m_msPropHead = MarkerData.GetHeadTarget(m_msPropParam);
+                
+                var selectPopup = new Rect(position.x, m_height, position.width, 18);
+                
+                if (GUI.Button(selectPopup, "Select : " + m_msPropParam))
+                {
+                    propIndex.intValue = m_msPropIndex;
+                    propParam.stringValue = m_msPropParam;
+                    propHead.stringValue = m_msPropHead;
+                }
+                Space();
+            }
+            else
+            {
+                propIndex.intValue = EditorGUI.Popup(amountRect, propIndex.intValue, MarkerData.paramEditor);
+                propParam.stringValue = MarkerData.paramEditor[propIndex.intValue];
+                propHead.stringValue = MarkerData.GetHeadTarget(propParam.stringValue);
+                popup.y -= 18;
+            }
+            
             EditorGUI.DrawRect(popup, new Color(0.3f, 0.3f, 0.3f, 1.0f));
-            GUI.Label(popup, propParam.stringValue);
+            GUI.Label(popup, "...");
             
             bool drawTemplatePopup = false;
             bool drawTemplate = false;
