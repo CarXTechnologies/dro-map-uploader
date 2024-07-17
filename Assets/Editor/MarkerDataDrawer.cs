@@ -63,6 +63,8 @@ namespace Editor
                     propHead.stringValue = m_msPropHead;
                 }
                 Space();
+                EditorGUI.DrawRect(popup, new Color(0.3f, 0.3f, 0.3f, 1.0f));
+                GUI.Label(popup, "...");
             }
             else
             {
@@ -70,10 +72,9 @@ namespace Editor
                 propParam.stringValue = MarkerData.paramEditor[propIndex.intValue];
                 propHead.stringValue = MarkerData.GetHeadTarget(propParam.stringValue);
                 popup.y -= 18;
+                EditorGUI.DrawRect(popup, new Color(0.3f, 0.3f, 0.3f, 1.0f));
+                GUI.Label(popup, propParam.stringValue);
             }
-            
-            EditorGUI.DrawRect(popup, new Color(0.3f, 0.3f, 0.3f, 1.0f));
-            GUI.Label(popup, "...");
             
             bool drawTemplatePopup = false;
             bool drawTemplate = false;
