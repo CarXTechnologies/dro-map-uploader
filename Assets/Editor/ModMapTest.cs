@@ -26,7 +26,7 @@ namespace Editor
         public static ValidItemData Target = default;
         
         public static readonly ValidItemData Steam = new ValidItemData
-        (4096, 24f, 100f, 30000000,
+        (4096, 24f,
             new ValidItem(nameof(Transform), 1, 20000),
             //Physics
             new ValidItem(nameof(MeshCollider), 1, 10000),
@@ -124,42 +124,6 @@ namespace Editor
 
             return isNoCorrect;
         }
-
-        private static void VertexTestCount()
-        {
-            m_vertexCountPositionDiscreate.Clear();
-            foreach (var gameObject in m_gameObjects)
-            {
-                var meshFilter = gameObject.GetComponent<MeshFilter>();
-            
-                if (meshFilter != null && meshFilter.sharedMesh != null)
-                {
-                    var count = meshFilter.sharedMesh.vertexCount;
-
-                    var pos = meshFilter.transform.position / Target.vertexDistanceForMaxCount;
-                
-                    var posDisc = new Vector3(Mathf.Floor(pos.x), Mathf.Floor(pos.y), Mathf.Floor(pos.z))
-                                  * Target.vertexDistanceForMaxCount;
-                
-                    if (m_vertexCountPositionDiscreate.TryGetValue(posDisc, out var value))
-                    {
-                        m_vertexCountPositionDiscreate[posDisc] = value + count;
-                    }
-                    else
-                    {
-                        m_vertexCountPositionDiscreate.Add(posDisc, count);
-                    }
-                }
-            }
-        
-            foreach (var val in m_vertexCountPositionDiscreate)
-            {
-                if (val.Value > Target.vertexCountForDistance)
-                {
-                    throw new Exception("Triangle greater than " + Target.vertexCountForDistance);
-                }
-            }
-        }
     
         private static void SpawnPointTestExistence()
         {
@@ -192,7 +156,6 @@ namespace Editor
         {
             try
             {
-                VertexTestCount();
                 SpawnPointTestExistence();
                 return false;
             }
