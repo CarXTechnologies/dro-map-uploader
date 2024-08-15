@@ -47,7 +47,17 @@ MonoBehaviour:
   markerData:
     head: Ambient
     param: Ambient/Kami
+    value:
+      id: 0
     index: 31
+    lastHeadObject: Ambient
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: , ns: , asm: }
 --- !u!114 &2173215841612614180
 MonoBehaviour:
   m_ObjectHideFlags: 0

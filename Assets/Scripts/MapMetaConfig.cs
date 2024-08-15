@@ -1,9 +1,13 @@
 using System;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Map/MapMetaConfig", fileName = "MapMetaConfig", order = 0)]
 public class MapMetaConfig : ScriptableObject
 {
+    [Lock] public string id;
     public MapMetaConfigValue mapMetaConfigValue;
 
     public event Action<MapMetaConfigValue> updateValue;
@@ -11,23 +15,8 @@ public class MapMetaConfig : ScriptableObject
     private void OnValidate()
     {
         updateValue?.Invoke(mapMetaConfigValue);
+#if UNITY_EDITOR
+        id = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(this));
+#endif
     }
-}
-
-[Serializable]
-public struct MapMetaConfigValue
-{
-    public string targetScene;
-    public string mapName;
-    [TextArea] public string mapDescription;
-    public Texture2D icon;
-    public Texture2D largeIcon;
-    [HideInInspector]public Texture2D miniMapIcon;
-
-    public ulong itemWorkshopId;
-    public bool UploadSteamName;
-    public bool UploadSteamDescription;
-    public bool UploadSteamPreview;
-    
-    public string GetTargetScenePath() => $"Assets/MapResources/{targetScene}/{targetScene}.unity";
 }

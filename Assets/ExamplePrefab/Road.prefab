@@ -111,4 +111,23 @@ MonoBehaviour:
   markerData:
     head: Road
     param: Road/asphalt
+    value:
+      id: 0
     index: 2
+    lastHeadObject: Road
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 1
+    00000000:
+      type: {class: PhysicMaterialProperties, ns: , asm: Assembly-CSharp}
+      data:
+        friction: 0
+        rollFriction: 0
+        bumpMin: 0
+        bumpMax: 0
+        bumpScale: 0
+        bump2Min: 0
+        bump2Max: 0
+        bump2Scale: 0

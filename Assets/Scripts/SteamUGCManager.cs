@@ -1,156 +1,244 @@
 ﻿using System;
 using System.Collections;
-using UnityEngine;
-using Steamworks;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Steamworks;
 using Steamworks.Data;
+using Steamworks.Parser;
 using Steamworks.Ugc;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
+using Item = Steamworks.Ugc.Item;
 
-namespace GameOverlay
+public class SteamUGCManager
 {
-	public class SteamUGCManager
+	public const ulong PUBLISH_ITEM_FAILED_CODE = 0u;
+	public const uint APP_ID = 635260;
+	public const string MAP_TAG_OLD = "Map";
+	public const string MAP_TAG = "map_2.0";
+	private Task<PublishResult> m_currentPublishResult;
+	private string m_itemName;
+	private string m_previewPath;
+	private string m_desciption;
+	private List<Item> m_tempFetchResultList = new List<Item>();
+		
+	public void Update()
 	{
-		public const ulong PUBLISH_ITEM_FAILED_CODE = 0u;
-		public const uint APP_ID = 635260;
-		private const string MAP_TAG = "3";
-		private Task<PublishResult> m_currentPublishResult;
-		private string m_itemName;
-		private string m_previewPath;
-		private string m_desciption;
-		
-		public void Update()
+		SteamClient.RunCallbacks();
+	}
+
+	public async Task PaggingQuery(Query query, List<Item> result, Action<Item> itemSuccess)
+	{
+		const byte maxErrorCount = 5;
+		const int delayBetweenQuery = 500;
+
+		int estimatedQueryCountItems = int.MaxValue;
+		int page = 1;
+		byte errorCounter = 0;
+
+		while (estimatedQueryCountItems > 0 && errorCounter < maxErrorCount)
 		{
-			SteamClient.RunCallbacks();
+			var searchingResult = await query.GetPageAsync(page);
+			if (searchingResult.HasValue)
+			{
+				var searchingResultPage = searchingResult.Value;
+				AddToResultList(searchingResultPage.Entries, result, itemSuccess);
+				estimatedQueryCountItems = searchingResultPage.TotalCount - searchingResultPage.ResultCount;
+				searchingResultPage.Dispose();
+
+				if (searchingResultPage.ResultCount == 0)
+				{
+					errorCounter++;
+				}
+				else 
+				{
+					page++;
+					errorCounter = 0;
+				}
+			}
+			else 
+			{
+				errorCounter++;
+			}
+
+			if (estimatedQueryCountItems > 0)
+			{
+				await Task.Delay(delayBetweenQuery);            
+			}
 		}
 
-		private IEnumerator UpdateItemCoroutine(string path, ulong id)
+		void AddToResultList(IEnumerable<Item> queryList, List<Item> resultList, Action<Item> success)
 		{
-			var dirInfo = new DirectoryInfo(path);
+			foreach (var item in queryList)
+			{
+				if (item.Result != Result.OK || resultList.FindIndex(x => x.Id == item.Id) >= 0 || !IsTagMatching(item))
+				{
+					continue;
+				}
+				success?.Invoke(item);
+				resultList.Add(item);
+			}
+		}
+	}
+		
+	private bool IsTagMatching(Item item)
+	{
+		foreach (string tag in item.Tags)
+		{
+			if (EqualsTag(tag))
+			{
+				return true;
+			}
+		}
 			
-			var itemTask = Item.GetAsync(id);
-			yield return itemTask.AsIEnumerator();
+		return false;
+	}
+		
+	private bool EqualsTag(string tag)
+	{
+		return tag.Equals(MAP_TAG, StringComparison.OrdinalIgnoreCase) || tag.Equals(MAP_TAG_OLD, StringComparison.OrdinalIgnoreCase) ;
+	}
+		
+	public async Task GetWorkshopItems(List<Item> result, Action<Item> callback)
+	{
+		await PaggingQuery(Query.Items.WithTag(MAP_TAG_OLD).MatchAnyTag().WhereUserPublished(), result, callback);
+		await PaggingQuery(Query.Items.WithTag(MAP_TAG).MatchAnyTag().WhereUserPublished(), result, callback);
+	}
 
-			var itemTaskResult = itemTask.Result;
-			if (!itemTaskResult.HasValue)
-			{
-				Debug.LogError($"SteamUGCManager : Unable to get item with id {id}");
-				yield break;
-			}
-
-			var item = itemTaskResult.Value;
-			var editor = EditItemContent(item, dirInfo);
-			var submitTask = editor.SubmitAsync();
+	private IEnumerator UpdateItemCoroutine(string path, ulong id)
+	{
+		var dirInfo = new DirectoryInfo(path);
 			
-			yield return submitTask.AsIEnumerator();
+		var itemTask = Item.GetAsync(id);
+		yield return itemTask.AsIEnumerator();
 
-			var submitTaskResult = submitTask.Result;
-
-			if (submitTaskResult.Success)
-			{
-				Debug.Log($"UGC item ({submitTaskResult.FileId}) update finished with result '{submitTaskResult.Result}'");
-			}
-			else
-			{
-				Debug.LogError($"Error UGC item ({submitTaskResult.FileId}) with result '{submitTaskResult.Result}'");
-			}
-		}
-
-		private FileInfo TryGetMetaFileFromDir(DirectoryInfo dirInfo)
+		var itemTaskResult = itemTask.Result;
+		if (!itemTaskResult.HasValue)
 		{
-			var previewFiles = dirInfo.GetFiles("meta");
-			foreach (var file in previewFiles)
-			{
-				if (file.Name.ToLower().Contains("meta"))
-				{
-					return file;
-				}
-			}
-
-			return null;
+			Debug.LogError($"SteamUGCManager : Unable to get item with id {id}");
+			yield break;
 		}
+
+		var item = itemTaskResult.Value;
+		var editor = EditItemContent(item, dirInfo);
+		var submitTask = editor.SubmitAsync();
+			
+		yield return submitTask.AsIEnumerator();
+
+		var submitTaskResult = submitTask.Result;
+
+		if (submitTaskResult.Success)
+		{
+			Debug.Log($"UGC item ({submitTaskResult.FileId}) update finished with result '{submitTaskResult.Result}'");
+		}
+		else
+		{
+			Debug.LogError($"Error UGC item ({submitTaskResult.FileId}) with result '{submitTaskResult.Result}'");
+		}
+	}
+
+	private FileInfo TryGetMetaFileFromDir(DirectoryInfo dirInfo)
+	{
+		var previewFiles = dirInfo.GetFiles("meta");
+		foreach (var file in previewFiles)
+		{
+			if (file.Name.ToLower().Contains("meta"))
+			{
+				return file;
+			}
+		}
+
+		return null;
+	}
 		
-		protected virtual Editor EditItemContent(Item item, DirectoryInfo dirInfo)
-		{
-			var editor = item.Edit().WithContent(dirInfo);
-
-			var metaFileInfo = TryGetMetaFileFromDir(dirInfo);
-			if (metaFileInfo != null)
-			{
-				editor.WithMetaData(metaFileInfo.DirectoryName + "/" + metaFileInfo.Name);
-				
-				if (MapManagerConfig.Value.UploadSteamName)
-				{
-					editor.WithTitle(m_itemName);
-				}
-
-				if (MapManagerConfig.Value.UploadSteamPreview)
-				{
-					editor.WithPreviewFile(m_previewPath);
-				}
-
-				if (MapManagerConfig.Value.UploadSteamDescription)
-				{
-					editor.WithDescription(m_desciption);
-				}
-
-				editor.WithTag(MAP_TAG);
-				editor.WithPrivateVisibility();
-			}
-
-			return editor;
-		}
-
-		private Editor CreateCommunityFile()
-		{     
-			return Editor.NewCommunityFile
-				.ForAppId(APP_ID)
-				.WithTag(MAP_TAG)
-				.WithPrivateVisibility();
-		}
-
-		public void SetItemData(string itemName, string previewPath, string desciption)
-		{
-			m_itemName = itemName;
-			m_previewPath = previewPath;
-			m_desciption = desciption;
-		}
+	public static SteamUGCDetails_t GetItemDetail(Item item)
+	{
+		var result = UnsafeUtility.As<Item, Steamworks.Parser.Item>(ref item);
+		return result.details;
+	}
 		
-		public IEnumerator CreatePublisherItem(Action<PublishResult> onCreate)
+	protected virtual Editor EditItemContent(Item item, DirectoryInfo dirInfo)
+	{
+		var editor = item.Edit().WithContent(dirInfo);
+
+		var metaFileInfo = TryGetMetaFileFromDir(dirInfo);
+		if (metaFileInfo != null)
 		{
-			var submitTask = CreateCommunityFile().SubmitAsync();
-			m_currentPublishResult = submitTask;
-			yield return m_currentPublishResult.AsIEnumerator();
-			onCreate?.Invoke(m_currentPublishResult.Result);
+			editor.WithMetaData(metaFileInfo.DirectoryName + "/" + metaFileInfo.Name);
+
+			var build = MapManagerConfig.instance;
+			if (build.uploadSteamName)
+			{
+				editor.WithTitle(m_itemName);
+			}
+
+			if (build.uploadSteamPreview)
+			{
+				editor.WithPreviewFile(m_previewPath);
+			}
+
+			if (build.uploadSteamDescription)
+			{
+				editor.WithDescription(m_desciption);
+			}
+
+			editor.WithTag(MAP_TAG);
+			editor.WithPrivateVisibility();
 		}
+
+		return editor;
+	}
+
+	private Editor CreateCommunityFile()
+	{     
+		return Editor.NewCommunityFile
+			.ForAppId(APP_ID)
+			.WithTag(MAP_TAG)
+			.WithPrivateVisibility();
+	}
+
+	public void SetItemData(string itemName, string previewPath, string desciption)
+	{
+		m_itemName = itemName;
+		m_previewPath = previewPath;
+		m_desciption = desciption;
+	}
 		
-		public IEnumerator PublishItemCoroutine(string path, Action<ulong> uploadedId)
+	public IEnumerator CreatePublisherItem(Action<PublishResult> onCreate)
+	{
+		var submitTask = CreateCommunityFile().SubmitAsync();
+		m_currentPublishResult = submitTask;
+		yield return m_currentPublishResult.AsIEnumerator();
+		onCreate?.Invoke(m_currentPublishResult.Result);
+	}
+		
+	public IEnumerator PublishItemCoroutine(string path, Func<ulong, bool> uploadedId)
+	{
+		yield return m_currentPublishResult.AsIEnumerator();
+
+		var submitTaskResult = m_currentPublishResult.Result;
+
+		Debug.Log($"UGC item ({submitTaskResult.FileId}) creation finished with result '{submitTaskResult.Result}'");
+
+		if (submitTaskResult.Result == Result.OK)
 		{
-			yield return m_currentPublishResult.AsIEnumerator();
+			ulong itemId = submitTaskResult.FileId.Value;
 
-			var submitTaskResult = m_currentPublishResult.Result;
+			File.WriteAllText(path + Path.AltDirectorySeparatorChar + "pid.txt", itemId.ToString());
 
-			Debug.Log($"UGC item ({submitTaskResult.FileId}) creation finished with result '{submitTaskResult.Result}'");
-
-			if (submitTaskResult.Result == Result.OK)
-			{
-				ulong itemId = submitTaskResult.FileId.Value;
-
-				File.WriteAllText(path + Path.AltDirectorySeparatorChar + "pid.txt", itemId.ToString());
-
-				yield return UpdateItemCoroutine(path, itemId);
-				uploadedId.Invoke(itemId);
-			}
-			else
-			{
-				uploadedId.Invoke(PUBLISH_ITEM_FAILED_CODE);
-			}
-		}
-
-		public IEnumerator UploadItemCoroutine(string path, PublishedFileId itemId, Action<ulong> uploadedId = null)
-		{
 			yield return UpdateItemCoroutine(path, itemId);
-			uploadedId?.Invoke(itemId);
+			uploadedId.Invoke(itemId);
 		}
+		else
+		{
+			uploadedId.Invoke(PUBLISH_ITEM_FAILED_CODE);
+		}
+	}
+
+	public IEnumerator UploadItemCoroutine(string path, PublishedFileId itemId, Func<ulong, bool> uploadedId = null)
+	{
+		yield return UpdateItemCoroutine(path, itemId);
+		uploadedId?.Invoke(itemId);
 	}
 }
