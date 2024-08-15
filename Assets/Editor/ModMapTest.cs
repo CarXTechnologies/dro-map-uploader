@@ -26,7 +26,7 @@ namespace Editor
         public static ValidItemData Target = default;
         
         public static readonly ValidItemData Steam = new ValidItemData
-        (4096, 24f, 100f, 30000000,
+        (4096, 24f,
             new ValidItem(nameof(Transform), 1, 20000),
             //Physics
             new ValidItem(nameof(MeshCollider), 1, 10000),
@@ -39,7 +39,7 @@ namespace Editor
             new ValidItem(nameof(HingeJoint), 0, 100),
             //Hdrp 
             new ValidItem(nameof(ReflectionProbe), 1, 1),
-            new ValidItem(nameof(HDAdditionalLightData), 0, 200),
+            new ValidItem(nameof(HDAdditionalLightData), 0, 500),
             new ValidItem(nameof(HDAdditionalReflectionData), 0, 200),
             new ValidItem(nameof(Volume), 1, 1),
             //Render
@@ -51,7 +51,7 @@ namespace Editor
             // UI
             new ValidItem(nameof(Canvas), 0, 10),
             new ValidItem(nameof(CanvasScaler), 0, 10),
-            new ValidItem(nameof(CanvasRenderer), 0, 100),
+            new ValidItem(nameof(CanvasRenderer), 0, 50),
             new ValidItem(nameof(RectTransform), 0, 100),
             new ValidItem(nameof(TextMeshProUGUI), 0, 50),
             new ValidItem(nameof(RawImage), 0, 20),
@@ -63,7 +63,7 @@ namespace Editor
             new ValidItem(nameof(VisualEffect), 0, 200),
             new ValidItem("VFXRenderer", 0, 200),
             //Other
-            new ValidItem(nameof(GameMarkerData), 1, 1000),
+            new ValidItem(nameof(GameMarkerData), 1, 10000),
             new ValidItem(nameof(CacheData), 0, 1),
             new ValidItem(nameof(Minimap), 1, 1),
             new ValidItem("SceneObjectIDMapSceneAsset", 0, 1)
@@ -124,42 +124,6 @@ namespace Editor
 
             return isNoCorrect;
         }
-
-        private static void VertexTestCount()
-        {
-            m_vertexCountPositionDiscreate.Clear();
-            foreach (var gameObject in m_gameObjects)
-            {
-                var meshFilter = gameObject.GetComponent<MeshFilter>();
-            
-                if (meshFilter != null && meshFilter.sharedMesh != null)
-                {
-                    var count = meshFilter.sharedMesh.vertexCount;
-
-                    var pos = meshFilter.transform.position / Target.vertexDistanceForMaxCount;
-                
-                    var posDisc = new Vector3(Mathf.Floor(pos.x), Mathf.Floor(pos.y), Mathf.Floor(pos.z))
-                                  * Target.vertexDistanceForMaxCount;
-                
-                    if (m_vertexCountPositionDiscreate.TryGetValue(posDisc, out var value))
-                    {
-                        m_vertexCountPositionDiscreate[posDisc] = value + count;
-                    }
-                    else
-                    {
-                        m_vertexCountPositionDiscreate.Add(posDisc, count);
-                    }
-                }
-            }
-        
-            foreach (var val in m_vertexCountPositionDiscreate)
-            {
-                if (val.Value > Target.vertexCountForDistance)
-                {
-                    throw new Exception("Triangle greater than " + Target.vertexCountForDistance);
-                }
-            }
-        }
     
         private static void SpawnPointTestExistence()
         {
@@ -192,7 +156,6 @@ namespace Editor
         {
             try
             {
-                VertexTestCount();
                 SpawnPointTestExistence();
                 return false;
             }

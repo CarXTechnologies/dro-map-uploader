@@ -6,16 +6,11 @@ using UnityEngine;
 public struct ValidItemData : ICloneable
 {
     public List<ValidItem> data;
-    public readonly int vertexCountForDistance;
-    public readonly float vertexDistanceForMaxCount;
     public readonly float maxSizeInMb;
     public readonly float maxSizeInMbMeta;
 
-    public ValidItemData(float maxSizeInMb = 512f, float maxSizeInMbMeta = 24f, float vertexDistanceForMaxCount = 1f, 
-        int vertexCountForDistance = 10000000, params ValidItem[] data)
+    public ValidItemData(float maxSizeInMb = 512f, float maxSizeInMbMeta = 24f, params ValidItem[] data)
     {
-        this.vertexCountForDistance = vertexCountForDistance;
-        this.vertexDistanceForMaxCount = vertexDistanceForMaxCount;
         this.maxSizeInMb = maxSizeInMb;
         this.maxSizeInMbMeta = maxSizeInMbMeta;
         this.data = data == null ? new List<ValidItem>() : new List<ValidItem>(data);
@@ -27,11 +22,12 @@ public struct ValidItemData : ICloneable
 
         if (data != null)
         {
-            foreach (var item in data)
+            for (var index = 0; index < data.Count; index++)
             {
+                var item = data[index];
                 if (item.current != 0)
                 {
-                    result += item.ToStat() + "\n";
+                    result += item.ToStat() + (index < data.Count - 2 ? "\n" : String.Empty);
                 }
             }
         }
@@ -41,8 +37,7 @@ public struct ValidItemData : ICloneable
 
     public object Clone()
     {
-        return new ValidItemData(maxSizeInMb, maxSizeInMbMeta, vertexDistanceForMaxCount, vertexCountForDistance, 
-            (ValidItem[])data?.ToArray().Clone());
+        return new ValidItemData(maxSizeInMb, maxSizeInMbMeta, (ValidItem[])data?.ToArray().Clone());
     }
 }
 
