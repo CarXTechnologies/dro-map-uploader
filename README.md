@@ -20,7 +20,7 @@
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/1.png?raw=true" alt="drawing" style="width:600px;"/> <br>
 
-- To open the project, you'll need to install the Unity Editor with version 2023.2.20 (available for 64-bit systems only). You can download it from the following link: **[Download link](https://download.unity3d.com/download_unity/9b9180224418/Windows64EditorInstaller/UnitySetup64-2020.3.25f1.exe)**
+- To open the project, you'll need to install the Unity Editor with version 2023.2.20 (available for 64-bit systems only). You can download it from the following link: **[Download link](https://download.unity3d.com/download_unity/0e25a174756c/Windows64EditorInstaller/UnitySetup64-2023.2.20f1.exe)**
 - The next step is to launch Unity. Go to the File → Open Project menu, then choose the folder that contains the unpacked project (ensure this folder includes the Assets, Packages, etc. folders).
 - When the project is set up, we can proceed to the next step.
 
