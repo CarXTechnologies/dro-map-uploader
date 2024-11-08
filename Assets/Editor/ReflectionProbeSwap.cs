@@ -9,38 +9,38 @@ using UnityEngine.SceneManagement;
 public class ReflectionProbeSwap : MonoBehaviour
 {
 #if UNITY_EDITOR
-    [ContextMenu("Bake")]
-    private void Bake()
-    {
-        var hdrpAsset = GraphicsSettings.renderPipelineAsset as HDRenderPipelineAsset;
-        var hdrpSettings = hdrpAsset.currentPlatformRenderPipelineSettings;
+	[ContextMenu("Bake")]
+	private void Bake()
+	{
+		var hdrpAsset = GraphicsSettings.renderPipelineAsset as HDRenderPipelineAsset;
+		var hdrpSettings = hdrpAsset.currentPlatformRenderPipelineSettings;
 
-        var savedCubemapSize = hdrpSettings.lightLoopSettings.reflectionProbeTexCacheSize;
-        hdrpSettings.lightLoopSettings.reflectionProbeTexCacheSize = ReflectionProbeTextureCacheResolution.Resolution512x512;
-        var reflectProbe = GetComponent<ReflectionProbe>();
-        var additionalData = reflectProbe.GetComponent<HDAdditionalReflectionData>();
+		var savedCubemapSize = hdrpSettings.lightLoopSettings.reflectionProbeTexCacheSize;
+		hdrpSettings.lightLoopSettings.reflectionProbeTexCacheSize = ReflectionProbeTextureCacheResolution.Resolution512x512;
+		var reflectProbe = GetComponent<ReflectionProbe>();
+		var additionalData = reflectProbe.GetComponent<HDAdditionalReflectionData>();
 
-        var reflectionCube = additionalData.realtimeTexture;
-        var reflectionEquirect = new RenderTexture(1024, 512, 0, reflectionCube.graphicsFormat);
+		var reflectionCube = additionalData.realtimeTexture;
+		var reflectionEquirect = new RenderTexture(1024, 512, 0, reflectionCube.graphicsFormat);
 
-        reflectionCube.ConvertToEquirect(reflectionEquirect);
+		reflectionCube.ConvertToEquirect(reflectionEquirect);
 
-        RenderTexture.active = reflectionEquirect;
+		RenderTexture.active = reflectionEquirect;
 
-        var row = new Texture2D(reflectionEquirect.width, reflectionEquirect.height, reflectionCube.graphicsFormat, 0, TextureCreationFlags.None);
-        row.ReadPixels(new Rect(0, 0, reflectionEquirect.width, reflectionEquirect.height), 0, 0);
+		var row = new Texture2D(reflectionEquirect.width, reflectionEquirect.height, reflectionCube.graphicsFormat, 0, TextureCreationFlags.None);
+		row.ReadPixels(new Rect(0, 0, reflectionEquirect.width, reflectionEquirect.height), 0, 0);
 
-        RenderTexture.active = null;
+		RenderTexture.active = null;
 
-        var sceneName = SceneManager.GetActiveScene().name;
-        var filepath = EditorUtility.SaveFilePanel("Save Reflection Probe", Application.dataPath, sceneName, "exr");
-        
-        if (!string.IsNullOrEmpty(filepath))
-        {
-            File.WriteAllBytes(filepath, row.EncodeToEXR(Texture2D.EXRFlags.CompressZIP));
-        }
+		var sceneName = SceneManager.GetActiveScene().name;
+		var filepath = EditorUtility.SaveFilePanel("Save Reflection Probe", Application.dataPath, sceneName, "exr");
 
-        hdrpSettings.lightLoopSettings.reflectionProbeTexCacheSize = savedCubemapSize;
-    }
+		if (!string.IsNullOrEmpty(filepath))
+		{
+			File.WriteAllBytes(filepath, row.EncodeToEXR(Texture2D.EXRFlags.CompressZIP));
+		}
+
+		hdrpSettings.lightLoopSettings.reflectionProbeTexCacheSize = savedCubemapSize;
+	}
 #endif
 }
