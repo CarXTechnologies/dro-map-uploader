@@ -47,7 +47,8 @@ public class MarkerData
 		"Ambient/Track",
 		"Ambient/Waterfall",
 		"Ambient/Winter",
-		"Map/TimeObjectActivator"
+		"TimeObjectActivator",
+		"NetworkObject"
 	};
 
 	public string head;
@@ -64,11 +65,9 @@ public class MarkerData
 	public static readonly Dictionary<string, Func<string, object>> paramObjectsEditor =
 		new()
 		{
-			{
-				"Road",
-				name => AssetUtils.GetDBConfig<SurfaceTemplate>(name.Replace("Road/", string.Empty)).physicMaterial
-			},
-			{ "Map", name => new TimeObjectActivatorProperties() }
+			{ "Road", name => AssetUtils.GetDBConfig<SurfaceTemplate>(name.Replace("Road/", string.Empty)).physicMaterial },
+			{ "TimeObjectActivator", name => new TimeObjectActivatorProperties() },
+			{ "NetworkObject", name => new NetworkObjectProperties() },
 		};
 
 	public static string[] paramEditorOnlyParameters
