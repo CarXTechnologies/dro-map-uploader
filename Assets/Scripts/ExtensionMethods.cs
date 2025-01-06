@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,5 +17,18 @@ public static class ExtensionMethods
 		{
 			throw task.Exception;
 		}
+	}
+
+	public static int IndexOf(this string[] values, string value)
+	{
+		for (var index = 0; index < values.Length; index++)
+		{
+			if (values[index] == value)
+			{
+				return index;
+			}
+		}
+
+		return -1;
 	}
 }

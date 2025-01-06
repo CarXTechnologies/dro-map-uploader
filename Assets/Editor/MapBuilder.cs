@@ -53,18 +53,23 @@ namespace Editor
 		{
 			var currentScene = SceneManager.GetActiveScene();
 
-			return m_targetScene != currentScene.path && !EditorUtility.DisplayDialog($"Build scene : {GetSceneNameFromPath(m_targetScene)}", $"Close and save the current scene : {currentScene.name}", "Yes", "Cancel");
+			return m_targetScene != currentScene.path && !EditorUtility.DisplayDialog($"Build scene : {GetSceneNameFromPathNoId(m_targetScene)}", $"Close and save the current scene : {currentScene.name}", "Yes", "Cancel");
 		}
 
-		public static string GetSceneNameFromPath(string path)
+		public static string GetSceneNameFromPathNoId(string path)
 		{
 			var pos = path.LastIndexOf('/');
 			return pos == -1 ? path : path.Substring(pos + 1, path.Length - pos - 7);
 		}
 
+		private static string GetScenePathNoId(string path)
+		{
+			return path.Substring(0, path.Length - 16) + ".unity";
+		}
+
 		private static bool CheckMetaAndError()
 		{
-			if (!GetSceneNameFromPath(m_targetScene).All(char.IsLetter))
+			if (!GetSceneNameFromPathNoId(m_targetScene).All(char.IsLetter))
 			{
 				Debug.LogError("Target scene only letters");
 				return true;
@@ -212,7 +217,7 @@ namespace Editor
 
 		private static void InitPath()
 		{
-			var targetScene = GetSceneNameFromPath(m_targetScene);
+			var targetScene = GetSceneNameFromPathNoId(m_targetScene);
 			m_scenePath = path + "/" + targetScene + ".unity";
 			m_assetPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
 			m_titleIconPath = m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.icon);
@@ -220,7 +225,7 @@ namespace Editor
 
 		private static void InitPathUpload(MapManagerConfig.BuildData scenePath)
 		{
-			m_uploadScene = GetSceneNameFromPath(scenePath.targetScene);
+			m_uploadScene = GetSceneNameFromPathNoId(scenePath.targetScene);
 			m_scenePath = path + "/" + m_uploadScene + ".unity";
 			m_assetPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
 			m_titleIconPath = m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.icon);
@@ -342,7 +347,7 @@ namespace Editor
 
 		private static void RenameCacheScene(PublishedFileId publishResult)
 		{
-			var sceneName = GetSceneNameFromPath(m_targetScene);
+			var sceneName = GetSceneNameFromPathNoId(m_targetScene);
 			var scenePathNew = path + "/" + sceneName + publishResult.Value + ".unity";
 			AssetDatabase.RenameAsset(m_scenePath, sceneName + publishResult.Value);
 			m_scenePath = scenePathNew;
@@ -355,20 +360,17 @@ namespace Editor
 
 		private static void CreateMapBundle()
 		{
-			var sceneName = GetSceneNameFromPath(m_targetScene);
-			var bundleBuilds = CreateBundleArrayDataForOneElement(sceneName + ".bundle", m_scenePath);
-			BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Map),
-				bundleBuilds, m_assetBundleOption, m_buildTarget);
+			var sceneName = GetSceneNameFromPathNoId(m_targetScene);
+			var bundleBuilds = CreateBundleArrayDataForOneElement(sceneName + ".bundle", GetScenePathNoId(m_scenePath));
+			BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Map), bundleBuilds, m_assetBundleOption, m_buildTarget);
 		}
 
 		private static void CreateMetaBundle()
 		{
 			MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.compress = MapManagerConfig.Build.compress;
 			MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.platform = MapManagerConfig.Build.platform;
-			var bundleBuilds = CreateBundleArrayDataForOneElement(TempData.Meta.ToString().ToLower(),
-				"Assets/Resources/" + MapManagerConfig.instance.name + ".asset");
-			BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Meta),
-				bundleBuilds, m_assetBundleOption, m_buildTarget);
+			var bundleBuilds = CreateBundleArrayDataForOneElement(TempData.Meta.ToString().ToLower(), "Assets/Resources/" + MapManagerConfig.instance.name + ".asset");
+			BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Meta), bundleBuilds, m_assetBundleOption, m_buildTarget);
 		}
 
 		private static void SelectCache()
@@ -576,7 +578,7 @@ namespace Editor
 
 		private static bool IsSizeValid()
 		{
-			var sceneName = GetSceneNameFromPath(m_uploadScene);
+			var sceneName = GetSceneNameFromPathNoId(m_uploadScene);
 			var notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(sceneName + ".bundle", assetBuildPath + "/" + sceneName + ".bundle");
 			var notMetaSize = ModMapTestTool.IsNotCorrectMetaFileSize(assetBuildPath + "/" + TempData.Meta.ToString().ToLower());
 
@@ -593,8 +595,9 @@ namespace Editor
 		{
 			var bundleBuilds = new AssetBundleBuild[1];
 			bundleBuilds[0].assetBundleName = bundleName;
-			bundleBuilds[0].assetNames = new[] { path };
-			AssetImporter.GetAtPath(bundleBuilds[0].assetNames[0]).assetBundleName = bundleBuilds[0].assetBundleName;
+			bundleBuilds[0].assetNames = new[] { path};
+			var asset = AssetImporter.GetAtPath(bundleBuilds[0].assetNames[0]);
+			asset.assetBundleName = bundleBuilds[0].assetBundleName;
 			AssetDatabase.RemoveUnusedAssetBundleNames();
 
 			return bundleBuilds;

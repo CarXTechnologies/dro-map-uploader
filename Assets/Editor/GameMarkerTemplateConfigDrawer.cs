@@ -79,29 +79,34 @@ namespace Editor
 				EditorGUI.BeginDisabledGroup(GetIndexTemplate(propTemplateName.stringValue, propPresets) != -1);
 				if (GUI.Button(amountRect, "Add Template"))
 				{
-					if (propPresets.arraySize == 0)
+					int selected = MarkerData.paramEditor.IndexOf(MarkerData.paramEditorOnlyParameters[propSelectHead.intValue]);
+					if (selected != -1)
 					{
-						propPresets.InsertArrayElementAtIndex(0);
+						if (propPresets.arraySize == 0)
+						{
+							propPresets.InsertArrayElementAtIndex(0);
+						}
+						else
+						{
+							propPresets.InsertArrayElementAtIndex(propPresets.arraySize - 1);
+						}
+
+						var propChild = propPresets.GetArrayElementAtIndex(propPresets.arraySize - 2);
+						var propChildTemplateName = propChild.FindPropertyRelative("templateName");
+						var propHead = propChild.FindPropertyRelative("head");
+						var propParam = propChild.FindPropertyRelative("param");
+						var propLastHead = propChild.FindPropertyRelative("lastHeadObject");
+						var propValue = propChild.FindPropertyRelative("value");
+
+						propParam.stringValue = MarkerData.paramEditor[selected];
+
+						propHead.stringValue = MarkerData.GetHeadTarget(propParam.stringValue);
+						propValue.managedReferenceValue = MarkerData.paramObjectsEditor.TryGetValue(propHead.stringValue, out var getValue) ? getValue?.Invoke(propParam.stringValue) : null;
+
+						propLastHead.stringValue = propHead.stringValue;
+
+						propChildTemplateName.stringValue = propTemplateName.stringValue;
 					}
-					else
-					{
-						propPresets.InsertArrayElementAtIndex(propPresets.arraySize - 1);
-					}
-
-					var propChild = propPresets.GetArrayElementAtIndex(propPresets.arraySize - 2);
-					var propChildTemplateName = propChild.FindPropertyRelative("templateName");
-					var propHead = propChild.FindPropertyRelative("head");
-					var propParam = propChild.FindPropertyRelative("param");
-					var propLastHead = propChild.FindPropertyRelative("lastHeadObject");
-					var propValue = propChild.FindPropertyRelative("value");
-
-					propParam.stringValue = MarkerData.paramEditor[propSelectHead.intValue];
-					propHead.stringValue = MarkerData.GetHeadTarget(propParam.stringValue);
-					propValue.managedReferenceValue = MarkerData.paramObjectsEditor.TryGetValue(propHead.stringValue, out var getValue) ? getValue?.Invoke(propParam.stringValue) : null;
-
-					propLastHead.stringValue = propHead.stringValue;
-
-					propChildTemplateName.stringValue = propTemplateName.stringValue;
 				}
 
 				EditorGUI.EndDisabledGroup();

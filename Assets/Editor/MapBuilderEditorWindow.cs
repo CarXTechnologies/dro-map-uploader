@@ -180,8 +180,8 @@ namespace Editor
 				return;
 			}
 
-			m_scrollPosition = GUI.BeginScrollView(new Rect(rectItem.x + space * 2, 0, rectItem.width + space * 2, position.height),
-				m_scrollPosition, new Rect(rectItem.x - 2, 0, rectItem.width, elementHeight * (m_fetchResultListItems.Count + 1) + space));
+			m_scrollPosition = GUI.BeginScrollView(new Rect(rectItem.x + space * 2, 0, rectItem.width + space * 3, position.height),
+				m_scrollPosition, new Rect(rectItem.x - 2, 0, rectItem.width, elementHeight * (m_fetchResultListItems.Count + 2) + space));
 
 			m_attaching.TryGetValue(SelectItem.Id, out var isSelectAttach);
 
@@ -203,6 +203,14 @@ namespace Editor
 			}
 
 			var loadIcon = EditorGUIUtility.IconContent(m_iconLoad[Mathf.FloorToInt((Time.time * 12) % m_iconLoad.Length)]);
+
+			if (GUI.Button(rectItem, "Fetch steam workshop"))
+			{
+				Fetch();
+			}
+
+			rectItem.y += rectItem.height;
+
 			for (int i = 0; i < m_fetchResultListItems.Count; i++)
 			{
 				rectItem.y += space;
@@ -771,7 +779,7 @@ namespace Editor
 		{
 			return editorScenes
 				.Where(scene => scene.enabled)
-				.Select(editorScene => MapBuilder.GetSceneNameFromPath(editorScene.path))
+				.Select(editorScene => MapBuilder.GetSceneNameFromPathNoId(editorScene.path))
 				.ToArray();
 		}
 

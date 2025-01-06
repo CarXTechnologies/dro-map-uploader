@@ -17,7 +17,7 @@ namespace Editor
 			SerializedProperty property,
 			GUIContent label)
 		{
-			var gameMarkerData = (property.serializedObject.targetObject as GameMarkerData);
+			var gameMarkerData = property.serializedObject.targetObject as GameMarkerData;
 			var propHeight = base.GetPropertyHeight(property, label);
 			var amountRect = new Rect(position.x + 16, position.y, position.width - 16, propHeight);
 
@@ -120,13 +120,12 @@ namespace Editor
 
 					templates[^1] = "Custom";
 					Space();
-					propTemplateIndex.intValue = EditorGUI.Popup(amountRect,
-						propTemplateIndex.intValue,
-						templates);
+					propTemplateIndex.intValue = EditorGUI.Popup(amountRect, propTemplateIndex.intValue, templates);
 					propTemplateName.stringValue = templates[propTemplateIndex.intValue];
-
+					EditorGUI.DrawRect(amountRect, new Color(0.3f, 0.3f, 0.3f, 1.0f));
+					GUI.Label(amountRect, propTemplateName.stringValue);
 					drawTemplate = true;
-					if (templates[propTemplateIndex.intValue] != "Custom")
+					if (propTemplateName.stringValue != "Custom")
 					{
 						propValue.managedReferenceValue = gameMarkerTemplateConfig.presets.presets[propTemplateIndex.intValue].value;
 						drawTemplatePopup = true;
@@ -136,9 +135,14 @@ namespace Editor
 						propValue.managedReferenceValue = gameMarkerData.markerData.customValue;
 					}
 
-					m_oldTemplate = templates[propTemplateIndex.intValue];
+					m_oldTemplate = propTemplateName.stringValue;
 				}
 			}
+
+			//if (propValue.managedReferenceValue.GetType() != )
+			//{
+
+			//}
 
 			if (propLastHead.stringValue != propParam.stringValue)
 			{
