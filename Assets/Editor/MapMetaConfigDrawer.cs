@@ -8,6 +8,7 @@ namespace Editor
     {
         private float m_height;
         private MapMetaConfig m_target;
+        private Vector2 scrollPosition;
         
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -68,20 +69,47 @@ namespace Editor
         }
 
         private void TextureProp(ref Rect position, SerializedProperty property, Vector2 size, Vector2 space)
-        {
-            var rectTexture = new Rect(position.position, new Vector2(size.x, size.y * ((float)9 / 16)));
-            property.objectReferenceValue = (Texture2D)EditorGUI.ObjectField(rectTexture, property.objectReferenceValue, typeof(Texture2D), false);
-            position.position += rectTexture.size * space;
-            position.size += rectTexture.size * space;
-        }
+		{
+			var rectTexture = new Rect(position.position, new Vector2(size.x, size.y * 9f / 16f));
+			property.objectReferenceValue = EditorGUI.ObjectField(rectTexture, property.objectReferenceValue, typeof(Texture2D), false);
+
+			if (property.objectReferenceValue != null)
+			{
+				var path = AssetDatabase.GetAssetPath(property.objectReferenceValue);
+				var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+
+				if (importer != null && !importer.isReadable)
+				{
+					var buttonRect = new Rect(rectTexture.x, rectTexture.yMax + 2, rectTexture.width, 20);
+					if (GUI.Button(buttonRect, new GUIContent(" Fix Readable", EditorGUIUtility.IconContent("console.warnicon").image)))
+					{
+						importer.isReadable = true;
+						importer.SaveAndReimport();
+					}
+
+					position.position += new Vector2(0, 24);
+					position.size += new Vector2(0, 24);
+				}
+			}
+
+			position.position += rectTexture.size * space;
+			position.size += rectTexture.size * space;
+		}
         
         private void TextArea(ref Rect position, SerializedProperty property, Vector2 size, Vector2 space)
-        {
-            var rectTexture = new Rect(position.position, size);
-            property.stringValue = EditorGUI.TextArea(rectTexture, property.stringValue);
-            position.position += rectTexture.size * space;
-            position.size += rectTexture.size * space;
-        }
+		{
+			var style = new GUIStyle(EditorStyles.textArea) { wordWrap = true };
+			var rect = new Rect(position.position, size);
+
+			float textHeight = Mathf.Max(style.CalcHeight(new GUIContent(property.stringValue), rect.width), rect.height);
+
+			scrollPosition = GUI.BeginScrollView(rect, scrollPosition, new Rect(0, 0, rect.width - 16, textHeight));
+			property.stringValue = EditorGUI.TextArea(new Rect(0, 0, rect.width - 16, textHeight), property.stringValue, style);
+			GUI.EndScrollView();
+
+			position.position += rect.size * space;
+			position.size += rect.size * space;
+		}
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
