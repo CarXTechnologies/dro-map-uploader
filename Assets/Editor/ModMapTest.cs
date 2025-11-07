@@ -67,6 +67,7 @@ namespace Editor
             new ValidItem(nameof(GameMarkerData), 1, 10000),
             new ValidItem(nameof(CacheData), 0, 1),
             new ValidItem(nameof(Minimap), 1, 1),
+            new ValidItem(nameof(MapParticlesActivator), 0, 100),
             new ValidItem("SceneObjectIDMapSceneAsset", 0, 1)
         );
 
