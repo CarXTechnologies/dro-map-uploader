@@ -30,6 +30,8 @@ namespace Editor
 
 		private Property m_configProperty;
 		private int m_buildType;
+		private FormatBuild m_buildFormat;
+		private FormatBuild m_buildFormatCached;
 		private PlatformBuild m_platformBuild;
 		private CompressBuild m_compressBuild;
 		private PlatformBuild m_platformBuildCached;
@@ -250,19 +252,18 @@ namespace Editor
 
 				var rectItemWarning = new Rect(rectItem.x + rectItem.width - 48, rectItem.y, 48, 18);
 				GUI.skin.label.fontSize = oldSize;
+
 				if (m_selectItemIndex == i)
 				{
 					GUI.color = Color.black;
-					GUI.Box(rectItem,
-						String.Empty);
+					GUI.Box(rectItem, string.Empty);
 					GUI.color = Color.white;
 				}
 
 				if (!MapManagerConfig.TryGetAttach(m_fetchResultListItems[i].Id, out var attachData) || attachData.metaConfig == null)
 				{
 					GUI.color = Color.red;
-					GUI.Box(rectItemWarning,
-						"Detach");
+					GUI.Box(rectItemWarning, "Detach");
 					GUI.color = Color.white;
 				}
 
@@ -277,24 +278,19 @@ namespace Editor
 					{
 						rectItemPreview.y += space;
 						rectItemPreview.height -= space * 2;
-						EditorGUI.DrawRect(rectItemPreview,
-							Color.black);
+						EditorGUI.DrawRect(rectItemPreview, Color.black);
 						rectItemPreview.y -= space;
-						rectItemPreview.height = rectItemPreview.width *
-						                         ((float)imageData.Item1.height / imageData.Item1.width);
+						rectItemPreview.height = rectItemPreview.width * ((float)imageData.Item1.height / imageData.Item1.width);
 						rectItemPreview.y += rectItem.height / 2 - rectItemPreview.height / 2;
-						GUI.DrawTexture(rectItemPreview,
-							imageData.Item1);
+						GUI.DrawTexture(rectItemPreview, imageData.Item1);
 					}
 					else
 					{
 						rectItemPreview.y += space;
 						rectItemPreview.height -= space * 2;
-						GUI.Box(rectItemPreview,
-							String.Empty);
+						GUI.Box(rectItemPreview, String.Empty);
 						rectItemPreview.x += rectItemPreview.width / 4;
-						GUI.Label(rectItemPreview,
-							"Empty");
+						GUI.Label(rectItemPreview, "Empty");
 						rectItemPreview.x -= rectItemPreview.width / 4;
 					}
 
@@ -305,8 +301,7 @@ namespace Editor
 				}
 				else if (m_loads.TryGetValue(item.Id, out var state) && state)
 				{
-					GUI.Label(rectItemPreview,
-						loadIcon);
+					GUI.Label(rectItemPreview, loadIcon);
 				}
 
 				rectItem.x -= space;
@@ -315,6 +310,7 @@ namespace Editor
 
 			rectItem.y += space;
 			rectItem.height = 40;
+
 			if (GUI.Button(rectItem, "New Workshop Item"))
 			{
 				MapBuilder.CreateNewCommunityFile(result =>
@@ -326,9 +322,7 @@ namespace Editor
 				});
 			}
 
-			;
 			GUI.Label(rectItem, iconSteam);
-
 			GUI.EndScrollView();
 
 			Rect lastRect;
@@ -363,10 +357,16 @@ namespace Editor
 				rectBuildSettings.width / 2,
 				sizeButton);
 
-			var rectScene = new Rect(
+			var rectFormat = new Rect(
 				rectPlatform.x,
-				rectPlatform.y + (sizeButton + space),
-				rectPlatform.width,
+				rectPlatform.y + sizeButton + space * 2,
+				rectBuildSettings.width / 2,
+				sizeButton);
+
+			var rectScene = new Rect(
+				rectFormat.x,
+				rectFormat.y + (sizeButton + space),
+				rectFormat.width,
 				sizeButton);
 
 			var rectCompress = new Rect(
@@ -378,6 +378,12 @@ namespace Editor
 			var rectPlatformName = new Rect(
 				rectBuildSettings.x,
 				rectPlatform.y,
+				rectBuildSettings.width / 2,
+				sizeButton);
+
+			var rectFormatName = new Rect(
+				rectBuildSettings.x,
+				rectFormat.y,
 				rectBuildSettings.width / 2,
 				sizeButton);
 
@@ -580,10 +586,12 @@ namespace Editor
 					MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
 					m_compressBuildCached = m_compressBuild;
 					m_platformBuildCached = m_platformBuild;
+					m_buildFormatCached = m_buildFormat;
 
 					MapBuilder.BuildCustom((TempData)m_buildType,
 						(TempData)buildData.buildSuccess,
 						selectId,
+						m_buildFormatCached,
 						m_compressBuildCached,
 						m_platformBuildCached,
 						(path, success) => AddBuild(attachObj.metaConfig, buildData, path, success));
@@ -614,6 +622,10 @@ namespace Editor
 				EditorGUI.BeginDisabledGroup(!flagPlat);
 				GUI.Label(rectPlatformName, "Platform");
 				m_platformBuild = (PlatformBuild)EditorGUI.EnumPopup(rectPlatform, flagPlat ? m_platformBuild : buildData.platform);
+
+				GUI.Label(rectFormatName, "Format");
+				m_buildFormat = (FormatBuild)EditorGUI.EnumPopup(rectFormat, flagPlat ? m_buildFormat : buildData.format);
+
 				EditorGUI.EndDisabledGroup();
 
 				var variants = Enum.GetNames(typeof(UploadSettingVariant));
@@ -700,7 +712,7 @@ namespace Editor
 
 			GUI.color = new Color(1f, 1f, 1f, .7f);
 
-			var version = Version.GetFullVersion();
+			var version = GameVersion.GetFullVersion();
 			var versionSize = GUI.skin.label.CalcSize(new GUIContent(version));
 
 			EditorGUI.DropShadowLabel(new Rect(position.width - sizeButton * 2 - versionSize.x, position.height - sizeButton * 2, versionSize.x + sizeButton, sizeButton), version);
@@ -732,12 +744,12 @@ namespace Editor
 				{
 					EnqueueDrawAction(ref rectInfo, buildNames[i] + " is not build", MessageType.Error);
 				}
-				else if (buildNames[i] == TempData.Meta.ToString() && !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
+				else if (buildNames[i] == nameof(TempData.Meta) && !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
 				{
 					EnqueueDrawAction(ref rectInfo, $"Is Changed {buildNames[i]}! Please build {buildNames[i]}.", MessageType.Warning);
 				}
 
-				if (buildNames[i] == TempData.Map.ToString() && !string.IsNullOrWhiteSpace(message))
+				if (buildNames[i] == nameof(TempData.Map) && !string.IsNullOrWhiteSpace(message))
 				{
 					rectInfo.height = validComponentsHeight;
 					EnqueueDrawAction(ref rectInfo, message, has ? MessageType.Info : MessageType.Error);
@@ -769,8 +781,10 @@ namespace Editor
 			buildData.platform = m_platformBuildCached;
 
 			MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(config,
-				MapManagerConfig.instance.targetScene, path, (int)complete, ((TempData)m_buildType).HasFlag(TempData.Map) ? ModMapTestTool.Target : buildData.lastValid,
-				m_platformBuildCached, m_compressBuildCached));
+				MapManagerConfig.instance.targetScene,
+				path, (int)complete,
+				((TempData)m_buildType).HasFlag(TempData.Map) ? ModMapTestTool.Target : buildData.lastValid,
+				m_buildFormat, m_platformBuildCached, m_compressBuildCached));
 
 			m_buildProcess = false;
 		}

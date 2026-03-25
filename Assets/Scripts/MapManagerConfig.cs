@@ -12,6 +12,13 @@ public enum TempData : int
 	Map = 2,
 }
 
+public enum FormatBuild
+{
+	Legacy,
+	LegacyWavefront,
+	ModificationFormat,
+}
+
 public enum PlatformBuild : int
 {
 	StandaloneWindows = 0,
@@ -55,6 +62,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 		public int buildSuccess;
 		public ValidItemData lastValid;
 		public MapMetaConfigValue lastMeta;
+		public FormatBuild format;
 		public PlatformBuild platform;
 		public CompressBuild compress;
 		public string targetScene;
@@ -64,6 +72,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 			string path,
 			int buildSuccess,
 			ValidItemData lastValid,
+			FormatBuild format,
 			PlatformBuild platform,
 			CompressBuild compress)
 		{
@@ -75,6 +84,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 			this.platform = platform;
 			this.compress = compress;
 			this.targetScene = targetScene;
+			this.format = format;
 		}
 	}
 

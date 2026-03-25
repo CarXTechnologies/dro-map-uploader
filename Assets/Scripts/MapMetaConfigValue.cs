@@ -8,6 +8,8 @@ public struct MapMetaConfigValue
 	[TextArea] public string mapDescription;
 	public Texture2D icon;
 	public Texture2D largeIcon;
+	public string[] authors;
+	public string url;
 
 	public PlatformBuild platform;
 	public CompressBuild compress;

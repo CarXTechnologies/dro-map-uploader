@@ -17,7 +17,6 @@ namespace Editor
 		public const float BYTES_TO_MEGABYTES = 1048576f;
 
 		private static readonly List<GameObject> m_gameObjects = new();
-		private static Dictionary<Vector3, int> m_vertexCountPositionDiscreate = new();
 		public static Func<string, bool> playCallback;
 		public static Action<string, string> errorCallback;
 

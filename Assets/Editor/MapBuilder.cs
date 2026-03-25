@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Plugins.CarX.Modding.Creator.Editor;
+using Plugins.CarX.Modding.Creator.Runtime;
 using Steamworks;
 using Steamworks.Data;
 using Steamworks.Ugc;
@@ -31,8 +33,12 @@ namespace Editor
 		private static PublishedFileId m_currentFileId;
 		private static BuildAssetBundleOptions m_assetBundleOption = BuildAssetBundleOptions.UncompressedAssetBundle;
 		private static BuildTarget m_buildTarget = BuildTarget.StandaloneWindows;
+		private static FormatBuild m_buildFormat;
 		private static string m_uploadScene;
 		private static string m_targetScene => MapManagerConfig.instance.targetScene;
+
+		private static readonly IModCollectionProvider m_provider = new EditorCollectionProvider();
+		private static ModResults results;
 
 		private static bool PublishCallback(ulong id)
 		{
@@ -111,8 +117,7 @@ namespace Editor
 				return true;
 			}
 
-			if (new FileInfo(m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.largeIcon)).Length
-			    / ModMapTestTool.BYTES_TO_MEGABYTES > 10f)
+			if (new FileInfo(m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.largeIcon)).Length / ModMapTestTool.BYTES_TO_MEGABYTES > 10f)
 			{
 				Debug.LogError("Large icon more 10mb");
 				return true;
@@ -120,8 +125,7 @@ namespace Editor
 
 			if (MapManagerConfig.Value.mapDescription.Length > 8000 && MapManagerConfig.instance.uploadSteamDescription)
 			{
-				Debug.LogError(
-					$"Map description must be less than 8000 characters({MapManagerConfig.Value.mapDescription.Length})");
+				Debug.LogError($"Map description must be less than 8000 characters({MapManagerConfig.Value.mapDescription.Length})");
 				return true;
 			}
 
@@ -148,21 +152,27 @@ namespace Editor
 			}
 		}
 
-		private static void CopyTemporary(string source, string dest, string searchPattern)
-		{
-			foreach (var file in Directory.GetFiles(source, searchPattern))
-			{
-				var fileName = file.Substring(source.Length + 1);
-				File.Copy(Path.Combine(source, fileName), Path.Combine(dest, fileName), true);
-			}
-		}
-
 		private static void CopyTemporary(string source, string dest)
 		{
-			foreach (var file in Directory.GetFiles(source))
+			DirectoryInfo sourceDirectory = new DirectoryInfo(source);
+
+			if (!sourceDirectory.Exists)
 			{
-				var fileName = file.Substring(source.Length + 1);
-				File.Copy(Path.Combine(source, fileName), Path.Combine(dest, fileName), true);
+				throw new DirectoryNotFoundException($"Source directory not found: {source}");
+			}
+
+			Directory.CreateDirectory(dest);
+
+			foreach (FileInfo file in sourceDirectory.GetFiles())
+			{
+				string targetFilePath = Path.Combine(dest, file.Name);
+				file.CopyTo(targetFilePath, true);
+			}
+
+			foreach (DirectoryInfo subdir in sourceDirectory.GetDirectories())
+			{
+				string newTargetDir = Path.Combine(dest, subdir.Name);
+				CopyTemporary(subdir.FullName, newTargetDir);
 			}
 		}
 
@@ -231,6 +241,63 @@ namespace Editor
 			m_titleIconPath = m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.icon);
 		}
 
+		private static bool? ValidComponent(Component component)
+		{
+			var compType = component.GetType();
+			if (!ModMapTestTool.ValidType(component, ModMapTestTool.Target.data))
+			{
+				if (ModMapTestTool.ValidType(compType, MapSkipComponentConfig.instance.valid))
+				{
+					return true;
+				}
+
+				ModMapTestTool.TryErrorMessage(compType.Name, $"No valid component : {compType.Name}");
+				return false;
+			}
+
+			return null;
+		}
+
+		private static bool? ProcessComponent(Component component)
+		{
+			var compType = component.GetType();
+
+			if (compType.Name == nameof(GameMarkerData))
+			{
+				var comp = component.GetComponent<GameMarkerData>();
+				comp.markerData.Update();
+				m_cacheDataList.Add(comp);
+				if (comp.markerData.GetHead() == "road")
+				{
+					var road = comp.gameObject;
+					road.isStatic = true;
+					GameObjectUtility.SetStaticEditorFlags(road,
+						StaticEditorFlags.BatchingStatic | StaticEditorFlags.NavigationStatic |
+						StaticEditorFlags.OccludeeStatic | StaticEditorFlags.OccluderStatic |
+						StaticEditorFlags.ReflectionProbeStatic | StaticEditorFlags.OffMeshLinkGeneration);
+				}
+			}
+
+			if (compType.Name == nameof(LODGroup))
+			{
+				var groupLods = (component as LODGroup)?.GetLODs();
+
+				for (var i = 0; i < groupLods.Length; i++)
+				{
+					groupLods[i].renderers = component.transform.FindAllComponent<Renderer>(groupLods[i].renderers);
+				}
+
+				component.GetComponent<LODGroup>().SetLODs(groupLods);
+			}
+
+			if (compType.Name == nameof(ReflectionProbe))
+			{
+				m_cacheData.reflectionProbe = component.GetComponent<ReflectionProbe>();
+			}
+
+			return null;
+		}
+
 		[Obsolete("Obsolete")]
 		private static bool ValidateSceneAndMirror()
 		{
@@ -268,56 +335,19 @@ namespace Editor
 				return true;
 			}
 
-			var noValidComp = false;
+			IModResultCollector collector = null;
 
-			DuplicateValidComponents(root.transform, null, "Garbage", (go, component) =>
+			switch (m_buildFormat)
 			{
-				var compType = component.GetType();
-				if (!ModMapTestTool.ValidType(component, ModMapTestTool.Target.data))
-				{
-					if (ModMapTestTool.ValidType(compType, MapSkipComponentConfig.instance.valid)) return;
+				case FormatBuild.Legacy:
+					collector = new SceneAssetBundleCollector(root.transform, ValidComponent, ProcessComponent, "Garbage");
+					break;
+				case FormatBuild.LegacyWavefront:
+					collector = new SceneFormatCollector(root.transform, Path.GetFileNameWithoutExtension(m_scenePath), "Garbage");
+					break;
+			}
 
-					noValidComp = true;
-					ModMapTestTool.TryErrorMessage(compType.Name, $"No valid component : {compType.Name}");
-					return;
-				}
-
-				UnityEditorInternal.ComponentUtility.CopyComponent(component);
-				UnityEditorInternal.ComponentUtility.PasteComponentAsNew(go);
-
-				if (compType.Name == nameof(GameMarkerData))
-				{
-					var comp = go.GetComponent<GameMarkerData>();
-					comp.markerData.Update();
-					m_cacheDataList.Add(comp);
-					if (comp.markerData.GetHead() == "road")
-					{
-						var road = comp.gameObject;
-						road.isStatic = true;
-						GameObjectUtility.SetStaticEditorFlags(road,
-							StaticEditorFlags.BatchingStatic |
-							StaticEditorFlags.NavigationStatic |
-							StaticEditorFlags.OccludeeStatic |
-							StaticEditorFlags.OccluderStatic |
-							StaticEditorFlags.ReflectionProbeStatic |
-							StaticEditorFlags.OffMeshLinkGeneration);
-					}
-				}
-
-				if (compType.Name == nameof(LODGroup))
-				{
-					var groupLods = (component as LODGroup)?.GetLODs();
-
-					for (var i = 0; i < groupLods.Length; i++)
-					{
-						groupLods[i].renderers = go.transform.FindAllComponent<Renderer>(groupLods[i].renderers);
-					}
-
-					go.GetComponent<LODGroup>().SetLODs(groupLods);
-				}
-
-				if (compType.Name == nameof(ReflectionProbe)) m_cacheData.reflectionProbe = go.GetComponent<ReflectionProbe>();
-			});
+			results = collector.CollectModResults(m_provider, GameVersion.GetFullVersionFormat());
 
 			for (var i = 0; i < sceneObjects.Length; i++)
 			{
@@ -331,7 +361,7 @@ namespace Editor
 			EditorSceneManager.SaveScene(mapScene, m_scenePath);
 			SceneManager.UnloadScene(mapScene);
 
-			return noValidComp;
+			return !results.success;
 		}
 
 		private static string GetTemporary(TempData name)
@@ -358,19 +388,65 @@ namespace Editor
 			return MapManagerConfig.instance.mapMetaConfigValue.id;
 		}
 
-		private static void CreateMapBundle()
+		private static void CreateMapBundle(FormatBuild moddingFormat)
 		{
-			var sceneName = GetSceneNameFromPathNoId(m_targetScene);
-			var bundleBuilds = CreateBundleArrayDataForOneElement(sceneName + ".bundle", GetScenePathNoId(m_scenePath));
-			BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Map), bundleBuilds, m_assetBundleOption, m_buildTarget);
+			switch (moddingFormat)
+			{
+				case FormatBuild.Legacy:
+					var sceneName = GetSceneNameFromPathNoId(m_targetScene);
+					var bundleBuilds = CreateBundleArrayDataForOneElement(sceneName + ".bundle", GetScenePathNoId(m_scenePath));
+					BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Map), bundleBuilds, m_assetBundleOption, m_buildTarget);
+					return;
+				case FormatBuild.LegacyWavefront:
+					results.UploadInCatalog(GetTemporary(TempData.Map));
+					return;
+			}
 		}
 
-		private static void CreateMetaBundle()
+		private static void CreateMetaBundle(FormatBuild moddingFormat)
 		{
-			MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.compress = MapManagerConfig.Build.compress;
-			MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue.platform = MapManagerConfig.Build.platform;
-			var bundleBuilds = CreateBundleArrayDataForOneElement(TempData.Meta.ToString().ToLower(), "Assets/Resources/" + MapManagerConfig.instance.name + ".asset");
-			BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Meta), bundleBuilds, m_assetBundleOption, m_buildTarget);
+			MapMetaConfigValue metaValue = MapManagerConfig.Value;
+			metaValue.compress = MapManagerConfig.Build.compress;
+			metaValue.platform = MapManagerConfig.Build.platform;
+			MapManagerConfig.instance.mapMetaConfigValue.mapMetaConfigValue = metaValue;
+
+			var pathToResources = "Assets/Resources/" + MapManagerConfig.instance.name + ".asset";
+
+			switch (moddingFormat)
+			{
+				case FormatBuild.Legacy:
+					var bundleBuilds = CreateBundleArrayDataForOneElement(nameof(TempData.Meta).ToLower() + ".bundle", pathToResources);
+					BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Meta), bundleBuilds, m_assetBundleOption, m_buildTarget);
+					return;
+				case FormatBuild.LegacyWavefront:
+					results ??= new ModResults(m_provider);
+					var modHierarchy = new ModMeta
+					{
+						id = m_currentFileId.Value.ToString(),
+						name = metaValue.mapName,
+						description = metaValue.mapDescription,
+						madeIn = $"Mod Map Uploader {GameVersion.GetFullVersion()}",
+						version = GameVersion.GetFullVersionFormat(),
+						authors = metaValue.authors,
+						url = metaValue.url
+					};
+
+					if (results.TryGetProvider(metaValue.icon, out var iconProvider))
+					{
+						modHierarchy.icon = iconProvider.GetFilePath(metaValue.icon);
+					}
+
+					if (results.TryGetProvider(metaValue.largeIcon, out var largeIconProvider))
+					{
+						modHierarchy.largeIcon = largeIconProvider.GetFilePath(metaValue.largeIcon);
+					}
+
+					results.Add(metaValue.icon);
+					results.Add(metaValue.largeIcon);
+					results.Add(modHierarchy);
+					results.UploadInCatalog(GetTemporary(TempData.Meta));
+					return;
+			}
 		}
 
 		private static void SelectCache()
@@ -383,6 +459,7 @@ namespace Editor
 			TempData target,
 			TempData success,
 			PublishedFileId published,
+			FormatBuild formatBuild,
 			CompressBuild compressBuild,
 			PlatformBuild platformBuild,
 			Action<string, TempData> callback)
@@ -421,6 +498,9 @@ namespace Editor
 					     break;*/
 				}
 
+				m_buildFormat = formatBuild;
+				m_currentFileId = published;
+
 				SelectCache();
 
 				if (target.HasFlag(TempData.Meta))
@@ -444,7 +524,7 @@ namespace Editor
 							if (!ValidateSceneAndMirror())
 							{
 								RenameCacheScene(published);
-								CreateMapBundle();
+								CreateMapBundle(m_buildFormat);
 								success |= TempData.Map;
 							}
 							else
@@ -460,7 +540,7 @@ namespace Editor
 
 					if (target.HasFlag(TempData.Meta))
 					{
-						CreateMetaBundle();
+						CreateMetaBundle(m_buildFormat);
 						ClearCacheScene();
 						success |= TempData.Meta;
 					}
@@ -580,7 +660,7 @@ namespace Editor
 		{
 			var sceneName = GetSceneNameFromPathNoId(m_uploadScene);
 			var notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(sceneName + ".bundle", assetBuildPath + "/" + sceneName + ".bundle");
-			var notMetaSize = ModMapTestTool.IsNotCorrectMetaFileSize(assetBuildPath + "/" + TempData.Meta.ToString().ToLower());
+			var notMetaSize = ModMapTestTool.IsNotCorrectMetaFileSize(assetBuildPath + "/" + nameof(TempData.Meta).ToLower());
 
 			if (!notMapSize && !notMetaSize)
 			{
@@ -602,44 +682,26 @@ namespace Editor
 
 			return bundleBuilds;
 		}
-
-		private static void DuplicateValidComponents(Transform parent, Transform root, string tagGarbage, Action<GameObject, Component> tryAct)
-		{
-			if (!string.IsNullOrEmpty(tagGarbage) && parent.CompareTag(tagGarbage))
-			{
-				return;
-			}
-
-			var allComponents = parent.GetComponents(typeof(Component));
-			var o = parent.gameObject;
-
-			var go = new GameObject(parent.transform.name)
-			{
-				transform =
-				{
-					parent = root,
-					localPosition = parent.localPosition,
-					localRotation = parent.localRotation,
-					localScale = parent.localScale
-				},
-				tag = "Untagged",
-				isStatic = o.isStatic,
-				layer = o.layer
-			};
-
-			for (var i = 0; i < parent.transform.childCount; i++)
-			{
-				var child = parent.transform.GetChild(i);
-				DuplicateValidComponents(child, go.transform, tagGarbage, tryAct);
-			}
-
-			foreach (var component in allComponents)
-			{
-				if (component != null)
-				{
-					tryAct?.Invoke(go, component);
-				}
-			}
-		}
 	}
+}
+
+public class EditorCollectionProvider : ProviderCollection
+{
+	private static readonly IModFileProvider DefaultFileProvider = new DefaultFileProvider(Application.persistentDataPath);
+
+	public EditorCollectionProvider() : base(GameVersion.GetDefaultFullVersionFormat())
+	{
+
+	}
+
+	protected override VersionProvider[] providers { get; set; } =
+	{
+		new(GameVersion.GetFullVersionFormat(),
+			new Provider(typeof(ModMeta), new MetaProvider(DefaultFileProvider, string.Empty)),
+			new Provider(typeof(StaticHierarchyMeta), new HierarchiesMetaProvider(DefaultFileProvider)),
+			new Provider(typeof(PrefabHierarchyMeta), new PrefabsMetaProvider(DefaultFileProvider)),
+			new Provider(typeof(UnityPrefabInstance), new ObjMtlExporterProvider(DefaultFileProvider)),
+			new Provider(typeof(Texture2D), new TexturePngProvider(DefaultFileProvider))
+		),
+	};
 }

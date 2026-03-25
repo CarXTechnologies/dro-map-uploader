@@ -12,7 +12,7 @@ public class ReflectionProbeSwap : MonoBehaviour
 	[ContextMenu("Bake")]
 	private void Bake()
 	{
-		var hdrpAsset = GraphicsSettings.renderPipelineAsset as HDRenderPipelineAsset;
+		var hdrpAsset = GraphicsSettings.defaultRenderPipeline as HDRenderPipelineAsset;
 		var hdrpSettings = hdrpAsset.currentPlatformRenderPipelineSettings;
 
 		var savedCubemapSize = hdrpSettings.lightLoopSettings.reflectionProbeTexCacheSize;
