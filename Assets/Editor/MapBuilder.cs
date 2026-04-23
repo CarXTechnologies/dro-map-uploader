@@ -229,6 +229,44 @@ namespace Editor
             m_assetPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
             m_titleIconPath = m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.icon);
         }
+
+        private static void RenameConflictingRootObjects(Transform parent, List<KeyValuePair<GameObject, string>> renamedRoots)
+        {
+            if (parent.name == "root")
+            {
+                renamedRoots.Add(new KeyValuePair<GameObject, string>(parent.gameObject, parent.name));
+                parent.name = "__SceneRootRenamedForBuild__" + renamedRoots.Count;
+            }
+
+            for (int i = 0; i < parent.childCount; i++)
+            {
+                RenameConflictingRootObjects(parent.GetChild(i), renamedRoots);
+            }
+        }
+
+        private static List<KeyValuePair<GameObject, string>> RenameConflictingRootObjects(Scene scene)
+        {
+            var renamedRoots = new List<KeyValuePair<GameObject, string>>();
+            var sceneObjects = scene.GetRootGameObjects();
+
+            for (int i = 0; i < sceneObjects.Length; i++)
+            {
+                RenameConflictingRootObjects(sceneObjects[i].transform, renamedRoots);
+            }
+
+            return renamedRoots;
+        }
+
+        private static void RestoreRenamedRootObjects(List<KeyValuePair<GameObject, string>> renamedRoots)
+        {
+            for (int i = 0; i < renamedRoots.Count; i++)
+            {
+                if (renamedRoots[i].Key != null)
+                {
+                    renamedRoots[i].Key.name = renamedRoots[i].Value;
+                }
+            }
+        }
         
         [Obsolete("Obsolete")]
         private static bool ValidateSceneAndMirror()
@@ -236,6 +274,7 @@ namespace Editor
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
             EditorSceneManager.OpenScene(m_targetScene);
             var scene = SceneManager.GetActiveScene();
+            var renamedRoots = RenameConflictingRootObjects(scene);
             var sceneObjects = scene.GetRootGameObjects();
             var root = new GameObject("root");
 
@@ -253,6 +292,12 @@ namespace Editor
             
             if (IsValidate(scene))
             {
+                for (int i = 0; i < sceneObjects.Length; i++)
+                {
+                    sceneObjects[i].transform.SetParent(null);
+                }
+
+                RestoreRenamedRootObjects(renamedRoots);
                 EditorSceneManager.OpenScene(m_targetScene);
                 try
                 {
@@ -328,6 +373,8 @@ namespace Editor
             {
                 sceneObjects[i].transform.SetParent(null);
             }
+
+            RestoreRenamedRootObjects(renamedRoots);
             
             m_cacheData.gameMarkers = new List<GameMarkerData>(m_cacheDataList.ToArray());
             
@@ -654,4 +701,3 @@ namespace Editor
         }
     }
 }
-
