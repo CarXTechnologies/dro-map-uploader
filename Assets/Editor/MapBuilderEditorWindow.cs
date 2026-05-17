@@ -109,11 +109,15 @@ namespace Editor
                 await Task.Delay(100);
             }
             
-            await m_steamUgc.GetWorkshopItems(m_fetchResultListItems, DownloadSpriteAsync);
+            await m_steamUgc.GetWorkshopItems(m_fetchResultListItems, item =>
+            {
+                GetAttachState(item.Id);
+                DownloadSpriteAsync(item);
+            });
             
             foreach (var item in m_fetchResultListItems)
             {
-                m_attaching[item.Id] = MapManagerConfig.IsAttach(item.Id);
+                GetAttachState(item.Id);
             }
             
             MapManagerConfig.ValidBuildsAndAttaching(m_fetchResultListItems);
@@ -175,7 +179,7 @@ namespace Editor
                 new Rect(rectItem.x + space * 2, 0, rectItem.width + space * 2, position.height), m_scrollPosition, 
                 new Rect(rectItem.x - 2, 0, rectItem.width, elementHeight * (m_fetchResultListItems.Count + 1) + space));
             
-            m_attaching.TryGetValue(SelectItem.Id, out var isSelectAttach);
+            var isSelectAttach = GetAttachState(SelectItem.Id);
             
             MapManagerConfig.BuildData buildData = default;
             
@@ -454,13 +458,14 @@ namespace Editor
             
             if (attachObj != null)
             {
+                var selectedItemId = SelectItem.Id;
                 var old = attachObj.metaConfig;
                 attachObj.metaConfig = EditorGUI.ObjectField(rectConfig, old, typeof(MapMetaConfig), false) as MapMetaConfig;
 
-                if (attachObj.metaConfig != null && !m_attaching[SelectItem.Id])
+                if (attachObj.metaConfig != null && selectedItemId != 0 && !GetAttachState(selectedItemId))
                 {
-                    MapManagerConfig.Attach(SelectItem.Id, attachObj.metaConfig);
-                    m_attaching[SelectItem.Id] = true;
+                    MapManagerConfig.Attach(selectedItemId, attachObj.metaConfig);
+                    m_attaching[selectedItemId] = true;
                 }
             }
 
@@ -716,6 +721,22 @@ namespace Editor
             }
 
             return false;
+        }
+
+        private bool GetAttachState(ulong itemId)
+        {
+            if (itemId == 0)
+            {
+                return false;
+            }
+
+            if (!m_attaching.TryGetValue(itemId, out var isAttached))
+            {
+                isAttached = MapManagerConfig.IsAttach(itemId);
+                m_attaching[itemId] = isAttached;
+            }
+
+            return isAttached;
         }
     }
 }
