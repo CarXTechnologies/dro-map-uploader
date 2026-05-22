@@ -422,11 +422,11 @@ namespace Editor
 					results ??= new ModResults(m_provider);
 					var modHierarchy = new ModMeta
 					{
-						id = m_currentFileId.Value.ToString(),
+						Id = m_currentFileId.Value.ToString(),
 						name = metaValue.mapName,
 						description = metaValue.mapDescription,
 						madeIn = $"Mod Map Uploader {GameVersion.GetFullVersion()}",
-						version = GameVersion.GetFullVersionFormat(),
+						Version = GameVersion.GetFullVersionFormat(),
 						authors = metaValue.authors,
 						url = metaValue.url
 					};
@@ -683,25 +683,4 @@ namespace Editor
 			return bundleBuilds;
 		}
 	}
-}
-
-public class EditorCollectionProvider : ProviderCollection
-{
-	private static readonly IModFileProvider DefaultFileProvider = new DefaultFileProvider(Application.persistentDataPath);
-
-	public EditorCollectionProvider() : base(GameVersion.GetDefaultFullVersionFormat())
-	{
-
-	}
-
-	protected override VersionProvider[] providers { get; set; } =
-	{
-		new(GameVersion.GetFullVersionFormat(),
-			new Provider(typeof(ModMeta), new MetaProvider(DefaultFileProvider, string.Empty)),
-			new Provider(typeof(StaticHierarchyMeta), new HierarchiesMetaProvider(DefaultFileProvider)),
-			new Provider(typeof(PrefabHierarchyMeta), new PrefabsMetaProvider(DefaultFileProvider)),
-			new Provider(typeof(UnityPrefabInstance), new ObjMtlExporterProvider(DefaultFileProvider)),
-			new Provider(typeof(Texture2D), new TexturePngProvider(DefaultFileProvider))
-		),
-	};
 }
