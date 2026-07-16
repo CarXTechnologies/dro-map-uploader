@@ -325,199 +325,57 @@ namespace Editor
 			GUI.Label(rectItem, iconSteam);
 			GUI.EndScrollView();
 
-			Rect lastRect;
+			var layout = new RectLayout(rectPreview, space, sizeButton);
 
-			var rectConfig = new Rect(
-				rectPreview.x,
-				rectPreview.y + rectPreview.height + space,
-				rectPreview.width,
-				sizeButton);
+			var rectConfig = layout.Stack();
+			var rectButtons = layout.Stack(2);
 
-			var rectConfigValue = new Rect(
-				rectConfig.x,
-				rectConfig.y + rectConfig.height,
-				rectConfig.width,
-				sizeButton);
+			var rectBuildSettings = layout.Place(rectPreview.x, rectButtons.y - space, rectPreview.width, sizeButton + space / 2);
 
-			var rectButtons = new Rect(
-				rectConfigValue.x,
-				rectConfigValue.y + space * 2,
-				rectConfigValue.width,
-				sizeButton);
+			var rectPlatform = layout.Place(rectBuildSettings.x + rectBuildSettings.width / 2, rectBuildSettings.y + sizeButton + space * 2, rectBuildSettings.width / 2);
+			var rectFormat = layout.Place(rectPlatform.x, rectPlatform.y + sizeButton + space * 2, rectBuildSettings.width / 2);
+			var rectScene = layout.Place(rectFormat.x, rectFormat.y + (sizeButton + space), rectFormat.width);
 
-			var rectBuildSettings = new Rect(
-				rectPreview.x,
-				rectButtons.y - space,
-				rectPreview.width,
-				sizeButton + space / 2);
+			var rectCompress = m_buildFormat != FormatBuild.LegacySupportWavefront ?
+				layout.Place(rectScene.x, rectScene.y + sizeButton + space, rectScene.width) :
+				new Rect(rectScene.x, rectScene.y, rectScene.width, sizeButton);
 
-			var rectPlatform = new Rect(
-				rectBuildSettings.x + rectBuildSettings.width / 2,
-				rectBuildSettings.y + sizeButton + space * 2,
-				rectBuildSettings.width / 2,
-				sizeButton);
+			var rectPlatformName = new Rect(rectBuildSettings.x, rectPlatform.y, rectBuildSettings.width / 2, sizeButton);
+			var rectFormatName = new Rect(rectBuildSettings.x, rectFormat.y, rectBuildSettings.width / 2, sizeButton);
 
-			var rectFormat = new Rect(
-				rectPlatform.x,
-				rectPlatform.y + sizeButton + space * 2,
-				rectBuildSettings.width / 2,
-				sizeButton);
+			var rectCompressName = new Rect(rectPlatformName.x, rectCompress.y, rectPlatformName.width, sizeButton);
 
-			var rectScene = new Rect(
-				rectFormat.x,
-				rectFormat.y + (sizeButton + space),
-				rectFormat.width,
-				sizeButton);
+			var rectSceneName = new Rect(rectPlatformName.x, rectScene.y, rectPlatformName.width, sizeButton);
 
-			var rectCompress = new Rect(
-				rectScene.x,
-				rectScene.y + sizeButton + space,
-				rectScene.width,
-				sizeButton);
+			var rectSplitRight = new Rect(rectCompressName.x + rectCompressName.width, rectCompressName.y + sizeButton + space, rectCompressName.width, sizeButton);
+			var rectSplitLeft = new Rect(rectCompressName.x, rectCompressName.y + sizeButton + space, rectCompressName.width, sizeButton);
 
-			var rectPlatformName = new Rect(
-				rectBuildSettings.x,
-				rectPlatform.y,
-				rectBuildSettings.width / 2,
-				sizeButton);
+			var rectSplitBuild = layout.Place(rectCompressName.x, rectSplitLeft.y + sizeButton + space, rectBuildSettings.width, sizeButton * 1.5f);
+			var rectUploadSettings = layout.Place(rectBuildSettings.x, rectSplitBuild.y + sizeButton + space * 3, rectBuildSettings.width, sizeButton + space / 2);
 
-			var rectFormatName = new Rect(
-				rectBuildSettings.x,
-				rectFormat.y,
-				rectBuildSettings.width / 2,
-				sizeButton);
+			ShowBuildResultIfExists(ref uploadState, ref rectUploadSettings, attachObj, buildData, space);
 
-			var rectCompressName = new Rect(
-				rectPlatformName.x,
-				rectCompress.y,
-				rectPlatformName.width,
-				sizeButton);
+			var rectSelectionGridSettings = layout.Place(rectBuildSettings.x, rectUploadSettings.y + sizeButton + space * 3, rectBuildSettings.width, sizeButton + space / 2);
 
-			var rectSceneName = new Rect(
-				rectPlatformName.x,
-				rectCompressName.y - (sizeButton + space),
-				rectPlatformName.width,
-				sizeButton);
+			var rectUploadSteamNameToggle = layout.Place(rectUploadSettings.x + rectCompressName.width, rectSelectionGridSettings.y + sizeButton + space * 2, rectUploadSettings.width / 2);
+			var rectUploadExternalNameFolder = new Rect(rectUploadSettings.x + rectUploadSettings.width * 0.9f, rectUploadSteamNameToggle.y, rectUploadSettings.width * 0.1f, sizeButton);
+			var rectUploadSteamDescriptionToggle = layout.Place(rectUploadSteamNameToggle.x, rectUploadSteamNameToggle.y + sizeButton + space, rectUploadSteamNameToggle.width / 2);
+			var rectUploadSteamPreviewToggle = layout.Place(rectUploadSteamDescriptionToggle.x, rectUploadSteamDescriptionToggle.y + sizeButton + space, rectUploadSteamDescriptionToggle.width);
 
-			var rectSplitRight = new Rect(
-				rectCompressName.x + rectCompressName.width,
-				rectCompressName.y + sizeButton + space,
-				rectCompressName.width,
-				sizeButton);
+			var rectUploadExternalName = new Rect(rectBuildSettings.x, rectUploadSteamNameToggle.y, rectBuildSettings.width * 0.9f, sizeButton);
+			var rectUploadToExternalPath = new Rect(rectBuildSettings.x, rectUploadExternalName.y + sizeButton + space, rectBuildSettings.width, sizeButton * 1.5f);
 
-			var rectSplitLeft = new Rect(
-				rectCompressName.x,
-				rectCompressName.y + sizeButton + space,
-				rectCompressName.width,
-				sizeButton);
+			var rectUploadSteamName = new Rect(rectBuildSettings.x, rectUploadSteamNameToggle.y, rectBuildSettings.width, sizeButton);
+			var rectUploadSteamDescription = new Rect(rectUploadSteamName.x, rectUploadSteamName.y + sizeButton + space, rectUploadSteamName.width, sizeButton);
+			var rectUploadSteamPreview = new Rect(rectUploadSteamDescription.x, rectUploadSteamDescription.y + sizeButton + space, rectUploadSteamDescription.width, sizeButton);
 
-			lastRect = rectSplitLeft;
+			var rectBuildLocalName = new Rect(rectSceneName.x, rectUploadSteamPreviewToggle.y + sizeButton + space, rectBuildSettings.width / 2, sizeButton * 1.5f);
+			var rectBuildLocal = new Rect(rectSceneName.x + rectBuildLocalName.width, rectBuildLocalName.y, rectBuildSettings.width / 2, sizeButton * 1.5f);
 
-			var rectSplitBuild = new Rect(
-				rectCompressName.x,
-				lastRect.y + sizeButton + space,
-				rectBuildSettings.width,
-				sizeButton * 1.5f);
+			var rectUploadButtons = new Rect(rectSplitBuild.x, rectBuildLocalName.y + sizeButton + space * 2, rectUploadSettings.width, sizeButton * 1.5f);
+			var rectInfo = new Rect(rectButtons.x, rectUploadButtons.y + rectUploadButtons.height + space, rectButtons.width, sizeButton * 2);
 
-			var rectUploadSettings = new Rect(
-				rectBuildSettings.x,
-				rectSplitBuild.y + sizeButton + space * 3,
-				rectBuildSettings.width,
-				sizeButton + space / 2);
-
-			ShowBuildResultIfExists(ref uploadState,
-				ref rectUploadSettings,
-				attachObj,
-				buildData,
-				space);
-
-			var rectSelectionGridSettings = new Rect(
-				rectBuildSettings.x,
-				rectUploadSettings.y + sizeButton + space * 3,
-				rectBuildSettings.width,
-				sizeButton + space / 2);
-
-			var rectUploadExternalNameFolder = new Rect(
-				rectUploadSettings.x + rectUploadSettings.width * 0.9f,
-				rectSelectionGridSettings.y + sizeButton + space * 2,
-				rectUploadSettings.width * 0.1f,
-				sizeButton);
-
-			var rectUploadSteamNameToggle = new Rect(
-				rectUploadSettings.x + rectCompressName.width,
-				rectSelectionGridSettings.y + sizeButton + space * 2,
-				rectUploadSettings.width / 2,
-				sizeButton);
-
-			var rectUploadSteamDescriptionToggle = new Rect(
-				rectUploadSteamNameToggle.x,
-				rectUploadSteamNameToggle.y + sizeButton + space,
-				rectUploadSteamNameToggle.width / 2,
-				sizeButton);
-
-			var rectUploadSteamPreviewToggle = new Rect(
-				rectUploadSteamDescriptionToggle.x,
-				rectUploadSteamDescriptionToggle.y + sizeButton + space,
-				rectUploadSteamDescriptionToggle.width,
-				sizeButton);
-
-
-			var rectUploadExternalName = new Rect(
-				rectBuildSettings.x,
-				rectUploadSteamNameToggle.y,
-				rectBuildSettings.width * 0.9f,
-				sizeButton);
-
-			var rectUploadToExternalPath = new Rect(
-				rectBuildSettings.x,
-				rectUploadExternalName.y + sizeButton + space,
-				rectBuildSettings.width,
-				sizeButton * 1.5f);
-
-			var rectUploadSteamName = new Rect(
-				rectBuildSettings.x,
-				rectUploadSteamNameToggle.y,
-				rectBuildSettings.width,
-				sizeButton);
-
-			var rectUploadSteamDescription = new Rect(
-				rectUploadSteamName.x,
-				rectUploadSteamName.y + sizeButton + space,
-				rectUploadSteamName.width,
-				sizeButton);
-
-			var rectUploadSteamPreview = new Rect(
-				rectUploadSteamDescription.x,
-				rectUploadSteamDescription.y + sizeButton + space,
-				rectUploadSteamDescription.width,
-				sizeButton);
-
-
-			var rectBuildLocalName = new Rect(
-				rectSceneName.x,
-				rectUploadSteamPreviewToggle.y + sizeButton + space,
-				rectBuildSettings.width / 2,
-				sizeButton * 1.5f);
-
-			var rectBuildLocal = new Rect(
-				rectSceneName.x + rectBuildLocalName.width,
-				rectBuildLocalName.y,
-				rectBuildSettings.width / 2,
-				sizeButton * 1.5f);
-
-			var rectUploadButtons = new Rect(
-				rectSplitBuild.x,
-				rectBuildLocalName.y + sizeButton + space * 2,
-				rectUploadSettings.width,
-				sizeButton * 1.5f);
-
-			var rectInfo = new Rect(
-				rectButtons.x,
-				rectUploadButtons.y + rectUploadButtons.height + space,
-				rectButtons.width,
-				sizeButton * 2);
-
-			lastRect = (UploadSettingVariant)m_selectionUploadSetting == UploadSettingVariant.Steam ? rectInfo : new Rect(rectUploadToExternalPath.position + Vector2.up * sizeButton * 2f, rectUploadToExternalPath.size);
+			var lastRect = (UploadSettingVariant)m_selectionUploadSetting == UploadSettingVariant.Steam ? rectInfo : new Rect(rectUploadToExternalPath.position + Vector2.up * sizeButton * 2f, rectUploadToExternalPath.size);
 
 			var rectPreviewBack = new Rect(0, 0, rectPreview.width + 31, lastRect.y);
 			var rectLabelId = new Rect(rectPreviewBack.width / 2 - 16, 2, 128, 24);
@@ -634,8 +492,11 @@ namespace Editor
 
 				GUI.Box(rectUploadSettings, "Upload Settings");
 
-				GUI.Label(rectCompressName, "Compression");
-				m_compressBuild = (CompressBuild)EditorGUI.EnumPopup(rectCompress, m_compressBuild);
+				if (m_buildFormat != FormatBuild.LegacySupportWavefront)
+				{
+					GUI.Label(rectCompressName, "Compression");
+					m_compressBuild = (CompressBuild)EditorGUI.EnumPopup(rectCompress, m_compressBuild);
+				}
 
 				if ((UploadSettingVariant)m_selectionUploadSetting == UploadSettingVariant.Steam)
 				{
@@ -821,6 +682,32 @@ namespace Editor
 			}
 
 			return false;
+		}
+		
+		private class RectLayout
+		{
+			public Rect current;
+			private readonly float space;
+			private readonly float sizeButton;
+
+			public RectLayout(Rect initial, float space, float sizeButton)
+			{
+				this.current = initial;
+				this.space = space;
+				this.sizeButton = sizeButton;
+			}
+
+			public Rect Stack(float spaceMultiplier = 1, float? height = null, float? width = null, float? x = null)
+			{
+				current = new Rect(x ?? current.x, current.yMax + space * spaceMultiplier, width ?? current.width, height ?? sizeButton);
+				return current;
+			}
+
+			public Rect Place(float x, float y, float width, float? height = null)
+			{
+				current = new Rect(x, y, width, height ?? sizeButton);
+				return current;
+			}
 		}
 	}
 }

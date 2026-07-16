@@ -342,7 +342,7 @@ namespace Editor
 				case FormatBuild.Legacy:
 					collector = new SceneAssetBundleCollector(root.transform, ValidComponent, ProcessComponent, "Garbage");
 					break;
-				case FormatBuild.LegacyWavefront:
+				case FormatBuild.LegacySupportWavefront:
 					collector = new SceneFormatCollector(root.transform, Path.GetFileNameWithoutExtension(m_scenePath), "Garbage");
 					break;
 			}
@@ -397,7 +397,7 @@ namespace Editor
 					var bundleBuilds = CreateBundleArrayDataForOneElement(sceneName + ".bundle", GetScenePathNoId(m_scenePath));
 					BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Map), bundleBuilds, m_assetBundleOption, m_buildTarget);
 					return;
-				case FormatBuild.LegacyWavefront:
+				case FormatBuild.LegacySupportWavefront:
 					results.UploadInCatalog(GetTemporary(TempData.Map));
 					return;
 			}
@@ -418,7 +418,7 @@ namespace Editor
 					var bundleBuilds = CreateBundleArrayDataForOneElement(nameof(TempData.Meta).ToLower() + ".bundle", pathToResources);
 					BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Meta), bundleBuilds, m_assetBundleOption, m_buildTarget);
 					return;
-				case FormatBuild.LegacyWavefront:
+				case FormatBuild.LegacySupportWavefront:
 					results ??= new ModResults(m_provider);
 					var modHierarchy = new ModMeta
 					{
