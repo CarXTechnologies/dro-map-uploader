@@ -260,9 +260,6 @@ namespace Editor
 			left.AddToClassList("mb-left-panel");
 
 			left.Add(BuildPreviewBox());
-			var versionLabel = new Label(GameVersion.GetFullVersion());
-			versionLabel.AddToClassList("mb-version-label");
-			left.Add(versionLabel);
 			left.Add(BuildDescriptionBox());
 
 			m_configField = new ObjectField("Map Meta Config")
