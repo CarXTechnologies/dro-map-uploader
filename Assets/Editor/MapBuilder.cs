@@ -347,7 +347,7 @@ namespace Editor
 					break;
 			}
 
-			results = collector.CollectModResults(m_provider, ModingVersion.GetFullVersionFormat());
+			results = collector.CollectModResults(m_provider, ModdingVersion.GetFullVersionFormat());
 
 			for (var i = 0; i < sceneObjects.Length; i++)
 			{
@@ -425,8 +425,8 @@ namespace Editor
 						Id = m_currentFileId.Value.ToString(),
 						name = metaValue.mapName,
 						description = metaValue.mapDescription,
-						madeIn = $"Mod Map Uploader {ModingVersion.GetFullVersion()}",
-						Version = ModingVersion.GetFullVersionFormat(),
+						madeIn = $"Mod Map Uploader {ModdingVersion.GetFullVersion()}",
+						Version = ModdingVersion.GetFullVersionFormat(),
 						authors = metaValue.authors,
 						url = metaValue.url
 					};
