@@ -1,0 +1,267 @@
+.mb-root {
+    flex-grow: 1;
+}
+
+.mb-no-steam {
+    margin: 24px;
+}
+
+.mb-main-layout {
+    flex-grow: 1;
+    flex-direction: row;
+}
+
+.mb-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.mb-grow {
+    flex-grow: 1;
+}
+
+.mb-external-path-field {
+    min-width: 0;
+    max-width: 90%;
+    overflow: hidden;
+}
+
+.mb-external-path-field .unity-text-input {
+    min-width: 0;
+    max-width: 90%;
+    overflow: hidden;
+    white-space: nowrap;
+    -unity-text-overflow-position: end;
+}
+
+.mb-field {
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mb-section-header {
+    -unity-font-style: bold;
+    font-size: 13px;
+    color: rgb(217, 217, 217);
+    margin-bottom: 6px;
+}
+
+.mb-box {
+    background-color: rgba(255, 255, 255, 0.07);
+    border-radius: 4px;
+    border-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.35);
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+/* --- Left panel / preview / build & publish --- */
+
+.mb-left-panel {
+    width: 380px;
+    min-width: 340px;
+    border-right-width: 1px;
+    border-right-color: rgba(0, 0, 0, 0.35);
+    position: relative;
+}
+
+.mb-preview-box {
+    height: 200px;
+    background-color: rgb(35, 35, 35);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.mb-preview-image {
+    width: 100%;
+    height: 100%;
+}
+
+.mb-preview-missing {
+    position: absolute;
+    max-width: 220px;
+}
+
+.mb-id-badge {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.55);
+    border-radius: 3px;
+    padding: 2px 6px;
+}
+
+.mb-id-badge-icon {
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+}
+
+.mb-id-badge-label {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 11px;
+}
+
+.mb-description-box {
+    background-color: rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin-bottom: 10px;
+    min-height: 56px;
+}
+
+.mb-description-text {
+    white-space: normal;
+    font-size: 11px;
+    color: rgba(204, 204, 204, 1);
+}
+
+.mb-description-text-empty {
+    color: rgba(190, 190, 190, 0.75);
+    -unity-font-style: italic;
+}
+
+.mb-build-button {
+    min-width: 70px;
+    margin-left: 6px;
+}
+
+.mb-build-result-box {
+    margin-bottom: 4px;
+}
+
+.mb-build-result-item {
+    margin-bottom: 4px;
+}
+
+.mb-destination-group {
+    margin-bottom: 8px;
+    border-color: green;
+}
+
+.mb-publish-button {
+    width: 100%;
+    max-width: 100%;
+    flex-grow: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mb-icon-button {
+    width: 24px;
+    height: 20px;
+    margin-left: 4px;
+    padding: 0;
+}
+
+.mb-version-label {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* --- Right panel / workshop items list --- */
+
+.mb-right-panel {
+    flex-grow: 1;
+    padding: 10px;
+}
+
+.mb-list-header {
+    margin-bottom: 6px;
+    justify-content: space-between;
+}
+
+.mb-items-scroll {
+    flex-grow: 1;
+}
+
+.mb-item-row {
+    flex-direction: row;
+    align-items: center;
+    height: 58px;
+    padding: 0.5px;
+    margin-bottom: 6px;
+    border-radius: 2px;
+    background-color: rgba(255, 255, 255, 0.02);
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.25);
+    position: relative;
+}
+
+.mb-item-row-odd {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.mb-item-row:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.mb-item-row-selected {
+    background-color: rgba(122, 122, 122, 0.22);
+    border-left-color: greenyellow;
+    border-left-width: 1px;
+}
+
+.mb-item-row-old .mb-item-title {
+    color: rgb(217, 140, 38);
+}
+
+.mb-item-thumb {
+    width: 96px;
+    height: 54px;
+    background-color: rgb(20, 20, 20);
+    border-radius: 2px;
+    margin-right: 10px;
+}
+
+.mb-item-thumb-loading {
+    opacity: 0.6;
+}
+
+.mb-item-info {
+    flex-grow: 1;
+}
+
+.mb-item-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(230, 230, 230);
+}
+
+.mb-item-size {
+    font-size: 11px;
+    color: rgba(190, 190, 190, 1);
+    margin-top: 2px;
+}
+
+.mb-item-old-badge {
+    color: rgb(217, 140, 38);
+    -unity-font-style: bold;
+    font-size: 11px;
+    margin-right: 8px;
+}
+
+.mb-item-warning {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    color: rgb(219, 90, 90);
+    font-size: 10px;
+    -unity-font-style: bold;
+}
+
+.mb-new-item-button {
+    height: 32px;
+    margin-top: 6px;
+}

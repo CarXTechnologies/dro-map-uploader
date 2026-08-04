@@ -342,7 +342,7 @@ namespace Editor
 				case FormatBuild.Legacy:
 					collector = new SceneAssetBundleCollector(root.transform, ValidComponent, ProcessComponent, "Garbage");
 					break;
-				case FormatBuild.LegacySupportWavefront:
+				case FormatBuild.Wavefront:
 					collector = new SceneFormatCollector(root.transform, Path.GetFileNameWithoutExtension(m_scenePath), "Garbage");
 					break;
 			}
@@ -397,7 +397,7 @@ namespace Editor
 					var bundleBuilds = CreateBundleArrayDataForOneElement(sceneName + ".bundle", GetScenePathNoId(m_scenePath));
 					BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Map), bundleBuilds, m_assetBundleOption, m_buildTarget);
 					return;
-				case FormatBuild.LegacySupportWavefront:
+				case FormatBuild.Wavefront:
 					results.UploadInCatalog(GetTemporary(TempData.Map));
 					return;
 			}
@@ -418,7 +418,7 @@ namespace Editor
 					var bundleBuilds = CreateBundleArrayDataForOneElement(nameof(TempData.Meta).ToLower() + ".bundle", pathToResources);
 					BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Meta), bundleBuilds, m_assetBundleOption, m_buildTarget);
 					return;
-				case FormatBuild.LegacySupportWavefront:
+				case FormatBuild.Wavefront:
 					results ??= new ModResults(m_provider);
 					var modHierarchy = new ModMeta
 					{
@@ -431,18 +431,29 @@ namespace Editor
 						url = metaValue.url
 					};
 
-					if (results.TryGetProvider(metaValue.icon, out var iconProvider))
+					var decompressedIcon = metaValue.icon != null
+						? UnityGoObjExporter.EnsureTextureIsReadableAndUncompressed(metaValue.icon) : null;
+					var decompressedLargeIcon = metaValue.largeIcon != null
+						? UnityGoObjExporter.EnsureTextureIsReadableAndUncompressed(metaValue.largeIcon) : null;
+
+					if (results.TryGetProvider(decompressedIcon, out var iconProvider))
 					{
-						modHierarchy.icon = iconProvider.GetFilePath(metaValue.icon);
+						modHierarchy.icon = iconProvider.GetFilePath(decompressedIcon);
 					}
 
-					if (results.TryGetProvider(metaValue.largeIcon, out var largeIconProvider))
+					if (results.TryGetProvider(decompressedLargeIcon, out var largeIconProvider))
 					{
-						modHierarchy.largeIcon = largeIconProvider.GetFilePath(metaValue.largeIcon);
+						modHierarchy.largeIcon = largeIconProvider.GetFilePath(decompressedLargeIcon);
 					}
 
-					results.Add(metaValue.icon);
-					results.Add(metaValue.largeIcon);
+					if (decompressedIcon != null)
+					{
+						results.Add(decompressedIcon);
+					}
+					if (decompressedLargeIcon != null)
+					{
+						results.Add(decompressedLargeIcon);
+					}
 					results.Add(modHierarchy);
 					results.UploadInCatalog(GetTemporary(TempData.Meta));
 					return;
@@ -481,21 +492,6 @@ namespace Editor
 					case PlatformBuild.StandaloneWindows:
 						m_buildTarget = BuildTarget.StandaloneWindows;
 						break;
-					/* case PlatformBuild.PS4 :
-					     m_buildTarget = BuildTarget.PS4;
-					     break;
-					 case PlatformBuild.PS5 :
-					     m_buildTarget = BuildTarget.PS5;
-					     break;
-					 case PlatformBuild.XboxOne :
-					     m_buildTarget = BuildTarget.XboxOne;
-					     break;
-					 case PlatformBuild.XboxSeries :
-					     m_buildTarget = BuildTarget.GameCoreXboxSeries;
-					     break;
-					 case PlatformBuild.Switch :
-					     m_buildTarget = BuildTarget.Switch;
-					     break;*/
 				}
 
 				m_buildFormat = formatBuild;

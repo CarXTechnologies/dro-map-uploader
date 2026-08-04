@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 using Steamworks;
 using Steamworks.Ugc;
 using UnityEditor;
-using UnityEditor.Graphs;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Editor
 {
 	public class MapBuilderEditorWindow : EditorWindow
 	{
-		private Vector2 m_scrollPosition;
-		private Vector2 m_scrollPositionPreview;
-		private Task m_fetchTask;
+		private const string StyleSheetPath = "Assets/Editor/MapBuilderEditorWindow.uss";
+
 		private SteamUGCManager m_steamUgc;
 		private int m_selectItemIndex;
 		private readonly List<Item> m_fetchResultListItems = new();
@@ -24,11 +24,8 @@ namespace Editor
 
 		private readonly Dictionary<ulong, bool> m_loads = new();
 		private readonly Dictionary<ulong, bool> m_attaching = new();
-		private readonly Dictionary<ulong, (Texture2D, bool)> m_images = new();
+		private readonly Dictionary<ulong, (Texture2D texture, bool downloading)> m_images = new();
 
-		private readonly Queue<Action> m_queueActionDraw = new();
-
-		private Property m_configProperty;
 		private int m_buildType;
 		private FormatBuild m_buildFormat;
 		private FormatBuild m_buildFormatCached;
@@ -37,37 +34,66 @@ namespace Editor
 		private PlatformBuild m_platformBuildCached;
 		private CompressBuild m_compressBuildCached;
 		private bool m_buildProcess;
-		private int m_selectionUploadSetting;
+		private int m_publishDestination;
 		private bool m_buttonLastClickOnAnyItem = true;
+		private string m_pathToExternal;
 
-		private enum UploadSettingVariant
+		private enum PublishDestination
 		{
-			Steam = 0,
-			External = 1,
+			SteamWorkshop = 0,
+			LocalTest = 1,
+			ExternalFolder = 2,
 		}
 
-		private readonly string[] m_iconLoad =
-		{
-			"d_WaitSpin00",
-			"d_WaitSpin01",
-			"d_WaitSpin02",
-			"d_WaitSpin03",
-			"d_WaitSpin04",
-			"d_WaitSpin05",
-			"d_WaitSpin06",
-			"d_WaitSpin07",
-			"d_WaitSpin08",
-			"d_WaitSpin09",
-			"d_WaitSpin10",
-			"d_WaitSpin11"
-		};
+		private VisualElement m_noSteamBox;
+		private VisualElement m_mainLayout;
 
-		private string m_pathToExternal;
+		private ScrollView m_itemsScroll;
+
+		private Image m_previewImage;
+		private HelpBox m_previewMissingBox;
+		private Label m_previewIdLabel;
+
+		private Label m_descriptionText;
+
+		private ObjectField m_configField;
+
+		private VisualElement m_buildAndPublishWrapper;
+
+		private VisualElement m_buildSection;
+		private EnumFlagsField m_buildTargetsField;
+		private Button m_buildButton;
+		private DropdownField m_sceneField;
+		private string[] m_sceneNames = Array.Empty<string>();
+		private string[] m_scenePaths = Array.Empty<string>();
+		private EnumField m_platformField;
+		private EnumField m_formatField;
+		private VisualElement m_compressRow;
+		private EnumField m_compressField;
+
+		private VisualElement m_buildResultBox;
+
+		private RadioButtonGroup m_destinationGroup;
+
+		private VisualElement m_steamPanel;
+		private Toggle m_uploadNameToggle;
+		private Toggle m_uploadDescriptionToggle;
+		private Toggle m_uploadPreviewToggle;
+		private Button m_uploadSteamButton;
+
+		private VisualElement m_localPanel;
+		private HelpBox m_localHelpBox;
+		private Button m_localButton;
+
+		private VisualElement m_externalPanel;
+		private TextField m_externalPathField;
+		private Button m_externalExportButton;
+
+		private IVisualElementScheduledItem m_spinnerSchedule;
 
 		private void OnEnable()
 		{
 			Clear();
-			Fetch();
 		}
 
 		[MenuItem("Tools/MapBuilder")]
@@ -76,6 +102,13 @@ namespace Editor
 			MapBuilderEditorWindow wnd = GetWindow<MapBuilderEditorWindow>();
 			wnd.titleContent = new GUIContent("MapBuilder");
 			wnd.Fetch();
+		}
+
+		public void CreateGUI()
+		{
+			BuildLayout(rootVisualElement);
+			m_spinnerSchedule = rootVisualElement.schedule.Execute(TickSpinner).Every(90);
+			Fetch();
 		}
 
 		private async void Fetch()
@@ -87,6 +120,7 @@ namespace Editor
 
 		private void OnDisable()
 		{
+			m_spinnerSchedule?.Pause();
 			Clear();
 			MapManagerConfig.SaveForce();
 			SaveChanges();
@@ -103,12 +137,17 @@ namespace Editor
 		{
 			foreach (var image in m_images)
 			{
-				DestroyImmediate(image.Value.Item1);
+				if (image.Value.texture != null)
+				{
+					DestroyImmediate(image.Value.texture);
+				}
 			}
 		}
 
 		private async Task FetchItems()
 		{
+			RefreshSteamAvailability();
+
 			if (!SteamClient.IsValid)
 			{
 				return;
@@ -119,7 +158,7 @@ namespace Editor
 				await Task.Delay(100);
 			}
 
-			await m_steamUgc.GetWorkshopItems(m_fetchResultListItems, DownloadSpriteAsync);
+			await m_steamUgc.GetWorkshopItems(m_fetchResultListItems, OnItemFetched);
 
 			foreach (var item in m_fetchResultListItems)
 			{
@@ -127,11 +166,19 @@ namespace Editor
 			}
 
 			MapManagerConfig.ValidBuildsAndAttaching(m_fetchResultListItems);
+			RefreshItemsList();
+			RefreshDetailsPanel();
+		}
+
+		private void OnItemFetched(Item item)
+		{
+			RefreshItemRow((ulong)item.Id);
+			DownloadSpriteAsync(item);
 		}
 
 		private async void DownloadSpriteAsync(Item item)
 		{
-			if (m_images.TryGetValue(item.Id, out var image) && image.Item2)
+			if (m_images.TryGetValue(item.Id, out var image) && image.downloading)
 			{
 				return;
 			}
@@ -141,9 +188,9 @@ namespace Editor
 				await Task.Delay(100);
 			}
 
-			if (image.Item1 != null)
+			if (image.texture != null)
 			{
-				DestroyImmediate(image.Item1);
+				DestroyImmediate(image.texture);
 			}
 
 			if (string.IsNullOrWhiteSpace(item.PreviewImageUrl))
@@ -152,478 +199,699 @@ namespace Editor
 			}
 
 			m_images[item.Id] = (null, true);
-			await UIUtils.DownloadSprite(item.PreviewImageUrl, (_,
-				texture2D) =>
+			m_loads[item.Id] = true;
+			RefreshItemRow((ulong)item.Id);
+
+			await UIUtils.DownloadSprite(item.PreviewImageUrl, (_, texture2D) =>
 			{
 				m_images[item.Id] = (texture2D == null ? new Texture2D(1, 1) : texture2D, false);
+				m_loads[item.Id] = false;
+				RefreshItemRow((ulong)item.Id);
+
+				if (SelectItem.Id == item.Id)
+				{
+					RefreshPreview();
+				}
 			});
 		}
 
-		[Obsolete("Obsolete")]
-		private void OnGUI()
+		private bool IsDownloadAnyIcon()
 		{
-			GUI.skin.box.normal.textColor = Color.white;
-			const float aspect = 16.0f / 9.0f;
-			const float sizeImage = 200;
-			const float sizeButton = 18;
-			const float space = 6;
-
-			var rectPreview = new Rect(16, 28, sizeImage * aspect, sizeImage);
-			var rectCenterPreview = new Rect((sizeImage * aspect) / 2f - 64, sizeImage / 2f, 164f, 32f);
-			var rectItem = new Rect(rectPreview.width + rectPreview.x + 32, 0, position.width - 48 - (rectPreview.width + rectPreview.x + 16), 80);
-			var rectWindow = rootVisualElement.contentRect;
-			float elementHeight = space + rectItem.height;
-			var iconSteam = EditorGUIUtility.IconContent("steam");
-			bool uploadState = true;
-
-			if (!SteamClient.IsValid)
+			foreach (var item in m_fetchResultListItems)
 			{
-				EditorGUI.HelpBox(new Rect(rectWindow.width / 2, rectWindow.height / 2, 128, 64), "Please open steam", MessageType.Error);
+				if (m_images.TryGetValue(item.Id, out var itemImage) && itemImage.downloading)
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+
+		private void BuildLayout(VisualElement root)
+		{
+			root.Clear();
+
+			var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(StyleSheetPath);
+			if (styleSheet != null)
+			{
+				root.styleSheets.Add(styleSheet);
+			}
+
+			root.AddToClassList("mb-root");
+
+			m_noSteamBox = new HelpBox("Please open Steam and sign in, then reopen this window.", HelpBoxMessageType.Error);
+			m_noSteamBox.AddToClassList("mb-no-steam");
+			m_noSteamBox.style.display = DisplayStyle.None;
+			root.Add(m_noSteamBox);
+
+			m_mainLayout = new VisualElement();
+			m_mainLayout.AddToClassList("mb-main-layout");
+			root.Add(m_mainLayout);
+
+			m_mainLayout.Add(BuildLeftPanel());
+			m_mainLayout.Add(BuildRightPanel());
+		}
+
+		private VisualElement BuildLeftPanel()
+		{
+			var left = new ScrollView(ScrollViewMode.Vertical);
+			left.AddToClassList("mb-left-panel");
+
+			left.Add(BuildPreviewBox());
+			var versionLabel = new Label(GameVersion.GetFullVersion());
+			versionLabel.AddToClassList("mb-version-label");
+			left.Add(versionLabel);
+			left.Add(BuildDescriptionBox());
+
+			m_configField = new ObjectField("Map Meta Config")
+			{
+				objectType = typeof(MapMetaConfig),
+				allowSceneObjects = false,
+			};
+			m_configField.AddToClassList("mb-field");
+			m_configField.RegisterValueChangedCallback(OnConfigFieldChanged);
+			left.Add(m_configField);
+
+			m_buildAndPublishWrapper = new VisualElement();
+			m_buildAndPublishWrapper.Add(BuildBuildSection());
+			m_buildResultBox = new VisualElement();
+			m_buildResultBox.AddToClassList("mb-build-result-box");
+			m_buildAndPublishWrapper.Add(m_buildResultBox);
+			m_buildAndPublishWrapper.Add(BuildDestinationSection());
+			left.Add(m_buildAndPublishWrapper);
+
+			return left;
+		}
+
+		private VisualElement BuildPreviewBox()
+		{
+			var previewBox = new VisualElement();
+			previewBox.AddToClassList("mb-preview-box");
+
+			m_previewImage = new Image { scaleMode = ScaleMode.ScaleToFit };
+			m_previewImage.AddToClassList("mb-preview-image");
+			previewBox.Add(m_previewImage);
+
+			m_previewMissingBox = new HelpBox("Preview is missed", HelpBoxMessageType.Warning);
+			m_previewMissingBox.AddToClassList("mb-preview-missing");
+			previewBox.Add(m_previewMissingBox);
+
+			var idBadge = new VisualElement();
+			idBadge.AddToClassList("mb-id-badge");
+			var steamIcon = new Image { image = EditorGUIUtility.IconContent("steam").image };
+			steamIcon.AddToClassList("mb-id-badge-icon");
+			idBadge.Add(steamIcon);
+			m_previewIdLabel = new Label(string.Empty);
+			m_previewIdLabel.AddToClassList("mb-id-badge-label");
+			idBadge.Add(m_previewIdLabel);
+			previewBox.Add(idBadge);
+
+			return previewBox;
+		}
+
+		private VisualElement BuildDescriptionBox()
+		{
+			var box = new VisualElement();
+			box.AddToClassList("mb-description-box");
+
+			var header = new Label("Description");
+			header.AddToClassList("mb-section-header");
+			box.Add(header);
+
+			m_descriptionText = new Label(string.Empty) { enableRichText = false };
+			m_descriptionText.AddToClassList("mb-description-text");
+			box.Add(m_descriptionText);
+
+			return box;
+		}
+
+		private VisualElement BuildBuildSection()
+		{
+			m_buildSection = new VisualElement();
+			m_buildSection.AddToClassList("mb-box");
+
+			var header = new Label("Build Settings");
+			header.AddToClassList("mb-section-header");
+			m_buildSection.Add(header);
+
+			var targetsRow = new VisualElement();
+			targetsRow.AddToClassList("mb-row");
+
+			m_buildTargetsField = new EnumFlagsField("Build Targets", (TempData)0);
+			m_buildTargetsField.AddToClassList("mb-field");
+			m_buildTargetsField.AddToClassList("mb-grow");
+			m_buildTargetsField.RegisterValueChangedCallback(OnBuildTargetsChanged);
+			targetsRow.Add(m_buildTargetsField);
+
+			m_buildButton = new Button(OnBuildButtonClicked) { text = "Build", tooltip = "Build the selected targets with the settings above" };
+			m_buildButton.AddToClassList("mb-build-button");
+			targetsRow.Add(m_buildButton);
+
+			m_buildSection.Add(targetsRow);
+
+			m_sceneField = new DropdownField("Target Scene", new List<string>(), 0);
+			m_sceneField.AddToClassList("mb-field");
+			m_sceneField.RegisterValueChangedCallback(OnSceneChanged);
+			m_buildSection.Add(m_sceneField);
+
+			m_formatField = new EnumField("Format", m_buildFormat);
+			m_formatField.AddToClassList("mb-field");
+			m_formatField.RegisterValueChangedCallback(evt =>
+			{
+				m_buildFormat = (FormatBuild)evt.newValue;
+				UpdateCompressVisibility();
+			});
+			m_buildSection.Add(m_formatField);
+
+			m_compressRow = new VisualElement();
+			m_compressField = new EnumField("Compression", m_compressBuild);
+			m_compressField.AddToClassList("mb-field");
+			m_compressField.RegisterValueChangedCallback(evt => m_compressBuild = (CompressBuild)evt.newValue);
+			m_compressRow.Add(m_compressField);
+			m_buildSection.Add(m_compressRow);
+
+			return m_buildSection;
+		}
+
+		private VisualElement BuildDestinationSection()
+		{
+			var box = new VisualElement();
+			box.AddToClassList("mb-box");
+
+			var header = new Label("Destination");
+			header.AddToClassList("mb-section-header");
+			box.Add(header);
+
+			m_destinationGroup = new RadioButtonGroup(string.Empty, new List<string> { "Steam Workshop", "Local Test", "External Folder" });
+			m_destinationGroup.AddToClassList("mb-destination-group");
+			m_destinationGroup.SetValueWithoutNotify(m_publishDestination);
+			m_destinationGroup.RegisterValueChangedCallback(OnDestinationChanged);
+			box.Add(m_destinationGroup);
+
+			var publishHeader = new Label("Publish");
+			publishHeader.AddToClassList("mb-section-header");
+			box.Add(publishHeader);
+
+			m_steamPanel = new VisualElement();
+
+			m_uploadNameToggle = new Toggle("Upload Name") { tooltip = "Overwrite the workshop item title on upload" };
+			m_uploadNameToggle.AddToClassList("mb-field");
+			m_uploadNameToggle.RegisterValueChangedCallback(evt => MapManagerConfig.instance.uploadSteamName = evt.newValue);
+			m_steamPanel.Add(m_uploadNameToggle);
+
+			m_uploadDescriptionToggle = new Toggle("Upload Description") { tooltip = "Overwrite the workshop item description on upload" };
+			m_uploadDescriptionToggle.AddToClassList("mb-field");
+			m_uploadDescriptionToggle.RegisterValueChangedCallback(evt => MapManagerConfig.instance.uploadSteamDescription = evt.newValue);
+			m_steamPanel.Add(m_uploadDescriptionToggle);
+
+			m_uploadPreviewToggle = new Toggle("Upload Preview") { tooltip = "Overwrite the workshop item preview image on upload" };
+			m_uploadPreviewToggle.AddToClassList("mb-field");
+			m_uploadPreviewToggle.RegisterValueChangedCallback(evt => MapManagerConfig.instance.uploadSteamPreview = evt.newValue);
+			m_steamPanel.Add(m_uploadPreviewToggle);
+
+			m_uploadSteamButton = new Button(OnUploadSteamClicked) { text = "Upload to Steam", tooltip = "Publish this build live to the Steam Workshop item" };
+			m_uploadSteamButton.AddToClassList("mb-publish-button");
+			m_steamPanel.Add(m_uploadSteamButton);
+			box.Add(m_steamPanel);
+
+			m_localPanel = new VisualElement();
+			m_localHelpBox = new HelpBox(string.Empty, HelpBoxMessageType.Warning);
+			m_localPanel.Add(m_localHelpBox);
+
+			m_localButton = new Button(OnUploadLocalClicked) { text = "Update Local Test Copy", tooltip = "Copy this build into the subscribed workshop item's local folder, without publishing to Steam" };
+			m_localButton.AddToClassList("mb-publish-button");
+			m_localPanel.Add(m_localButton);
+			box.Add(m_localPanel);
+
+			m_externalPanel = new VisualElement();
+			var externalRow = new VisualElement();
+			externalRow.AddToClassList("mb-row");
+
+			m_externalPathField = new TextField("External Path");
+			m_externalPathField.AddToClassList("mb-field");
+			m_externalPathField.AddToClassList("mb-grow");
+			m_externalPathField.AddToClassList("mb-external-path-field");
+			m_externalPathField.RegisterValueChangedCallback(evt =>
+			{
+				m_pathToExternal = evt.newValue;
+				m_externalExportButton.SetEnabled(!string.IsNullOrWhiteSpace(m_pathToExternal) && Path.IsPathFullyQualified(m_pathToExternal));
+			});
+			externalRow.Add(m_externalPathField);
+
+			var browseButton = new Button(OnBrowseExternalClicked) { text = "…" };
+			browseButton.AddToClassList("mb-icon-button");
+			externalRow.Add(browseButton);
+			m_externalPanel.Add(externalRow);
+
+			m_externalExportButton = new Button(OnExportExternalClicked) { text = "Export to Folder", tooltip = "Copy this build to any external folder on disk" };
+			m_externalExportButton.AddToClassList("mb-publish-button");
+			m_externalPanel.Add(m_externalExportButton);
+			box.Add(m_externalPanel);
+
+			return box;
+		}
+
+		private VisualElement BuildRightPanel()
+		{
+			var right = new VisualElement();
+			right.AddToClassList("mb-right-panel");
+
+			var headerRow = new VisualElement();
+			headerRow.AddToClassList("mb-row");
+			headerRow.AddToClassList("mb-list-header");
+
+			var header = new Label("Workshop Items");
+			header.AddToClassList("mb-section-header");
+			header.AddToClassList("mb-grow");
+			headerRow.Add(header);
+
+			var fetchButton = new Button(Fetch) { text = "Fetch steam workshop", tooltip = "Reload the list of workshop items from Steam" };
+			headerRow.Add(fetchButton);
+			right.Add(headerRow);
+
+			m_itemsScroll = new ScrollView(ScrollViewMode.Vertical);
+			m_itemsScroll.AddToClassList("mb-items-scroll");
+			right.Add(m_itemsScroll);
+
+			var newItemButton = new Button(OnNewWorkshopItemClicked) { text = "New Workshop Item", tooltip = "Create a brand new Steam Workshop item" };
+			newItemButton.AddToClassList("mb-new-item-button");
+			right.Add(newItemButton);
+
+			return right;
+		}
+
+		private void RefreshSteamAvailability()
+		{
+			var isValid = SteamClient.IsValid;
+			m_noSteamBox.style.display = isValid ? DisplayStyle.None : DisplayStyle.Flex;
+			m_mainLayout.style.display = isValid ? DisplayStyle.Flex : DisplayStyle.None;
+		}
+
+		private void RefreshItemsList()
+		{
+			m_itemsScroll.Clear();
+
+			for (var i = 0; i < m_fetchResultListItems.Count; i++)
+			{
+				m_itemsScroll.Add(BuildItemRow(i));
+			}
+		}
+
+		private VisualElement BuildItemRow(int index)
+		{
+			var item = m_fetchResultListItems[index];
+			var hasOldFlag = item.HasTag(SteamUGCManager.MAP_TAG_OLD);
+
+			var row = new VisualElement { userData = (ulong)item.Id };
+			row.AddToClassList("mb-item-row");
+			row.AddToClassList(index % 2 == 0 ? "mb-item-row-even" : "mb-item-row-odd");
+			if (hasOldFlag)
+			{
+				row.AddToClassList("mb-item-row-old");
+			}
+
+			if (index == m_selectItemIndex)
+			{
+				row.AddToClassList("mb-item-row-selected");
+			}
+
+			row.RegisterCallback<ClickEvent>(_ => OnItemRowClicked(index));
+
+			var thumb = new Image { name = "thumb", scaleMode = ScaleMode.ScaleToFit };
+			thumb.AddToClassList("mb-item-thumb");
+			row.Add(thumb);
+
+			var info = new VisualElement();
+			info.AddToClassList("mb-item-info");
+
+			var title = new Label(string.IsNullOrWhiteSpace(item.Title) ? $"Blank {index}" : item.Title);
+			title.AddToClassList("mb-item-title");
+			info.Add(title);
+
+			var itemDetail = SteamUGCManager.GetItemDetail(item);
+			var sizeLabel = new Label($"{Mathf.FloorToInt(itemDetail.FileSize / ModMapTestTool.BYTES_TO_MEGABYTES)} / {(ModMapTestTool.Steam.maxSizeInMb + ModMapTestTool.Steam.maxSizeInMbMeta)} mb");
+			sizeLabel.AddToClassList("mb-item-size");
+			info.Add(sizeLabel);
+
+			row.Add(info);
+
+			if (hasOldFlag)
+			{
+				var oldLabel = new Label("Old version!");
+				oldLabel.AddToClassList("mb-item-old-badge");
+				row.Add(oldLabel);
+			}
+
+			if (!MapManagerConfig.TryGetAttach(item.Id, out var attachData) || attachData.metaConfig == null)
+			{
+				var warning = new Label("Detach") { tooltip = "No MapMetaConfig attached to this workshop item yet" };
+				warning.AddToClassList("mb-item-warning");
+				row.Add(warning);
+			}
+
+			ApplyItemThumbnail(row, item.Id);
+
+			return row;
+		}
+
+		private void RefreshItemRow(ulong id)
+		{
+			if (m_itemsScroll == null)
+			{
 				return;
 			}
 
-			m_scrollPosition = GUI.BeginScrollView(new Rect(rectItem.x + space * 2, 0, rectItem.width + space * 3, position.height),
-				m_scrollPosition, new Rect(rectItem.x - 2, 0, rectItem.width, elementHeight * (m_fetchResultListItems.Count + 2) + space));
-
-			m_attaching.TryGetValue(SelectItem.Id, out var isSelectAttach);
-
-			MapManagerConfig.BuildData buildData = default;
-
-			MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj);
-
-			if (attachObj != null)
+			VisualElement existing = null;
+			foreach (var child in m_itemsScroll.Children())
 			{
-				buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
-				if (m_buttonLastClickOnAnyItem)
+				if (child.userData is ulong childId && childId == id)
 				{
-					m_compressBuild = buildData.compress;
-					m_platformBuild = buildData.platform;
-					m_buildType = buildData.buildSuccess;
-					MapManagerConfig.instance.targetScene = buildData.targetScene;
-					m_buttonLastClickOnAnyItem = false;
+					existing = child;
+					break;
 				}
 			}
 
-			var loadIcon = EditorGUIUtility.IconContent(m_iconLoad[Mathf.FloorToInt((Time.time * 12) % m_iconLoad.Length)]);
-
-			if (GUI.Button(rectItem, "Fetch steam workshop"))
+			if (existing != null)
 			{
-				Fetch();
+				ApplyItemThumbnail(existing, id);
+			}
+		}
+
+		private void ApplyItemThumbnail(VisualElement row, ulong id)
+		{
+			var thumb = row.Q<Image>("thumb");
+			if (thumb == null)
+			{
+				return;
 			}
 
-			rectItem.y += rectItem.height;
+			thumb.RemoveFromClassList("mb-item-thumb-loading");
 
-			for (int i = 0; i < m_fetchResultListItems.Count; i++)
+			if (m_images.TryGetValue(id, out var imageData) && !imageData.downloading)
 			{
-				rectItem.y += space;
-				var item = m_fetchResultListItems[i];
-
-				GUI.Box(rectItem, string.Empty);
-
-				var hasOldFlag = item.HasTag(SteamUGCManager.MAP_TAG_OLD);
-				if (hasOldFlag)
-				{
-					GUI.color = new Color(0.2f, 0.5f, 0.3f, 1f);
-				}
-
-				if (GUI.Button(rectItem, hasOldFlag ? "Old version!" : string.Empty))
-				{
-					m_buttonLastClickOnAnyItem = true;
-					m_selectItemIndex = i;
-				}
-
-				GUI.color = Color.white;
-				rectItem.x += rectItem.height + space;
-				rectItem.height /= 2;
-				var oldSize = GUI.skin.label.fontSize;
-				GUI.skin.label.fontSize = 16;
-				GUI.skin.label.fontStyle = FontStyle.Bold;
-				GUI.Label(rectItem, string.IsNullOrWhiteSpace(item.Title) ? $"Blank {i}" : item.Title);
-
-				rectItem.y += rectItem.height;
-				var itemDetail = SteamUGCManager.GetItemDetail(item);
-
-				GUI.skin.label.fontStyle = FontStyle.Normal;
-				GUI.skin.label.fontSize = 12;
-				GUI.Label(rectItem, $"{Mathf.FloorToInt(itemDetail.FileSize / ModMapTestTool.BYTES_TO_MEGABYTES)} / " + $"{(ModMapTestTool.Steam.maxSizeInMb + ModMapTestTool.Steam.maxSizeInMbMeta)} mb");
-				rectItem.y -= rectItem.height;
-				rectItem.height *= 2;
-				rectItem.x -= rectItem.height + space;
-
-				var rectItemWarning = new Rect(rectItem.x + rectItem.width - 48, rectItem.y, 48, 18);
-				GUI.skin.label.fontSize = oldSize;
-
-				if (m_selectItemIndex == i)
-				{
-					GUI.color = Color.black;
-					GUI.Box(rectItem, string.Empty);
-					GUI.color = Color.white;
-				}
-
-				if (!MapManagerConfig.TryGetAttach(m_fetchResultListItems[i].Id, out var attachData) || attachData.metaConfig == null)
-				{
-					GUI.color = Color.red;
-					GUI.Box(rectItemWarning, "Detach");
-					GUI.color = Color.white;
-				}
-
-				rectItem.x += space;
-
-				var rectItemPreview = rectItem;
-				rectItemPreview.width = 128 * (9f / 16f);
-
-				if (m_images.TryGetValue(item.Id, out var imageData) && !imageData.Item2)
-				{
-					if (imageData.Item1 != null && imageData.Item1.width > 1)
-					{
-						rectItemPreview.y += space;
-						rectItemPreview.height -= space * 2;
-						EditorGUI.DrawRect(rectItemPreview, Color.black);
-						rectItemPreview.y -= space;
-						rectItemPreview.height = rectItemPreview.width * ((float)imageData.Item1.height / imageData.Item1.width);
-						rectItemPreview.y += rectItem.height / 2 - rectItemPreview.height / 2;
-						GUI.DrawTexture(rectItemPreview, imageData.Item1);
-					}
-					else
-					{
-						rectItemPreview.y += space;
-						rectItemPreview.height -= space * 2;
-						GUI.Box(rectItemPreview, String.Empty);
-						rectItemPreview.x += rectItemPreview.width / 4;
-						GUI.Label(rectItemPreview, "Empty");
-						rectItemPreview.x -= rectItemPreview.width / 4;
-					}
-
-					if (imageData.Item1 == null)
-					{
-						DownloadSpriteAsync(item);
-					}
-				}
-				else if (m_loads.TryGetValue(item.Id, out var state) && state)
-				{
-					GUI.Label(rectItemPreview, loadIcon);
-				}
-
-				rectItem.x -= space;
-				rectItem.y += rectItem.height;
+				thumb.image = imageData.texture != null && imageData.texture.width > 1 ? imageData.texture : null;
 			}
-
-			rectItem.y += space;
-			rectItem.height = 40;
-
-			if (GUI.Button(rectItem, "New Workshop Item"))
+			else if (m_loads.TryGetValue(id, out var loading) && loading)
 			{
-				MapBuilder.CreateNewCommunityFile(result =>
-				{
-					if (result.Success)
-					{
-						Fetch();
-					}
-				});
-			}
-
-			GUI.Label(rectItem, iconSteam);
-			GUI.EndScrollView();
-
-			var layout = new RectLayout(rectPreview, space, sizeButton);
-
-			var rectConfig = layout.Stack();
-			var rectButtons = layout.Stack(2);
-
-			var rectBuildSettings = layout.Place(rectPreview.x, rectButtons.y - space, rectPreview.width, sizeButton + space / 2);
-
-			var rectPlatform = layout.Place(rectBuildSettings.x + rectBuildSettings.width / 2, rectBuildSettings.y + sizeButton + space * 2, rectBuildSettings.width / 2);
-			var rectFormat = layout.Place(rectPlatform.x, rectPlatform.y + sizeButton + space * 2, rectBuildSettings.width / 2);
-			var rectScene = layout.Place(rectFormat.x, rectFormat.y + (sizeButton + space), rectFormat.width);
-
-			var rectCompress = m_buildFormat != FormatBuild.LegacySupportWavefront ?
-				layout.Place(rectScene.x, rectScene.y + sizeButton + space, rectScene.width) :
-				new Rect(rectScene.x, rectScene.y, rectScene.width, sizeButton);
-
-			var rectPlatformName = new Rect(rectBuildSettings.x, rectPlatform.y, rectBuildSettings.width / 2, sizeButton);
-			var rectFormatName = new Rect(rectBuildSettings.x, rectFormat.y, rectBuildSettings.width / 2, sizeButton);
-
-			var rectCompressName = new Rect(rectPlatformName.x, rectCompress.y, rectPlatformName.width, sizeButton);
-
-			var rectSceneName = new Rect(rectPlatformName.x, rectScene.y, rectPlatformName.width, sizeButton);
-
-			var rectSplitRight = new Rect(rectCompressName.x + rectCompressName.width, rectCompressName.y + sizeButton + space, rectCompressName.width, sizeButton);
-			var rectSplitLeft = new Rect(rectCompressName.x, rectCompressName.y + sizeButton + space, rectCompressName.width, sizeButton);
-
-			var rectSplitBuild = layout.Place(rectCompressName.x, rectSplitLeft.y + sizeButton + space, rectBuildSettings.width, sizeButton * 1.5f);
-			var rectUploadSettings = layout.Place(rectBuildSettings.x, rectSplitBuild.y + sizeButton + space * 3, rectBuildSettings.width, sizeButton + space / 2);
-
-			ShowBuildResultIfExists(ref uploadState, ref rectUploadSettings, attachObj, buildData, space);
-
-			var rectSelectionGridSettings = layout.Place(rectBuildSettings.x, rectUploadSettings.y + sizeButton + space * 3, rectBuildSettings.width, sizeButton + space / 2);
-
-			var rectUploadSteamNameToggle = layout.Place(rectUploadSettings.x + rectCompressName.width, rectSelectionGridSettings.y + sizeButton + space * 2, rectUploadSettings.width / 2);
-			var rectUploadExternalNameFolder = new Rect(rectUploadSettings.x + rectUploadSettings.width * 0.9f, rectUploadSteamNameToggle.y, rectUploadSettings.width * 0.1f, sizeButton);
-			var rectUploadSteamDescriptionToggle = layout.Place(rectUploadSteamNameToggle.x, rectUploadSteamNameToggle.y + sizeButton + space, rectUploadSteamNameToggle.width / 2);
-			var rectUploadSteamPreviewToggle = layout.Place(rectUploadSteamDescriptionToggle.x, rectUploadSteamDescriptionToggle.y + sizeButton + space, rectUploadSteamDescriptionToggle.width);
-
-			var rectUploadExternalName = new Rect(rectBuildSettings.x, rectUploadSteamNameToggle.y, rectBuildSettings.width * 0.9f, sizeButton);
-			var rectUploadToExternalPath = new Rect(rectBuildSettings.x, rectUploadExternalName.y + sizeButton + space, rectBuildSettings.width, sizeButton * 1.5f);
-
-			var rectUploadSteamName = new Rect(rectBuildSettings.x, rectUploadSteamNameToggle.y, rectBuildSettings.width, sizeButton);
-			var rectUploadSteamDescription = new Rect(rectUploadSteamName.x, rectUploadSteamName.y + sizeButton + space, rectUploadSteamName.width, sizeButton);
-			var rectUploadSteamPreview = new Rect(rectUploadSteamDescription.x, rectUploadSteamDescription.y + sizeButton + space, rectUploadSteamDescription.width, sizeButton);
-
-			var rectBuildLocalName = new Rect(rectSceneName.x, rectUploadSteamPreviewToggle.y + sizeButton + space, rectBuildSettings.width / 2, sizeButton * 1.5f);
-			var rectBuildLocal = new Rect(rectSceneName.x + rectBuildLocalName.width, rectBuildLocalName.y, rectBuildSettings.width / 2, sizeButton * 1.5f);
-
-			var rectUploadButtons = new Rect(rectSplitBuild.x, rectBuildLocalName.y + sizeButton + space * 2, rectUploadSettings.width, sizeButton * 1.5f);
-			var rectInfo = new Rect(rectButtons.x, rectUploadButtons.y + rectUploadButtons.height + space, rectButtons.width, sizeButton * 2);
-
-			var lastRect = (UploadSettingVariant)m_selectionUploadSetting == UploadSettingVariant.Steam ? rectInfo : new Rect(rectUploadToExternalPath.position + Vector2.up * sizeButton * 2f, rectUploadToExternalPath.size);
-
-			var rectPreviewBack = new Rect(0, 0, rectPreview.width + 31, lastRect.y);
-			var rectLabelId = new Rect(rectPreviewBack.width / 2 - 16, 2, 128, 24);
-
-			m_scrollPositionPreview = GUI.BeginScrollView(new Rect(rectPreviewBack.x, 0, rectPreview.width + 44, position.height), m_scrollPositionPreview,
-				new Rect(rectPreviewBack.x, 0, rectPreview.width, lastRect.y));
-
-			EditorGUI.DrawRect(rectPreviewBack, new Color(0.22f, 0.22f, 0.22f));
-
-			if (m_queueActionDraw != null)
-			{
-				while (m_queueActionDraw.Count > 0)
-				{
-					m_queueActionDraw.Dequeue()?.Invoke();
-				}
-			}
-
-			if (attachObj != null)
-			{
-				var old = attachObj.metaConfig;
-				attachObj.metaConfig = EditorGUI.ObjectField(rectConfig, old, typeof(MapMetaConfig), false) as MapMetaConfig;
-
-				if (attachObj.metaConfig != null && m_attaching != null && m_attaching.ContainsKey(SelectItem.Id) && !m_attaching[SelectItem.Id])
-				{
-					MapManagerConfig.Attach(SelectItem.Id, attachObj.metaConfig);
-					m_attaching[SelectItem.Id] = true;
-				}
-			}
-
-			EditorGUI.DrawRect(rectPreview, Color.black);
-
-			if (attachObj != null && attachObj.metaConfig != null)
-			{
-				GUI.DrawTexture(rectPreview, attachObj.metaConfig.mapMetaConfigValue.largeIcon);
+				thumb.image = null;
+				thumb.AddToClassList("mb-item-thumb-loading");
 			}
 			else
 			{
-				EditorGUI.HelpBox(rectCenterPreview, "Preview is missed", MessageType.Warning);
+				thumb.image = null;
 			}
-
-			if (SelectItem.Id != 0)
-			{
-				rectLabelId.x -= 16;
-				GUI.Label(rectLabelId, SelectItem.Id.ToString());
-				rectLabelId.x -= 24;
-				GUI.Label(rectLabelId, iconSteam);
-			}
-
-			var manager = MapManagerConfig.instance;
-
-			if (attachObj != null && attachObj.metaConfig != null)
-			{
-				EditorGUI.BeginDisabledGroup(!isSelectAttach || attachObj == null || attachObj.metaConfig == null);
-
-				GUI.Label(rectSplitLeft, "Build Targets");
-				m_buildType = EditorGUI.MaskField(rectSplitRight, m_buildType, Enum.GetNames(typeof(TempData)));
-
-				GUI.Box(rectBuildSettings, "Build Settings");
-
-				EditorGUI.BeginDisabledGroup(m_buildType == 0);
-				if (GUI.Button(rectSplitBuild, "Build") && !IsDownloadAnyIcon())
-				{
-					m_loads[SelectItem.Id] = true;
-					m_buildProcess = true;
-					var selectId = (ulong)SelectItem.Id;
-					MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-					m_compressBuildCached = m_compressBuild;
-					m_platformBuildCached = m_platformBuild;
-					m_buildFormatCached = m_buildFormat;
-
-					MapBuilder.BuildCustom((TempData)m_buildType,
-						(TempData)buildData.buildSuccess,
-						selectId,
-						m_buildFormatCached,
-						m_compressBuildCached,
-						m_platformBuildCached,
-						(path, success) => AddBuild(attachObj.metaConfig, buildData, path, success));
-				}
-
-				EditorGUI.EndDisabledGroup();
-
-				var flagScene = ((TempData)m_buildType).HasFlag(TempData.Map);
-
-				EditorGUI.BeginDisabledGroup(!flagScene);
-				GUI.Label(rectSceneName, "Target Scene");
-				var editorScenes = EditorBuildSettings.scenes;
-				if (editorScenes.Length > 0)
-				{
-					if (!flagScene && !string.IsNullOrWhiteSpace(buildData.targetScene))
-					{
-						MapManagerConfig.instance.targetScene = buildData.targetScene;
-					}
-
-					int index = FindSceneIndex(editorScenes, MapManagerConfig.instance.targetScene);
-					var scenes = GetScenesName(editorScenes);
-					MapManagerConfig.instance.targetScene = editorScenes[EditorGUI.Popup(rectScene, index, scenes)].path;
-				}
-
-				EditorGUI.EndDisabledGroup();
-
-				var flagPlat = (buildData.buildSuccess & m_buildType) == buildData.buildSuccess;
-				EditorGUI.BeginDisabledGroup(!flagPlat);
-				GUI.Label(rectPlatformName, "Platform");
-				m_platformBuild = (PlatformBuild)EditorGUI.EnumPopup(rectPlatform, flagPlat ? m_platformBuild : buildData.platform);
-
-				GUI.Label(rectFormatName, "Format");
-				m_buildFormat = (FormatBuild)EditorGUI.EnumPopup(rectFormat, flagPlat ? m_buildFormat : buildData.format);
-
-				EditorGUI.EndDisabledGroup();
-
-				var variants = Enum.GetNames(typeof(UploadSettingVariant));
-
-				m_selectionUploadSetting = GUI.SelectionGrid(rectSelectionGridSettings, m_selectionUploadSetting, variants, variants.Length);
-
-				GUI.Box(rectUploadSettings, "Upload Settings");
-
-				if (m_buildFormat != FormatBuild.LegacySupportWavefront)
-				{
-					GUI.Label(rectCompressName, "Compression");
-					m_compressBuild = (CompressBuild)EditorGUI.EnumPopup(rectCompress, m_compressBuild);
-				}
-
-				if ((UploadSettingVariant)m_selectionUploadSetting == UploadSettingVariant.Steam)
-				{
-					GUI.Label(rectBuildLocalName, "Local Build (*only test build)");
-
-					var existItemDirectory = Directory.Exists(SelectItem.Directory);
-					EditorGUI.BeginDisabledGroup(!existItemDirectory);
-					manager.buildLocal = EditorGUI.Toggle(rectBuildLocal, manager.buildLocal) && existItemDirectory;
-					EditorGUI.EndDisabledGroup();
-
-					rectBuildLocal.x += 22;
-					rectBuildLocal.width -= 22;
-
-					if (existItemDirectory)
-					{
-						EditorGUI.HelpBox(rectBuildLocal, "don`t use the map restart", MessageType.Warning);
-					}
-					else
-					{
-						EditorGUI.HelpBox(rectBuildLocal, "need subscribe this item", MessageType.Error);
-					}
-
-					GUI.Label(rectUploadSteamName, "Upload Name");
-					GUI.Label(rectUploadSteamDescription, "Upload Description");
-					GUI.Label(rectUploadSteamPreview, "Upload Preview");
-
-					manager.uploadSteamName = EditorGUI.Toggle(rectUploadSteamNameToggle, manager.uploadSteamName);
-					manager.uploadSteamDescription = EditorGUI.Toggle(rectUploadSteamDescriptionToggle, manager.uploadSteamDescription);
-					manager.uploadSteamPreview = EditorGUI.Toggle(rectUploadSteamPreviewToggle, manager.uploadSteamPreview);
-
-					EditorGUI.BeginDisabledGroup(!uploadState);
-					GUI.color = uploadState && isSelectAttach ? new Color(0.55f, 0.6f, 0.9f) : Color.white;
-
-					if (GUI.Button(rectUploadButtons, manager.buildLocal ? "Upload to local exist" : "Upload to steam") && uploadState)
-					{
-						m_loads[SelectItem.Id] = true;
-						MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-						MapBuilder.UploadSteamCommunityItem(buildData,
-							SelectItem,
-							manager.buildLocal,
-							id =>
-							{
-								m_loads[id] = false;
-								DownloadSpriteAsync(m_fetchResultListItems.Find(itemFind => itemFind.Id == id));
-							});
-					}
-
-					GUI.Label(rectUploadButtons, iconSteam);
-					EditorGUI.EndDisabledGroup();
-					GUI.color = Color.white;
-					EditorGUI.EndDisabledGroup();
-				}
-				else
-				{
-					m_pathToExternal = GUI.TextField(rectUploadExternalName, m_pathToExternal);
-
-					if (GUI.Button(rectUploadExternalNameFolder, EditorGUIUtility.IconContent("d_FolderOpened Icon")))
-					{
-						m_pathToExternal = EditorUtility.SaveFolderPanel("External path", Application.streamingAssetsPath, attachObj.id.ToString());
-					}
-
-					EditorGUI.BeginDisabledGroup(string.IsNullOrWhiteSpace(m_pathToExternal) || !Path.IsPathFullyQualified(m_pathToExternal));
-
-					if (GUI.Button(rectUploadToExternalPath, "Upload to external folder"))
-					{
-						MapBuilder.BuildDataTransitionToDirectory(buildData, m_pathToExternal);
-					}
-
-					EditorGUI.EndDisabledGroup();
-				}
-			}
-
-			GUI.EndScrollView();
-
-			GUI.color = new Color(1f, 1f, 1f, .7f);
-
-			var version = GameVersion.GetFullVersion();
-			var versionSize = GUI.skin.label.CalcSize(new GUIContent(version));
-
-			EditorGUI.DropShadowLabel(new Rect(position.width - sizeButton * 2 - versionSize.x, position.height - sizeButton * 2, versionSize.x + sizeButton, sizeButton), version);
-			GUI.color = Color.white;
 		}
 
-		private void ShowBuildResultIfExists(ref bool uploadState,
-			ref Rect rectInfo,
-			MapManagerConfig.AttachData attachObj,
-			MapManagerConfig.BuildData buildData,
-			float space)
+		private void TickSpinner()
 		{
-			if (attachObj == null || attachObj.metaConfig == null)
+			if (m_itemsScroll == null)
 			{
 				return;
 			}
 
-			var message = buildData.lastValid.ToString();
-			var validComponentsHeight = EditorStyles.helpBox.CalcSize(new GUIContent(message)).y + space;
+			var iconName = "d_WaitSpin" + (Mathf.FloorToInt(Time.realtimeSinceStartup * 12) % 12).ToString("00");
+			var icon = EditorGUIUtility.IconContent(iconName).image;
 
+			foreach (var child in m_itemsScroll.Children())
+			{
+				var thumb = child.Q<Image>("thumb");
+				if (thumb != null && thumb.ClassListContains("mb-item-thumb-loading"))
+				{
+					thumb.image = icon;
+				}
+			}
+		}
+
+		private void OnItemRowClicked(int index)
+		{
+			m_selectItemIndex = index;
+			m_buttonLastClickOnAnyItem = true;
+			RefreshItemsList();
+			RefreshDetailsPanel();
+		}
+
+		private void RefreshDetailsPanel()
+		{
+			m_attaching.TryGetValue(SelectItem.Id, out var isSelectAttach);
+
+			MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj);
+			var buildData = attachObj != null ? MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig) : default;
+
+			if (attachObj != null && m_buttonLastClickOnAnyItem)
+			{
+				m_compressBuild = buildData.compress;
+				m_platformBuild = buildData.platform;
+				m_buildType = buildData.buildSuccess;
+				MapManagerConfig.instance.targetScene = buildData.targetScene;
+				m_buttonLastClickOnAnyItem = false;
+			}
+
+			m_configField.SetValueWithoutNotify(attachObj?.metaConfig);
+
+			RefreshPreview();
+			RefreshDescription();
+
+			var hasConfig = attachObj != null && attachObj.metaConfig != null;
+			m_buildAndPublishWrapper.style.display = hasConfig ? DisplayStyle.Flex : DisplayStyle.None;
+
+			if (!hasConfig)
+			{
+				m_buildResultBox.Clear();
+				return;
+			}
+
+			m_buildAndPublishWrapper.SetEnabled(isSelectAttach);
+
+			m_buildTargetsField.SetValueWithoutNotify((TempData)m_buildType);
+			m_formatField.SetValueWithoutNotify(m_buildFormat);
+			m_compressField.SetValueWithoutNotify(m_compressBuild);
+			UpdateCompressVisibility();
+
+			RefreshSceneDropdown(buildData);
+
+			m_buildButton.SetEnabled(m_buildType != 0 && !IsDownloadAnyIcon());
+
+			var uploadState = RefreshBuildResult(attachObj, buildData);
+
+			var destination = (PublishDestination)m_publishDestination;
+			MapManagerConfig.instance.buildLocal = destination == PublishDestination.LocalTest;
+
+			m_uploadNameToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadSteamName);
+			m_uploadDescriptionToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadSteamDescription);
+			m_uploadPreviewToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadSteamPreview);
+			m_uploadSteamButton.SetEnabled(uploadState);
+
+			var existItemDirectory = Directory.Exists(SelectItem.Directory);
+			m_localHelpBox.text = existItemDirectory ? "don`t use the map restart" : "need subscribe this item";
+			m_localHelpBox.messageType = existItemDirectory ? HelpBoxMessageType.Warning : HelpBoxMessageType.Error;
+			m_localButton.SetEnabled(uploadState && existItemDirectory);
+
+			m_externalPathField.SetValueWithoutNotify(m_pathToExternal);
+			m_externalExportButton.SetEnabled(!string.IsNullOrWhiteSpace(m_pathToExternal) && Path.IsPathFullyQualified(m_pathToExternal));
+
+			UpdateDestinationPanels();
+		}
+
+		private void RefreshPreview()
+		{
+			var hasConfig = MapManagerConfig.TryGetAttach(SelectItem.Id, out var attachObj) && attachObj.metaConfig != null;
+
+			m_previewImage.style.display = hasConfig ? DisplayStyle.Flex : DisplayStyle.None;
+			m_previewMissingBox.style.display = hasConfig ? DisplayStyle.None : DisplayStyle.Flex;
+
+			if (hasConfig)
+			{
+				m_previewImage.image = attachObj.metaConfig.mapMetaConfigValue.largeIcon;
+			}
+
+			m_previewIdLabel.text = SelectItem.Id != 0 ? SelectItem.Id.ToString() : string.Empty;
+		}
+
+		private void RefreshDescription()
+		{
+			if (SelectItem.Id == 0)
+			{
+				m_descriptionText.text = string.Empty;
+				return;
+			}
+
+			const int maxChars = 280;
+			var description = SelectItem.Description;
+			var isEmpty = string.IsNullOrWhiteSpace(description);
+			var text = isEmpty ? "No description provided for this workshop item." : description.Trim();
+
+			if (!isEmpty && text.Length > maxChars)
+			{
+				m_descriptionText.tooltip = text;
+				text = text.Substring(0, maxChars) + "…";
+			}
+			else
+			{
+				m_descriptionText.tooltip = string.Empty;
+			}
+
+			m_descriptionText.text = text;
+			m_descriptionText.EnableInClassList("mb-description-text-empty", isEmpty);
+		}
+
+		private void RefreshSceneDropdown(MapManagerConfig.BuildData buildData)
+		{
+			var flagScene = ((TempData)m_buildType).HasFlag(TempData.Map);
+			m_sceneField.SetEnabled(flagScene);
+
+			var editorScenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).ToArray();
+			if (editorScenes.Length == 0)
+			{
+				m_scenePaths = Array.Empty<string>();
+				m_sceneNames = Array.Empty<string>();
+				m_sceneField.choices = new List<string>();
+				return;
+			}
+
+			if (!flagScene && !string.IsNullOrWhiteSpace(buildData.targetScene))
+			{
+				MapManagerConfig.instance.targetScene = buildData.targetScene;
+			}
+
+			m_scenePaths = editorScenes.Select(scene => scene.path).ToArray();
+			m_sceneNames = editorScenes.Select(scene => MapBuilder.GetSceneNameFromPathNoId(scene.path)).ToArray();
+			m_sceneField.choices = new List<string>(m_sceneNames);
+
+			var index = Array.IndexOf(m_scenePaths, MapManagerConfig.instance.targetScene);
+			if (index == -1)
+			{
+				index = 0;
+			}
+
+			m_sceneField.SetValueWithoutNotify(m_sceneNames[index]);
+			MapManagerConfig.instance.targetScene = m_scenePaths[index];
+		}
+
+		private bool RefreshBuildResult(MapManagerConfig.AttachData attachObj, MapManagerConfig.BuildData buildData)
+		{
+			m_buildResultBox.Clear();
+
+			if (attachObj == null || attachObj.metaConfig == null)
+			{
+				return true;
+			}
+
+			var uploadState = true;
 			var buildNames = Enum.GetNames(typeof(TempData));
 
-			for (int i = 0; i < buildNames.Length; i++)
+			foreach (var buildName in buildNames)
 			{
-				var has = ((TempData)buildData.buildSuccess).HasFlag((TempData)Enum.Parse(typeof(TempData), buildNames[i]));
+				var has = ((TempData)buildData.buildSuccess).HasFlag((TempData)Enum.Parse(typeof(TempData), buildName));
 				uploadState = has && uploadState;
 
 				if (!has)
 				{
-					EnqueueDrawAction(ref rectInfo, buildNames[i] + " is not build", MessageType.Error);
+					AddBuildResultBox(buildName + " is not build", HelpBoxMessageType.Error);
 				}
-				else if (buildNames[i] == nameof(TempData.Meta) && !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
+				else if (buildName == nameof(TempData.Meta) && !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
 				{
-					EnqueueDrawAction(ref rectInfo, $"Is Changed {buildNames[i]}! Please build {buildNames[i]}.", MessageType.Warning);
+					AddBuildResultBox($"Is Changed {buildName}! Please build {buildName}.", HelpBoxMessageType.Warning);
 				}
 
-				if (buildNames[i] == nameof(TempData.Map) && !string.IsNullOrWhiteSpace(message))
+				if (buildName == nameof(TempData.Map))
 				{
-					rectInfo.height = validComponentsHeight;
-					EnqueueDrawAction(ref rectInfo, message, has ? MessageType.Info : MessageType.Error);
-					rectInfo.height = 24;
+					var message = buildData.lastValid.ToString();
+					if (!string.IsNullOrWhiteSpace(message))
+					{
+						AddBuildResultBox(message, has ? HelpBoxMessageType.Info : HelpBoxMessageType.Error);
+					}
 				}
 			}
 
-			void EnqueueDrawAction(ref Rect rect, string msg, MessageType messageType)
+			return uploadState;
+		}
+
+		private void AddBuildResultBox(string message, HelpBoxMessageType type)
+		{
+			var box = new HelpBox(message, type);
+			box.AddToClassList("mb-build-result-item");
+			m_buildResultBox.Add(box);
+		}
+
+		private void UpdateCompressVisibility()
+		{
+			m_compressRow.style.display = m_buildFormat != FormatBuild.Wavefront ? DisplayStyle.Flex : DisplayStyle.None;
+		}
+
+		private void UpdateDestinationPanels()
+		{
+			var destination = (PublishDestination)m_publishDestination;
+			m_steamPanel.style.display = destination == PublishDestination.SteamWorkshop ? DisplayStyle.Flex : DisplayStyle.None;
+			m_localPanel.style.display = destination == PublishDestination.LocalTest ? DisplayStyle.Flex : DisplayStyle.None;
+			m_externalPanel.style.display = destination == PublishDestination.ExternalFolder ? DisplayStyle.Flex : DisplayStyle.None;
+		}
+
+		private void OnConfigFieldChanged(ChangeEvent<UnityEngine.Object> evt)
+		{
+			if (!MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj) || attachObj == null)
 			{
-				var localRect = rect;
-				m_queueActionDraw.Enqueue(() => EditorGUI.HelpBox(localRect, msg, messageType));
-				rect.y += rect.height + space;
+				return;
 			}
+
+			attachObj.metaConfig = evt.newValue as MapMetaConfig;
+
+			if (attachObj.metaConfig != null && m_attaching.TryGetValue(SelectItem.Id, out var attached) && !attached)
+			{
+				MapManagerConfig.Attach(SelectItem.Id, attachObj.metaConfig);
+				m_attaching[SelectItem.Id] = true;
+			}
+
+			RefreshDetailsPanel();
+		}
+
+		private void OnBuildTargetsChanged(ChangeEvent<Enum> evt)
+		{
+			m_buildType = Convert.ToInt32(evt.newValue);
+			RefreshDetailsPanel();
+		}
+
+		private void OnSceneChanged(ChangeEvent<string> evt)
+		{
+			var index = Array.IndexOf(m_sceneNames, evt.newValue);
+			if (index >= 0 && index < m_scenePaths.Length)
+			{
+				MapManagerConfig.instance.targetScene = m_scenePaths[index];
+			}
+		}
+
+		private void OnDestinationChanged(ChangeEvent<int> evt)
+		{
+			m_publishDestination = evt.newValue;
+			UpdateDestinationPanels();
+			RefreshDetailsPanel();
+		}
+
+		private void OnBuildButtonClicked()
+		{
+			if (IsDownloadAnyIcon() || !MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj) || attachObj == null || attachObj.metaConfig == null)
+			{
+				return;
+			}
+
+			var buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
+
+			m_loads[SelectItem.Id] = true;
+			m_buildProcess = true;
+			var selectId = (ulong)SelectItem.Id;
+			MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
+			m_compressBuildCached = m_compressBuild;
+			m_platformBuildCached = m_platformBuild;
+			m_buildFormatCached = m_buildFormat;
+
+			MapBuilder.BuildCustom((TempData)m_buildType,
+				(TempData)buildData.buildSuccess,
+				selectId,
+				m_buildFormatCached,
+				m_compressBuildCached,
+				m_platformBuildCached,
+				(path, success) => AddBuild(attachObj.metaConfig, buildData, path, success));
 		}
 
 		private void AddBuild(MapMetaConfig config,
@@ -635,7 +903,7 @@ namespace Editor
 
 			if (complete == (TempData.Map | TempData.Meta))
 			{
-				Debug.Log($"Build Complete : Everything");
+				Debug.Log("Build Complete : Everything");
 			}
 
 			buildData.compress = m_compressBuildCached;
@@ -648,66 +916,79 @@ namespace Editor
 				m_buildFormat, m_platformBuildCached, m_compressBuildCached));
 
 			m_buildProcess = false;
+			RefreshDetailsPanel();
 		}
 
-		private string[] GetScenesName(EditorBuildSettingsScene[] editorScenes)
+		private void OnUploadSteamClicked()
 		{
-			return editorScenes
-				.Where(scene => scene.enabled)
-				.Select(editorScene => MapBuilder.GetSceneNameFromPathNoId(editorScene.path))
-				.ToArray();
-		}
-
-		private int FindSceneIndex(EditorBuildSettingsScene[] scenes, string path)
-		{
-			for (int index = 0; index < scenes.Length; index++)
+			if (!MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj) || attachObj == null || attachObj.metaConfig == null)
 			{
-				if (scenes[index].path == path && scenes[index].enabled)
+				return;
+			}
+
+			var buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
+			var selectedId = SelectItem.Id;
+
+			m_loads[selectedId] = true;
+			MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
+			MapBuilder.UploadSteamCommunityItem(buildData, SelectItem, false, id =>
+			{
+				m_loads[id] = false;
+				DownloadSpriteAsync(m_fetchResultListItems.Find(itemFind => itemFind.Id == id));
+			});
+		}
+
+		private void OnUploadLocalClicked()
+		{
+			if (!MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj) || attachObj == null || attachObj.metaConfig == null)
+			{
+				return;
+			}
+
+			var buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
+			var selectedId = SelectItem.Id;
+
+			m_loads[selectedId] = true;
+			MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
+			MapBuilder.UploadSteamCommunityItem(buildData, SelectItem, true, id =>
+			{
+				m_loads[id] = false;
+				DownloadSpriteAsync(m_fetchResultListItems.Find(itemFind => itemFind.Id == id));
+			});
+		}
+
+		private void OnBrowseExternalClicked()
+		{
+			if (!MapManagerConfig.TryGetAttach(SelectItem.Id, out var attachObj))
+			{
+				return;
+			}
+
+			m_pathToExternal = EditorUtility.SaveFolderPanel("External path", Application.streamingAssetsPath, attachObj.id.ToString());
+			m_externalPathField.SetValueWithoutNotify(m_pathToExternal);
+			m_externalExportButton.SetEnabled(!string.IsNullOrWhiteSpace(m_pathToExternal) && Path.IsPathFullyQualified(m_pathToExternal));
+		}
+
+		private void OnExportExternalClicked()
+		{
+			if (!MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj) || attachObj == null || attachObj.metaConfig == null)
+			{
+				return;
+			}
+
+			var buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
+			MapBuilder.BuildDataTransitionToDirectory(buildData, m_pathToExternal);
+		}
+
+		private void OnNewWorkshopItemClicked()
+		{
+			MapBuilder.CreateNewCommunityFile(result =>
+			{
+				if (result.Success)
 				{
-					return index;
+					Fetch();
 				}
-			}
-
-			return 0;
-		}
-
-		private bool IsDownloadAnyIcon()
-		{
-			foreach (var item in m_fetchResultListItems)
-			{
-				if (m_images.TryGetValue(item.Id, out var itemImage) && itemImage.Item2)
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
-		
-		private class RectLayout
-		{
-			public Rect current;
-			private readonly float space;
-			private readonly float sizeButton;
-
-			public RectLayout(Rect initial, float space, float sizeButton)
-			{
-				this.current = initial;
-				this.space = space;
-				this.sizeButton = sizeButton;
-			}
-
-			public Rect Stack(float spaceMultiplier = 1, float? height = null, float? width = null, float? x = null)
-			{
-				current = new Rect(x ?? current.x, current.yMax + space * spaceMultiplier, width ?? current.width, height ?? sizeButton);
-				return current;
-			}
-
-			public Rect Place(float x, float y, float width, float? height = null)
-			{
-				current = new Rect(x, y, width, height ?? sizeButton);
-				return current;
-			}
+			});
 		}
 	}
 }

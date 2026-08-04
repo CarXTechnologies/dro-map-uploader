@@ -16,19 +16,18 @@ public class SteamUGCManager
 	public const ulong PUBLISH_ITEM_FAILED_CODE = 0u;
 	public const uint APP_ID = 635260;
 	public const string MAP_TAG_OLD = "Map";
-	public const string MAP_TAG = "map_2.0";
+	private const string MAP_TAG = "map_2.0";
 	private Task<PublishResult> m_currentPublishResult;
 	private string m_itemName;
 	private string m_previewPath;
 	private string m_desciption;
-	private List<Item> m_tempFetchResultList = new List<Item>();
-		
+
 	public void Update()
 	{
 		SteamClient.RunCallbacks();
 	}
 
-	public async Task PaggingQuery(Query query, List<Item> result, Action<Item> itemSuccess)
+	private async Task PaggingQuery(Query query, List<Item> result, Action<Item> itemSuccess)
 	{
 		const byte maxErrorCount = 5;
 		const int delayBetweenQuery = 500;
@@ -81,7 +80,7 @@ public class SteamUGCManager
 			}
 		}
 	}
-		
+
 	private bool IsTagMatching(Item item)
 	{
 		foreach (string tag in item.Tags)
@@ -91,15 +90,15 @@ public class SteamUGCManager
 				return true;
 			}
 		}
-			
+
 		return false;
 	}
-		
+
 	private bool EqualsTag(string tag)
 	{
 		return tag.Equals(MAP_TAG, StringComparison.OrdinalIgnoreCase) || tag.Equals(MAP_TAG_OLD, StringComparison.OrdinalIgnoreCase) ;
 	}
-		
+
 	public async Task GetWorkshopItems(List<Item> result, Action<Item> callback)
 	{
 		await PaggingQuery(Query.Items.WithTag(MAP_TAG_OLD).MatchAnyTag().WhereUserPublished(), result, callback);
@@ -109,7 +108,7 @@ public class SteamUGCManager
 	private IEnumerator UpdateItemCoroutine(string path, ulong id)
 	{
 		var dirInfo = new DirectoryInfo(path);
-			
+
 		var itemTask = Item.GetAsync(id);
 		yield return itemTask.AsIEnumerator();
 
@@ -123,7 +122,7 @@ public class SteamUGCManager
 		var item = itemTaskResult.Value;
 		var editor = EditItemContent(item, dirInfo);
 		var submitTask = editor.SubmitAsync();
-			
+
 		yield return submitTask.AsIEnumerator();
 
 		var submitTaskResult = submitTask.Result;
@@ -151,13 +150,13 @@ public class SteamUGCManager
 
 		return null;
 	}
-		
+
 	public static SteamUGCDetails_t GetItemDetail(Item item)
 	{
 		var result = UnsafeUtility.As<Item, Steamworks.Parser.Item>(ref item);
 		return result.details;
 	}
-		
+
 	protected virtual Editor EditItemContent(Item item, DirectoryInfo dirInfo)
 	{
 		var editor = item.Edit().WithContent(dirInfo);
@@ -191,7 +190,7 @@ public class SteamUGCManager
 	}
 
 	private Editor CreateCommunityFile()
-	{     
+	{
 		return Editor.NewCommunityFile
 			.ForAppId(APP_ID)
 			.WithTag(MAP_TAG)
@@ -204,7 +203,7 @@ public class SteamUGCManager
 		m_previewPath = previewPath;
 		m_desciption = desciption;
 	}
-		
+
 	public IEnumerator CreatePublisherItem(Action<PublishResult> onCreate)
 	{
 		var submitTask = CreateCommunityFile().SubmitAsync();
@@ -212,7 +211,7 @@ public class SteamUGCManager
 		yield return m_currentPublishResult.AsIEnumerator();
 		onCreate?.Invoke(m_currentPublishResult.Result);
 	}
-		
+
 	public IEnumerator PublishItemCoroutine(string path, Func<ulong, bool> uploadedId)
 	{
 		yield return m_currentPublishResult.AsIEnumerator();
