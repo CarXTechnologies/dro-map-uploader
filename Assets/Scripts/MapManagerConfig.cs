@@ -14,8 +14,8 @@ public enum TempData : int
 
 public enum FormatBuild
 {
-	Legacy,
-	Wavefront,
+	dro1,
+	dro2,
 }
 
 public enum PlatformBuild : int

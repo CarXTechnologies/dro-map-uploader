@@ -814,7 +814,7 @@ namespace Editor
 
 		private void UpdateCompressVisibility()
 		{
-			m_compressRow.style.display = m_buildFormat != FormatBuild.Wavefront ? DisplayStyle.Flex : DisplayStyle.None;
+			m_compressRow.style.display = m_buildFormat != FormatBuild.dro2 ? DisplayStyle.Flex : DisplayStyle.None;
 		}
 
 		private void UpdateDestinationPanels()

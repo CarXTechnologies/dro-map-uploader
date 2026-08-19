@@ -339,10 +339,10 @@ namespace Editor
 
 			switch (m_buildFormat)
 			{
-				case FormatBuild.Legacy:
+				case FormatBuild.dro1:
 					collector = new SceneAssetBundleCollector(root.transform, ValidComponent, ProcessComponent, "Garbage");
 					break;
-				case FormatBuild.Wavefront:
+				case FormatBuild.dro2:
 					collector = new SceneFormatCollector(root.transform, Path.GetFileNameWithoutExtension(m_scenePath), "Garbage");
 					break;
 			}
@@ -392,12 +392,12 @@ namespace Editor
 		{
 			switch (moddingFormat)
 			{
-				case FormatBuild.Legacy:
+				case FormatBuild.dro1:
 					var sceneName = GetSceneNameFromPathNoId(m_targetScene);
 					var bundleBuilds = CreateBundleArrayDataForOneElement(sceneName + ".bundle", GetScenePathNoId(m_scenePath));
 					BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Map), bundleBuilds, m_assetBundleOption, m_buildTarget);
 					return;
-				case FormatBuild.Wavefront:
+				case FormatBuild.dro2:
 					results.UploadInCatalog(GetTemporary(TempData.Map));
 					return;
 			}
@@ -414,11 +414,11 @@ namespace Editor
 
 			switch (moddingFormat)
 			{
-				case FormatBuild.Legacy:
+				case FormatBuild.dro1:
 					var bundleBuilds = CreateBundleArrayDataForOneElement(nameof(TempData.Meta).ToLower() + ".bundle", pathToResources);
 					BuildPipeline.BuildAssetBundles(GetTemporary(TempData.Meta), bundleBuilds, m_assetBundleOption, m_buildTarget);
 					return;
-				case FormatBuild.Wavefront:
+				case FormatBuild.dro2:
 					results ??= new ModResults(m_provider);
 					var modHierarchy = new ModMeta
 					{
@@ -454,10 +454,57 @@ namespace Editor
 					{
 						results.Add(decompressedLargeIcon);
 					}
+
+					modHierarchy.minimap = CollectMinimapMeta();
+
 					results.Add(modHierarchy);
 					results.UploadInCatalog(GetTemporary(TempData.Meta));
 					return;
 			}
+		}
+
+		private static ModMinimapMeta CollectMinimapMeta()
+		{
+			var minimap = UnityEngine.Object.FindFirstObjectByType<Minimap>();
+			if (minimap == null || minimap.Textures == null)
+			{
+				return null;
+			}
+
+			var textures = minimap.Textures;
+			var textureNames = new string[textures.Length];
+
+			for (var i = 0; i < textures.Length; i++)
+			{
+				textureNames[i] = AddMinimapTexture(textures[i].mainTexture);
+			}
+
+			return new ModMinimapMeta
+			{
+				textures = textureNames,
+				boundsCenterX = minimap.BoundsCenter.x,
+				boundsCenterY = minimap.BoundsCenter.y,
+				boundsSizeX = minimap.BoundsSize.x,
+				boundsSizeY = minimap.BoundsSize.y,
+			};
+		}
+
+		private static string AddMinimapTexture(Texture texture)
+		{
+			if (texture == null)
+			{
+				return string.Empty;
+			}
+
+			var decompressedTexture = UnityGoObjExporter.EnsureTextureIsReadableAndUncompressed(texture as Texture2D);
+			if (decompressedTexture == null || !results.TryGetProvider(decompressedTexture, out var provider))
+			{
+				return string.Empty;
+			}
+
+			var filePath = provider.GetFilePath(decompressedTexture);
+			results.Add(decompressedTexture);
+			return filePath;
 		}
 
 		private static void SelectCache()

@@ -27,6 +27,10 @@ public class Minimap : MonoBehaviour
 	[SerializeField] private TexturePair[] m_textures = null;
 	[SerializeField] private bool m_lockSize = false;
 
+	public TexturePair[] Textures => m_textures;
+	public Vector2 BoundsCenter => m_boundsCenter;
+	public Vector2 BoundsSize => m_boundsSize;
+
 	private void OnValidate()
 	{
 		if (m_lockSize)

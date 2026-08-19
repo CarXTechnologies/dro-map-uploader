@@ -7,4 +7,5 @@ public class GameMarkerData : MonoBehaviour, IMarkerDataSource
 
 	public string MarkerHead => markerData?.head;
 	public string MarkerParam => markerData?.param;
+	public object MarkerData => markerData?.value;
 }
