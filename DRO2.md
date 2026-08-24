@@ -38,9 +38,9 @@ Identical mesh + material + collider combinations are stored once and reused by 
 
 `LODGroup` is supported, up to **8 LOD levels** per group. Screen-relative transition heights are converted into world distances on export. A group with more than 8 levels is skipped with a warning; a group that ends up with one usable level becomes a plain static instance.
 
-### Spawn point
+### Spawn points
 
-Exactly **one** `SpawnPoint` marker (`GameMarkerData`) per map. Its transform defines where the car appears.
+`SpawnPoint` markers (`GameMarkerData`) define where cars appear. Unlike dro1, dro2 supports **multiple** spawn points per map, and the **name of the spawn point GameObject** is exported together with its transform — name the objects meaningfully, the name travels with the mod and identifies the spawn point in game.
 
 ### Minimap
 
