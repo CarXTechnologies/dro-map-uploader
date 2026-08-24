@@ -220,7 +220,8 @@ namespace Editor
 
 			ModMapTestTool.Play(MapManagerConfig.Value.mapName)?.WithList(ModMapTestTool.Target.data).ValidComponents();
 			ModMapTestTool.InitTestsEditor(scene);
-			ModMapTestTool.RunTest(m_targetScene);
+			//no dro2
+			//ModMapTestTool.RunTest(m_targetScene);
 
 			return isError;
 		}

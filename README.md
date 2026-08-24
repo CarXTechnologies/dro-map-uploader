@@ -11,6 +11,7 @@
    - [Capture prototypes](#capture-prototypes--icon-preview-minimap)
 - [Uploading the track to the workshop](#uploading-the-track-to-the-workshop)
    - [Build Setting](#build-setting)
+   - [Mod Format: dro1 vs dro2](#mod-format-dro1-vs-dro2)
    - [Upload Setting](#upload-setting)
 - [Supported Components](#supported-components)
 - [Recommendations](#requirements)
@@ -143,9 +144,18 @@
 #### Build Setting
   - Platform - only steam support.
   - Target Scene - selected scene for build map bundle. (*the scene must be in build settings).
+  - Format - the mod packaging format used for the build: **dro1** or **dro2** (see [Mod Format: dro1 vs dro2](#mod-format-dro1-vs-dro2) below).
+  - Compression - only shown/used for **dro1** builds.
   - Build Targets(flags) - select build targets what you want to build/rebuild.
   - *Build* - builds all selected "Build Targets" <br>
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/20.png?raw=true" alt="drawing" style="width:400px;"/><br>
+
+### Mod Format: dro1 vs dro2
+
+- **dro1** - the original format. The scene and its meta data are packed into Unity **AssetBundles**, with an optional Compression setting.
+- **dro2** - the newer format. The map is exported into a plain-data catalog (obj/mtl/png/json) instead of AssetBundles, so it is not tied to the Unity version it was built with. The Compression setting is not used and is hidden when dro2 is selected.
+
+📄 **Full dro2 documentation: [DRO2.md](DRO2.md)** - output structure, mesh/material/texture export rules, LOD and marker handling, limits and troubleshooting.
 
 #### Upload Setting
   - Upload Steam Description - if enabled, the description on the workshop page will be updated
