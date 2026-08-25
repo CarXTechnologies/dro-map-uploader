@@ -29,6 +29,9 @@ Assets/Plugins/CarX.Modding.Creator/          <- submodule
 └── Publishing/
     ├── Steam/                                <- compiled only with CARX_MODDING_STEAM
     └── ModIo/                                <- compiled only with CARX_MODDING_MODIO
+
+Assets/Plugins/Facepunch.Steamworks/          <- Steam SDK, vendored in this repository
+Assets/Plugins/Modio/                         <- mod.io SDK, vendored in this repository
 ```
 
 Each vendor sits in its own assembly behind a define constraint. `ModPublishingDefines` sets those defines from
@@ -40,16 +43,16 @@ reference, for the same reason: nothing may hard-link an assembly that might not
 
 ## Installing the vendor SDKs
 
-**Steam** uses Facepunch.Steamworks, which lives inside the CarX.Modding.Creator submodule at
-`ThirdParty/Facepunch.Steamworks` — nothing extra to install. Get it with the rest of the submodule:
+Both SDKs are vendored as plain files under `Assets/Plugins`, committed to this repository — nothing extra to
+install, and nothing to fetch alongside the submodule. The submodule holds the contracts and the vendor
+implementations; the SDKs they compile against belong to the project, so a project that ships only one vendor carries
+only that vendor's binaries.
 
-```bash
-git clone --recurse-submodules <this repo>
-# or, in an existing checkout
-git submodule update --init --recursive
-```
+**Steam** uses [Facepunch.Steamworks](https://wiki.facepunch.com/steamworks/) at `Assets/Plugins/Facepunch.Steamworks`,
+managed assemblies plus the native `redistributable_bin`. To update it, replace the folder contents with a newer
+release and commit the result.
 
-**mod.io** is vendored as plain files at `Assets/Plugins/Modio`, committed to this repository.
+**mod.io** lives at `Assets/Plugins/Modio`.
 
 > [!NOTE]
 > The mod.io plugin is not a UPM package — its repository has no `package.json`, and its releases ship a
