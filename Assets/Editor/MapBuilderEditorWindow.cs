@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Steamworks;
-using Steamworks.Ugc;
+using Plugins.CarX.Modding.Creator.Runtime.Publishing;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ModPublisherSession = Plugins.CarX.Modding.Creator.Editor.Publishing.ModPublisherSession;
 
 namespace Editor
 {
@@ -16,15 +17,18 @@ namespace Editor
 	{
 		private const string StyleSheetPath = "Assets/Editor/MapBuilderEditorWindow.uss";
 
-		private SteamUGCManager m_steamUgc;
 		private int m_selectItemIndex;
-		private readonly List<Item> m_fetchResultListItems = new();
+		private readonly List<ModItem> m_fetchResultListItems = new();
 
-		private Item SelectItem => m_selectItemIndex >= 0 && m_selectItemIndex < m_fetchResultListItems.Count ? m_fetchResultListItems[m_selectItemIndex] : default;
+		private ModItem SelectItem => m_selectItemIndex >= 0 && m_selectItemIndex < m_fetchResultListItems.Count
+			? m_fetchResultListItems[m_selectItemIndex]
+			: null;
 
-		private readonly Dictionary<ulong, bool> m_loads = new();
-		private readonly Dictionary<ulong, bool> m_attaching = new();
-		private readonly Dictionary<ulong, (Texture2D texture, bool downloading)> m_images = new();
+		private ModItemKey SelectKey => SelectItem?.Key ?? default;
+
+		private readonly Dictionary<ModItemKey, bool> m_loads = new();
+		private readonly Dictionary<ModItemKey, bool> m_attaching = new();
+		private readonly Dictionary<ModItemKey, (Texture2D texture, bool downloading)> m_images = new();
 
 		private int m_buildType;
 		private FormatBuild m_buildFormat;
@@ -34,18 +38,36 @@ namespace Editor
 		private PlatformBuild m_platformBuildCached;
 		private CompressBuild m_compressBuildCached;
 		private bool m_buildProcess;
-		private int m_publishDestination;
+		private bool m_fetching;
+		private PublishDestination m_publishDestination;
+
+		/// <summary>
+		/// Destinations offered for the active vendor, in the order they appear in the radio group.
+		/// The group works in indices, so this is what maps a click back to a destination - the list is not fixed,
+		/// because a vendor that does not install items locally does not get a Local Test option at all.
+		/// </summary>
+		private readonly List<PublishDestination> m_destinationOptions = new();
 		private bool m_buttonLastClickOnAnyItem = true;
 		private string m_pathToExternal;
 
 		private enum PublishDestination
 		{
-			SteamWorkshop = 0,
+			Vendor = 0,
 			LocalTest = 1,
 			ExternalFolder = 2,
 		}
 
-		private VisualElement m_noSteamBox;
+		private VisualElement m_vendorBar;
+		private DropdownField m_vendorField;
+		private DropdownField m_gameField;
+		private Image m_gamePreview;
+		private Texture2D m_gamePreviewTexture;
+		private string m_gamePreviewUrl;
+		private Label m_authLabel;
+		private Button m_authButton;
+
+		private VisualElement m_unavailableBox;
+		private HelpBox m_unavailableHelp;
 		private VisualElement m_mainLayout;
 
 		private ScrollView m_itemsScroll;
@@ -58,6 +80,15 @@ namespace Editor
 
 		private ObjectField m_configField;
 
+		/// <summary>
+		/// Config chosen in the field, kept even while no item is selected. On a vendor account without any items
+		/// there is nothing to attach a config to, yet one is still needed to create the first item.
+		/// </summary>
+		private MapMetaConfig m_pendingConfig;
+
+		private HelpBox m_newItemHint;
+		private Button m_newItemButton;
+
 		private VisualElement m_buildAndPublishWrapper;
 
 		private VisualElement m_buildSection;
@@ -66,20 +97,24 @@ namespace Editor
 		private DropdownField m_sceneField;
 		private string[] m_sceneNames = Array.Empty<string>();
 		private string[] m_scenePaths = Array.Empty<string>();
-		private EnumField m_platformField;
 		private EnumField m_formatField;
 		private VisualElement m_compressRow;
 		private EnumField m_compressField;
 
 		private VisualElement m_buildResultBox;
 
+		private VisualElement m_destinationSection;
+		private HelpBox m_noItemHint;
+		private Label m_publishStatus;
+		private TextField m_versionField;
+		private TextField m_changelogField;
 		private RadioButtonGroup m_destinationGroup;
 
-		private VisualElement m_steamPanel;
+		private VisualElement m_vendorPanel;
 		private Toggle m_uploadNameToggle;
 		private Toggle m_uploadDescriptionToggle;
 		private Toggle m_uploadPreviewToggle;
-		private Button m_uploadSteamButton;
+		private Button m_uploadVendorButton;
 
 		private VisualElement m_localPanel;
 		private HelpBox m_localHelpBox;
@@ -101,7 +136,12 @@ namespace Editor
 		{
 			MapBuilderEditorWindow wnd = GetWindow<MapBuilderEditorWindow>();
 			wnd.titleContent = new GUIContent("MapBuilder");
-			wnd.Fetch();
+
+			// A window opening for the first time fetches from CreateGUI; only an already open one needs a nudge.
+			if (wnd.m_itemsScroll != null)
+			{
+				wnd.Fetch();
+			}
 		}
 
 		public void CreateGUI()
@@ -113,9 +153,23 @@ namespace Editor
 
 		private async void Fetch()
 		{
-			MapBuilder.InitSteamUgc();
-			m_steamUgc = MapBuilder.steamUgc;
-			await FetchItems();
+			// Guarded because a fetch is kicked off from several places - window open, vendor switch, sign in, the
+			// Fetch button - and two of them overlapping would duplicate every request the vendor makes.
+			if (m_fetching)
+			{
+				return;
+			}
+
+			m_fetching = true;
+
+			try
+			{
+				await FetchItems();
+			}
+			finally
+			{
+				m_fetching = false;
+			}
 		}
 
 		private void OnDisable()
@@ -135,6 +189,13 @@ namespace Editor
 
 		private void Clear()
 		{
+			if (m_gamePreviewTexture != null)
+			{
+				DestroyImmediate(m_gamePreviewTexture);
+				m_gamePreviewTexture = null;
+				m_gamePreviewUrl = null;
+			}
+
 			foreach (var image in m_images)
 			{
 				if (image.Value.texture != null)
@@ -146,10 +207,14 @@ namespace Editor
 
 		private async Task FetchItems()
 		{
-			RefreshSteamAvailability();
+			var session = MapBuilder.session;
+			var ready = await session.EnsureInitializedAsync(CancellationToken.None);
 
-			if (!SteamClient.IsValid)
+			RefreshVendorBar();
+
+			if (!ready.Success || !session.IsAuthenticated)
 			{
+				RefreshAvailability();
 				return;
 			}
 
@@ -158,27 +223,44 @@ namespace Editor
 				await Task.Delay(100);
 			}
 
-			await m_steamUgc.GetWorkshopItems(m_fetchResultListItems, OnItemFetched);
+			m_fetchResultListItems.Clear();
+			var fetched = await session.Publisher.FetchOwnedItemsAsync(OnItemFetched, CancellationToken.None);
+
+			RefreshAvailability();
+
+			if (!fetched.Success)
+			{
+				Debug.LogError(fetched.Message);
+				return;
+			}
+
+			m_fetchResultListItems.Clear();
+			m_fetchResultListItems.AddRange(fetched.Value);
 
 			foreach (var item in m_fetchResultListItems)
 			{
-				m_attaching[item.Id] = MapManagerConfig.IsAttach(item.Id);
+				m_attaching[item.Key] = MapManagerConfig.IsAttach(item.Key);
 			}
 
-			MapManagerConfig.ValidBuildsAndAttaching(m_fetchResultListItems);
+			MapManagerConfig.ValidBuildsAndAttaching(session.VendorId, m_fetchResultListItems);
 			RefreshItemsList();
 			RefreshDetailsPanel();
 		}
 
-		private void OnItemFetched(Item item)
+		private void OnItemFetched(ModItem item)
 		{
-			RefreshItemRow((ulong)item.Id);
+			// Fetch reports entries as pages arrive, so the row can only be refreshed once the list is rebuilt.
 			DownloadSpriteAsync(item);
 		}
 
-		private async void DownloadSpriteAsync(Item item)
+		private async void DownloadSpriteAsync(ModItem item)
 		{
-			if (m_images.TryGetValue(item.Id, out var image) && image.downloading)
+			if (item == null)
+			{
+				return;
+			}
+
+			if (m_images.TryGetValue(item.Key, out var image) && image.downloading)
 			{
 				return;
 			}
@@ -193,22 +275,22 @@ namespace Editor
 				DestroyImmediate(image.texture);
 			}
 
-			if (string.IsNullOrWhiteSpace(item.PreviewImageUrl))
+			if (string.IsNullOrWhiteSpace(item.PreviewUrl))
 			{
 				return;
 			}
 
-			m_images[item.Id] = (null, true);
-			m_loads[item.Id] = true;
-			RefreshItemRow((ulong)item.Id);
+			m_images[item.Key] = (null, true);
+			m_loads[item.Key] = true;
+			RefreshItemRow(item.Key);
 
-			await UIUtils.DownloadSprite(item.PreviewImageUrl, (_, texture2D) =>
+			await UIUtils.DownloadSprite(item.PreviewUrl, (_, texture2D) =>
 			{
-				m_images[item.Id] = (texture2D == null ? new Texture2D(1, 1) : texture2D, false);
-				m_loads[item.Id] = false;
-				RefreshItemRow((ulong)item.Id);
+				m_images[item.Key] = (texture2D == null ? new Texture2D(1, 1) : texture2D, false);
+				m_loads[item.Key] = false;
+				RefreshItemRow(item.Key);
 
-				if (SelectItem.Id == item.Id)
+				if (SelectKey == item.Key)
 				{
 					RefreshPreview();
 				}
@@ -219,7 +301,7 @@ namespace Editor
 		{
 			foreach (var item in m_fetchResultListItems)
 			{
-				if (m_images.TryGetValue(item.Id, out var itemImage) && itemImage.downloading)
+				if (m_images.TryGetValue(item.Key, out var itemImage) && itemImage.downloading)
 				{
 					return true;
 				}
@@ -227,7 +309,6 @@ namespace Editor
 
 			return false;
 		}
-
 
 		private void BuildLayout(VisualElement root)
 		{
@@ -241,10 +322,14 @@ namespace Editor
 
 			root.AddToClassList("mb-root");
 
-			m_noSteamBox = new HelpBox("Please open Steam and sign in, then reopen this window.", HelpBoxMessageType.Error);
-			m_noSteamBox.AddToClassList("mb-no-steam");
-			m_noSteamBox.style.display = DisplayStyle.None;
-			root.Add(m_noSteamBox);
+			root.Add(BuildVendorBar());
+
+			m_unavailableBox = new VisualElement();
+			m_unavailableHelp = new HelpBox(string.Empty, HelpBoxMessageType.Error);
+			m_unavailableHelp.AddToClassList("mb-unavailable");
+			m_unavailableBox.Add(m_unavailableHelp);
+			m_unavailableBox.style.display = DisplayStyle.None;
+			root.Add(m_unavailableBox);
 
 			m_mainLayout = new VisualElement();
 			m_mainLayout.AddToClassList("mb-main-layout");
@@ -252,6 +337,46 @@ namespace Editor
 
 			m_mainLayout.Add(BuildLeftPanel());
 			m_mainLayout.Add(BuildRightPanel());
+		}
+
+		/// <summary>
+		/// Vendor picker plus sign in state. Sits above everything else because every other control in the window
+		/// only makes sense once a vendor is up and a user is signed in.
+		/// </summary>
+		private VisualElement BuildVendorBar()
+		{
+			m_vendorBar = new VisualElement();
+			m_vendorBar.AddToClassList("mb-vendor-bar");
+
+			m_vendorField = new DropdownField("Vendor", GetVendorDisplayNames(), 0);
+			m_vendorField.AddToClassList("mb-field");
+			m_vendorField.RegisterValueChangedCallback(OnVendorChanged);
+			m_vendorBar.Add(m_vendorField);
+
+			m_gamePreview = new Image { scaleMode = ScaleMode.ScaleToFit };
+			m_gamePreview.AddToClassList("mb-game-preview");
+			m_gamePreview.style.display = DisplayStyle.None;
+			m_vendorBar.Add(m_gamePreview);
+
+			m_gameField = new DropdownField("Game", new List<string>(), 0);
+			m_gameField.AddToClassList("mb-field");
+			m_gameField.AddToClassList("mb-grow");
+			m_gameField.RegisterValueChangedCallback(OnGameChanged);
+			m_vendorBar.Add(m_gameField);
+
+			m_authLabel = new Label(string.Empty);
+			m_authLabel.AddToClassList("mb-auth-state");
+			m_vendorBar.Add(m_authLabel);
+
+			m_authButton = new Button(OnAuthButtonClicked) { text = "Sign in" };
+			m_vendorBar.Add(m_authButton);
+
+			return m_vendorBar;
+		}
+
+		private static List<string> GetVendorDisplayNames()
+		{
+			return ModPublisherSession.AvailableVendors.Select(vendor => vendor.DisplayName).ToList();
 		}
 
 		private VisualElement BuildLeftPanel()
@@ -297,9 +422,6 @@ namespace Editor
 
 			var idBadge = new VisualElement();
 			idBadge.AddToClassList("mb-id-badge");
-			var steamIcon = new Image { image = EditorGUIUtility.IconContent("steam").image };
-			steamIcon.AddToClassList("mb-id-badge-icon");
-			idBadge.Add(steamIcon);
 			m_previewIdLabel = new Label(string.Empty);
 			m_previewIdLabel.AddToClassList("mb-id-badge-label");
 			idBadge.Add(m_previewIdLabel);
@@ -376,14 +498,20 @@ namespace Editor
 		{
 			var box = new VisualElement();
 			box.AddToClassList("mb-box");
+			m_destinationSection = box;
 
 			var header = new Label("Destination");
 			header.AddToClassList("mb-section-header");
 			box.Add(header);
 
-			m_destinationGroup = new RadioButtonGroup(string.Empty, new List<string> { "Steam Workshop", "Local Test", "External Folder" });
+			m_noItemHint = new HelpBox(
+				"Select an item on the right to publish to, or create one with New Item once the build is done.",
+				HelpBoxMessageType.Info);
+			box.Add(m_noItemHint);
+
+			// Choices are filled in by RefreshDestinationOptions once the active vendor is known.
+			m_destinationGroup = new RadioButtonGroup(string.Empty, new List<string>());
 			m_destinationGroup.AddToClassList("mb-destination-group");
-			m_destinationGroup.SetValueWithoutNotify(m_publishDestination);
 			m_destinationGroup.RegisterValueChangedCallback(OnDestinationChanged);
 			box.Add(m_destinationGroup);
 
@@ -391,33 +519,57 @@ namespace Editor
 			publishHeader.AddToClassList("mb-section-header");
 			box.Add(publishHeader);
 
-			m_steamPanel = new VisualElement();
+			m_publishStatus = new Label(string.Empty);
+			m_publishStatus.AddToClassList("mb-publish-status");
+			m_publishStatus.style.display = DisplayStyle.None;
+			box.Add(m_publishStatus);
 
-			m_uploadNameToggle = new Toggle("Upload Name") { tooltip = "Overwrite the workshop item title on upload" };
+			m_vendorPanel = new VisualElement();
+
+			m_versionField = new TextField("Version")
+			{
+				tooltip = "Version label for this release, shown against the uploaded file. " +
+				          "Left empty it falls back to the uploader version.",
+			};
+			m_versionField.AddToClassList("mb-field");
+			m_versionField.RegisterValueChangedCallback(evt => WritePublishNotes(notes => notes.version = evt.newValue));
+			m_vendorPanel.Add(m_versionField);
+
+			m_changelogField = new TextField("Changelog")
+			{
+				multiline = true,
+				tooltip = "What changed in this release. Shown to players on the mod page.",
+			};
+			m_changelogField.AddToClassList("mb-field");
+			StretchToMultiline(m_changelogField, 90f);
+			m_changelogField.RegisterValueChangedCallback(evt => WritePublishNotes(notes => notes.changelog = evt.newValue));
+			m_vendorPanel.Add(m_changelogField);
+
+			m_uploadNameToggle = new Toggle("Upload Name") { tooltip = "Overwrite the item title on upload" };
 			m_uploadNameToggle.AddToClassList("mb-field");
-			m_uploadNameToggle.RegisterValueChangedCallback(evt => MapManagerConfig.instance.uploadSteamName = evt.newValue);
-			m_steamPanel.Add(m_uploadNameToggle);
+			m_uploadNameToggle.RegisterValueChangedCallback(evt => MapManagerConfig.instance.uploadName = evt.newValue);
+			m_vendorPanel.Add(m_uploadNameToggle);
 
-			m_uploadDescriptionToggle = new Toggle("Upload Description") { tooltip = "Overwrite the workshop item description on upload" };
+			m_uploadDescriptionToggle = new Toggle("Upload Description") { tooltip = "Overwrite the item description on upload" };
 			m_uploadDescriptionToggle.AddToClassList("mb-field");
-			m_uploadDescriptionToggle.RegisterValueChangedCallback(evt => MapManagerConfig.instance.uploadSteamDescription = evt.newValue);
-			m_steamPanel.Add(m_uploadDescriptionToggle);
+			m_uploadDescriptionToggle.RegisterValueChangedCallback(evt => MapManagerConfig.instance.uploadDescription = evt.newValue);
+			m_vendorPanel.Add(m_uploadDescriptionToggle);
 
-			m_uploadPreviewToggle = new Toggle("Upload Preview") { tooltip = "Overwrite the workshop item preview image on upload" };
+			m_uploadPreviewToggle = new Toggle("Upload Preview") { tooltip = "Overwrite the item preview image on upload" };
 			m_uploadPreviewToggle.AddToClassList("mb-field");
-			m_uploadPreviewToggle.RegisterValueChangedCallback(evt => MapManagerConfig.instance.uploadSteamPreview = evt.newValue);
-			m_steamPanel.Add(m_uploadPreviewToggle);
+			m_uploadPreviewToggle.RegisterValueChangedCallback(evt => MapManagerConfig.instance.uploadPreview = evt.newValue);
+			m_vendorPanel.Add(m_uploadPreviewToggle);
 
-			m_uploadSteamButton = new Button(OnUploadSteamClicked) { text = "Upload to Steam", tooltip = "Publish this build live to the Steam Workshop item" };
-			m_uploadSteamButton.AddToClassList("mb-publish-button");
-			m_steamPanel.Add(m_uploadSteamButton);
-			box.Add(m_steamPanel);
+			m_uploadVendorButton = new Button(OnUploadVendorClicked) { text = "Upload" };
+			m_uploadVendorButton.AddToClassList("mb-publish-button");
+			m_vendorPanel.Add(m_uploadVendorButton);
+			box.Add(m_vendorPanel);
 
 			m_localPanel = new VisualElement();
 			m_localHelpBox = new HelpBox(string.Empty, HelpBoxMessageType.Warning);
 			m_localPanel.Add(m_localHelpBox);
 
-			m_localButton = new Button(OnUploadLocalClicked) { text = "Update Local Test Copy", tooltip = "Copy this build into the subscribed workshop item's local folder, without publishing to Steam" };
+			m_localButton = new Button(OnUploadLocalClicked) { text = "Update Local Test Copy", tooltip = "Copy this build into the item's local install folder, without publishing" };
 			m_localButton.AddToClassList("mb-publish-button");
 			m_localPanel.Add(m_localButton);
 			box.Add(m_localPanel);
@@ -459,12 +611,12 @@ namespace Editor
 			headerRow.AddToClassList("mb-row");
 			headerRow.AddToClassList("mb-list-header");
 
-			var header = new Label("Workshop Items");
+			var header = new Label("Items");
 			header.AddToClassList("mb-section-header");
 			header.AddToClassList("mb-grow");
 			headerRow.Add(header);
 
-			var fetchButton = new Button(Fetch) { text = "Fetch steam workshop", tooltip = "Reload the list of workshop items from Steam" };
+			var fetchButton = new Button(Fetch) { text = "Fetch", tooltip = "Reload the list of items from the vendor" };
 			headerRow.Add(fetchButton);
 			right.Add(headerRow);
 
@@ -472,23 +624,120 @@ namespace Editor
 			m_itemsScroll.AddToClassList("mb-items-scroll");
 			right.Add(m_itemsScroll);
 
-			var newItemButton = new Button(OnNewWorkshopItemClicked) { text = "New Workshop Item", tooltip = "Create a brand new Steam Workshop item" };
-			newItemButton.AddToClassList("mb-new-item-button");
-			right.Add(newItemButton);
+			m_newItemHint = new HelpBox(string.Empty, HelpBoxMessageType.Info);
+			m_newItemHint.style.display = DisplayStyle.None;
+			right.Add(m_newItemHint);
+
+			var actionsRow = new VisualElement();
+			actionsRow.AddToClassList("mb-row");
+
+			m_newItemButton = new Button(OnNewItemClicked)
+			{
+				text = "New Item",
+				tooltip = "Create a new item on the vendor and publish the finished build to it",
+			};
+			m_newItemButton.AddToClassList("mb-new-item-button");
+			m_newItemButton.AddToClassList("mb-grow");
+			actionsRow.Add(m_newItemButton);
+
+			var deleteItemButton = new Button(OnDeleteItemClicked)
+			{
+				text = "Delete…",
+				tooltip = "Delete the selected item from the vendor. With nothing selected you are asked for an id, " +
+				          "which is how to remove an item the list cannot show.",
+			};
+			actionsRow.Add(deleteItemButton);
+
+			right.Add(actionsRow);
 
 			return right;
 		}
 
-		private void RefreshSteamAvailability()
+		private void RefreshVendorBar()
 		{
-			var isValid = SteamClient.IsValid;
-			m_noSteamBox.style.display = isValid ? DisplayStyle.None : DisplayStyle.Flex;
-			m_mainLayout.style.display = isValid ? DisplayStyle.Flex : DisplayStyle.None;
+			// Fetch can be kicked off by ShowMyEditor before CreateGUI has built the bar.
+			if (m_vendorField == null)
+			{
+				return;
+			}
+
+			var session = MapBuilder.session;
+			var vendors = ModPublisherSession.AvailableVendors;
+
+			m_vendorField.choices = vendors.Select(vendor => vendor.DisplayName).ToList();
+
+			var current = vendors.FirstOrDefault(vendor =>
+				string.Equals(vendor.VendorId, session.VendorId, StringComparison.OrdinalIgnoreCase));
+
+			if (current != null)
+			{
+				m_vendorField.SetValueWithoutNotify(current.DisplayName);
+			}
+
+			RefreshGamePicker();
+
+			var auth = session.Publisher?.Auth;
+			var state = auth?.State ?? ModAuthState.Unavailable(session.Status.Message);
+
+			m_authLabel.text = state.Status switch
+			{
+				ModAuthStatus.Authenticated => $"Signed in as {state.UserName}",
+				ModAuthStatus.Authenticating => "Signing in…",
+				ModAuthStatus.NotAuthenticated => "Not signed in",
+				_ => "Unavailable",
+			};
+
+			// Vendors that inherit an ambient session (Steam) have nothing for a button to do.
+			var interactive = auth?.RequiresInteractiveLogin ?? false;
+			m_authButton.style.display = interactive ? DisplayStyle.Flex : DisplayStyle.None;
+			m_authButton.text = state.IsAuthenticated ? "Sign out" : "Sign in";
+			m_authButton.SetEnabled(state.Status != ModAuthStatus.Authenticating);
+		}
+
+		private void RefreshAvailability()
+		{
+			if (m_unavailableBox == null || m_mainLayout == null)
+			{
+				return;
+			}
+
+			var session = MapBuilder.session;
+			var usable = session.IsReady && session.IsAuthenticated;
+
+			if (!usable)
+			{
+				var auth = session.Publisher?.Auth;
+
+				m_unavailableHelp.text = !session.IsReady
+					? session.Status.Message
+					: string.IsNullOrWhiteSpace(auth?.State.Message)
+						? "Sign in to the selected vendor to continue."
+						: auth.State.Message;
+			}
+
+			m_unavailableBox.style.display = usable ? DisplayStyle.None : DisplayStyle.Flex;
+			m_mainLayout.style.display = usable ? DisplayStyle.Flex : DisplayStyle.None;
 		}
 
 		private void RefreshItemsList()
 		{
+			if (m_itemsScroll == null)
+			{
+				return;
+			}
+
 			m_itemsScroll.Clear();
+
+			if (m_fetchResultListItems.Count == 0)
+			{
+				// An empty scroll area reads as "still loading" or "something broke"; say which it is.
+				var vendorName = MapBuilder.session.Publisher?.DisplayName ?? "the vendor";
+				var hint = new Label($"Nothing published to {vendorName} yet.\n" +
+				                     "Assign a Map Meta Config on the left, build it, then use New Item.");
+				hint.AddToClassList("mb-empty-hint");
+				m_itemsScroll.Add(hint);
+				return;
+			}
 
 			for (var i = 0; i < m_fetchResultListItems.Count; i++)
 			{
@@ -499,9 +748,9 @@ namespace Editor
 		private VisualElement BuildItemRow(int index)
 		{
 			var item = m_fetchResultListItems[index];
-			var hasOldFlag = item.HasTag(SteamUGCManager.MAP_TAG_OLD);
+			var hasOldFlag = item.Tags.Any(MapBuilder.publisherContext.IsLegacyContentTag);
 
-			var row = new VisualElement { userData = (ulong)item.Id };
+			var row = new VisualElement { userData = item.Key };
 			row.AddToClassList("mb-item-row");
 			row.AddToClassList(index % 2 == 0 ? "mb-item-row-even" : "mb-item-row-odd");
 			if (hasOldFlag)
@@ -527,8 +776,16 @@ namespace Editor
 			title.AddToClassList("mb-item-title");
 			info.Add(title);
 
-			var itemDetail = SteamUGCManager.GetItemDetail(item);
-			var sizeLabel = new Label($"{Mathf.FloorToInt(itemDetail.FileSize / ModMapTestTool.BYTES_TO_MEGABYTES)} / {(ModMapTestTool.Steam.maxSizeInMb + ModMapTestTool.Steam.maxSizeInMbMeta)} mb");
+			var limits = MapBuilder.session.Limits;
+			var maxMb = limits == null ? 0f : limits.MaxPayloadSizeInMb + limits.MaxMetaSizeInMb;
+			var size = $"{Mathf.FloorToInt(item.PayloadSizeBytes / ModMapTestTool.BYTES_TO_MEGABYTES)} / {maxMb} mb";
+
+			var sizeLabel = new Label(string.IsNullOrWhiteSpace(item.StatusLabel)
+				? size
+				: $"{size}  ·  {item.StatusLabel}")
+			{
+				tooltip = BuildStatusTooltip(item),
+			};
 			sizeLabel.AddToClassList("mb-item-size");
 			info.Add(sizeLabel);
 
@@ -541,19 +798,31 @@ namespace Editor
 				row.Add(oldLabel);
 			}
 
-			if (!MapManagerConfig.TryGetAttach(item.Id, out var attachData) || attachData.metaConfig == null)
+			if (!MapManagerConfig.TryGetAttach(item.Key, out var attachData) || attachData.metaConfig == null)
 			{
-				var warning = new Label("Detach") { tooltip = "No MapMetaConfig attached to this workshop item yet" };
+				var warning = new Label("Detach") { tooltip = "No MapMetaConfig attached to this item yet" };
 				warning.AddToClassList("mb-item-warning");
 				row.Add(warning);
 			}
 
-			ApplyItemThumbnail(row, item.Id);
+			ApplyItemThumbnail(row, item.Key);
 
 			return row;
 		}
 
-		private void RefreshItemRow(ulong id)
+		/// <summary>
+		/// Points at the vendor page for the states the vendor keeps to itself. mod.io tracks a review status and a
+		/// hidden/public flag that its Unity plugin does not expose, so the page is the only place to read them.
+		/// </summary>
+		private static string BuildStatusTooltip(ModItem item)
+		{
+			var url = MapBuilder.session.Publisher?.GetItemUrl(item.Key);
+			return string.IsNullOrWhiteSpace(url)
+				? item.StatusLabel
+				: $"{item.StatusLabel}\nFull status and visibility: {url}";
+		}
+
+		private void RefreshItemRow(ModItemKey key)
 		{
 			if (m_itemsScroll == null)
 			{
@@ -563,7 +832,7 @@ namespace Editor
 			VisualElement existing = null;
 			foreach (var child in m_itemsScroll.Children())
 			{
-				if (child.userData is ulong childId && childId == id)
+				if (child.userData is ModItemKey childKey && childKey == key)
 				{
 					existing = child;
 					break;
@@ -572,11 +841,11 @@ namespace Editor
 
 			if (existing != null)
 			{
-				ApplyItemThumbnail(existing, id);
+				ApplyItemThumbnail(existing, key);
 			}
 		}
 
-		private void ApplyItemThumbnail(VisualElement row, ulong id)
+		private void ApplyItemThumbnail(VisualElement row, ModItemKey key)
 		{
 			var thumb = row.Q<Image>("thumb");
 			if (thumb == null)
@@ -586,11 +855,11 @@ namespace Editor
 
 			thumb.RemoveFromClassList("mb-item-thumb-loading");
 
-			if (m_images.TryGetValue(id, out var imageData) && !imageData.downloading)
+			if (m_images.TryGetValue(key, out var imageData) && !imageData.downloading)
 			{
 				thumb.image = imageData.texture != null && imageData.texture.width > 1 ? imageData.texture : null;
 			}
-			else if (m_loads.TryGetValue(id, out var loading) && loading)
+			else if (m_loads.TryGetValue(key, out var loading) && loading)
 			{
 				thumb.image = null;
 				thumb.AddToClassList("mb-item-thumb-loading");
@@ -631,10 +900,20 @@ namespace Editor
 
 		private void RefreshDetailsPanel()
 		{
-			m_attaching.TryGetValue(SelectItem.Id, out var isSelectAttach);
+			if (m_configField == null)
+			{
+				return;
+			}
 
-			MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj);
-			var buildData = attachObj != null ? MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig) : default;
+			var key = SelectKey;
+			m_attaching.TryGetValue(key, out var isSelectAttach);
+
+			MapManagerConfig.GetOrAttach(key, out var attachObj);
+
+			// The config the panel works on: the one attached to the selected item, or the one picked by hand when
+			// nothing is selected. Building only ever needs this - the vendor entry is a publishing concern.
+			var activeConfig = attachObj?.metaConfig != null ? attachObj.metaConfig : m_pendingConfig;
+			var buildData = MapManagerConfig.GetBuildOrEmpty(activeConfig);
 
 			if (attachObj != null && m_buttonLastClickOnAnyItem)
 			{
@@ -645,12 +924,20 @@ namespace Editor
 				m_buttonLastClickOnAnyItem = false;
 			}
 
-			m_configField.SetValueWithoutNotify(attachObj?.metaConfig);
+			// Selecting an item adopts its config; with nothing selected the field keeps whatever was picked by hand,
+			// which is what a brand new vendor account needs in order to create its first item at all.
+			if (attachObj?.metaConfig != null)
+			{
+				m_pendingConfig = attachObj.metaConfig;
+			}
+
+			m_configField.SetValueWithoutNotify(attachObj != null ? attachObj.metaConfig : m_pendingConfig);
 
 			RefreshPreview();
 			RefreshDescription();
+			RefreshNewItemHint();
 
-			var hasConfig = attachObj != null && attachObj.metaConfig != null;
+			var hasConfig = activeConfig != null;
 			m_buildAndPublishWrapper.style.display = hasConfig ? DisplayStyle.Flex : DisplayStyle.None;
 
 			if (!hasConfig)
@@ -659,7 +946,12 @@ namespace Editor
 				return;
 			}
 
-			m_buildAndPublishWrapper.SetEnabled(isSelectAttach);
+			// Building is unlocked by the config alone. Requiring a vendor entry here would deadlock mod.io, where an
+			// entry cannot be created without a payload to attach - and a payload is what building produces.
+			var hasItem = key.IsValid && attachObj?.metaConfig != null && isSelectAttach;
+			m_buildSection.SetEnabled(true);
+			m_destinationSection.SetEnabled(hasItem);
+			m_noItemHint.style.display = hasItem ? DisplayStyle.None : DisplayStyle.Flex;
 
 			m_buildTargetsField.SetValueWithoutNotify((TempData)m_buildType);
 			m_formatField.SetValueWithoutNotify(m_buildFormat);
@@ -670,20 +962,26 @@ namespace Editor
 
 			m_buildButton.SetEnabled(m_buildType != 0 && !IsDownloadAnyIcon());
 
-			var uploadState = RefreshBuildResult(attachObj, buildData);
+			var uploadState = RefreshBuildResult(activeConfig, buildData);
 
-			var destination = (PublishDestination)m_publishDestination;
-			MapManagerConfig.instance.buildLocal = destination == PublishDestination.LocalTest;
+			RefreshDestinationOptions();
+			MapManagerConfig.instance.buildLocal = m_publishDestination == PublishDestination.LocalTest;
 
-			m_uploadNameToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadSteamName);
-			m_uploadDescriptionToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadSteamDescription);
-			m_uploadPreviewToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadSteamPreview);
-			m_uploadSteamButton.SetEnabled(uploadState);
+			var notes = MapManagerConfig.GetPublishData(activeConfig);
+			m_versionField.SetValueWithoutNotify(notes?.version ?? string.Empty);
+			m_changelogField.SetValueWithoutNotify(notes?.changelog ?? string.Empty);
 
-			var existItemDirectory = Directory.Exists(SelectItem.Directory);
-			m_localHelpBox.text = existItemDirectory ? "don`t use the map restart" : "need subscribe this item";
-			m_localHelpBox.messageType = existItemDirectory ? HelpBoxMessageType.Warning : HelpBoxMessageType.Error;
-			m_localButton.SetEnabled(uploadState && existItemDirectory);
+			// Steam has a change note but no version field, so asking for one there would be asking for nothing.
+			var supportsVersion = MapBuilder.session.Limits?.SupportsVersion ?? false;
+			m_versionField.style.display = supportsVersion ? DisplayStyle.Flex : DisplayStyle.None;
+
+			m_uploadNameToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadName);
+			m_uploadDescriptionToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadDescription);
+			m_uploadPreviewToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadPreview);
+			m_uploadVendorButton.text = $"Upload to {MapBuilder.session.Publisher?.DisplayName ?? "vendor"}";
+			m_uploadVendorButton.SetEnabled(uploadState);
+
+			RefreshLocalPanel(uploadState);
 
 			m_externalPathField.SetValueWithoutNotify(m_pathToExternal);
 			m_externalExportButton.SetEnabled(!string.IsNullOrWhiteSpace(m_pathToExternal) && Path.IsPathFullyQualified(m_pathToExternal));
@@ -691,33 +989,115 @@ namespace Editor
 			UpdateDestinationPanels();
 		}
 
+		/// <summary>
+		/// Writes a release-notes edit through to the config the panel is currently working on.
+		/// Notes live per map rather than per published item, so they are available while creating the first entry
+		/// and are not lost when the map is rebuilt.
+		/// </summary>
+		private void WritePublishNotes(Action<MapManagerConfig.PublishData> edit)
+		{
+			MapManagerConfig.TryGetAttach(SelectKey, out var attachObj);
+			var config = attachObj?.metaConfig != null ? attachObj.metaConfig : m_pendingConfig;
+
+			var notes = MapManagerConfig.GetPublishData(config);
+			if (notes == null)
+			{
+				return;
+			}
+
+			edit(notes);
+			MapManagerConfig.Save();
+		}
+
+		/// <summary>
+		/// Gives a multiline <see cref="TextField"/> a real text area instead of the one line box it renders by
+		/// default, and lets its text wrap.
+		/// </summary>
+		/// <remarks>
+		/// Done in code rather than in the stylesheet because the element that needs the height is the field's inner
+		/// input, which UIElements identifies by the name "unity-text-input" - there is no class of that name, so a
+		/// descendant class selector for it silently matches nothing. Wrapping also has to be re-enabled here since
+		/// "mb-field" turns it off for the one line fields it is otherwise shared with.
+		/// </remarks>
+		private static void StretchToMultiline(TextField field, float height)
+		{
+			field.style.minHeight = height;
+
+			var input = field.Q(TextField.textInputUssName);
+			if (input == null)
+			{
+				return;
+			}
+
+			input.style.minHeight = height;
+			input.style.whiteSpace = WhiteSpace.Normal;
+			input.style.unityTextAlign = TextAnchor.UpperLeft;
+		}
+
+		private void SetPublishStatus(string message)
+		{
+			if (m_publishStatus == null)
+			{
+				return;
+			}
+
+			m_publishStatus.text = message;
+			m_publishStatus.style.display = string.IsNullOrEmpty(message) ? DisplayStyle.None : DisplayStyle.Flex;
+		}
+
+		private void RefreshLocalPanel(bool uploadState)
+		{
+			// No "this vendor cannot do local installs" branch: RefreshDestinationOptions leaves the option out
+			// entirely for those vendors, so this panel is only ever reachable when it applies.
+			var installDirectory = SelectItem?.LocalInstallDirectory;
+
+			// The target folder is created on demand, so only a missing game install blocks this - not a missing
+			// mods folder, which is exactly what the first local test is supposed to create.
+			var resolved = !string.IsNullOrWhiteSpace(installDirectory);
+
+			m_localHelpBox.text = resolved
+				? $"Copies the build to {installDirectory}\nClose the game before overwriting a mod it has loaded."
+				: "Could not find the game install. Check the Steam app id on SteamWorkshopConfig, " +
+				  "and that the game is installed on this machine.";
+
+			m_localHelpBox.messageType = resolved ? HelpBoxMessageType.Info : HelpBoxMessageType.Error;
+			m_localButton.SetEnabled(uploadState && resolved);
+		}
+
 		private void RefreshPreview()
 		{
-			var hasConfig = MapManagerConfig.TryGetAttach(SelectItem.Id, out var attachObj) && attachObj.metaConfig != null;
+			// Falls back to the hand picked config so the preview is visible while no item exists yet.
+			var config = MapManagerConfig.TryGetAttach(SelectKey, out var attachObj) && attachObj.metaConfig != null
+				? attachObj.metaConfig
+				: m_pendingConfig;
+
+			var hasConfig = config != null;
 
 			m_previewImage.style.display = hasConfig ? DisplayStyle.Flex : DisplayStyle.None;
 			m_previewMissingBox.style.display = hasConfig ? DisplayStyle.None : DisplayStyle.Flex;
 
 			if (hasConfig)
 			{
-				m_previewImage.image = attachObj.metaConfig.mapMetaConfigValue.largeIcon;
+				m_previewImage.image = config.mapMetaConfigValue.largeIcon;
 			}
 
-			m_previewIdLabel.text = SelectItem.Id != 0 ? SelectItem.Id.ToString() : string.Empty;
+			m_previewIdLabel.text = SelectKey.IsValid ? SelectKey.id : string.Empty;
 		}
 
 		private void RefreshDescription()
 		{
-			if (SelectItem.Id == 0)
+			var item = SelectItem;
+
+			if (item == null)
 			{
 				m_descriptionText.text = string.Empty;
 				return;
 			}
 
 			const int maxChars = 280;
-			var description = SelectItem.Description;
+			var description = item.Description;
 			var isEmpty = string.IsNullOrWhiteSpace(description);
-			var text = isEmpty ? "No description provided for this workshop item." : description.Trim();
+			var text = isEmpty ? "No description provided for this item." : description.Trim();
 
 			if (!isEmpty && text.Length > maxChars)
 			{
@@ -766,11 +1146,11 @@ namespace Editor
 			MapManagerConfig.instance.targetScene = m_scenePaths[index];
 		}
 
-		private bool RefreshBuildResult(MapManagerConfig.AttachData attachObj, MapManagerConfig.BuildData buildData)
+		private bool RefreshBuildResult(MapMetaConfig config, MapManagerConfig.BuildData buildData)
 		{
 			m_buildResultBox.Clear();
 
-			if (attachObj == null || attachObj.metaConfig == null)
+			if (config == null)
 			{
 				return true;
 			}
@@ -787,7 +1167,7 @@ namespace Editor
 				{
 					AddBuildResultBox(buildName + " is not build", HelpBoxMessageType.Error);
 				}
-				else if (buildName == nameof(TempData.Meta) && !buildData.lastMeta.Equals(attachObj.metaConfig.mapMetaConfigValue))
+				else if (buildName == nameof(TempData.Meta) && !buildData.lastMeta.Equals(config.mapMetaConfigValue))
 				{
 					AddBuildResultBox($"Is Changed {buildName}! Please build {buildName}.", HelpBoxMessageType.Warning);
 				}
@@ -817,27 +1197,214 @@ namespace Editor
 			m_compressRow.style.display = m_buildFormat != FormatBuild.dro2 ? DisplayStyle.Flex : DisplayStyle.None;
 		}
 
-		private void UpdateDestinationPanels()
+		/// <summary>
+		/// Rebuilds the destination choices for the active vendor, hiding the ones it cannot serve.
+		/// </summary>
+		private void RefreshDestinationOptions()
 		{
-			var destination = (PublishDestination)m_publishDestination;
-			m_steamPanel.style.display = destination == PublishDestination.SteamWorkshop ? DisplayStyle.Flex : DisplayStyle.None;
-			m_localPanel.style.display = destination == PublishDestination.LocalTest ? DisplayStyle.Flex : DisplayStyle.None;
-			m_externalPanel.style.display = destination == PublishDestination.ExternalFolder ? DisplayStyle.Flex : DisplayStyle.None;
+			var supportsLocal = MapBuilder.session.Limits?.SupportsLocalInstall ?? false;
+
+			m_destinationOptions.Clear();
+			m_destinationOptions.Add(PublishDestination.Vendor);
+
+			if (supportsLocal)
+			{
+				m_destinationOptions.Add(PublishDestination.LocalTest);
+			}
+
+			m_destinationOptions.Add(PublishDestination.ExternalFolder);
+
+			// Switching to a vendor without local installs can strip the destination that was selected.
+			if (!m_destinationOptions.Contains(m_publishDestination))
+			{
+				m_publishDestination = PublishDestination.Vendor;
+			}
+
+			var labels = m_destinationOptions.Select(DestinationLabel).ToList();
+
+			if (!m_destinationGroup.choices.SequenceEqual(labels))
+			{
+				m_destinationGroup.choices = labels;
+			}
+
+			m_destinationGroup.SetValueWithoutNotify(m_destinationOptions.IndexOf(m_publishDestination));
 		}
 
-		private void OnConfigFieldChanged(ChangeEvent<UnityEngine.Object> evt)
+		private static string DestinationLabel(PublishDestination destination)
 		{
-			if (!MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj) || attachObj == null)
+			return destination switch
+			{
+				PublishDestination.LocalTest => "Local Test",
+				PublishDestination.ExternalFolder => "External Folder",
+				_ => "Vendor",
+			};
+		}
+
+		private void UpdateDestinationPanels()
+		{
+			m_vendorPanel.style.display = m_publishDestination == PublishDestination.Vendor ? DisplayStyle.Flex : DisplayStyle.None;
+			m_localPanel.style.display = m_publishDestination == PublishDestination.LocalTest ? DisplayStyle.Flex : DisplayStyle.None;
+			m_externalPanel.style.display = m_publishDestination == PublishDestination.ExternalFolder ? DisplayStyle.Flex : DisplayStyle.None;
+		}
+
+		private async void OnVendorChanged(ChangeEvent<string> evt)
+		{
+			var vendor = ModPublisherSession.AvailableVendors
+				.FirstOrDefault(candidate => candidate.DisplayName == evt.newValue);
+
+			if (vendor == null)
 			{
 				return;
 			}
 
-			attachObj.metaConfig = evt.newValue as MapMetaConfig;
+			// Entries belong to the vendor they were fetched from, so nothing from the old list survives the switch.
+			m_fetchResultListItems.Clear();
+			m_selectItemIndex = 0;
+			RefreshItemsList();
 
-			if (attachObj.metaConfig != null && m_attaching.TryGetValue(SelectItem.Id, out var attached) && !attached)
+			await MapBuilder.session.SelectVendorAsync(vendor.VendorId, CancellationToken.None);
+			await FetchItems();
+		}
+
+		/// <summary>
+		/// Fills the game picker from the active vendor. The list is authored per vendor, so it changes completely
+		/// when the vendor does.
+		/// </summary>
+		private void RefreshGamePicker()
+		{
+			var options = MapBuilder.session.Publisher?.GameOptions;
+			var hasOptions = options is { Count: > 0 };
+
+			m_gameField.style.display = hasOptions ? DisplayStyle.Flex : DisplayStyle.None;
+
+			if (!hasOptions)
 			{
-				MapManagerConfig.Attach(SelectItem.Id, attachObj.metaConfig);
-				m_attaching[SelectItem.Id] = true;
+				SetGamePreview(string.Empty);
+				return;
+			}
+
+			// An entry that is missing credentials is still listed, marked, so it can be selected and fixed rather
+			// than silently vanishing from the picker.
+			var labels = options
+				.Select(option => option.IsConfigured ? option.DisplayName : $"{option.DisplayName}  (incomplete)")
+				.ToList();
+
+			if (!m_gameField.choices.SequenceEqual(labels))
+			{
+				m_gameField.choices = labels;
+			}
+
+			var selected = MapBuilder.session.Publisher.SelectedGameIndex;
+
+			if (selected >= 0 && selected < labels.Count)
+			{
+				m_gameField.SetValueWithoutNotify(labels[selected]);
+				m_gameField.tooltip = $"Id {options[selected].Id}";
+				SetGamePreview(options[selected].PreviewUrl);
+			}
+			else
+			{
+				SetGamePreview(string.Empty);
+			}
+		}
+
+		private async void SetGamePreview(string url)
+		{
+			if (m_gamePreviewUrl == url)
+			{
+				return;
+			}
+
+			m_gamePreviewUrl = url;
+
+			if (string.IsNullOrWhiteSpace(url))
+			{
+				m_gamePreview.style.display = DisplayStyle.None;
+				return;
+			}
+
+			await UIUtils.DownloadSprite(url, (_, texture) =>
+			{
+				// The url may have moved on while the download was in flight.
+				if (m_gamePreview == null || m_gamePreviewUrl != url)
+				{
+					return;
+				}
+
+				if (m_gamePreviewTexture != null)
+				{
+					DestroyImmediate(m_gamePreviewTexture);
+				}
+
+				m_gamePreviewTexture = texture;
+				m_gamePreview.image = texture;
+				m_gamePreview.style.display = texture != null ? DisplayStyle.Flex : DisplayStyle.None;
+			});
+		}
+
+		private async void OnGameChanged(ChangeEvent<string> evt)
+		{
+			var index = m_gameField.choices.IndexOf(evt.newValue);
+
+			if (index < 0)
+			{
+				return;
+			}
+
+			// Entries belong to the game they were fetched from, so nothing from the old list survives the switch.
+			m_fetchResultListItems.Clear();
+			m_selectItemIndex = 0;
+			RefreshItemsList();
+
+			var result = await MapBuilder.session.SelectGameAsync(index, CancellationToken.None);
+
+			if (!result.Success)
+			{
+				Debug.LogError(result.Message);
+			}
+			else if (!string.IsNullOrWhiteSpace(result.Message))
+			{
+				Debug.LogWarning(result.Message);
+			}
+
+			Fetch();
+		}
+
+		private async void OnAuthButtonClicked()
+		{
+			var session = MapBuilder.session;
+
+			var result = session.IsAuthenticated
+				? await session.LogoutAsync()
+				: await session.LoginAsync(CancellationToken.None);
+
+			if (!result.Success)
+			{
+				Debug.LogError(result.Message);
+			}
+			else if (!string.IsNullOrWhiteSpace(result.Message))
+			{
+				Debug.Log(result.Message);
+			}
+
+			RefreshVendorBar();
+			await FetchItems();
+		}
+
+		private void OnConfigFieldChanged(ChangeEvent<UnityEngine.Object> evt)
+		{
+			var key = SelectKey;
+
+			// Remembered even with nothing selected: on a vendor account with no items yet there is nothing to
+			// attach to, and this is the config that seeds the first "New Item".
+			m_pendingConfig = evt.newValue as MapMetaConfig;
+
+			if (MapManagerConfig.GetOrAttach(key, out var attachObj) && attachObj != null)
+			{
+				// Attach writes the link through and saves the asset, so the choice survives a domain reload. Doing
+				// it unconditionally also covers clearing the field, which detaches the item.
+				MapManagerConfig.Attach(key, m_pendingConfig);
+				m_attaching[key] = m_pendingConfig != null;
 			}
 
 			RefreshDetailsPanel();
@@ -860,35 +1427,47 @@ namespace Editor
 
 		private void OnDestinationChanged(ChangeEvent<int> evt)
 		{
-			m_publishDestination = evt.newValue;
+			if (evt.newValue < 0 || evt.newValue >= m_destinationOptions.Count)
+			{
+				return;
+			}
+
+			m_publishDestination = m_destinationOptions[evt.newValue];
 			UpdateDestinationPanels();
 			RefreshDetailsPanel();
 		}
 
 		private void OnBuildButtonClicked()
 		{
-			if (IsDownloadAnyIcon() || !MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj) || attachObj == null || attachObj.metaConfig == null)
+			var key = SelectKey;
+
+			MapManagerConfig.TryGetAttach(key, out var attachObj);
+
+			// Builds run off the config, with or without a vendor entry: the entry may not exist yet, and on mod.io
+			// it cannot be created before there is a build to attach to it.
+			var config = attachObj?.metaConfig != null ? attachObj.metaConfig : m_pendingConfig;
+
+			if (IsDownloadAnyIcon() || config == null)
 			{
 				return;
 			}
 
-			var buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
+			var buildData = MapManagerConfig.GetBuildOrEmpty(config);
 
-			m_loads[SelectItem.Id] = true;
+			m_loads[key] = true;
 			m_buildProcess = true;
-			var selectId = (ulong)SelectItem.Id;
-			MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
+			MapManagerConfig.instance.mapMetaConfigValue = config;
 			m_compressBuildCached = m_compressBuild;
 			m_platformBuildCached = m_platformBuild;
 			m_buildFormatCached = m_buildFormat;
 
 			MapBuilder.BuildCustom((TempData)m_buildType,
 				(TempData)buildData.buildSuccess,
-				selectId,
+				key,
 				m_buildFormatCached,
 				m_compressBuildCached,
 				m_platformBuildCached,
-				(path, success) => AddBuild(attachObj.metaConfig, buildData, path, success));
+				(path, success) => AddBuild(config, buildData, path, success));
 		}
 
 		private void AddBuild(MapMetaConfig config,
@@ -896,7 +1475,7 @@ namespace Editor
 			string path,
 			TempData complete)
 		{
-			m_loads[SelectItem.Id] = false;
+			m_loads[SelectKey] = false;
 
 			if (complete == (TempData.Map | TempData.Meta))
 			{
@@ -916,59 +1495,62 @@ namespace Editor
 			RefreshDetailsPanel();
 		}
 
-		private void OnUploadSteamClicked()
+		private void OnUploadVendorClicked()
 		{
-			if (!MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj) || attachObj == null || attachObj.metaConfig == null)
-			{
-				return;
-			}
-
-			var buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
-			var selectedId = SelectItem.Id;
-
-			m_loads[selectedId] = true;
-			MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-			MapBuilder.UploadSteamCommunityItem(buildData, SelectItem, false, id =>
-			{
-				m_loads[id] = false;
-				DownloadSpriteAsync(m_fetchResultListItems.Find(itemFind => itemFind.Id == id));
-			});
+			Upload(localBuild: false);
 		}
 
 		private void OnUploadLocalClicked()
 		{
-			if (!MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj) || attachObj == null || attachObj.metaConfig == null)
+			Upload(localBuild: true);
+		}
+
+		private void Upload(bool localBuild)
+		{
+			var item = SelectItem;
+
+			if (item == null || !MapManagerConfig.GetOrAttach(item.Key, out var attachObj) || attachObj == null || attachObj.metaConfig == null)
 			{
 				return;
 			}
 
 			var buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
-			var selectedId = SelectItem.Id;
 
-			m_loads[selectedId] = true;
+			m_loads[item.Key] = true;
 			MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-			MapBuilder.UploadSteamCommunityItem(buildData, SelectItem, true, id =>
+
+			// Publishing runs without a modal progress bar, so this line is the only in-window sign of activity.
+			SetPublishStatus(localBuild ? "Copying to the local install folder…" : "Uploading… see the Console.");
+
+			MapBuilder.UploadCommunityItem(buildData, item, localBuild, uploadedKey =>
 			{
-				m_loads[id] = false;
-				DownloadSpriteAsync(m_fetchResultListItems.Find(itemFind => itemFind.Id == id));
+				m_loads[item.Key] = false;
+				SetPublishStatus(string.Empty);
+
+				if (uploadedKey.IsValid)
+				{
+					DownloadSpriteAsync(m_fetchResultListItems.Find(candidate => candidate.Key == uploadedKey));
+				}
+
+				RefreshDetailsPanel();
 			});
 		}
 
 		private void OnBrowseExternalClicked()
 		{
-			if (!MapManagerConfig.TryGetAttach(SelectItem.Id, out var attachObj))
+			if (!MapManagerConfig.TryGetAttach(SelectKey, out var attachObj))
 			{
 				return;
 			}
 
-			m_pathToExternal = EditorUtility.SaveFolderPanel("External path", Application.streamingAssetsPath, attachObj.id.ToString());
+			m_pathToExternal = EditorUtility.SaveFolderPanel("External path", Application.streamingAssetsPath, attachObj.key.id);
 			m_externalPathField.SetValueWithoutNotify(m_pathToExternal);
 			m_externalExportButton.SetEnabled(!string.IsNullOrWhiteSpace(m_pathToExternal) && Path.IsPathFullyQualified(m_pathToExternal));
 		}
 
 		private void OnExportExternalClicked()
 		{
-			if (!MapManagerConfig.GetOrAttach(SelectItem.Id, out var attachObj) || attachObj == null || attachObj.metaConfig == null)
+			if (!MapManagerConfig.GetOrAttach(SelectKey, out var attachObj) || attachObj == null || attachObj.metaConfig == null)
 			{
 				return;
 			}
@@ -977,15 +1559,123 @@ namespace Editor
 			MapBuilder.BuildDataTransitionToDirectory(buildData, m_pathToExternal);
 		}
 
-		private void OnNewWorkshopItemClicked()
+		private void OnNewItemClicked()
 		{
-			MapBuilder.CreateNewCommunityFile(result =>
+			// mod.io refuses to create an entry without a name, a summary and a logo, so a config has to be supplied
+			// up front. The field above is the source - it works with nothing selected, which is the only way to
+			// create the very first item on an account. Steam ignores all of it.
+			MapManagerConfig.TryGetAttach(SelectKey, out var attachObj);
+			var config = attachObj?.metaConfig != null ? attachObj.metaConfig : m_pendingConfig;
+
+			MapBuilder.CreateNewCommunityItem(config, newKey => OnItemCreated(config, newKey));
+		}
+
+		private void OnItemCreated(MapMetaConfig config, ModItemKey newKey)
+		{
+			if (config != null && newKey.IsValid)
 			{
-				if (result.Success)
-				{
-					Fetch();
-				}
-			});
+				MapManagerConfig.Attach(newKey, config);
+				m_attaching[newKey] = true;
+				InvalidateMetaBuild(config);
+			}
+
+			Fetch();
+		}
+
+		/// <summary>
+		/// Marks the meta as needing a rebuild after an entry is created.
+		/// </summary>
+		/// <remarks>
+		/// The meta carries the mod id, and the build that was attached during creation was necessarily made before
+		/// the entry existed - so it holds the map config's id as a placeholder. Clearing the flag makes the build
+		/// panel ask for a Meta rebuild through the same warning it already uses when the meta goes stale.
+		/// </remarks>
+		private static void InvalidateMetaBuild(MapMetaConfig config)
+		{
+			var buildData = MapManagerConfig.GetBuildOrEmpty(config);
+
+			if (buildData.config == null || !((TempData)buildData.buildSuccess).HasFlag(TempData.Meta))
+			{
+				return;
+			}
+
+			var withoutMeta = (TempData)buildData.buildSuccess & ~TempData.Meta;
+
+			MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(
+				config,
+				buildData.targetScene,
+				buildData.path,
+				(int)withoutMeta,
+				buildData.lastValid,
+				buildData.format,
+				buildData.platform,
+				buildData.compress));
+
+			Debug.Log("The item was created with the build that existed at the time, whose meta carries a placeholder " +
+			          "id. Rebuild Meta and upload so the mod id in the meta matches the item.");
+		}
+
+		private async void OnDeleteItemClicked()
+		{
+			var selected = SelectItem;
+			var result = await MapBuilder.session.PromptDeleteAsync(
+				selected?.Key ?? default, selected?.Title, CancellationToken.None);
+
+			if (!result.Success)
+			{
+				Debug.LogError(result.Message);
+				return;
+			}
+
+			Debug.Log(result.Message);
+
+			// The local attachment outlives the item it pointed at, so it is dropped before the list is rebuilt.
+			if (selected != null)
+			{
+				MapManagerConfig.Detach(selected.Key);
+			}
+
+			m_selectItemIndex = 0;
+			await FetchItems();
+		}
+
+		/// <summary>
+		/// Explains what the active vendor still needs before "New Item" can work, rather than letting the button
+		/// fail with a message in the console.
+		/// </summary>
+		private void RefreshNewItemHint()
+		{
+			if (m_newItemHint == null)
+			{
+				return;
+			}
+
+			// An item is always created together with its content, on every vendor - so the gate is the same
+			// everywhere: a config to describe it, and a finished build to publish.
+			if (m_pendingConfig == null)
+			{
+				ShowNewItemHint("Assign a Map Meta Config above to create an item.");
+				return;
+			}
+
+			var built = (TempData)MapManagerConfig.GetBuildOrEmpty(m_pendingConfig).buildSuccess;
+			var missing = (TempData.Map | TempData.Meta) & ~built;
+
+			if (missing != 0)
+			{
+				ShowNewItemHint($"Build {missing} first — an item is created together with its files.");
+				return;
+			}
+
+			m_newItemHint.style.display = DisplayStyle.None;
+			m_newItemButton?.SetEnabled(true);
+		}
+
+		private void ShowNewItemHint(string message)
+		{
+			m_newItemHint.text = message;
+			m_newItemHint.style.display = DisplayStyle.Flex;
+			m_newItemButton?.SetEnabled(false);
 		}
 	}
 }

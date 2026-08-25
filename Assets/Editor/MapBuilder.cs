@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Plugins.CarX.Modding.Creator.Editor;
+using Plugins.CarX.Modding.Creator.Editor.Publishing;
 using Plugins.CarX.Modding.Creator.Runtime;
-using Steamworks;
-using Steamworks.Data;
-using Steamworks.Ugc;
-using Unity.EditorCoroutines.Editor;
+using Plugins.CarX.Modding.Creator.Runtime.Publishing;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -24,13 +23,22 @@ namespace Editor
 		private static string assetBuildPathTemporary = assetBuildPathTemporaryOrigin;
 		private const string path = "Assets";
 
+		/// <summary>
+		/// Tagging policy for this game, shared by every vendor. "map_2.0" is what the uploader stamps today, "Map"
+		/// is the tag maps published by earlier versions carry and is only used to keep listing them.
+		/// </summary>
+		public static readonly ModPublisherContext publisherContext = new(
+			new[] { "map_2.0" },
+			new[] { "Map" },
+			ModVisibility.Private);
+
 		private static readonly List<GameMarkerData> m_cacheDataList = new();
 		private static CacheData m_cacheData;
-		public static SteamUGCManager steamUgc;
+		private static ModPublisherSession m_session;
 		private static string m_scenePath;
 		private static string m_titleIconPath;
 		private static string m_assetPath;
-		private static PublishedFileId m_currentFileId;
+		private static ModItemKey m_currentItemKey;
 		private static BuildAssetBundleOptions m_assetBundleOption = BuildAssetBundleOptions.UncompressedAssetBundle;
 		private static BuildTarget m_buildTarget = BuildTarget.StandaloneWindows;
 		private static FormatBuild m_buildFormat;
@@ -40,19 +48,26 @@ namespace Editor
 		private static readonly IModCollectionProvider m_provider = new EditorCollectionProvider();
 		private static ModResults results;
 
-		private static bool PublishCallback(ulong id)
+		/// <summary>The publisher the uploader currently talks to. Created on first use and reused afterwards.</summary>
+		public static ModPublisherSession session => m_session ??= new ModPublisherSession(publisherContext);
+
+		/// <summary>
+		/// Limits of the active vendor, or the conservative defaults baked into the component rules when no vendor
+		/// could be brought up - validation still has to produce sensible numbers in that state.
+		/// </summary>
+		public static ModVendorLimits Limits => session.Limits ?? new ModVendorLimits(
+			ModMapTestTool.ComponentRules.maxSizeInMb,
+			ModMapTestTool.ComponentRules.maxSizeInMbMeta,
+			1f, 128, 8000, 8000,
+			supportsLocalInstall: false, requiresSummary: false, requiresPreviewOnCreate: false,
+			supportsVersion: false);
+
+		/// <summary>Rebuilds the validation target from the component rules plus the active vendor's size caps.</summary>
+		private static void ApplyVendorLimitsToValidation()
 		{
-			EditorUtility.ClearProgressBar();
-			Directory.Delete(assetBuildPath, true);
-
-			if (id == SteamUGCManager.PUBLISH_ITEM_FAILED_CODE)
-			{
-				Debug.LogError("Publish failed");
-				return false;
-			}
-
-			Debug.Log("Export track id: " + id);
-			return true;
+			var limits = Limits;
+			ModMapTestTool.Target = ModMapTestTool.ComponentRules
+				.CloneWithLimits(limits.MaxPayloadSizeInMb, limits.MaxMetaSizeInMb);
 		}
 
 		private static bool IsCurrentSceneCheck()
@@ -68,13 +83,29 @@ namespace Editor
 			return pos == -1 ? path : path.Substring(pos + 1, path.Length - pos - 7);
 		}
 
+		/// <summary>
+		/// Id the current build stamps into its output.
+		/// </summary>
+		/// <remarks>
+		/// Building is a local operation on a map config and must not require a vendor entry to exist - on mod.io an
+		/// entry cannot even be created without a payload to attach, so demanding one here would be a deadlock. Until
+		/// there is an entry the map config's own id stands in, and the meta is rebuilt once the entry exists.
+		/// </remarks>
+		private static string CurrentBuildId => m_currentItemKey.IsValid
+			? m_currentItemKey.id
+			: MapManagerConfig.instance.mapMetaConfigValue.id;
+
 		private static string GetScenePathNoId(string path)
 		{
-			return path.Substring(0, path.Length - 16) + ".unity";
+			// The suffix is the id plus ".unity"; ids are not a fixed width - Steam hands out ten digit numbers,
+			// mod.io five digit ones, and a map config id is a 32 character guid.
+			return path.Substring(0, path.Length - (CurrentBuildId.Length + ".unity".Length)) + ".unity";
 		}
 
 		private static bool CheckMetaAndError()
 		{
+			var limits = Limits;
+
 			if (!GetSceneNameFromPathNoId(m_targetScene).All(char.IsLetter))
 			{
 				Debug.LogError("Target scene only letters");
@@ -93,9 +124,9 @@ namespace Editor
 				return true;
 			}
 
-			if (MapManagerConfig.Value.mapName.Length > 128 && MapManagerConfig.instance.uploadSteamName)
+			if (MapManagerConfig.Value.mapName.Length > limits.MaxTitleLength && MapManagerConfig.instance.uploadName)
 			{
-				Debug.LogError("Length name more 128 symbols");
+				Debug.LogError($"Length name more {limits.MaxTitleLength} symbols");
 				return true;
 			}
 
@@ -111,9 +142,9 @@ namespace Editor
 				return true;
 			}
 
-			if (new FileInfo(m_titleIconPath).Length / ModMapTestTool.BYTES_TO_MEGABYTES > 1f)
+			if (new FileInfo(m_titleIconPath).Length / ModMapTestTool.BYTES_TO_MEGABYTES > limits.MaxPreviewSizeInMb)
 			{
-				Debug.LogError("Icon more 1mb");
+				Debug.LogError($"Icon more {limits.MaxPreviewSizeInMb}mb");
 				return true;
 			}
 
@@ -123,9 +154,10 @@ namespace Editor
 				return true;
 			}
 
-			if (MapManagerConfig.Value.mapDescription.Length > 8000 && MapManagerConfig.instance.uploadSteamDescription)
+			if (MapManagerConfig.Value.mapDescription.Length > limits.MaxDescriptionLength &&
+			    MapManagerConfig.instance.uploadDescription)
 			{
-				Debug.LogError($"Map description must be less than 8000 characters({MapManagerConfig.Value.mapDescription.Length})");
+				Debug.LogError($"Map description must be less than {limits.MaxDescriptionLength} characters({MapManagerConfig.Value.mapDescription.Length})");
 				return true;
 			}
 
@@ -184,23 +216,6 @@ namespace Editor
 			}
 		}
 
-		public static void InitSteamUgc()
-		{
-			try
-			{
-				if (steamUgc == null)
-				{
-					SteamClient.Init(SteamUGCManager.APP_ID, false);
-					steamUgc = new SteamUGCManager();
-					EditorApplication.update += steamUgc.Update;
-				}
-			}
-			catch (Exception e)
-			{
-				Debug.LogWarning(e);
-			}
-		}
-
 		private static bool IsValidate(Scene scene)
 		{
 			var isError = false;
@@ -209,12 +224,6 @@ namespace Editor
 			{
 				Debug.LogError(error);
 				EditorUtility.ClearProgressBar();
-				if (m_currentFileId != 0)
-				{
-					SteamUGC.DeleteFileAsync(m_currentFileId);
-					m_currentFileId = 0;
-				}
-
 				isError = true;
 			};
 
@@ -318,7 +327,7 @@ namespace Editor
 			m_cacheDataList.Clear();
 			m_cacheData = new GameObject("CacheData", typeof(CacheData)).GetComponent<CacheData>();
 
-			ModMapTestTool.Target = (ValidItemData)ModMapTestTool.Steam.Clone();
+			ApplyVendorLimitsToValidation();
 
 			if (IsValidate(scene))
 			{
@@ -376,11 +385,11 @@ namespace Editor
 			return pathDir;
 		}
 
-		private static void RenameCacheScene(PublishedFileId publishResult)
+		private static void RenameCacheScene()
 		{
 			var sceneName = GetSceneNameFromPathNoId(m_targetScene);
-			var scenePathNew = path + "/" + sceneName + publishResult.Value + ".unity";
-			AssetDatabase.RenameAsset(m_scenePath, sceneName + publishResult.Value);
+			var scenePathNew = path + "/" + sceneName + CurrentBuildId + ".unity";
+			AssetDatabase.RenameAsset(m_scenePath, sceneName + CurrentBuildId);
 			m_scenePath = scenePathNew;
 		}
 
@@ -423,7 +432,7 @@ namespace Editor
 					results ??= new ModResults(m_provider);
 					var modHierarchy = new ModMeta
 					{
-						Id = m_currentFileId.Value.ToString(),
+						Id = CurrentBuildId,
 						name = metaValue.mapName,
 						description = metaValue.mapDescription,
 						madeIn = $"Mod Map Uploader {ModdingVersion.GetFullVersion()}",
@@ -517,7 +526,7 @@ namespace Editor
 		public static async void BuildCustom(
 			TempData target,
 			TempData success,
-			PublishedFileId published,
+			ModItemKey itemKey,
 			FormatBuild formatBuild,
 			CompressBuild compressBuild,
 			PlatformBuild platformBuild,
@@ -543,7 +552,7 @@ namespace Editor
 				}
 
 				m_buildFormat = formatBuild;
-				m_currentFileId = published;
+				m_currentItemKey = itemKey;
 
 				SelectCache();
 
@@ -567,7 +576,7 @@ namespace Editor
 						{
 							if (!ValidateSceneAndMirror())
 							{
-								RenameCacheScene(published);
+								RenameCacheScene();
 								CreateMapBundle(m_buildFormat);
 								success |= TempData.Map;
 							}
@@ -608,54 +617,270 @@ namespace Editor
 			}
 		}
 
-		public static void CreateNewCommunityFile(Action<PublishResult> callback)
+		/// <summary>
+		/// Registers a new entry on the active vendor and publishes the finished build to it in one step.
+		/// A complete build is required: see <see cref="StageBuildForCreate"/> for why that holds for every vendor.
+		/// </summary>
+		public static async void CreateNewCommunityItem(MapMetaConfig config, Action<ModItemKey> callback)
 		{
-			EditorUtility.DisplayProgressBar("Creating Community File...", string.Empty, 1f);
-			EditorCoroutineUtility.StartCoroutine(steamUgc.CreatePublisherItem(result =>
+			// No modal progress bar here either - see the note in UploadCommunityItem.
+			Debug.Log($"Creating a new item on {session.Publisher?.DisplayName ?? "the vendor"}...");
+
+			try
 			{
-				callback?.Invoke(result);
+				var ready = await session.EnsureInitializedAsync(CancellationToken.None);
+				if (!ready.Success)
+				{
+					Debug.LogError(ready.Message);
+					return;
+				}
+
+				// Staged first: without content there is nothing to create, and the vendor must not be touched.
+				var contentDirectory = StageBuildForCreate(config);
+				if (string.IsNullOrEmpty(contentDirectory))
+				{
+					return;
+				}
+
+				var meta = config.mapMetaConfigValue;
+				var previewPath = meta.icon != null
+					? Application.dataPath.Substring(0, Application.dataPath.Length - 6) +
+					  AssetDatabase.GetAssetPath(meta.icon)
+					: string.Empty;
+
+				if (IsBuildTooLarge())
+				{
+					return;
+				}
+
+				var notes = MapManagerConfig.GetPublishData(config);
+
+				var request = new ModCreateRequest(
+					meta.mapName,
+					BuildSummary(meta),
+					previewPath,
+					contentDirectory,
+					ResolveVersion(notes),
+					notes?.changelog,
+					publisherContext.DefaultVisibility,
+					publisherContext.ContentTags);
+
+				var result = await session.Publisher.CreateItemAsync(request, CancellationToken.None);
+
+				if (!result.Success)
+				{
+					Debug.LogError(result.Message);
+					return;
+				}
+
+				if (!string.IsNullOrWhiteSpace(result.Message))
+				{
+					Debug.LogWarning(result.Message);
+				}
+
+				Debug.Log($"Created community item {result.Value}");
+				callback?.Invoke(result.Value);
+			}
+			catch (Exception exception)
+			{
+				Debug.LogError($"Could not create the community item: {exception.Message}");
+			}
+			finally
+			{
 				EditorUtility.ClearProgressBar();
-			}), steamUgc);
+
+				if (Directory.Exists(assetBuildPath))
+				{
+					Directory.Delete(assetBuildPath, true);
+				}
+			}
 		}
 
-		public static void UploadSteamCommunityItem(
+		/// <summary>
+		/// Stages the finished build of <paramref name="config"/> so it can be published together with the new entry.
+		/// Returns an empty path, having explained why, when there is nothing complete to stage.
+		/// </summary>
+		/// <remarks>
+		/// A finished build is a precondition for creating an entry on every vendor. Creating an empty entry first
+		/// and filling it in later leaves a half made item behind whenever the second step does not happen, and on
+		/// mod.io it is worse than untidy: a mod with no file cannot be read back by the plugin at all.
+		/// </remarks>
+		private static string StageBuildForCreate(MapMetaConfig config)
+		{
+			if (config == null)
+			{
+				Debug.LogError("Assign a Map Meta Config before creating an item.");
+				return string.Empty;
+			}
+
+			var buildData = MapManagerConfig.GetBuildOrEmpty(config);
+			var built = (TempData)buildData.buildSuccess;
+			var missing = (TempData.Map | TempData.Meta) & ~built;
+
+			if (missing != 0)
+			{
+				Debug.LogError(
+					$"'{config.name}' is not fully built ({missing} missing), so there is nothing to publish. " +
+					"Build Map and Meta first, then create the item.");
+				return string.Empty;
+			}
+
+			MapManagerConfig.instance.mapMetaConfigValue = config;
+			InitPathUpload(buildData);
+			SelectCache();
+			BuildDataTransition();
+
+			return assetBuildPath;
+		}
+
+		/// <summary>
+		/// Pushes a finished build to the active vendor, or copies it into the vendor's local install folder when
+		/// <paramref name="localBuild"/> is set and the vendor supports local installs.
+		/// </summary>
+		public static async void UploadCommunityItem(
 			MapManagerConfig.BuildData buildData,
-			Item published,
+			ModItem published,
 			bool localBuild,
-			Action<PublishedFileId> callback)
+			Action<ModItemKey> callback)
 		{
 			InitPathUpload(buildData);
-			ModMapTestTool.Target = (ValidItemData)ModMapTestTool.Steam.Clone();
-
+			ApplyVendorLimitsToValidation();
 			SelectCache();
 
 			if (localBuild)
 			{
-				BuildDataTransitionLocal(published.Directory);
-				Debug.Log($"Move build to folder successful ({published.Directory})");
-			}
-			else
-			{
-				EditorUtility.DisplayProgressBar("Uploading Community File...", string.Empty, 1f);
-				ClearDirectory(assetBuildPath);
-				BuildDataTransition();
-
-				if (IsSizeValid())
+				if (string.IsNullOrWhiteSpace(published.LocalInstallDirectory))
 				{
-					EditorUtility.ClearProgressBar();
+					Debug.LogError(
+						"Could not work out where the game is installed, so there is nowhere to put a local test " +
+						"copy. Check the Steam app id on SteamWorkshopConfig and that the game is installed.");
 					return;
 				}
 
-				steamUgc.SetItemData(MapManagerConfig.Value.mapName, m_titleIconPath, MapManagerConfig.Value.mapDescription);
-				EditorCoroutineUtility.StartCoroutine(steamUgc.UploadItemCoroutine(assetBuildPath, published.Id,
-					publish =>
-					{
-						if (!PublishCallback(publish)) return false;
-
-						callback?.Invoke(publish);
-						return true;
-					}), steamUgc);
+				BuildDataTransitionLocal(published.LocalInstallDirectory);
+				Debug.Log($"Local test copy written to {published.LocalInstallDirectory}");
+				callback?.Invoke(published.Key);
+				return;
 			}
+
+			// Deliberately no EditorUtility.DisplayProgressBar around this. A modal progress bar held across async
+			// work stalls the editor's task pump: everything up to the first real suspension runs, and the
+			// continuation never comes back - leaving a bar that cannot be dismissed and an upload that never starts.
+			// Progress is reported through the log and the row spinner instead.
+			Debug.Log($"Uploading '{published.Title}'...");
+
+			var uploadedKey = default(ModItemKey);
+
+			try
+			{
+				var ready = await session.EnsureInitializedAsync(CancellationToken.None);
+				if (!ready.Success)
+				{
+					Debug.LogError(ready.Message);
+					return;
+				}
+
+				if (IsBuildTooLarge())
+				{
+					return;
+				}
+
+				ClearDirectory(assetBuildPath);
+				BuildDataTransition();
+
+				var meta = MapManagerConfig.Value;
+				var notes = MapManagerConfig.GetPublishData(MapManagerConfig.instance.mapMetaConfigValue);
+				var fields = ModUploadFields.None;
+
+				if (MapManagerConfig.instance.uploadName)
+				{
+					fields |= ModUploadFields.Title;
+				}
+
+				if (MapManagerConfig.instance.uploadDescription)
+				{
+					fields |= ModUploadFields.Description;
+				}
+
+				if (MapManagerConfig.instance.uploadPreview)
+				{
+					fields |= ModUploadFields.Preview;
+				}
+
+				var request = new ModUploadRequest(
+					published.Key,
+					assetBuildPath,
+					meta.mapName,
+					BuildSummary(meta),
+					meta.mapDescription,
+					m_titleIconPath,
+					publisherContext.ContentTags,
+					// Unknown: an update must not touch the visibility the author set on the mod page.
+					ModVisibility.Unknown,
+					fields,
+					ResolveVersion(notes),
+					notes?.changelog);
+
+				var result = await session.Publisher.UploadItemAsync(request, null, CancellationToken.None);
+
+				if (!result.Success)
+				{
+					Debug.LogError(result.Message);
+					return;
+				}
+
+				Debug.Log(result.Message);
+				uploadedKey = published.Key;
+			}
+			catch (Exception exception)
+			{
+				Debug.LogError($"Could not upload the community item: {exception.Message}");
+			}
+			finally
+			{
+				// Fires on failure too, with an invalid key, so the caller can always drop its "busy" state -
+				// otherwise a failed upload would leave the window spinning forever.
+				callback?.Invoke(uploadedKey);
+
+				EditorUtility.ClearProgressBar();
+
+				if (Directory.Exists(assetBuildPath))
+				{
+					Directory.Delete(assetBuildPath, true);
+				}
+			}
+		}
+
+		/// <summary>
+		/// The author's version label, falling back to the uploader's own version when they left it empty - a file
+		/// with no version at all reads as a mistake on the mod page.
+		/// Vendors without a version field ignore this; see <see cref="ModVendorLimits.SupportsVersion"/>.
+		/// </summary>
+		private static string ResolveVersion(MapManagerConfig.PublishData notes)
+		{
+			if (!Limits.SupportsVersion)
+			{
+				return string.Empty;
+			}
+
+			return string.IsNullOrWhiteSpace(notes?.version) ? ModdingVersion.GetFullVersion() : notes.version.Trim();
+		}
+
+		/// <summary>
+		/// Short one line description for vendors that keep a summary separate from the long description.
+		/// The map config has no dedicated summary field, so the first line of the description stands in for it.
+		/// </summary>
+		private static string BuildSummary(MapMetaConfigValue meta)
+		{
+			var description = meta.mapDescription;
+
+			if (string.IsNullOrWhiteSpace(description))
+			{
+				return string.IsNullOrWhiteSpace(meta.mapName) ? string.Empty : $"{meta.mapName} track.";
+			}
+
+			var firstBreak = description.IndexOfAny(new[] { '\r', '\n' });
+			return (firstBreak == -1 ? description : description.Substring(0, firstBreak)).Trim();
 		}
 
 		private static void BuildDataTransition()
@@ -668,6 +893,10 @@ namespace Editor
 
 		private static void BuildDataTransitionLocal(string directory)
 		{
+			// The game's mods folder may not exist yet, and neither may the mod's own folder inside it - this is the
+			// first thing that ever writes there, unlike the old workshop cache which Steam had already created.
+			Directory.CreateDirectory(directory);
+
 			ClearDirectory(directory, false);
 			CopyTemporary(GetTemporary(TempData.Map), directory);
 			CopyTemporary(GetTemporary(TempData.Meta), directory);
@@ -677,7 +906,7 @@ namespace Editor
 		public static void BuildDataTransitionToDirectory(MapManagerConfig.BuildData buildData, string directory)
 		{
 			InitPathUpload(buildData);
-			ModMapTestTool.Target = (ValidItemData)ModMapTestTool.Steam.Clone();
+			ApplyVendorLimitsToValidation();
 			SelectCache();
 
 			CopyTemporary(GetTemporary(TempData.Map), directory);
@@ -700,19 +929,58 @@ namespace Editor
 			}
 		}
 
-		private static bool IsSizeValid()
+		/// <summary>
+		/// Whether the staged build exceeds the size the active vendor accepts.
+		/// The two staging folders are measured rather than individual files: dro1 writes asset bundles while dro2
+		/// writes a whole catalog of loose files, and the folders are the one thing both formats have in common.
+		/// </summary>
+		private static bool IsBuildTooLarge()
 		{
-			var sceneName = GetSceneNameFromPathNoId(m_uploadScene);
-			var notMapSize = ModMapTestTool.IsNotCorrectMapFileSize(sceneName + ".bundle", assetBuildPath + "/" + sceneName + ".bundle");
-			var notMetaSize = ModMapTestTool.IsNotCorrectMetaFileSize(assetBuildPath + "/" + nameof(TempData.Meta).ToLower());
+			var limits = Limits;
 
-			if (!notMapSize && !notMetaSize)
+			var mapSizeInMb = GetDirectorySizeInMb(GetTemporary(TempData.Map));
+			var metaSizeInMb = GetDirectorySizeInMb(GetTemporary(TempData.Meta));
+
+			var tooLarge = false;
+
+			if (mapSizeInMb > limits.MaxPayloadSizeInMb)
 			{
-				return false;
+				ModMapTestTool.TryErrorMessage(m_uploadScene,
+					$"Map size is {mapSizeInMb:F2}/{limits.MaxPayloadSizeInMb} mb");
+				tooLarge = true;
 			}
 
-			Directory.Delete(assetBuildPath, true);
-			return true;
+			if (metaSizeInMb > limits.MaxMetaSizeInMb)
+			{
+				ModMapTestTool.TryErrorMessage(m_uploadScene,
+					$"Meta size is {metaSizeInMb:F2}/{limits.MaxMetaSizeInMb} mb");
+				tooLarge = true;
+			}
+
+			return tooLarge;
+		}
+
+		private static float GetDirectorySizeInMb(string directory)
+		{
+			if (!Directory.Exists(directory))
+			{
+				return 0f;
+			}
+
+			var totalBytes = 0L;
+
+			foreach (var file in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories))
+			{
+				// Manifests are stripped before upload, so counting them would fail builds that actually fit.
+				if (file.EndsWith(".manifest", StringComparison.OrdinalIgnoreCase))
+				{
+					continue;
+				}
+
+				totalBytes += new FileInfo(file).Length;
+			}
+
+			return totalBytes / ModMapTestTool.BYTES_TO_MEGABYTES;
 		}
 
 		private static AssetBundleBuild[] CreateBundleArrayDataForOneElement(string bundleName, string path)

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53997915430b6ed428746bf3e7508c47, type: 3}
+  m_Name: SteamWorkshopConfig
+  m_EditorClassIdentifier: 
+  m_games:
+  - displayName: CarX Drift Racing Online
+    appId: 635260
+  - displayName: CarX Drift Racing Online 2
+    appId: 1826420
+  m_selectedGame: 1
+  m_appId: 0
+  m_localModsFolder: Mods
+  m_maxPayloadSizeInMb: 4096
+  m_maxMetaSizeInMb: 24
+  m_maxPreviewSizeInMb: 1
+  m_maxTitleLength: 128
+  m_maxDescriptionLength: 8000

@@ -41,6 +41,16 @@ public struct ValidItemData : ICloneable
 	{
 		return new ValidItemData(maxSizeInMb, maxSizeInMbMeta, (ValidItem[])data?.ToArray().Clone());
 	}
+
+	/// <summary>
+	/// Copy of these rules with the size caps replaced by the ones the active mod vendor enforces.
+	/// The component whitelist is a property of the game and the same everywhere, while the payload limits differ
+	/// per vendor, so only the latter are substituted.
+	/// </summary>
+	public ValidItemData CloneWithLimits(float payloadSizeInMb, float metaSizeInMb)
+	{
+		return new ValidItemData(payloadSizeInMb, metaSizeInMb, (ValidItem[])data?.ToArray().Clone());
+	}
 }
 
 public interface IValidComponentProcess

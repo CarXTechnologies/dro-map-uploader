@@ -1,0 +1,22 @@
+{
+    "name": "Modio.Unity.UI.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:28e6807516f0602459ad53684d5c9f84",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:6546d7765b4165b40850b3667f981c26",
+        "GUID:5d9bc446664d1d743aa865adef69322b",
+        "GUID:37fcad29cfa572740a5ce73465e06ce3"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

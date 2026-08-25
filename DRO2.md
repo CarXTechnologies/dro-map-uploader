@@ -68,8 +68,11 @@ The marker also carries the friction and bump parameters of the selected surface
 ## Publishing
 
 - **External Folder** — copies the build to any folder on disk. Useful for inspecting the catalog or for manual distribution.
+- **Vendor** — uploads the catalog to the selected mod vendor. The uploader no longer measures a single asset bundle
+  file, so a dro2 catalog is validated and uploaded like any other build. See **[PUBLISHING.md](PUBLISHING.md)**.
 
-> Note! For now a dro2 mod can only be launched from a local folder — Steam Workshop publishing is not available for this format yet.
+> Note! Whether the shipped game reads a dro2 mod delivered through a vendor depends on the game build you are testing
+> against. Loading from a local folder is the path that is known to work:
 > Export the build into `Mods/<ModName>/` so that the catalog files lie directly inside that folder:
 >
 > ```

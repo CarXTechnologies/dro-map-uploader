@@ -1,0 +1,145 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+using JsonConvert = Newtonsoft.Json.JsonConvert;   
+
+[assembly: InternalsVisibleTo("Modio.UnityClient")]
+
+namespace Modio.API
+{
+    public class ModioAPIRequestOptions : IDisposable
+    {
+        internal Dictionary<string, string> QueryParameters { get; } = new Dictionary<string, string>();
+        internal Dictionary<string, string> HeaderParameters { get; } = new Dictionary<string, string>();
+        internal bool RequiresAuthentication { get; private set; }
+
+        internal Dictionary<string, string> FormParameters { get; } = new Dictionary<string, string>();
+
+        internal Dictionary<string, ModioAPIFileParameter> FileParameters { get; } =
+            new Dictionary<string, ModioAPIFileParameter>();
+
+        public byte[] BodyDataBytes { get; private set; }
+        
+        ModioAPIRequestContentType _contentType;
+
+        internal void SetContentType(ModioAPIRequestContentType contentType)
+        {
+            _contentType = contentType;
+        }
+
+        public void Dispose()
+        {
+            RequiresAuthentication = false;
+            HeaderParameters.Clear();
+            QueryParameters.Clear();
+            FormParameters.Clear();
+            FileParameters.Clear();
+        }
+
+        internal void AddQueryParameter(string key, object value)
+        {
+            if (value != null) QueryParameters.Add(key, ParameterToString(value));
+        }
+
+        internal void AddHeaderParameter(string key, object value)
+        {
+            if (value != null) HeaderParameters.Add(key, ParameterToString(value));
+        }
+
+        internal void AddFilterParameters(SearchFilter filter)
+        {
+            if (filter == null) return;
+
+            AddQueryParameter("_offset", filter.PageIndex * filter.PageSize);
+            AddQueryParameter("_limit", filter.PageSize);
+
+            foreach (KeyValuePair<string, object> parameter in filter.Parameters)
+                AddQueryParameter(parameter.Key, parameter.Value);
+        }
+
+        public void RequireAuthentication() => RequiresAuthentication = true;
+
+        static string ParameterToString(object value)
+        {
+            switch (value)
+            {
+                case null:
+                    return string.Empty;
+                
+                case IEnumerable<string> e:
+                    return string.Join(",", e);
+                
+                case ICollection collection:
+                {
+                    var stringBuilder = new StringBuilder();
+
+                    var index = 0;
+
+                    foreach (object o in collection)
+                    {
+                        if (index++ > 0) stringBuilder.Append(",");
+                        stringBuilder.Append(o);
+                    }
+
+                    return stringBuilder.ToString();
+                }
+                
+                case bool:
+                    return $"{value}".ToLowerInvariant();
+                
+                default:
+                    return $"{value}";
+            }
+        }
+
+        public void AddBody(byte[] data)
+        {
+            BodyDataBytes = data;
+        }
+
+        public void AddBody(IApiRequest request)
+        {
+            foreach (KeyValuePair<string, object> bodyParam in request.GetBodyParameters())
+            {
+                if (bodyParam.Value is ModioAPIFileParameter file)
+                    FileParameters.Add(bodyParam.Key, file);
+                else if (bodyParam.Value != null)
+                {
+                    if (_contentType is ModioAPIRequestContentType.MultipartFormData 
+                                        or ModioAPIRequestContentType.FormUrlEncoded
+                        && bodyParam.Value is IEnumerable enumerable and not string)
+                    {
+                        var index = 0;
+                        foreach (object o in enumerable)
+                            FormParameters.Add($"{bodyParam.Key}[{index++}]", o.ToString());
+                        if(index == 0)
+                            FormParameters.Add($"{bodyParam.Key}[]", string.Empty);
+
+                        continue;
+                    }
+                    
+                    FormParameters.Add(bodyParam.Key, ParameterToString(bodyParam.Value));
+                }
+            }
+        }
+
+        public void AddBody(IApiRequest request, string hint)
+        {
+            switch (hint)
+            {
+                case "application/json":
+                    var nonNull = request.GetBodyParameters().Where(param => param.Value != null);
+                    string body = JsonConvert.SerializeObject(nonNull);
+                    AddBody(Encoding.UTF8.GetBytes(body));
+                    break;
+
+                default:
+                    AddBody(request);
+                    break;
+            }
+        }
+    }
+}

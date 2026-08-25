@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26dd890b19775834fa03bf7dc583cc86, type: 3}
+  m_Name: ModIoConfig
+  m_EditorClassIdentifier: 
+  m_games:
+  - displayName: CarX Drift Racing Online 2
+    gameId: 14124
+    apiKey: 00f0a56222dd19f4308ad5bdfeb65bf0
+    serverUrl: https://g-14124.modapi.io/v1
+    profileUrl: https://mod.io/g/carx-dro2
+  m_selectedGame: 0
+  m_defaultLanguage: en
+  m_applyContentTags: 0
+  m_logLevel: 2
+  m_maxPayloadSizeInMb: 4096
+  m_maxMetaSizeInMb: 24
+  m_maxPreviewSizeInMb: 8
+  m_maxTitleLength: 50
+  m_maxSummaryLength: 250
+  m_maxDescriptionLength: 50000
+  m_profileUrl: https://mod.io/g/carx-dro2
+  m_gameId: 14124
+  m_apiKey: 00f0a56222dd19f4308ad5bdfeb65bf0
+  m_serverUrl: https://g-14124.modapi.io/v1

@@ -24,7 +24,12 @@ namespace Editor
 
 		public static ValidItemData Target = default;
 
-		public static readonly ValidItemData Steam = new(4096, 24f,
+		/// <summary>
+		/// Component budget every map has to fit into, regardless of where it is published.
+		/// The two size numbers are only defaults; the uploader replaces them with the limits of the active vendor
+		/// through <see cref="ValidItemData.CloneWithLimits"/> before validating a build.
+		/// </summary>
+		public static readonly ValidItemData ComponentRules = new(4096, 24f,
 			new ValidItem(nameof(Transform), 1, 20000),
 			//Physics
 			new ValidItem(nameof(MeshCollider), 1, 10000),

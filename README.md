@@ -1,6 +1,9 @@
-# 🗺 Uploading tracks to the Workshop
+# 🗺 Uploading tracks
 
-Step-by-step guide to preparing a track in the Unity project and publishing it to the Steam Workshop.
+Step-by-step guide to preparing a track in the Unity project and publishing it.
+
+Tracks can be published to the **Steam Workshop** or to **mod.io**; the vendor is picked at the top of the MapBuilder
+window. Setting up the vendors — SDKs, credentials, sign in — is covered in **[PUBLISHING.md](PUBLISHING.md)**.
 
 - [Preparing the track upload project](#preparing-the-track-upload-project)
 - [Importing the 3D model into the project](#importing-the-3d-model-into-the-project)
@@ -161,7 +164,6 @@ The minimap is optional. Create an empty object in the scene (as described above
 
 | Setting | Description |
 | --- | --- |
-| **Platform** | Steam only. |
 | **Target Scene** | The scene used to build the map bundle (the scene must be in Build Settings). |
 | **Format** | The mod packaging format: **dro1** or **dro2** — see [Mod format: dro1 vs dro2](#mod-format-dro1-vs-dro2). |
 | **Compression** | Shown and used for **dro1** builds only. |
@@ -181,11 +183,13 @@ The minimap is optional. Create an empty object in the scene (as described above
 
 | Setting | Description |
 | --- | --- |
-| **Upload Steam Description** | If enabled, the description on the Workshop page is updated. |
-| **Upload Steam Name** | If enabled, the map name on the Workshop page is updated. |
-| **Upload Steam Preview** | If enabled, the map icon on the Workshop page is updated. |
-| **Local Build** *(test only)* | If enabled, replaces the current build in Steam locally only (may not always work correctly). |
-| **Upload To …** | Uploads to the current Workshop item if all Build Targets for the selected config succeeded. |
+| **Vendor** *(top bar)* | Where the map is published — Steam Workshop or mod.io. See [PUBLISHING.md](PUBLISHING.md). |
+| **Upload Description** | If enabled, the description on the mod page is updated. |
+| **Upload Name** | If enabled, the map name on the mod page is updated. |
+| **Upload Preview** | If enabled, the map icon on the mod page is updated. |
+| **Destination → Vendor** | Uploads to the current item if all Build Targets for the selected config succeeded. |
+| **Destination → Local Test** | Replaces the build in the vendor's local install folder only. Steam only. |
+| **Destination → External Folder** | Copies the build to any folder on disk. |
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/21.png?raw=true" alt="Upload settings" style="width:400px;"/>
 
@@ -202,17 +206,25 @@ The minimap is optional. Create an empty object in the scene (as described above
 ## Requirements
 
 - Avoid using multiple Directional Light sources.
-- Keep the Steam preview under 1 MB.
-- Keep the Steam description within 8000 characters.
-- Keep the map name within 128 characters.
 - Keep the map size under 4 GB.
 - Keep the meta size under 24 MB (including preview, icon, description and title).
 - Be mindful of the component limitations.
+
+The remaining limits depend on the vendor you publish to, and the uploader validates against whichever one is
+selected:
+
+| Limit | Steam Workshop | mod.io |
+| --- | --- | --- |
+| Preview / logo | 1 MB | 8 MB |
+| Map name | 128 characters | 50 characters |
+| Description | 8000 characters | 50000 characters |
+| Summary | not used | required, 250 characters |
+
 - A non-convex MeshCollider with a non-kinematic Rigidbody is no longer supported.
 
 If the map is configured incorrectly, an error is shown during upload — the listed causes have to be fixed on your side.
 
-Once these steps are complete, the map is published to the **Steam Workshop**. The visibility of a freshly uploaded map is **Private**, so you can test it in the game while it stays visible only to you — open **Workshop → Track Workshop** in the game. You can switch the visibility to **Public** on the map page in the Workshop.
+Once these steps are complete, the map is published to the vendor you selected. A freshly uploaded map is **private / hidden** on both vendors, so you can test it while it stays visible only to you — on Steam, open **Workshop → Track Workshop** in the game. You can switch it to public on the map page on the vendor site.
 
 > [!WARNING]
-> The **Friends Only** visibility option currently has issues caused by the external library used for Steam API integration. We plan to fix this in an upcoming release.
+> On Steam, the **Friends Only** visibility option currently has issues caused by the external library used for Steam API integration. We plan to fix this in an upcoming release.

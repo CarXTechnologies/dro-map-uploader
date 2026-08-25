@@ -1,15 +1,13 @@
+/* MapBuilder window.
+
+   Colours are kept relative to the editor skin (translucent white / black overlays) rather than hardcoded greys, so
+   the window keeps working if the user switches between the dark and light editor themes. */
+
 .mb-root {
     flex-grow: 1;
 }
 
-.mb-no-steam {
-    margin: 24px;
-}
-
-.mb-main-layout {
-    flex-grow: 1;
-    flex-direction: row;
-}
+/* --- Shared --- */
 
 .mb-row {
     flex-direction: row;
@@ -20,20 +18,6 @@
     flex-grow: 1;
 }
 
-.mb-external-path-field {
-    min-width: 0;
-    max-width: 90%;
-    overflow: hidden;
-}
-
-.mb-external-path-field .unity-text-input {
-    min-width: 0;
-    max-width: 90%;
-    overflow: hidden;
-    white-space: nowrap;
-    -unity-text-overflow-position: end;
-}
-
 .mb-field {
     margin-bottom: 4px;
     white-space: nowrap;
@@ -41,27 +25,72 @@
     text-overflow: ellipsis;
 }
 
+/* The changelog box is sized in MapBuilderEditorWindow.StretchToMultiline instead. A rule cannot do it from here:
+   the inner input of a TextField is identified by the *name* "unity-text-input", not by a class of that name, so a
+   ".mb-changelog-field .unity-text-input" selector matches nothing at all. */
+
 .mb-section-header {
     -unity-font-style: bold;
-    font-size: 13px;
-    color: rgb(217, 217, 217);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
     margin-bottom: 6px;
 }
 
 .mb-box {
-    background-color: rgba(255, 255, 255, 0.07);
+    background-color: rgba(255, 255, 255, 0.05);
     border-radius: 4px;
-    border-width: 1px;
-    border-top-color: rgba(255, 255, 255, 0.35);
-    padding: 8px;
+    /* Only the top edge is drawn, as a highlight. Setting a width on all four sides while colouring one of them
+       leaves the other three at the default colour, which reads as a broken frame. */
+    border-top-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.12);
+    padding: 10px;
     margin-bottom: 10px;
+}
+
+.mb-muted {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* --- Vendor bar --- */
+
+.mb-vendor-bar {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 8px;
+    background-color: rgba(0, 0, 0, 0.18);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.4);
+}
+
+.mb-game-preview {
+    width: 60px;
+    height: 28px;
+    margin: 0 8px;
+    border-radius: 2px;
+}
+
+.mb-auth-state {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-right: 8px;
+}
+
+.mb-unavailable {
+    margin: 24px;
 }
 
 /* --- Left panel / preview / build & publish --- */
 
+.mb-main-layout {
+    flex-grow: 1;
+    flex-direction: row;
+}
+
 .mb-left-panel {
     width: 380px;
     min-width: 340px;
+    padding: 10px;
     border-right-width: 1px;
     border-right-color: rgba(0, 0, 0, 0.35);
     position: relative;
@@ -69,12 +98,13 @@
 
 .mb-preview-box {
     height: 200px;
-    background-color: rgb(35, 35, 35);
+    background-color: rgba(0, 0, 0, 0.35);
     border-radius: 4px;
     margin-bottom: 10px;
     align-items: center;
     justify-content: center;
     position: relative;
+    overflow: hidden;
 }
 
 .mb-preview-image {
@@ -89,19 +119,13 @@
 
 .mb-id-badge {
     position: absolute;
-    top: 4px;
-    left: 4px;
+    top: 6px;
+    left: 6px;
     flex-direction: row;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.55);
+    background-color: rgba(0, 0, 0, 0.6);
     border-radius: 3px;
     padding: 2px 6px;
-}
-
-.mb-id-badge-icon {
-    width: 14px;
-    height: 14px;
-    margin-right: 4px;
 }
 
 .mb-id-badge-label {
@@ -112,7 +136,7 @@
 .mb-description-box {
     background-color: rgba(0, 0, 0, 0.12);
     border-radius: 4px;
-    padding: 6px 8px;
+    padding: 8px;
     margin-bottom: 10px;
     min-height: 56px;
 }
@@ -120,11 +144,11 @@
 .mb-description-text {
     white-space: normal;
     font-size: 11px;
-    color: rgba(204, 204, 204, 1);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .mb-description-text-empty {
-    color: rgba(190, 190, 190, 0.75);
+    color: rgba(255, 255, 255, 0.45);
     -unity-font-style: italic;
 }
 
@@ -143,16 +167,30 @@
 
 .mb-destination-group {
     margin-bottom: 8px;
-    border-color: green;
+}
+
+.mb-publish-status {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    -unity-font-style: italic;
+    margin-bottom: 6px;
 }
 
 .mb-publish-button {
     width: 100%;
     max-width: 100%;
+    height: 26px;
+    margin-top: 4px;
     flex-grow: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.mb-external-path-field {
+    min-width: 0;
+    max-width: 90%;
+    overflow: hidden;
 }
 
 .mb-icon-button {
@@ -162,15 +200,7 @@
     padding: 0;
 }
 
-.mb-version-label {
-    position: absolute;
-    top: 4px;
-    right: 8px;
-    z-index: 10;
-    pointer-events: none;
-}
-
-/* --- Right panel / workshop items list --- */
+/* --- Right panel / item list --- */
 
 .mb-right-panel {
     flex-grow: 1;
@@ -186,31 +216,39 @@
     flex-grow: 1;
 }
 
+.mb-empty-hint {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    -unity-font-style: italic;
+    white-space: normal;
+    margin: 12px 4px;
+}
+
 .mb-item-row {
     flex-direction: row;
     align-items: center;
     height: 58px;
-    padding: 0.5px;
+    padding: 4px 6px;
     margin-bottom: 6px;
-    border-radius: 2px;
-    background-color: rgba(255, 255, 255, 0.02);
-    border-width: 1px;
-    border-color: rgba(0, 0, 0, 0.25);
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.03);
+    /* A transparent accent is reserved on every row so that selecting one does not shift its contents sideways. */
+    border-left-width: 3px;
+    border-left-color: rgba(0, 0, 0, 0);
     position: relative;
 }
 
 .mb-item-row-odd {
-    background-color: rgba(0, 0, 0, 0.08);
+    background-color: rgba(0, 0, 0, 0.12);
 }
 
 .mb-item-row:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: rgba(255, 255, 255, 0.07);
 }
 
 .mb-item-row-selected {
-    background-color: rgba(122, 122, 122, 0.22);
-    border-left-color: greenyellow;
-    border-left-width: 1px;
+    background-color: rgba(88, 148, 214, 0.18);
+    border-left-color: rgb(88, 148, 214);
 }
 
 .mb-item-row-old .mb-item-title {
@@ -220,7 +258,7 @@
 .mb-item-thumb {
     width: 96px;
     height: 54px;
-    background-color: rgb(20, 20, 20);
+    background-color: rgba(0, 0, 0, 0.45);
     border-radius: 2px;
     margin-right: 10px;
 }
@@ -234,14 +272,14 @@
 }
 
 .mb-item-title {
-    font-size: 14px;
+    font-size: 13px;
     -unity-font-style: bold;
-    color: rgb(230, 230, 230);
+    color: rgba(255, 255, 255, 0.92);
 }
 
 .mb-item-size {
     font-size: 11px;
-    color: rgba(190, 190, 190, 1);
+    color: rgba(255, 255, 255, 0.6);
     margin-top: 2px;
 }
 
@@ -262,6 +300,6 @@
 }
 
 .mb-new-item-button {
-    height: 32px;
+    height: 28px;
     margin-top: 6px;
 }
