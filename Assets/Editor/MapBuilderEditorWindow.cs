@@ -1539,12 +1539,13 @@ namespace Editor
 
 		private void OnBrowseExternalClicked()
 		{
-			if (!MapManagerConfig.TryGetAttach(SelectKey, out var attachObj))
+			var path = EditorUtility.SaveFolderPanel("External path", Application.streamingAssetsPath, SelectKey.id ?? string.Empty);
+			if (string.IsNullOrEmpty(path))
 			{
 				return;
 			}
 
-			m_pathToExternal = EditorUtility.SaveFolderPanel("External path", Application.streamingAssetsPath, attachObj.key.id);
+			m_pathToExternal = path;
 			m_externalPathField.SetValueWithoutNotify(m_pathToExternal);
 			m_externalExportButton.SetEnabled(!string.IsNullOrWhiteSpace(m_pathToExternal) && Path.IsPathFullyQualified(m_pathToExternal));
 		}
