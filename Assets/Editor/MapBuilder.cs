@@ -903,8 +903,18 @@ namespace Editor
 			ClearManifest(directory);
 		}
 
-		public static void BuildDataTransitionToDirectory(MapManagerConfig.BuildData buildData, string directory)
+		public static bool BuildDataTransitionToDirectory(MapManagerConfig.BuildData buildData, string directory)
 		{
+			var missing = (TempData.Map | TempData.Meta) & ~(TempData)buildData.buildSuccess;
+
+			if (buildData.config == null || missing != 0)
+			{
+				Debug.LogError(
+					$"'{buildData.config?.name ?? "<no config>"}' is not fully built ({missing} missing), so there is " +
+					"nothing to export. Build Map and Meta first.");
+				return false;
+			}
+
 			InitPathUpload(buildData);
 			ApplyVendorLimitsToValidation();
 			SelectCache();
@@ -912,6 +922,7 @@ namespace Editor
 			CopyTemporary(GetTemporary(TempData.Map), directory);
 			CopyTemporary(GetTemporary(TempData.Meta), directory);
 			ClearManifest(directory);
+			return true;
 		}
 
 		private static void ClearManifest(string directory)

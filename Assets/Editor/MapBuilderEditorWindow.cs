@@ -1552,13 +1552,21 @@ namespace Editor
 
 		private void OnExportExternalClicked()
 		{
-			if (!MapManagerConfig.GetOrAttach(SelectKey, out var attachObj) || attachObj == null || attachObj.metaConfig == null)
+			MapManagerConfig.GetOrAttach(SelectKey, out var attachObj);
+			var config = attachObj?.metaConfig != null ? attachObj.metaConfig : m_pendingConfig;
+
+			if (config == null)
 			{
+				SetPublishStatus("Assign a Map Meta Config before exporting.");
 				return;
 			}
 
-			var buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
-			MapBuilder.BuildDataTransitionToDirectory(buildData, m_pathToExternal);
+			var buildData = MapManagerConfig.GetBuildOrEmpty(config);
+
+			// The copy is synchronous and writes outside the project, so the status line is the only sign it ran.
+			SetPublishStatus(MapBuilder.BuildDataTransitionToDirectory(buildData, m_pathToExternal)
+				? $"Exported to {m_pathToExternal}"
+				: "Nothing to export — see the Console.");
 		}
 
 		private void OnNewItemClicked()
