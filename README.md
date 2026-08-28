@@ -23,14 +23,51 @@ window. Setting up the vendors — SDKs, credentials, sign in — is covered in 
 
 ## Preparing the track upload project
 
-1. Download the project archive from **[dro-map-uploader](https://github.com/CarXTechnologies/dro-map-uploader)** (Code → Download ZIP) and extract it anywhere on your computer.
+1. Get the project. The repository contains a **git submodule** (`Assets/Plugins/CarX.Modding.Creator`), so clone it with `git` rather than downloading the ZIP:
+
+   ```bash
+   git clone --recurse-submodules https://github.com/CarXTechnologies/dro-map-uploader
+   ```
+
+   > [!WARNING]
+   > **Code → Download ZIP** does *not* include submodules — `Assets/Plugins/CarX.Modding.Creator` will be an empty folder and the project will not compile.
 
    <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/1.png?raw=true" alt="Downloading the project archive" style="width:600px;"/>
 
 2. Install **Unity Editor 2023.2.20f1** (64-bit only): **[download installer](https://download.unity3d.com/download_unity/0e25a174756c/Windows64EditorInstaller/UnitySetup64-2023.2.20f1.exe)**.
-3. Launch Unity, go to **File → Open Project** and select the folder with the unpacked project (it must contain the `Assets` and `Packages` folders).
+3. Launch Unity, go to **File → Open Project** and select the project folder (it must contain the `Assets` and `Packages` folders).
 
 When the project opens, you can move on to the next step.
+
+### Updating an existing clone
+
+If you already cloned the repository without `--recurse-submodules`, or after pulling changes that move the submodule:
+
+```bash
+git submodule update --init --recursive
+```
+
+To pull the latest state of everything, including submodules:
+
+```bash
+git pull --recurse-submodules
+git submodule update --init --recursive
+```
+
+To wipe the working copy and re-fetch everything from scratch — **this discards all local changes**, including untracked files:
+
+```bash
+git reset --hard
+git clean -xffd                     # -f twice also removes untracked submodule folders
+git submodule update --init --recursive --force
+```
+
+If the submodule fails to fetch over SSH (`git@github.com: Permission denied`), tell git to use HTTPS instead:
+
+```bash
+git config --global url."https://github.com/".insteadOf git@github.com:
+git submodule update --init --recursive
+```
 
 ## Importing the 3D model into the project
 
