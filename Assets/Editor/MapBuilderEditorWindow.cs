@@ -950,8 +950,7 @@ namespace Editor
 			// entry cannot be created without a payload to attach - and a payload is what building produces.
 			var hasItem = key.IsValid && attachObj?.metaConfig != null && isSelectAttach;
 			m_buildSection.SetEnabled(true);
-			m_destinationSection.SetEnabled(hasItem);
-			m_noItemHint.style.display = hasItem ? DisplayStyle.None : DisplayStyle.Flex;
+			m_destinationSection.SetEnabled(true);
 
 			m_buildTargetsField.SetValueWithoutNotify((TempData)m_buildType);
 			m_formatField.SetValueWithoutNotify(m_buildFormat);
@@ -979,7 +978,7 @@ namespace Editor
 			m_uploadDescriptionToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadDescription);
 			m_uploadPreviewToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadPreview);
 			m_uploadVendorButton.text = $"Upload to {MapBuilder.session.Publisher?.DisplayName ?? "vendor"}";
-			m_uploadVendorButton.SetEnabled(uploadState);
+			m_uploadVendorButton.SetEnabled(uploadState && hasItem);
 
 			RefreshLocalPanel(uploadState);
 
@@ -987,6 +986,8 @@ namespace Editor
 			m_externalExportButton.SetEnabled(!string.IsNullOrWhiteSpace(m_pathToExternal) && Path.IsPathFullyQualified(m_pathToExternal));
 
 			UpdateDestinationPanels();
+			var showNoItemHint = !hasItem && m_publishDestination == PublishDestination.Vendor;
+			m_noItemHint.style.display = showNoItemHint ? DisplayStyle.Flex : DisplayStyle.None;
 		}
 
 		/// <summary>
