@@ -1280,7 +1280,7 @@ namespace Editor
 
 			if (!hasOptions)
 			{
-				SetGamePreview(string.Empty);
+				ClearGameSelection();
 				return;
 			}
 
@@ -1305,8 +1305,15 @@ namespace Editor
 			}
 			else
 			{
-				SetGamePreview(string.Empty);
+				ClearGameSelection();
 			}
+		}
+
+		private void ClearGameSelection()
+		{
+			m_gameField.SetValueWithoutNotify(string.Empty);
+			m_gameField.tooltip = string.Empty;
+			SetGamePreview(string.Empty);
 		}
 
 		private async void SetGamePreview(string url)
