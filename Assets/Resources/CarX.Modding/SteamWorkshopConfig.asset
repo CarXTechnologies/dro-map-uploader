@@ -15,8 +15,10 @@ MonoBehaviour:
   m_games:
   - displayName: CarX Drift Racing Online
     appId: 635260
+    available: 1
   - displayName: CarX Drift Racing Online 2
     appId: 1826420
+    available: 0
   m_selectedGame: 1
   m_appId: 0
   m_localModsFolder: Mods
