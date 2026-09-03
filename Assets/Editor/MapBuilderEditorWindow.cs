@@ -1126,7 +1126,7 @@ namespace Editor
 			}
 
 			m_operationCts.Cancel();
-			SetBuildStatus("Cancellingâ€¦");
+			SetBuildStatus("Cancelling…");
 		}
 
 		private void BeginOperation()

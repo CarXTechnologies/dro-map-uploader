@@ -42,13 +42,13 @@ namespace Editor
 			MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
 
 			// Publishing runs without a modal progress bar, so this line is the only in-window sign of activity.
-			SetPublishStatus(localBuild ? "Copying to the local install folderâ€¦" : "Uploadingâ€¦");
+			SetPublishStatus(localBuild ? "Copying to the local install folder…" : "Uploading…");
 
 			BeginOperation();
 			RefreshDetailsPanel();
 
 			var progress = new Progress<float>(fraction =>
-				SetPublishStatus($"Uploadingâ€¦ {Mathf.RoundToInt(Mathf.Clamp01(fraction) * 100f)}%"));
+				SetPublishStatus($"Uploading… {Mathf.RoundToInt(Mathf.Clamp01(fraction) * 100f)}%"));
 
 			try
 			{
@@ -101,7 +101,7 @@ namespace Editor
 			// The copy is synchronous and writes outside the project, so the status line is the only sign it ran.
 			SetPublishStatus(MapBuilder.BuildDataTransitionToDirectory(buildData, m_pathToExternal)
 				? $"Exported to {m_pathToExternal}"
-				: "Nothing to export â€” see the Console.");
+				: "Nothing to export — see the Console.");
 		}
 
 		private async void OnNewItemClicked()
@@ -119,7 +119,7 @@ namespace Editor
 
 			m_buildProcess = true;
 			BeginOperation();
-			SetBuildStatus("Creating the itemâ€¦");
+			SetBuildStatus("Creating the item…");
 			RefreshDetailsPanel();
 
 			try
@@ -226,7 +226,7 @@ namespace Editor
 
 			if (missing != 0)
 			{
-				ShowNewItemHint($"Build {missing} first â€” an item is created together with its files.");
+				ShowNewItemHint($"Build {missing} first — an item is created together with its files.");
 				return;
 			}
 
