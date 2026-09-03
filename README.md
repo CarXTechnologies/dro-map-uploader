@@ -1,5 +1,7 @@
 # 🗺 Uploading tracks
 
+*[Русская версия](README.ru.md)*
+
 Step-by-step guide to preparing a track in the Unity project and publishing it.
 
 Tracks can be published to the **Steam Workshop** or to **mod.io**; the vendor is picked at the top of the MapBuilder
@@ -116,7 +118,8 @@ For the track object that represents the surface, set the GameMarkerData type to
 Create an empty object via **GameObject → Create Empty** (or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd>). In the Transform component, set the coordinates where the car should appear in the game. Add the **GameMarkerData** component and choose the **SpawnPoint** type.
 
 > [!IMPORTANT]
-> Only one **vehicle spawn point** may be placed on the map.
+> A **dro1** map may have exactly one vehicle spawn point. **dro2** supports several — name each object meaningfully,
+> because the name is exported with the spawn point and identifies it in game.
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/5.png?raw=true" alt="Spawn point setup" style="width:400px;"/>
 
@@ -166,7 +169,7 @@ Every map needs exactly one minimap. Create an empty object in the scene (as des
 
 1. Add the **CaptureCamera** component to a Camera GameObject.
 2. Set up the camera for your prototype.
-3. Open the component context menu and press **Capture**.
+3. Press **Capture** at the bottom of the component in the Inspector.
 4. Save the prototype to disk.
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/14.png?raw=true" alt="Capture camera" style="width:300px;"/>
@@ -214,6 +217,7 @@ Every map needs exactly one minimap. Create an empty object in the scene (as des
 | **Build Targets** (flags) | The build targets you want to build or rebuild. |
 | **Validate** | Runs every check against the map without building anything. See [Validation](#validation). |
 | **Build** | Builds all selected Build Targets. |
+| **Cancel** | Appears while an operation is running and stops it. |
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/20.png?raw=true" alt="Build settings" style="width:400px;"/>
 

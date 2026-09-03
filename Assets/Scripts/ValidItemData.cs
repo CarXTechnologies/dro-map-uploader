@@ -18,23 +18,22 @@ public struct ValidItemData : ICloneable
 
 	public override string ToString()
 	{
-		var result = string.Empty;
-
 		if (data == null)
 		{
-			return result;
+			return string.Empty;
 		}
 
-		for (var index = 0; index < data.Count; index++)
+		var lines = new List<string>();
+
+		foreach (var item in data)
 		{
-			var item = data[index];
 			if (item.current != 0)
 			{
-				result += item.ToStat() + (index < data.Count - 2 ? "\n" : String.Empty);
+				lines.Add(item.ToStat());
 			}
 		}
 
-		return result;
+		return string.Join("\n", lines);
 	}
 
 	public object Clone()

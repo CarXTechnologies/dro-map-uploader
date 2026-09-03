@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Plugins.CarX.Modding.Creator.Runtime.Publishing;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -118,10 +117,8 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 	{
 		base.OnCreate();
 		MigrateLegacyAttachments();
-#if UNITY_EDITOR
-		EditorUtility.SetDirty(instance);
+		MapConfigPersistence.MarkDirty(instance);
 		Save();
-#endif
 	}
 
 	/// <summary>
@@ -354,20 +351,11 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 
 	public static void Save()
 	{
-#if UNITY_EDITOR
-		AssetDatabase.SaveAssetIfDirty(instance);
-		AssetDatabase.Refresh();
-#endif
+		MapConfigPersistence.Save(instance);
 	}
 
 	public static void SaveForce()
 	{
-#if UNITY_EDITOR
-		EditorUtility.SetDirty(instance);
-		AssetDatabase.SaveAssetIfDirty(instance);
-		AssetDatabase.SaveAssets();
-		AssetDatabase.Refresh();
-		EditorUtility.FocusProjectWindow();
-#endif
+		MapConfigPersistence.SaveForce(instance);
 	}
 }

@@ -8,10 +8,10 @@ public class ValidVideoPlayer : IValidComponentProcess
 
 	public string processMessage { get; private set; }
 
-	private int m_videoMaxWidth;
-	private int m_videoMaxHeight;
-	private int m_maxFramerate;
-	private int m_maxTimeInSecond;
+	private readonly int m_videoMaxWidth;
+	private readonly int m_videoMaxHeight;
+	private readonly int m_maxFramerate;
+	private readonly int m_maxTimeInSecond;
 
 	public ValidVideoPlayer(int videoMaxWidth = 1280,
 		int videoMaxHeight = 720,
@@ -32,10 +32,10 @@ public class ValidVideoPlayer : IValidComponentProcess
 
 	public void ValidProcess(Component comp)
 	{
-		const float videoMaxWidth = 1280;
-		const float videoMaxHeight = 720;
-		const int maxFramerate = 30;
-		const int maxTimeInSecond = 15;
+		var videoMaxWidth = m_videoMaxWidth;
+		var videoMaxHeight = m_videoMaxHeight;
+		var maxFramerate = m_maxFramerate;
+		var maxTimeInSecond = m_maxTimeInSecond;
 
 		var compType = comp.GetType();
 		if (compType.Name != nameof(VideoPlayer))

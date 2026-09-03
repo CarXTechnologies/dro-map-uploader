@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,7 +13,7 @@ using ModPublisherSession = Plugins.CarX.Modding.Creator.Editor.Publishing.ModPu
 
 namespace Editor
 {
-	public class MapBuilderEditorWindow : EditorWindow
+	public partial class MapBuilderEditorWindow : EditorWindow
 	{
 		private const string StyleSheetPath = "Assets/Editor/MapBuilderEditorWindow.uss";
 
@@ -95,6 +95,9 @@ namespace Editor
 		private EnumFlagsField m_buildTargetsField;
 		private Button m_buildButton;
 		private Button m_validateButton;
+		private Button m_cancelButton;
+		private Label m_buildStatus;
+		private CancellationTokenSource m_operationCts;
 		private DropdownField m_sceneField;
 		private string[] m_sceneNames = Array.Empty<string>();
 		private string[] m_scenePaths = Array.Empty<string>();
@@ -175,6 +178,7 @@ namespace Editor
 
 		private void OnDisable()
 		{
+			m_operationCts?.Cancel();
 			m_spinnerSchedule?.Pause();
 			Clear();
 			MapManagerConfig.SaveForce();
@@ -183,6 +187,7 @@ namespace Editor
 
 		private void OnDestroy()
 		{
+			m_operationCts?.Cancel();
 			Clear();
 			MapManagerConfig.SaveForce();
 			SaveChanges();
@@ -206,110 +211,6 @@ namespace Editor
 			}
 		}
 
-		private async Task FetchItems()
-		{
-			var session = MapBuilder.session;
-			var ready = await session.EnsureInitializedAsync(CancellationToken.None);
-
-			RefreshVendorBar();
-
-			if (!ready.Success || !session.IsAuthenticated)
-			{
-				RefreshAvailability();
-				return;
-			}
-
-			while (m_buildProcess)
-			{
-				await Task.Delay(100);
-			}
-
-			m_fetchResultListItems.Clear();
-			var fetched = await session.Publisher.FetchOwnedItemsAsync(OnItemFetched, CancellationToken.None);
-
-			RefreshAvailability();
-
-			if (!fetched.Success)
-			{
-				Debug.LogError(fetched.Message);
-				return;
-			}
-
-			m_fetchResultListItems.Clear();
-			m_fetchResultListItems.AddRange(fetched.Value);
-
-			foreach (var item in m_fetchResultListItems)
-			{
-				m_attaching[item.Key] = MapManagerConfig.IsAttach(item.Key);
-			}
-
-			MapManagerConfig.ValidBuildsAndAttaching(session.VendorId, m_fetchResultListItems);
-			RefreshItemsList();
-			RefreshDetailsPanel();
-		}
-
-		private void OnItemFetched(ModItem item)
-		{
-			// Fetch reports entries as pages arrive, so the row can only be refreshed once the list is rebuilt.
-			DownloadSpriteAsync(item);
-		}
-
-		private async void DownloadSpriteAsync(ModItem item)
-		{
-			if (item == null)
-			{
-				return;
-			}
-
-			if (m_images.TryGetValue(item.Key, out var image) && image.downloading)
-			{
-				return;
-			}
-
-			while (m_buildProcess)
-			{
-				await Task.Delay(100);
-			}
-
-			if (image.texture != null)
-			{
-				DestroyImmediate(image.texture);
-			}
-
-			if (string.IsNullOrWhiteSpace(item.PreviewUrl))
-			{
-				return;
-			}
-
-			m_images[item.Key] = (null, true);
-			m_loads[item.Key] = true;
-			RefreshItemRow(item.Key);
-
-			await UIUtils.DownloadSprite(item.PreviewUrl, (_, texture2D) =>
-			{
-				m_images[item.Key] = (texture2D == null ? new Texture2D(1, 1) : texture2D, false);
-				m_loads[item.Key] = false;
-				RefreshItemRow(item.Key);
-
-				if (SelectKey == item.Key)
-				{
-					RefreshPreview();
-				}
-			});
-		}
-
-		private bool IsDownloadAnyIcon()
-		{
-			foreach (var item in m_fetchResultListItems)
-			{
-				if (m_images.TryGetValue(item.Key, out var itemImage) && itemImage.downloading)
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
 
 		private void BuildLayout(VisualElement root)
 		{
@@ -503,7 +404,17 @@ namespace Editor
 			m_buildButton.AddToClassList("mb-build-button");
 			actionsRow.Add(m_buildButton);
 
+			m_cancelButton = new Button(OnCancelButtonClicked) { text = "Cancel", tooltip = "Stop the operation in progress" };
+			m_cancelButton.AddToClassList("mb-build-button");
+			m_cancelButton.style.display = DisplayStyle.None;
+			actionsRow.Add(m_cancelButton);
+
 			m_buildSection.Add(actionsRow);
+
+			m_buildStatus = new Label(string.Empty);
+			m_buildStatus.AddToClassList("mb-publish-status");
+			m_buildStatus.style.display = DisplayStyle.None;
+			m_buildSection.Add(m_buildStatus);
 
 			return m_buildSection;
 		}
@@ -733,184 +644,6 @@ namespace Editor
 			m_mainLayout.style.display = usable ? DisplayStyle.Flex : DisplayStyle.None;
 		}
 
-		private void RefreshItemsList()
-		{
-			if (m_itemsScroll == null)
-			{
-				return;
-			}
-
-			m_itemsScroll.Clear();
-
-			if (m_fetchResultListItems.Count == 0)
-			{
-				// An empty scroll area reads as "still loading" or "something broke"; say which it is.
-				var vendorName = MapBuilder.session.Publisher?.DisplayName ?? "the vendor";
-				var hint = new Label($"Nothing published to {vendorName} yet.\n" +
-				                     "Assign a Map Meta Config on the left, build it, then use New Item.");
-				hint.AddToClassList("mb-empty-hint");
-				m_itemsScroll.Add(hint);
-				return;
-			}
-
-			for (var i = 0; i < m_fetchResultListItems.Count; i++)
-			{
-				m_itemsScroll.Add(BuildItemRow(i));
-			}
-		}
-
-		private VisualElement BuildItemRow(int index)
-		{
-			var item = m_fetchResultListItems[index];
-			var hasOldFlag = item.Tags.Any(MapBuilder.publisherContext.IsLegacyContentTag);
-
-			var row = new VisualElement { userData = item.Key };
-			row.AddToClassList("mb-item-row");
-			row.AddToClassList(index % 2 == 0 ? "mb-item-row-even" : "mb-item-row-odd");
-			if (hasOldFlag)
-			{
-				row.AddToClassList("mb-item-row-old");
-			}
-
-			if (index == m_selectItemIndex)
-			{
-				row.AddToClassList("mb-item-row-selected");
-			}
-
-			row.RegisterCallback<ClickEvent>(_ => OnItemRowClicked(index));
-
-			var thumb = new Image { name = "thumb", scaleMode = ScaleMode.ScaleToFit };
-			thumb.AddToClassList("mb-item-thumb");
-			row.Add(thumb);
-
-			var info = new VisualElement();
-			info.AddToClassList("mb-item-info");
-
-			var title = new Label(string.IsNullOrWhiteSpace(item.Title) ? $"Blank {index}" : item.Title);
-			title.AddToClassList("mb-item-title");
-			info.Add(title);
-
-			var limits = MapBuilder.session.Limits;
-			var maxMb = limits == null ? 0f : limits.MaxPayloadSizeInMb + limits.MaxMetaSizeInMb;
-			var size = $"{Mathf.FloorToInt(item.PayloadSizeBytes / ModMapTestTool.BYTES_TO_MEGABYTES)} / {maxMb} mb";
-
-			var sizeLabel = new Label(string.IsNullOrWhiteSpace(item.StatusLabel)
-				? size
-				: $"{size}  ·  {item.StatusLabel}")
-			{
-				tooltip = BuildStatusTooltip(item),
-			};
-			sizeLabel.AddToClassList("mb-item-size");
-			info.Add(sizeLabel);
-
-			row.Add(info);
-
-			if (hasOldFlag)
-			{
-				var oldLabel = new Label("Old version!");
-				oldLabel.AddToClassList("mb-item-old-badge");
-				row.Add(oldLabel);
-			}
-
-			if (!MapManagerConfig.TryGetAttach(item.Key, out var attachData) || attachData.metaConfig == null)
-			{
-				var warning = new Label("Detach") { tooltip = "No MapMetaConfig attached to this item yet" };
-				warning.AddToClassList("mb-item-warning");
-				row.Add(warning);
-			}
-
-			ApplyItemThumbnail(row, item.Key);
-
-			return row;
-		}
-
-		/// <summary>
-		/// Points at the vendor page for the states the vendor keeps to itself. mod.io tracks a review status and a
-		/// hidden/public flag that its Unity plugin does not expose, so the page is the only place to read them.
-		/// </summary>
-		private static string BuildStatusTooltip(ModItem item)
-		{
-			var url = MapBuilder.session.Publisher?.GetItemUrl(item.Key);
-			return string.IsNullOrWhiteSpace(url)
-				? item.StatusLabel
-				: $"{item.StatusLabel}\nFull status and visibility: {url}";
-		}
-
-		private void RefreshItemRow(ModItemKey key)
-		{
-			if (m_itemsScroll == null)
-			{
-				return;
-			}
-
-			VisualElement existing = null;
-			foreach (var child in m_itemsScroll.Children())
-			{
-				if (child.userData is ModItemKey childKey && childKey == key)
-				{
-					existing = child;
-					break;
-				}
-			}
-
-			if (existing != null)
-			{
-				ApplyItemThumbnail(existing, key);
-			}
-		}
-
-		private void ApplyItemThumbnail(VisualElement row, ModItemKey key)
-		{
-			var thumb = row.Q<Image>("thumb");
-			if (thumb == null)
-			{
-				return;
-			}
-
-			thumb.RemoveFromClassList("mb-item-thumb-loading");
-
-			if (m_images.TryGetValue(key, out var imageData) && !imageData.downloading)
-			{
-				thumb.image = imageData.texture != null && imageData.texture.width > 1 ? imageData.texture : null;
-			}
-			else if (m_loads.TryGetValue(key, out var loading) && loading)
-			{
-				thumb.image = null;
-				thumb.AddToClassList("mb-item-thumb-loading");
-			}
-			else
-			{
-				thumb.image = null;
-			}
-		}
-
-		private void TickSpinner()
-		{
-			if (m_itemsScroll == null)
-			{
-				return;
-			}
-
-			var iconName = "d_WaitSpin" + (Mathf.FloorToInt(Time.realtimeSinceStartup * 12) % 12).ToString("00");
-			var icon = EditorGUIUtility.IconContent(iconName).image;
-
-			foreach (var child in m_itemsScroll.Children())
-			{
-				var thumb = child.Q<Image>("thumb");
-				if (thumb != null && thumb.ClassListContains("mb-item-thumb-loading"))
-				{
-					thumb.image = icon;
-				}
-			}
-		}
-
-		private void OnItemRowClicked(int index)
-		{
-			m_selectItemIndex = index;
-			m_buttonLastClickOnAnyItem = true;
-			RefreshItemsList();
-			RefreshDetailsPanel();
-		}
 
 		private void RefreshDetailsPanel()
 		{
@@ -973,8 +706,9 @@ namespace Editor
 
 			RefreshSceneDropdown(buildData);
 
-			m_buildButton.SetEnabled(m_buildType != 0 && !IsDownloadAnyIcon());
+			m_buildButton.SetEnabled(m_buildType != 0 && !IsDownloadAnyIcon() && !m_buildProcess);
 			m_validateButton.SetEnabled(!m_buildProcess && !IsDownloadAnyIcon());
+			m_cancelButton.style.display = m_buildProcess ? DisplayStyle.Flex : DisplayStyle.None;
 
 			var uploadState = RefreshBuildResult(activeConfig, buildData);
 
@@ -1190,11 +924,7 @@ namespace Editor
 
 				if (buildName == nameof(TempData.Map))
 				{
-					var message = buildData.lastValid.ToString();
-					if (!string.IsNullOrWhiteSpace(message))
-					{
-						AddBuildResultBox(message, has ? HelpBoxMessageType.Info : HelpBoxMessageType.Error);
-					}
+					AddSceneStats(buildData.lastValid);
 				}
 			}
 
@@ -1206,6 +936,25 @@ namespace Editor
 			var box = new HelpBox(message, type);
 			box.AddToClassList("mb-build-result-item");
 			m_buildResultBox.Add(box);
+		}
+
+		private void AddSceneStats(ValidItemData stats)
+		{
+			var text = stats.ToString();
+
+			if (string.IsNullOrWhiteSpace(text))
+			{
+				return;
+			}
+
+			var foldout = new Foldout { text = "Scene contents", value = false };
+			foldout.AddToClassList("mb-build-result-item");
+
+			var label = new Label(text) { enableRichText = false };
+			label.AddToClassList("mb-muted");
+			foldout.Add(label);
+
+			m_buildResultBox.Add(foldout);
 		}
 
 		private void UpdateCompressVisibility()
@@ -1263,156 +1012,6 @@ namespace Editor
 			m_externalPanel.style.display = m_publishDestination == PublishDestination.ExternalFolder ? DisplayStyle.Flex : DisplayStyle.None;
 		}
 
-		private async void OnVendorChanged(ChangeEvent<string> evt)
-		{
-			var vendor = ModPublisherSession.AvailableVendors
-				.FirstOrDefault(candidate => candidate.DisplayName == evt.newValue);
-
-			if (vendor == null)
-			{
-				return;
-			}
-
-			// Entries belong to the vendor they were fetched from, so nothing from the old list survives the switch.
-			m_fetchResultListItems.Clear();
-			m_selectItemIndex = 0;
-			RefreshItemsList();
-
-			await MapBuilder.session.SelectVendorAsync(vendor.VendorId, CancellationToken.None);
-			await FetchItems();
-		}
-
-		/// <summary>
-		/// Fills the game picker from the active vendor. The list is authored per vendor, so it changes completely
-		/// when the vendor does.
-		/// </summary>
-		private void RefreshGamePicker()
-		{
-			var options = MapBuilder.session.Publisher?.GameOptions;
-			var hasOptions = options is { Count: > 0 };
-
-			m_gameField.style.display = hasOptions ? DisplayStyle.Flex : DisplayStyle.None;
-
-			if (!hasOptions)
-			{
-				ClearGameSelection();
-				return;
-			}
-
-			// An entry that is missing credentials is still listed, marked, so it can be selected and fixed rather
-			// than silently vanishing from the picker.
-			var labels = options
-				.Select(option => option.IsConfigured ? option.DisplayName : $"{option.DisplayName}  (incomplete)")
-				.ToList();
-
-			if (!m_gameField.choices.SequenceEqual(labels))
-			{
-				m_gameField.choices = labels;
-			}
-
-			var selected = MapBuilder.session.Publisher.SelectedGameIndex;
-
-			if (selected >= 0 && selected < labels.Count)
-			{
-				m_gameField.SetValueWithoutNotify(labels[selected]);
-				m_gameField.tooltip = $"Id {options[selected].Id}";
-				SetGamePreview(options[selected].PreviewUrl);
-			}
-			else
-			{
-				ClearGameSelection();
-			}
-		}
-
-		private void ClearGameSelection()
-		{
-			m_gameField.SetValueWithoutNotify(string.Empty);
-			m_gameField.tooltip = string.Empty;
-			SetGamePreview(string.Empty);
-		}
-
-		private async void SetGamePreview(string url)
-		{
-			if (m_gamePreviewUrl == url)
-			{
-				return;
-			}
-
-			m_gamePreviewUrl = url;
-
-			if (string.IsNullOrWhiteSpace(url))
-			{
-				m_gamePreview.style.display = DisplayStyle.None;
-				return;
-			}
-
-			await UIUtils.DownloadSprite(url, (_, texture) =>
-			{
-				// The url may have moved on while the download was in flight.
-				if (m_gamePreview == null || m_gamePreviewUrl != url)
-				{
-					return;
-				}
-
-				if (m_gamePreviewTexture != null)
-				{
-					DestroyImmediate(m_gamePreviewTexture);
-				}
-
-				m_gamePreviewTexture = texture;
-				m_gamePreview.image = texture;
-				m_gamePreview.style.display = texture != null ? DisplayStyle.Flex : DisplayStyle.None;
-			});
-		}
-
-		private async void OnGameChanged(ChangeEvent<string> evt)
-		{
-			var index = m_gameField.choices.IndexOf(evt.newValue);
-
-			if (index < 0)
-			{
-				return;
-			}
-
-			// Entries belong to the game they were fetched from, so nothing from the old list survives the switch.
-			m_fetchResultListItems.Clear();
-			m_selectItemIndex = 0;
-			RefreshItemsList();
-
-			var result = await MapBuilder.session.SelectGameAsync(index, CancellationToken.None);
-
-			if (!result.Success)
-			{
-				Debug.LogError(result.Message);
-			}
-			else if (!string.IsNullOrWhiteSpace(result.Message))
-			{
-				Debug.LogWarning(result.Message);
-			}
-
-			Fetch();
-		}
-
-		private async void OnAuthButtonClicked()
-		{
-			var session = MapBuilder.session;
-
-			var result = session.IsAuthenticated
-				? await session.LogoutAsync()
-				: await session.LoginAsync(CancellationToken.None);
-
-			if (!result.Success)
-			{
-				Debug.LogError(result.Message);
-			}
-			else if (!string.IsNullOrWhiteSpace(result.Message))
-			{
-				Debug.Log(result.Message);
-			}
-
-			RefreshVendorBar();
-			await FetchItems();
-		}
 
 		private void OnConfigFieldChanged(ChangeEvent<UnityEngine.Object> evt)
 		{
@@ -1474,7 +1073,7 @@ namespace Editor
 			MapBuilder.ValidateOnly(config, m_buildFormat);
 		}
 
-		private void OnBuildButtonClicked()
+		private async void OnBuildButtonClicked()
 		{
 			var key = SelectKey;
 
@@ -1484,7 +1083,7 @@ namespace Editor
 			// it cannot be created before there is a build to attach to it.
 			var config = attachObj?.metaConfig != null ? attachObj.metaConfig : m_pendingConfig;
 
-			if (IsDownloadAnyIcon() || config == null)
+			if (IsDownloadAnyIcon() || config == null || m_buildProcess)
 			{
 				return;
 			}
@@ -1498,13 +1097,64 @@ namespace Editor
 			m_platformBuildCached = m_platformBuild;
 			m_buildFormatCached = m_buildFormat;
 
-			MapBuilder.BuildCustom((TempData)m_buildType,
-				(TempData)buildData.buildSuccess,
-				key,
-				m_buildFormatCached,
-				m_compressBuildCached,
-				m_platformBuildCached,
-				(path, success) => AddBuild(config, buildData, path, success));
+			BeginOperation();
+			RefreshDetailsPanel();
+
+			try
+			{
+				await MapBuilder.BuildCustom((TempData)m_buildType,
+					(TempData)buildData.buildSuccess,
+					key,
+					m_buildFormatCached,
+					m_compressBuildCached,
+					m_platformBuildCached,
+					new Progress<string>(SetBuildStatus),
+					m_operationCts.Token,
+					(path, success) => AddBuild(config, buildData, path, success));
+			}
+			finally
+			{
+				EndOperation();
+			}
+		}
+
+		private void OnCancelButtonClicked()
+		{
+			if (m_operationCts == null || m_operationCts.IsCancellationRequested)
+			{
+				return;
+			}
+
+			m_operationCts.Cancel();
+			SetBuildStatus("Cancellingâ€¦");
+		}
+
+		private void BeginOperation()
+		{
+			m_operationCts?.Cancel();
+			m_operationCts?.Dispose();
+			m_operationCts = new CancellationTokenSource();
+		}
+
+		private void EndOperation()
+		{
+			m_operationCts?.Dispose();
+			m_operationCts = null;
+
+			m_buildProcess = false;
+			SetBuildStatus(string.Empty);
+			RefreshDetailsPanel();
+		}
+
+		private void SetBuildStatus(string message)
+		{
+			if (m_buildStatus == null)
+			{
+				return;
+			}
+
+			m_buildStatus.text = message ?? string.Empty;
+			m_buildStatus.style.display = string.IsNullOrEmpty(m_buildStatus.text) ? DisplayStyle.None : DisplayStyle.Flex;
 		}
 
 		private void AddBuild(MapMetaConfig config,
@@ -1528,200 +1178,8 @@ namespace Editor
 				((TempData)m_buildType).HasFlag(TempData.Map) ? ModMapTestTool.Target : buildData.lastValid,
 				m_buildFormat, m_platformBuildCached, m_compressBuildCached));
 
-			m_buildProcess = false;
 			RefreshDetailsPanel();
 		}
 
-		private void OnUploadVendorClicked()
-		{
-			Upload(localBuild: false);
-		}
-
-		private void OnUploadLocalClicked()
-		{
-			Upload(localBuild: true);
-		}
-
-		private void Upload(bool localBuild)
-		{
-			var item = SelectItem;
-
-			if (item == null || !MapManagerConfig.GetOrAttach(item.Key, out var attachObj) || attachObj == null || attachObj.metaConfig == null)
-			{
-				return;
-			}
-
-			var buildData = MapManagerConfig.GetBuildOrEmpty(attachObj.metaConfig);
-
-			m_loads[item.Key] = true;
-			MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
-
-			// Publishing runs without a modal progress bar, so this line is the only in-window sign of activity.
-			SetPublishStatus(localBuild ? "Copying to the local install folder…" : "Uploading… see the Console.");
-
-			MapBuilder.UploadCommunityItem(buildData, item, localBuild, uploadedKey =>
-			{
-				m_loads[item.Key] = false;
-				SetPublishStatus(string.Empty);
-
-				if (uploadedKey.IsValid)
-				{
-					DownloadSpriteAsync(m_fetchResultListItems.Find(candidate => candidate.Key == uploadedKey));
-				}
-
-				RefreshDetailsPanel();
-			});
-		}
-
-		private void OnBrowseExternalClicked()
-		{
-			var path = EditorUtility.SaveFolderPanel("External path", Application.streamingAssetsPath, SelectKey.id ?? string.Empty);
-			if (string.IsNullOrEmpty(path))
-			{
-				return;
-			}
-
-			m_pathToExternal = path;
-			m_externalPathField.SetValueWithoutNotify(m_pathToExternal);
-			m_externalExportButton.SetEnabled(!string.IsNullOrWhiteSpace(m_pathToExternal) && Path.IsPathFullyQualified(m_pathToExternal));
-		}
-
-		private void OnExportExternalClicked()
-		{
-			MapManagerConfig.GetOrAttach(SelectKey, out var attachObj);
-			var config = attachObj?.metaConfig != null ? attachObj.metaConfig : m_pendingConfig;
-
-			if (config == null)
-			{
-				SetPublishStatus("Assign a Map Meta Config before exporting.");
-				return;
-			}
-
-			var buildData = MapManagerConfig.GetBuildOrEmpty(config);
-
-			// The copy is synchronous and writes outside the project, so the status line is the only sign it ran.
-			SetPublishStatus(MapBuilder.BuildDataTransitionToDirectory(buildData, m_pathToExternal)
-				? $"Exported to {m_pathToExternal}"
-				: "Nothing to export — see the Console.");
-		}
-
-		private void OnNewItemClicked()
-		{
-			// mod.io refuses to create an entry without a name, a summary and a logo, so a config has to be supplied
-			// up front. The field above is the source - it works with nothing selected, which is the only way to
-			// create the very first item on an account. Steam ignores all of it.
-			MapManagerConfig.TryGetAttach(SelectKey, out var attachObj);
-			var config = attachObj?.metaConfig != null ? attachObj.metaConfig : m_pendingConfig;
-
-			MapBuilder.CreateNewCommunityItem(config, newKey => OnItemCreated(config, newKey));
-		}
-
-		private void OnItemCreated(MapMetaConfig config, ModItemKey newKey)
-		{
-			if (config != null && newKey.IsValid)
-			{
-				MapManagerConfig.Attach(newKey, config);
-				m_attaching[newKey] = true;
-				InvalidateMetaBuild(config);
-			}
-
-			Fetch();
-		}
-
-		/// <summary>
-		/// Marks the meta as needing a rebuild after an entry is created.
-		/// </summary>
-		/// <remarks>
-		/// The meta carries the mod id, and the build that was attached during creation was necessarily made before
-		/// the entry existed - so it holds the map config's id as a placeholder. Clearing the flag makes the build
-		/// panel ask for a Meta rebuild through the same warning it already uses when the meta goes stale.
-		/// </remarks>
-		private static void InvalidateMetaBuild(MapMetaConfig config)
-		{
-			var buildData = MapManagerConfig.GetBuildOrEmpty(config);
-
-			if (buildData.config == null || !((TempData)buildData.buildSuccess).HasFlag(TempData.Meta))
-			{
-				return;
-			}
-
-			var withoutMeta = (TempData)buildData.buildSuccess & ~TempData.Meta;
-
-			MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(
-				config,
-				buildData.targetScene,
-				buildData.path,
-				(int)withoutMeta,
-				buildData.lastValid,
-				buildData.format,
-				buildData.platform,
-				buildData.compress));
-
-			Debug.Log("The item was created with the build that existed at the time, whose meta carries a placeholder " +
-			          "id. Rebuild Meta and upload so the mod id in the meta matches the item.");
-		}
-
-		private async void OnDeleteItemClicked()
-		{
-			var selected = SelectItem;
-			var result = await MapBuilder.session.PromptDeleteAsync(
-				selected?.Key ?? default, selected?.Title, CancellationToken.None);
-
-			if (!result.Success)
-			{
-				Debug.LogError(result.Message);
-				return;
-			}
-
-			Debug.Log(result.Message);
-
-			// The local attachment outlives the item it pointed at, so it is dropped before the list is rebuilt.
-			if (selected != null)
-			{
-				MapManagerConfig.Detach(selected.Key);
-			}
-
-			m_selectItemIndex = 0;
-			await FetchItems();
-		}
-
-		/// <summary>
-		/// Explains what the active vendor still needs before "New Item" can work, rather than letting the button
-		/// fail with a message in the console.
-		/// </summary>
-		private void RefreshNewItemHint()
-		{
-			if (m_newItemHint == null)
-			{
-				return;
-			}
-
-			// An item is always created together with its content, on every vendor - so the gate is the same
-			// everywhere: a config to describe it, and a finished build to publish.
-			if (m_pendingConfig == null)
-			{
-				ShowNewItemHint("Assign a Map Meta Config above to create an item.");
-				return;
-			}
-
-			var built = (TempData)MapManagerConfig.GetBuildOrEmpty(m_pendingConfig).buildSuccess;
-			var missing = (TempData.Map | TempData.Meta) & ~built;
-
-			if (missing != 0)
-			{
-				ShowNewItemHint($"Build {missing} first — an item is created together with its files.");
-				return;
-			}
-
-			m_newItemHint.style.display = DisplayStyle.None;
-			m_newItemButton?.SetEnabled(true);
-		}
-
-		private void ShowNewItemHint(string message)
-		{
-			m_newItemHint.text = message;
-			m_newItemHint.style.display = DisplayStyle.Flex;
-			m_newItemButton?.SetEnabled(false);
-		}
 	}
 }

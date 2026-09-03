@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 
@@ -12,4 +11,3 @@ public class LockDrawer : PropertyDrawer
 		EditorGUI.EndDisabledGroup();
 	}
 }
-#endif

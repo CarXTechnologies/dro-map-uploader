@@ -1,0 +1,16 @@
+{
+    "name": "MapUploader.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "CarX.Modding.Creator"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

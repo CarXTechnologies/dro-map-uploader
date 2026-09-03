@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, 'target/**', 'feature/**' ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checkout:
+    name: Submodule and project layout
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: true
+
+      - name: The submodule is populated
+        run: |
+          test -f Assets/Plugins/CarX.Modding.Creator/CarX.Modding.Creator.asmdef \
+            || { echo "::error::Assets/Plugins/CarX.Modding.Creator is empty - clone with --recurse-submodules"; exit 1; }
+
+      - name: The documented Unity version matches the project
+        run: |
+          project="$(sed -n 's/^m_EditorVersion: //p' ProjectSettings/ProjectVersion.txt | tr -d '\r')"
+          echo "Project is on $project"
+          grep -q "$project" README.md \
+            || { echo "::error::README.md does not mention $project - update the install instructions"; exit 1; }
+
+  tests:
+    name: Edit mode tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: true
+
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Packages/packages-lock.json') }}-${{ hashFiles('ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            Library-${{ hashFiles('Packages/packages-lock.json') }}-
+            Library-
+
+      - uses: game-ci/unity-test-runner@v4
+        id: tests
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          unityVersion: auto
+          testMode: editmode
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Edit mode test results
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ${{ steps.tests.outputs.artifactsPath }}

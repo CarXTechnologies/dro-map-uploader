@@ -35,6 +35,8 @@ namespace Editor
 			ModVisibility.Private);
 
 		private static readonly List<GameMarkerData> m_cacheDataList = new();
+
+		private static readonly List<string> m_cacheScenePaths = new();
 		private static CacheData m_cacheData;
 		private static ModPublisherSession m_session;
 		private static string m_scenePath;
@@ -98,11 +100,19 @@ namespace Editor
 			? m_currentItemKey.id
 			: MapManagerConfig.instance.mapMetaConfigValue.id;
 
-		private static string GetScenePathNoId(string path)
+		private static string GetScenePathNoId(string scenePath)
 		{
 			// The suffix is the id plus ".unity"; ids are not a fixed width - Steam hands out ten digit numbers,
 			// mod.io five digit ones, and a map config id is a 32 character guid.
-			return path.Substring(0, path.Length - (CurrentBuildId.Length + ".unity".Length)) + ".unity";
+			var sceneName = MapMetaRules.GetSceneNameFromPath(scenePath);
+			var id = CurrentBuildId;
+
+			if (!string.IsNullOrEmpty(id) && sceneName.EndsWith(id, StringComparison.Ordinal))
+			{
+				sceneName = sceneName.Substring(0, sceneName.Length - id.Length);
+			}
+
+			return path + "/" + sceneName + ".unity";
 		}
 
 		private static void ValidateMeta()
@@ -162,9 +172,22 @@ namespace Editor
 
 		private static void ClearCacheScene()
 		{
-			foreach (var file in Directory.GetFiles(path, "*.unity"))
+			foreach (var scenePath in m_cacheScenePaths)
 			{
-				File.Delete(file);
+				if (!string.IsNullOrEmpty(scenePath) && File.Exists(scenePath))
+				{
+					AssetDatabase.DeleteAsset(scenePath);
+				}
+			}
+
+			m_cacheScenePaths.Clear();
+		}
+
+		private static void TrackCacheScene(string scenePath)
+		{
+			if (!string.IsNullOrEmpty(scenePath) && !m_cacheScenePaths.Contains(scenePath))
+			{
+				m_cacheScenePaths.Add(scenePath);
 			}
 		}
 
@@ -334,6 +357,7 @@ namespace Editor
 			DestroyImmediate(root);
 
 			EditorSceneManager.SaveScene(mapScene, m_scenePath);
+			TrackCacheScene(m_scenePath);
 			SceneManager.UnloadScene(mapScene);
 
 			return !results.success;
@@ -356,6 +380,7 @@ namespace Editor
 			var scenePathNew = path + "/" + sceneName + CurrentBuildId + ".unity";
 			AssetDatabase.RenameAsset(m_scenePath, sceneName + CurrentBuildId);
 			m_scenePath = scenePathNew;
+			TrackCacheScene(m_scenePath);
 		}
 
 		private static string GetCacheName()
@@ -488,13 +513,15 @@ namespace Editor
 		}
 
 		[Obsolete("Obsolete")]
-		public static async void BuildCustom(
+		public static async Task BuildCustom(
 			TempData target,
 			TempData success,
 			ModItemKey itemKey,
 			FormatBuild formatBuild,
 			CompressBuild compressBuild,
 			PlatformBuild platformBuild,
+			IProgress<string> progress,
+			CancellationToken cancellationToken,
 			Action<string, TempData> callback)
 		{
 			try
@@ -534,16 +561,25 @@ namespace Editor
 
 				InitPath();
 				ApplyVendorLimitsToValidation();
+
+				progress?.Report("Checking the map configuration…");
 				ValidateMeta();
 
 				if (!m_report.HasErrors)
 				{
 					if (target.HasFlag(TempData.Map))
 					{
+						cancellationToken.ThrowIfCancellationRequested();
+
 						if (!IsCurrentSceneCheck())
 						{
+							progress?.Report("Validating the scene…");
+
 							if (!ValidateSceneAndMirror())
 							{
+								cancellationToken.ThrowIfCancellationRequested();
+								progress?.Report("Building the map…");
+
 								RenameCacheScene();
 								CreateMapBundle(m_buildFormat);
 								success |= TempData.Map;
@@ -561,6 +597,9 @@ namespace Editor
 
 					if (target.HasFlag(TempData.Meta))
 					{
+						cancellationToken.ThrowIfCancellationRequested();
+						progress?.Report("Building the meta…");
+
 						CreateMetaBundle(m_buildFormat);
 						ClearCacheScene();
 						success |= TempData.Meta;
@@ -571,14 +610,21 @@ namespace Editor
 					success = (TempData)((int)success & ~(int)TempData.Meta);
 				}
 			}
-			catch (Exception e)
+			catch (OperationCanceledException)
 			{
-				Debug.LogError(e.Message);
-				throw;
+				Debug.LogWarning("Build cancelled.");
+				success = (TempData)((int)success & ~(int)target);
+			}
+			catch (Exception exception)
+			{
+				Debug.LogException(exception);
+				success = (TempData)((int)success & ~(int)target);
 			}
 			finally
 			{
 				while (BuildPipeline.isBuildingPlayer) await Task.Delay(100);
+
+				progress?.Report(string.Empty);
 
 				PresentReport();
 
@@ -658,14 +704,17 @@ namespace Editor
 		/// Registers a new entry on the active vendor and publishes the finished build to it in one step.
 		/// A complete build is required: see <see cref="StageBuildForCreate"/> for why that holds for every vendor.
 		/// </summary>
-		public static async void CreateNewCommunityItem(MapMetaConfig config, Action<ModItemKey> callback)
+		public static async Task CreateNewCommunityItem(
+			MapMetaConfig config,
+			CancellationToken cancellationToken,
+			Action<ModItemKey> callback)
 		{
 			// No modal progress bar here either - see the note in UploadCommunityItem.
 			Debug.Log($"Creating a new item on {session.Publisher?.DisplayName ?? "the vendor"}...");
 
 			try
 			{
-				var ready = await session.EnsureInitializedAsync(CancellationToken.None);
+				var ready = await session.EnsureInitializedAsync(cancellationToken);
 				if (!ready.Success)
 				{
 					Debug.LogError(ready.Message);
@@ -702,7 +751,7 @@ namespace Editor
 					publisherContext.DefaultVisibility,
 					publisherContext.ContentTags);
 
-				var result = await session.Publisher.CreateItemAsync(request, CancellationToken.None);
+				var result = await session.Publisher.CreateItemAsync(request, cancellationToken);
 
 				if (!result.Success)
 				{
@@ -717,6 +766,10 @@ namespace Editor
 
 				Debug.Log($"Created community item {result.Value}");
 				callback?.Invoke(result.Value);
+			}
+			catch (OperationCanceledException)
+			{
+				Debug.LogWarning("Creating the community item was cancelled.");
 			}
 			catch (Exception exception)
 			{
@@ -774,10 +827,12 @@ namespace Editor
 		/// Pushes a finished build to the active vendor, or copies it into the vendor's local install folder when
 		/// <paramref name="localBuild"/> is set and the vendor supports local installs.
 		/// </summary>
-		public static async void UploadCommunityItem(
+		public static async Task UploadCommunityItem(
 			MapManagerConfig.BuildData buildData,
 			ModItem published,
 			bool localBuild,
+			IProgress<float> progress,
+			CancellationToken cancellationToken,
 			Action<ModItemKey> callback)
 		{
 			InitPathUpload(buildData);
@@ -810,7 +865,7 @@ namespace Editor
 
 			try
 			{
-				var ready = await session.EnsureInitializedAsync(CancellationToken.None);
+				var ready = await session.EnsureInitializedAsync(cancellationToken);
 				if (!ready.Success)
 				{
 					Debug.LogError(ready.Message);
@@ -858,7 +913,7 @@ namespace Editor
 					ResolveVersion(notes),
 					notes?.changelog);
 
-				var result = await session.Publisher.UploadItemAsync(request, null, CancellationToken.None);
+				var result = await session.Publisher.UploadItemAsync(request, progress, cancellationToken);
 
 				if (!result.Success)
 				{
@@ -868,6 +923,10 @@ namespace Editor
 
 				Debug.Log(result.Message);
 				uploadedKey = published.Key;
+			}
+			catch (OperationCanceledException)
+			{
+				Debug.LogWarning("Upload cancelled.");
 			}
 			catch (Exception exception)
 			{

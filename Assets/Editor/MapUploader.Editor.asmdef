@@ -1,0 +1,26 @@
+{
+    "name": "MapUploader.Editor",
+    "rootNamespace": "",
+    "references": [
+        "MapUploader.Runtime",
+        "MapUploader.Rules",
+        "CarX.Modding.Creator",
+        "CarX.Modding.Creator.Editor",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "Unity.TextMeshPro",
+        "Unity.VisualEffectGraph.Runtime",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
