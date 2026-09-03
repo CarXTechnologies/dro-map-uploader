@@ -9,6 +9,8 @@ namespace Editor
 		/// <summary>Width the vertical scrollbar takes, kept clear so text does not run underneath it.</summary>
 		private const float ScrollbarWidth = 16f;
 
+		private const float SummaryBlockHeight = 44f;
+
 		private float m_height;
 		private MapMetaConfig m_target;
 		private Vector2 m_descriptionScroll;
@@ -19,6 +21,7 @@ namespace Editor
 			m_target = property.serializedObject.targetObject as MapMetaConfig;
 
 			var propMapName = property.FindPropertyRelative("mapName");
+			var propSummary = property.FindPropertyRelative("summary");
 			var propMapDescription = property.FindPropertyRelative("mapDescription");
 			var propIcon = property.FindPropertyRelative("icon");
 			var propLargeIcon = property.FindPropertyRelative("largeIcon");
@@ -39,22 +42,27 @@ namespace Editor
 			var rectInfo = new Rect(position.position, new Vector2(position.width, 40));
 
 			// The title limit differs per vendor (Steam allows 128, mod.io 50), so it is read off the active one.
-			GUI.Box(rectName, $"Mod Name(only letters, {MapBuilder.Limits.MaxTitleLength} char)");
+			GUI.Box(rectName, $"Mod Name (max {MapBuilder.Limits.MaxTitleLength} characters)");
 			rectName.y += 22;
 			propMapName.stringValue = EditorGUI.TextField(rectName, propMapName.stringValue);
 
-			rectLabelDesc.y += rectLabelDesc.height * 2;
+			rectName.y += 22;
+			GUI.Box(rectName, $"Summary (optional, max {MapBuilder.Limits.MaxSummaryLength} - first description line when empty)");
+			rectName.y += 22;
+			propSummary.stringValue = EditorGUI.TextField(rectName, propSummary.stringValue);
+
+			rectLabelDesc.y += rectLabelDesc.height * 2 + SummaryBlockHeight;
 			GUI.Box(rectLabelDesc, "Mod Description");
 			rectLabelDesc.x += rectLabelDesc.width;
 			GUI.Box(rectLabelDesc, " Preview, Icon (16:9)");
-			rectView.y += rectLabelDesc.height * 3 + 4;
+			rectView.y += rectLabelDesc.height * 3 + 4 + SummaryBlockHeight;
 
 			TextArea(ref rectView, propMapDescription, new Vector2(position.width / 2, 128), Vector2.right);
 			TextureProp(ref rectView, propLargeIcon, new Vector2(128, 128), Vector2.up);
 			TextureProp(ref rectView, propIcon, new Vector2(96, 96), Vector2.up);
 
 			var build = MapManagerConfig.GetBuildOrEmpty(m_target);
-			m_height = rectView.height + 64;
+			m_height = rectView.height + 64 + SummaryBlockHeight;
 
 			if (!build.lastMeta.Equals(m_target.mapMetaConfigValue))
 			{
@@ -64,6 +72,7 @@ namespace Editor
 			}
 
 			propMapName.serializedObject.ApplyModifiedPropertiesWithoutUndo();
+			propSummary.serializedObject.ApplyModifiedPropertiesWithoutUndo();
 			propMapDescription.serializedObject.ApplyModifiedPropertiesWithoutUndo();
 			propIcon.serializedObject.ApplyModifiedPropertiesWithoutUndo();
 			propLargeIcon.serializedObject.ApplyModifiedPropertiesWithoutUndo();

@@ -152,9 +152,20 @@
     -unity-font-style: italic;
 }
 
+.mb-build-actions {
+    flex-direction: row;
+    margin-top: 6px;
+}
+
 .mb-build-button {
-    min-width: 70px;
-    margin-left: 6px;
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+    height: 24px;
+    margin: 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .mb-build-result-box {

@@ -5,6 +5,7 @@ using UnityEngine;
 public struct MapMetaConfigValue
 {
 	public string mapName;
+	[TextArea] public string summary;
 	[TextArea] public string mapDescription;
 	public Texture2D icon;
 	public Texture2D largeIcon;
@@ -20,6 +21,7 @@ public struct MapMetaConfigValue
 		{
 			return value.icon == icon &&
 			       value.largeIcon == largeIcon &&
+			       value.summary == summary &&
 			       value.mapDescription == mapDescription &&
 			       value.mapName == mapName &&
 			       value.platform == platform &&
@@ -27,5 +29,10 @@ public struct MapMetaConfigValue
 		}
 
 		return false;
+	}
+
+	public override int GetHashCode()
+	{
+		return HashCode.Combine(mapName, summary, mapDescription, icon, largeIcon, platform, compress);
 	}
 }

@@ -94,6 +94,7 @@ namespace Editor
 		private VisualElement m_buildSection;
 		private EnumFlagsField m_buildTargetsField;
 		private Button m_buildButton;
+		private Button m_validateButton;
 		private DropdownField m_sceneField;
 		private string[] m_sceneNames = Array.Empty<string>();
 		private string[] m_scenePaths = Array.Empty<string>();
@@ -464,10 +465,6 @@ namespace Editor
 			m_buildTargetsField.RegisterValueChangedCallback(OnBuildTargetsChanged);
 			targetsRow.Add(m_buildTargetsField);
 
-			m_buildButton = new Button(OnBuildButtonClicked) { text = "Build", tooltip = "Build the selected targets with the settings above" };
-			m_buildButton.AddToClassList("mb-build-button");
-			targetsRow.Add(m_buildButton);
-
 			m_buildSection.Add(targetsRow);
 
 			m_sceneField = new DropdownField("Target Scene", new List<string>(), 0);
@@ -490,6 +487,23 @@ namespace Editor
 			m_compressField.RegisterValueChangedCallback(evt => m_compressBuild = (CompressBuild)evt.newValue);
 			m_compressRow.Add(m_compressField);
 			m_buildSection.Add(m_compressRow);
+
+			var actionsRow = new VisualElement();
+			actionsRow.AddToClassList("mb-build-actions");
+
+			m_validateButton = new Button(OnValidateButtonClicked)
+			{
+				text = "Validate",
+				tooltip = "Check the map against every rule without building it. Nothing in the scene is modified.",
+			};
+			m_validateButton.AddToClassList("mb-build-button");
+			actionsRow.Add(m_validateButton);
+
+			m_buildButton = new Button(OnBuildButtonClicked) { text = "Build", tooltip = "Build the selected targets with the settings above" };
+			m_buildButton.AddToClassList("mb-build-button");
+			actionsRow.Add(m_buildButton);
+
+			m_buildSection.Add(actionsRow);
 
 			return m_buildSection;
 		}
@@ -960,6 +974,7 @@ namespace Editor
 			RefreshSceneDropdown(buildData);
 
 			m_buildButton.SetEnabled(m_buildType != 0 && !IsDownloadAnyIcon());
+			m_validateButton.SetEnabled(!m_buildProcess && !IsDownloadAnyIcon());
 
 			var uploadState = RefreshBuildResult(activeConfig, buildData);
 
@@ -1443,6 +1458,20 @@ namespace Editor
 			m_publishDestination = m_destinationOptions[evt.newValue];
 			UpdateDestinationPanels();
 			RefreshDetailsPanel();
+		}
+
+		private void OnValidateButtonClicked()
+		{
+			MapManagerConfig.TryGetAttach(SelectKey, out var attachObj);
+
+			var config = attachObj?.metaConfig != null ? attachObj.metaConfig : m_pendingConfig;
+
+			if (config == null || IsDownloadAnyIcon())
+			{
+				return;
+			}
+
+			MapBuilder.ValidateOnly(config, m_buildFormat);
 		}
 
 		private void OnBuildButtonClicked()

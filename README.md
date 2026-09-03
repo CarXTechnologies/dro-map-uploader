@@ -18,6 +18,7 @@ window. Setting up the vendors — SDKs, credentials, sign in — is covered in 
   - [Build Settings](#build-settings)
   - [Mod format: dro1 vs dro2](#mod-format-dro1-vs-dro2)
   - [Upload Settings](#upload-settings)
+- [Validation](#validation)
 - [Supported components](#supported-components)
 - [Requirements](#requirements)
 
@@ -34,7 +35,12 @@ window. Setting up the vendors — SDKs, credentials, sign in — is covered in 
 
    <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/1.png?raw=true" alt="Downloading the project archive" style="width:600px;"/>
 
-2. Install **Unity Editor 2023.2.20f1** (64-bit only): **[download installer](https://download.unity3d.com/download_unity/0e25a174756c/Windows64EditorInstaller/UnitySetup64-2023.2.20f1.exe)**.
+2. Install **Unity Editor 6000.3.19f1** (64-bit only): **[download installer](https://download.unity3d.com/download_unity/7689f4515d75/Windows64EditorInstaller/UnitySetup64-6000.3.19f1.exe)**.
+
+   > [!IMPORTANT]
+   > The version has to match exactly. It is recorded in `ProjectSettings/ProjectVersion.txt`, and opening the
+   > project with a different editor upgrades it in place - which is a change you did not ask for and cannot easily
+   > undo.
 3. Launch Unity, go to **File → Open Project** and select the project folder (it must contain the `Assets` and `Packages` folders).
 
 When the project opens, you can move on to the next step.
@@ -146,7 +152,7 @@ If you need another helper script, you can write your own and add it to `Assets/
 
 ### Adding a mini-map
 
-The minimap is optional. Create an empty object in the scene (as described above), add the **Minimap** component and select the Minimap Layer. In **Textures → Element 0**, assign at least one texture — MainTexture. While configuring the map you can use the auxiliary functions to generate a template, load it into a graphics editor and design your own minimap on top of it.
+Every map needs exactly one minimap. Create an empty object in the scene (as described above), add the **Minimap** component and select the Minimap Layer. In **Textures → Element 0**, assign at least one texture — MainTexture. While configuring the map you can use the auxiliary functions to generate a template, load it into a graphics editor and design your own minimap on top of it.
 
 - **Bound center** — the minimap's offset relative to the center.
 - **Bound size** — the map's size in world scale.
@@ -186,7 +192,8 @@ The minimap is optional. Create an empty object in the scene (as described above
 
 4. Fill in the configuration file:
 
-   - **Workshop Name** — the map name shown in the Workshop.
+   - **Workshop Name** — the map name shown in the Workshop. Letters, digits, spaces and `- _ ' . , : ! ? ( ) & + /`.
+   - **Summary** *(optional)* — one line shown next to the map in a listing. mod.io requires one and caps it at 250 characters; left empty, the first line of the description is used instead.
    - **Workshop Description** *(optional)* — the description shown in the Workshop.
    - **Icon** — the map icon shown in the list of Workshop maps in the game (Read/Write enabled required, PNG only).
    - **Preview** — the map preview shown in the Workshop and when entering the map in the game (Read/Write enabled required, PNG only).
@@ -205,6 +212,7 @@ The minimap is optional. Create an empty object in the scene (as described above
 | **Format** | The mod packaging format: **dro1** or **dro2** — see [Mod format: dro1 vs dro2](#mod-format-dro1-vs-dro2). |
 | **Compression** | Shown and used for **dro1** builds only. |
 | **Build Targets** (flags) | The build targets you want to build or rebuild. |
+| **Validate** | Runs every check against the map without building anything. See [Validation](#validation). |
 | **Build** | Builds all selected Build Targets. |
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/20.png?raw=true" alt="Build settings" style="width:400px;"/>
@@ -229,6 +237,35 @@ The minimap is optional. Create an empty object in the scene (as described above
 | **Destination → External Folder** | Copies the build to any folder on disk. |
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/21.png?raw=true" alt="Upload settings" style="width:400px;"/>
+
+## Validation
+
+Press **Validate** in the Build Settings section to check the map without building it. Nothing in the scene is
+modified, so it can be run as often as you like — it is the fastest way to find out whether a map is ready.
+
+The same checks run automatically as part of a build. Either way the result opens in a **Map Validation** window
+listing everything that was found in one pass, each row with a **Select** button that takes you to the object
+responsible. The console only gets a one line summary — **To console** in the window logs the full list when you
+want it there, and **Copy** puts it on the clipboard.
+
+- **Errors** stop the build. Fix them all — they are shown together on purpose, so you do not discover them one
+  rebuild at a time.
+- **Warnings** do not stop anything, but each one means something you authored will not reach players.
+
+What is checked:
+
+| Area | Checks |
+| --- | --- |
+| Meta | Name present, allowed characters and within the vendor's length limit; description and summary lengths; icon assigned, readable, PNG and within the size limit; preview readable and within 10 MB |
+| Components | Everything against the [supported components](#supported-components) list and its per-type budget; missing (deleted) scripts |
+| Markers | A spawn point exists; dro1 allows exactly one; duplicate spawn point names on dro2; markers with no type selected; Road markers with no Collider |
+| Format | Anything supported by dro1 that a dro2 build would silently drop |
+| Lighting | More than one Directional Light; light types dro2 cannot export |
+| Geometry | Renderers with no mesh or empty material slots; MeshColliders with no mesh; LOD groups over 8 levels or with no renderers |
+| Physics | Non-convex MeshCollider driven by a non-kinematic Rigidbody |
+| Minimap | Bound Size left at zero; missing or non-Texture2D minimap textures |
+
+Objects tagged **Garbage** are skipped, exactly as they are by the build.
 
 ## Supported components
 

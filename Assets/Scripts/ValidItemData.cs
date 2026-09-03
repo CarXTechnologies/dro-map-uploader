@@ -39,7 +39,7 @@ public struct ValidItemData : ICloneable
 
 	public object Clone()
 	{
-		return new ValidItemData(maxSizeInMb, maxSizeInMbMeta, (ValidItem[])data?.ToArray().Clone());
+		return new ValidItemData(maxSizeInMb, maxSizeInMbMeta, CopyData(item => item.CloneStats()));
 	}
 
 	/// <summary>
@@ -49,7 +49,24 @@ public struct ValidItemData : ICloneable
 	/// </summary>
 	public ValidItemData CloneWithLimits(float payloadSizeInMb, float metaSizeInMb)
 	{
-		return new ValidItemData(payloadSizeInMb, metaSizeInMb, (ValidItem[])data?.ToArray().Clone());
+		return new ValidItemData(payloadSizeInMb, metaSizeInMb, CopyData(item => item.CloneRules()));
+	}
+
+	private ValidItem[] CopyData(Func<ValidItem, ValidItem> copy)
+	{
+		if (data == null)
+		{
+			return null;
+		}
+
+		var result = new ValidItem[data.Count];
+
+		for (var index = 0; index < data.Count; index++)
+		{
+			result[index] = copy(data[index]);
+		}
+
+		return result;
 	}
 }
 
@@ -137,6 +154,16 @@ public struct ValidItem : IValidComponentProcess
 		validComponentProcess?.Reset();
 		components.Clear();
 		m_isSuccess = true;
+	}
+
+	public ValidItem CloneStats()
+	{
+		return new ValidItem(type, min, max, validComponentProcess, current);
+	}
+
+	public ValidItem CloneRules()
+	{
+		return new ValidItem(type, min, max, validComponentProcess);
 	}
 
 	public bool isSuccess => m_isSuccess;

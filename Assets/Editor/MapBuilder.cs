@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Editor.Validation;
+using MapUploader.Rules;
 using Plugins.CarX.Modding.Creator.Editor;
 using Plugins.CarX.Modding.Creator.Editor.Publishing;
 using Plugins.CarX.Modding.Creator.Runtime;
@@ -48,6 +50,8 @@ namespace Editor
 		private static readonly IModCollectionProvider m_provider = new EditorCollectionProvider();
 		private static ModResults results;
 
+		private static MapValidationReport m_report;
+
 		/// <summary>The publisher the uploader currently talks to. Created on first use and reused afterwards.</summary>
 		public static ModPublisherSession session => m_session ??= new ModPublisherSession(publisherContext);
 
@@ -79,8 +83,7 @@ namespace Editor
 
 		public static string GetSceneNameFromPathNoId(string path)
 		{
-			var pos = path.LastIndexOf('/');
-			return pos == -1 ? path : path.Substring(pos + 1, path.Length - pos - 7);
+			return MapMetaRules.GetSceneNameFromPath(path);
 		}
 
 		/// <summary>
@@ -102,66 +105,15 @@ namespace Editor
 			return path.Substring(0, path.Length - (CurrentBuildId.Length + ".unity".Length)) + ".unity";
 		}
 
-		private static bool CheckMetaAndError()
+		private static void ValidateMeta()
 		{
-			var limits = Limits;
+			MapMetaValidator.Validate(m_report, MapManagerConfig.Value, m_targetScene, Limits);
 
-			if (!GetSceneNameFromPathNoId(m_targetScene).All(char.IsLetter))
+			if (m_report.HasErrors)
 			{
-				Debug.LogError("Target scene only letters");
-				return true;
+				m_report.Info(MapMetaValidator.CategoryMeta,
+					"The scene itself was not validated - fix the configuration first, then build again.");
 			}
-
-			if (string.IsNullOrWhiteSpace(MapManagerConfig.Value.mapName))
-			{
-				Debug.LogError("Please name your track");
-				return true;
-			}
-
-			if (!MapManagerConfig.Value.mapName.All(char.IsLetter))
-			{
-				Debug.LogError("Track name only letters");
-				return true;
-			}
-
-			if (MapManagerConfig.Value.mapName.Length > limits.MaxTitleLength && MapManagerConfig.instance.uploadName)
-			{
-				Debug.LogError($"Length name more {limits.MaxTitleLength} symbols");
-				return true;
-			}
-
-			if (MapManagerConfig.Value.icon == null)
-			{
-				Debug.LogError($"Please apply icon config({MapManagerConfig.instance.mapMetaConfigValue.name}) field");
-				return true;
-			}
-
-			if (!MapManagerConfig.Value.largeIcon.isReadable || !MapManagerConfig.Value.icon.isReadable)
-			{
-				Debug.LogError("Icon no valid format");
-				return true;
-			}
-
-			if (new FileInfo(m_titleIconPath).Length / ModMapTestTool.BYTES_TO_MEGABYTES > limits.MaxPreviewSizeInMb)
-			{
-				Debug.LogError($"Icon more {limits.MaxPreviewSizeInMb}mb");
-				return true;
-			}
-
-			if (new FileInfo(m_assetPath + AssetDatabase.GetAssetPath(MapManagerConfig.Value.largeIcon)).Length / ModMapTestTool.BYTES_TO_MEGABYTES > 10f)
-			{
-				Debug.LogError("Large icon more 10mb");
-				return true;
-			}
-
-			if (MapManagerConfig.Value.mapDescription.Length > limits.MaxDescriptionLength &&
-			    MapManagerConfig.instance.uploadDescription)
-			{
-				Debug.LogError($"Map description must be less than {limits.MaxDescriptionLength} characters({MapManagerConfig.Value.mapDescription.Length})");
-				return true;
-			}
-
-			return false;
 		}
 
 		private static void ClearDirectory(string path, bool recursive = true)
@@ -216,23 +168,35 @@ namespace Editor
 			}
 		}
 
-		private static bool IsValidate(Scene scene)
+		private static bool IsValidate(Transform root)
 		{
-			var isError = false;
+			SceneValidator.Validate(
+				m_report,
+				new[] { root.gameObject },
+				m_buildFormat,
+				ModMapTestTool.Target,
+				MapSkipComponentConfig.instance.valid,
+				root);
 
-			ModMapTestTool.errorCallback = (_, error) =>
+			return m_report.HasErrors;
+		}
+
+		private static void PresentReport(Action revalidate = null, bool showWhenClean = false)
+		{
+			if (m_report == null)
 			{
-				Debug.LogError(error);
-				EditorUtility.ClearProgressBar();
-				isError = true;
-			};
+				return;
+			}
 
-			ModMapTestTool.Play(MapManagerConfig.Value.mapName)?.WithList(ModMapTestTool.Target.data).ValidComponents();
-			ModMapTestTool.InitTestsEditor(scene);
-			//no dro2
-			//ModMapTestTool.RunTest(m_targetScene);
+			m_report.WriteSummaryToConsole();
 
-			return isError;
+			if (m_report.IsEmpty && !showWhenClean)
+			{
+				MapValidationWindow.CloseIfOpen();
+				return;
+			}
+
+			MapValidationWindow.Show(m_report, revalidate);
 		}
 
 		private static void InitPath()
@@ -261,7 +225,8 @@ namespace Editor
 					return true;
 				}
 
-				ModMapTestTool.TryErrorMessage(compType.Name, $"No valid component : {compType.Name}");
+				Debug.LogError($"[Map validation] Components: '{compType.Name}' on '{component.name}' is not supported " +
+				               "and cannot be packed into the bundle.", component);
 				return false;
 			}
 
@@ -329,7 +294,7 @@ namespace Editor
 
 			ApplyVendorLimitsToValidation();
 
-			if (IsValidate(scene))
+			if (IsValidate(root.transform))
 			{
 				EditorSceneManager.OpenScene(m_targetScene);
 				try
@@ -553,6 +518,7 @@ namespace Editor
 
 				m_buildFormat = formatBuild;
 				m_currentItemKey = itemKey;
+				m_report = NewReport(formatBuild);
 
 				SelectCache();
 
@@ -567,8 +533,10 @@ namespace Editor
 				}
 
 				InitPath();
+				ApplyVendorLimitsToValidation();
+				ValidateMeta();
 
-				if (!CheckMetaAndError())
+				if (!m_report.HasErrors)
 				{
 					if (target.HasFlag(TempData.Map))
 					{
@@ -611,10 +579,79 @@ namespace Editor
 			finally
 			{
 				while (BuildPipeline.isBuildingPlayer) await Task.Delay(100);
+
+				PresentReport();
+
 				callback?.Invoke(assetBuildPathTemporary, success);
 
 				MapManagerConfig.SaveForce();
 			}
+		}
+
+		private static MapValidationReport NewReport(FormatBuild formatBuild)
+		{
+			var mapName = MapManagerConfig.Value.mapName;
+
+			return new MapValidationReport
+			{
+				title = string.IsNullOrWhiteSpace(mapName) ? "<unnamed map>" : mapName,
+				sceneName = GetSceneNameFromPathNoId(m_targetScene),
+				format = formatBuild,
+			};
+		}
+
+		public static void ValidateOnly(MapMetaConfig config, FormatBuild formatBuild)
+		{
+			if (config == null)
+			{
+				Debug.LogError("Assign a Map Meta Config before validating.");
+				return;
+			}
+
+			MapManagerConfig.instance.mapMetaConfigValue = config;
+			m_buildFormat = formatBuild;
+			m_report = NewReport(formatBuild);
+
+			ApplyVendorLimitsToValidation();
+			ValidateMeta();
+
+			if (EnsureTargetSceneOpen())
+			{
+				SceneValidator.Validate(
+					m_report,
+					SceneManager.GetActiveScene().GetRootGameObjects(),
+					formatBuild,
+					ModMapTestTool.Target,
+					MapSkipComponentConfig.instance.valid);
+			}
+			else
+			{
+				m_report.Info("Scene",
+					$"'{GetSceneNameFromPathNoId(m_targetScene)}' was not opened, so only the configuration was checked.");
+			}
+
+			PresentReport(() => ValidateOnly(config, formatBuild), showWhenClean: true);
+		}
+
+		private static bool EnsureTargetSceneOpen()
+		{
+			if (string.IsNullOrEmpty(m_targetScene))
+			{
+				return false;
+			}
+
+			if (SceneManager.GetActiveScene().path == m_targetScene)
+			{
+				return true;
+			}
+
+			if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+			{
+				return false;
+			}
+
+			EditorSceneManager.OpenScene(m_targetScene);
+			return true;
 		}
 
 		/// <summary>
@@ -858,29 +895,15 @@ namespace Editor
 		/// </summary>
 		private static string ResolveVersion(MapManagerConfig.PublishData notes)
 		{
-			if (!Limits.SupportsVersion)
-			{
-				return string.Empty;
-			}
-
-			return string.IsNullOrWhiteSpace(notes?.version) ? ModdingVersion.GetFullVersion() : notes.version.Trim();
+			return MapMetaRules.ResolveVersion(notes?.version, ModdingVersion.GetFullVersion(), Limits.SupportsVersion);
 		}
 
 		/// <summary>
 		/// Short one line description for vendors that keep a summary separate from the long description.
-		/// The map config has no dedicated summary field, so the first line of the description stands in for it.
 		/// </summary>
 		private static string BuildSummary(MapMetaConfigValue meta)
 		{
-			var description = meta.mapDescription;
-
-			if (string.IsNullOrWhiteSpace(description))
-			{
-				return string.IsNullOrWhiteSpace(meta.mapName) ? string.Empty : $"{meta.mapName} track.";
-			}
-
-			var firstBreak = description.IndexOfAny(new[] { '\r', '\n' });
-			return (firstBreak == -1 ? description : description.Substring(0, firstBreak)).Trim();
+			return MapMetaRules.BuildSummary(meta.mapName, meta.mapDescription, meta.summary);
 		}
 
 		private static void BuildDataTransition()
@@ -956,15 +979,15 @@ namespace Editor
 
 			if (mapSizeInMb > limits.MaxPayloadSizeInMb)
 			{
-				ModMapTestTool.TryErrorMessage(m_uploadScene,
-					$"Map size is {mapSizeInMb:F2}/{limits.MaxPayloadSizeInMb} mb");
+				Debug.LogError($"'{m_uploadScene}': the map is {mapSizeInMb:F2} mb and this vendor accepts " +
+				               $"{limits.MaxPayloadSizeInMb} mb.");
 				tooLarge = true;
 			}
 
 			if (metaSizeInMb > limits.MaxMetaSizeInMb)
 			{
-				ModMapTestTool.TryErrorMessage(m_uploadScene,
-					$"Meta size is {metaSizeInMb:F2}/{limits.MaxMetaSizeInMb} mb");
+				Debug.LogError($"'{m_uploadScene}': the meta is {metaSizeInMb:F2} mb and this vendor accepts " +
+				               $"{limits.MaxMetaSizeInMb} mb.");
 				tooLarge = true;
 			}
 

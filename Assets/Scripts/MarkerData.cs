@@ -93,7 +93,7 @@ public class MarkerData
 		}
 	}
 
-	public string GetHead() => head.ToLower();
+	public string GetHead() => string.IsNullOrEmpty(head) ? string.Empty : head.ToLowerInvariant();
 
 	public static string GetHeadTarget(string param)
 	{

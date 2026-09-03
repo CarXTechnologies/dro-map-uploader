@@ -54,6 +54,30 @@ Exactly **one** `Minimap` component per map. Its textures are exported as PNG an
 
 The marker also carries the friction and bump parameters of the selected surface template. Road objects are automatically flagged static during the build.
 
+### What is not exported
+
+These are supported by dro1 and have no place in the dro2 catalog. A dro2 build drops them without failing, so the
+map still builds and publishes — with that content missing in game. The uploader now warns about each of them
+during [validation](README.md#validation) rather than leaving you to find out from the published mod.
+
+| Category | Not exported by dro2 |
+| --- | --- |
+| **Physics** | BoxCollider, SphereCollider, CapsuleCollider, Rigidbody, FixedJoint, SpringJoint, HingeJoint |
+| **Graphics** | ReflectionProbe, Volume (and their HDRP data components) |
+| **Renderer** | Directional and Area lights, Animator |
+| **UI** | Canvas, CanvasScaler, CanvasRenderer, RectTransform, TextMeshProUGUI, RawImage |
+| **Particles** | ParticleSystem, ParticleSystemRenderer, VisualEffect (VFX Graph) |
+| **Other** | VideoPlayer |
+
+Collision in dro2 comes from `MeshCollider` alone. A prop whose only collider is a BoxCollider is exported as
+geometry with nothing to collide against.
+
+Also dropped, with a warning at export time:
+
+- a `LODGroup` with more than 8 levels — the whole group, including its geometry,
+- a material texture that is not a `Texture2D`,
+- an object with no `MeshFilter` + `MeshRenderer` and no `MeshCollider`.
+
 ## Selecting the format
 
 1. Open **Tools → MapBuilder**.
