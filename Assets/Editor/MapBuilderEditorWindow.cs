@@ -102,6 +102,7 @@ namespace Editor
 		private string[] m_sceneNames = Array.Empty<string>();
 		private string[] m_scenePaths = Array.Empty<string>();
 		private EnumField m_formatField;
+		private HelpBox m_formatBlockBox;
 		private VisualElement m_compressRow;
 		private EnumField m_compressField;
 
@@ -379,8 +380,14 @@ namespace Editor
 			{
 				m_buildFormat = (FormatBuild)evt.newValue;
 				UpdateCompressVisibility();
+				RefreshFormatAvailability();
 			});
 			m_buildSection.Add(m_formatField);
+
+			m_formatBlockBox = new HelpBox(string.Empty, HelpBoxMessageType.Error);
+			m_formatBlockBox.AddToClassList("mb-build-result-item");
+			m_formatBlockBox.style.display = DisplayStyle.None;
+			m_buildSection.Add(m_formatBlockBox);
 
 			m_compressRow = new VisualElement();
 			m_compressField = new EnumField("Compression", m_compressBuild);
@@ -706,7 +713,9 @@ namespace Editor
 
 			RefreshSceneDropdown(buildData);
 
-			m_buildButton.SetEnabled(m_buildType != 0 && !IsDownloadAnyIcon() && !m_buildProcess);
+			var formatBlocked = RefreshFormatAvailability();
+
+			m_buildButton.SetEnabled(m_buildType != 0 && !IsDownloadAnyIcon() && !m_buildProcess && !formatBlocked);
 			m_validateButton.SetEnabled(!m_buildProcess && !IsDownloadAnyIcon());
 			m_cancelButton.style.display = m_buildProcess ? DisplayStyle.Flex : DisplayStyle.None;
 
@@ -963,6 +972,23 @@ namespace Editor
 		}
 
 		/// <summary>
+		/// Shows why the selected format cannot be built by this editor, if it cannot.
+		/// The format stays selectable on purpose: hiding dro1 would leave the author guessing where it went.
+		/// </summary>
+		private bool RefreshFormatAvailability()
+		{
+			var blocked = MapBuilder.IsFormatBlocked(m_buildFormat, out var reason);
+
+			if (m_formatBlockBox != null)
+			{
+				m_formatBlockBox.text = reason;
+				m_formatBlockBox.style.display = blocked ? DisplayStyle.Flex : DisplayStyle.None;
+			}
+
+			return blocked;
+		}
+
+		/// <summary>
 		/// Rebuilds the destination choices for the active vendor, hiding the ones it cannot serve.
 		/// </summary>
 		private void RefreshDestinationOptions()
@@ -1085,6 +1111,13 @@ namespace Editor
 
 			if (IsDownloadAnyIcon() || config == null || m_buildProcess)
 			{
+				return;
+			}
+
+			// Belt and braces on top of the disabled button: a stale panel must not let a locked format through.
+			if (MapBuilder.IsFormatBlocked(m_buildFormat, out var blockReason))
+			{
+				Debug.LogError(blockReason);
 				return;
 			}
 

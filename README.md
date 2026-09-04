@@ -224,6 +224,13 @@ Every map needs exactly one minimap. Create an empty object in the scene (as des
 ### Mod format: dro1 vs dro2
 
 - **dro1** — the original format. The scene and its meta data are packed into Unity **AssetBundles**, with an optional Compression setting.
+
+  > [!IMPORTANT]
+  > dro1 is locked to **Unity 2023.2.20f1** — the engine version the shipped game runs. An asset bundle is only
+  > readable by the exact engine that wrote it, so a dro1 bundle built by any other editor would publish fine and
+  > load as an empty map in game. The uploader therefore refuses to build dro1 from a different editor version.
+  > The required version is set on `MapManagerConfig` (**Dro1 Editor Version**) and should be updated together with
+  > the game when its engine moves.
 - **dro2** — the newer format. The map is exported into a plain-data catalog (obj / mtl / png / json) instead of AssetBundles, so it is not tied to the Unity version it was built with. The Compression setting is unused and hidden when dro2 is selected.
 
 📄 Full dro2 documentation: **[DRO2.md](DRO2.md)** — output structure, mesh/material/texture export rules, LOD and marker handling, limits and troubleshooting.

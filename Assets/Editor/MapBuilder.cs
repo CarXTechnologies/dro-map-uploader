@@ -115,6 +115,30 @@ namespace Editor
 			return path + "/" + sceneName + ".unity";
 		}
 
+		/// <summary>
+		/// Whether <paramref name="format"/> may be built by this editor, with the reason when it may not.
+		/// dro1 is locked to the engine version the game runs (<see cref="MapManagerConfig.dro1EditorVersion"/>).
+		/// </summary>
+		public static bool IsFormatBlocked(FormatBuild format, out string reason)
+		{
+			reason = string.Empty;
+
+			if (format != FormatBuild.dro1)
+			{
+				return false;
+			}
+
+			var required = MapManagerConfig.instance.dro1EditorVersion;
+
+			if (FormatRules.IsEditorVersionCompatible(required, Application.unityVersion))
+			{
+				return false;
+			}
+
+			reason = FormatRules.DescribeDro1Block(required, Application.unityVersion);
+			return true;
+		}
+
 		private static void ValidateMeta()
 		{
 			MapMetaValidator.Validate(m_report, MapManagerConfig.Value, m_targetScene, Limits);
@@ -563,6 +587,12 @@ namespace Editor
 				ApplyVendorLimitsToValidation();
 
 				progress?.Report("Checking the map configuration…");
+
+				if (IsFormatBlocked(m_buildFormat, out var blockReason))
+				{
+					m_report.Error(SceneValidator.CategoryFormat, blockReason);
+				}
+
 				ValidateMeta();
 
 				if (!m_report.HasErrors)
@@ -659,6 +689,12 @@ namespace Editor
 			m_report = NewReport(formatBuild);
 
 			ApplyVendorLimitsToValidation();
+
+			if (IsFormatBlocked(formatBuild, out var blockReason))
+			{
+				m_report.Error(SceneValidator.CategoryFormat, blockReason);
+			}
+
 			ValidateMeta();
 
 			if (EnsureTargetSceneOpen())

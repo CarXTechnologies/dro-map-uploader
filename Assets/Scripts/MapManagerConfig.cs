@@ -50,6 +50,15 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 	[HideInInspector] public bool buildLocal;
 
 	/// <summary>
+	/// Editor version dro1 builds are locked to. The game loads dro1 asset bundles with this exact engine version,
+	/// so building them from any other editor is blocked - the bundle would publish fine and load as an empty map.
+	/// Update this together with the game when the game's engine moves. Empty means dro1 is not version locked.
+	/// </summary>
+	[Tooltip("dro1 asset bundles are only readable by this exact Unity version, because it is what the game runs. " +
+	         "Building dro1 from any other editor is blocked. Leave empty to lift the lock.")]
+	public string dro1EditorVersion = "2023.2.20f1";
+
+	/// <summary>
 	/// Link between a mod entry on a vendor and the map config that produces its content.
 	/// </summary>
 	[Serializable]
