@@ -69,31 +69,19 @@ public struct ValidItemData : ICloneable
 	}
 }
 
-public interface IValidComponentProcess
-{
-	public bool isSuccess { get; }
-	public string processMessage { get; }
-	public void ValidProcess(Component comp);
-
-	public void Reset();
-}
-
 [Serializable]
-public struct ValidItem : IValidComponentProcess
+public struct ValidItem
 {
 	public string type;
 	public int min;
 	public int max;
 	public int current;
-	public IValidComponentProcess validComponentProcess;
 	public List<Component> components;
-	private bool m_isSuccess;
 
 	public ValidItem(
 		string type,
 		int min,
 		int max,
-		IValidComponentProcess validComponentProcess = null,
 		int current = 0,
 		List<Component> components = null)
 	{
@@ -101,9 +89,7 @@ public struct ValidItem : IValidComponentProcess
 		this.min = min;
 		this.max = max;
 		this.current = current;
-		this.validComponentProcess = validComponentProcess;
 		this.components = components ?? new List<Component>();
-		m_isSuccess = true;
 	}
 
 	public string ToStat()
@@ -114,10 +100,6 @@ public struct ValidItem : IValidComponentProcess
 	public override string ToString()
 	{
 		var result = string.Empty;
-		if (validComponentProcess is { isSuccess: false })
-		{
-			result += validComponentProcess.processMessage + "\n";
-		}
 
 		if (current < min)
 		{
@@ -132,40 +114,20 @@ public struct ValidItem : IValidComponentProcess
 		return result;
 	}
 
-	public void ValidProcess()
-	{
-		foreach (var component in components)
-		{
-			ValidProcess(component);
-		}
-
-		m_isSuccess = m_isSuccess && (current >= min && current <= max);
-	}
-
-	public void ValidProcess(Component comp)
-	{
-		validComponentProcess?.ValidProcess(comp);
-		m_isSuccess = m_isSuccess && (validComponentProcess?.isSuccess ?? true);
-	}
-
 	public void Reset()
 	{
-		validComponentProcess?.Reset();
-		components.Clear();
-		m_isSuccess = true;
+		components?.Clear();
+		current = 0;
 	}
 
 	public ValidItem CloneStats()
 	{
-		return new ValidItem(type, min, max, validComponentProcess, current);
+		return new ValidItem(type, min, max, current);
 	}
 
 	public ValidItem CloneRules()
 	{
-		return new ValidItem(type, min, max, validComponentProcess);
+		return new ValidItem(type, min, max);
 	}
 
-	public bool isSuccess => m_isSuccess;
-
-	public string processMessage => ToString();
 }

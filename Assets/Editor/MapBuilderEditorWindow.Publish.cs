@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -48,7 +48,12 @@ namespace Editor
 			RefreshDetailsPanel();
 
 			var progress = new Progress<float>(fraction =>
-				SetPublishStatus($"Uploading… {Mathf.RoundToInt(Mathf.Clamp01(fraction) * 100f)}%"));
+            {
+                if (!m_buildProcess || m_operationCts == null) return;
+                SetPublishStatus($"Uploading… {Mathf.RoundToInt(Mathf.Clamp01(fraction) * 100f)}%");
+                m_operationProgress.value = Mathf.Clamp01(fraction) * 100;
+                m_operationProgress.title = $"{m_operationProgress.value:F0}%";
+            });
 
 			try
 			{
@@ -69,6 +74,7 @@ namespace Editor
 				m_loads[item.Key] = false;
 				SetPublishStatus(string.Empty);
 				EndOperation();
+				if (!localBuild) await FetchItems();
 			}
 		}
 
@@ -82,7 +88,7 @@ namespace Editor
 
 			m_pathToExternal = path;
 			m_externalPathField.SetValueWithoutNotify(m_pathToExternal);
-			m_externalExportButton.SetEnabled(!string.IsNullOrWhiteSpace(m_pathToExternal) && Path.IsPathFullyQualified(m_pathToExternal));
+			RefreshExportButton();
 		}
 
 		private void OnExportExternalClicked()
@@ -96,6 +102,7 @@ namespace Editor
 				return;
 			}
 
+			if (m_buildProcess || !CanExportCurrentMap()) return;
 			var buildData = MapManagerConfig.GetBuildOrEmpty(config);
 
 			// The copy is synchronous and writes outside the project, so the status line is the only sign it ran.
@@ -119,18 +126,31 @@ namespace Editor
 
 			m_buildProcess = true;
 			BeginOperation();
+			m_operationProgress.title = L("Подготовка…", "Preparing…");
 			SetBuildStatus("Creating the item…");
 			RefreshDetailsPanel();
+			var createdKey = default(ModItemKey);
 
 			try
 			{
 				await MapBuilder.CreateNewCommunityItem(config, m_operationCts.Token,
-					newKey => OnItemCreated(config, newKey));
+					newKey => createdKey = newKey,
+					new ImmediateProgress<string>(stage =>
+					{
+						SetBuildStatus(stage);
+						m_operationProgress.title = LocalizeOperation(stage);
+					}));
+				if (createdKey.IsValid) OnItemCreated(config, createdKey);
 			}
 			finally
 			{
+				m_lastOperationSummary = createdKey.IsValid
+					? L("Публикация создана.", "Publication created.")
+					: L("Публикация не завершена. Подробности в Console.", "Publication did not complete. See the Console.");
 				EndOperation();
 			}
+			// Refresh only after releasing the operation guard; fetching waits for it.
+			if (createdKey.IsValid) Fetch();
 		}
 
 		private void OnItemCreated(MapMetaConfig config, ModItemKey newKey)
@@ -142,7 +162,6 @@ namespace Editor
 				InvalidateMetaBuild(config);
 			}
 
-			Fetch();
 		}
 
 		/// <summary>
@@ -170,9 +189,7 @@ namespace Editor
 				buildData.path,
 				(int)withoutMeta,
 				buildData.lastValid,
-				buildData.format,
-				buildData.platform,
-				buildData.compress));
+				buildData.format));
 
 			Debug.Log("The item was created with the build that existed at the time, whose meta carries a placeholder " +
 			          "id. Rebuild Meta and upload so the mod id in the meta matches the item.");
@@ -217,7 +234,7 @@ namespace Editor
 			// everywhere: a config to describe it, and a finished build to publish.
 			if (m_pendingConfig == null)
 			{
-				ShowNewItemHint("Assign a Map Meta Config above to create an item.");
+				ShowNewItemHint(L("Выберите локальную карту.", "Select a local map."));
 				return;
 			}
 
@@ -226,7 +243,7 @@ namespace Editor
 
 			if (missing != 0)
 			{
-				ShowNewItemHint($"Build {missing} first — an item is created together with its files.");
+				ShowNewItemHint(L("Сначала соберите карту и её данные. Публикация создаётся вместе с файлами.", "Build the map and its metadata first. A publication is created together with its files."));
 				return;
 			}
 

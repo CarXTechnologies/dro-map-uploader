@@ -1,10 +1,12 @@
-﻿using System;
+using System;
+using System.Linq;
 using UnityEngine;
 
 [Serializable]
 public struct MapMetaConfigValue
 {
 	public string mapName;
+	public string mapVersion;
 	[TextArea] public string summary;
 	[TextArea] public string mapDescription;
 	public Texture2D icon;
@@ -12,8 +14,6 @@ public struct MapMetaConfigValue
 	public string[] authors;
 	public string url;
 
-	public PlatformBuild platform;
-	public CompressBuild compress;
 
 	public override bool Equals(object obj)
 	{
@@ -24,8 +24,9 @@ public struct MapMetaConfigValue
 			       value.summary == summary &&
 			       value.mapDescription == mapDescription &&
 			       value.mapName == mapName &&
-			       value.platform == platform &&
-			       value.compress == compress;
+			       value.mapVersion == mapVersion &&
+			       value.url == url &&
+			       (value.authors ?? Array.Empty<string>()).SequenceEqual(authors ?? Array.Empty<string>());
 		}
 
 		return false;
@@ -33,6 +34,9 @@ public struct MapMetaConfigValue
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine(mapName, summary, mapDescription, icon, largeIcon, platform, compress);
+		var hash = new HashCode();
+		hash.Add(mapName); hash.Add(mapVersion); hash.Add(summary); hash.Add(mapDescription); hash.Add(icon); hash.Add(largeIcon); hash.Add(url);
+		foreach (var author in authors ?? Array.Empty<string>()) hash.Add(author);
+		return hash.ToHashCode();
 	}
 }

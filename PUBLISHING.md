@@ -93,7 +93,7 @@ cannot drift apart. It is chosen from the **Game** dropdown at the top of the Ma
 | Asset | Per-game field | Where it comes from |
 | --- | --- | --- |
 | `SteamWorkshopConfig` | Display Name | Whatever you want to see in the picker |
-| `SteamWorkshopConfig` | App Id | Steam app id — the first entry is pre-filled with `635260` |
+| `SteamWorkshopConfig` | App Id | Steam app id — the first entry is pre-filled with `1826420` |
 | `ModIoConfig` | Display Name | Whatever you want to see in the picker |
 | `ModIoConfig` | **Game Id** | mod.io → account settings → **Access → API access**, on the row for this game |
 | `ModIoConfig` | **API Key** | same row — reveal it with the eye icon |

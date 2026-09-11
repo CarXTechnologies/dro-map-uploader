@@ -17,10 +17,10 @@ namespace Editor
 	{
 		private const string ConfigDirectory = "Assets/Resources/CarX.Modding";
 
-		/// <summary>Steam app id of CarX Drift Racing Online.</summary>
-		private const uint SteamAppId = 635260;
+		/// <summary>Steam app id of CarX Drift Racing Online 2.</summary>
+		private const uint SteamAppId = 1826420;
 
-		private const string SteamGameName = "CarX Drift Racing Online";
+		private const string SteamGameName = "CarX Drift Racing Online 2";
 
 		private const string ModIoGameName = "CarX Drift Racing Online 2";
 

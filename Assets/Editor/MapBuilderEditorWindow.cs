@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,7 +17,7 @@ namespace Editor
 	{
 		private const string StyleSheetPath = "Assets/Editor/MapBuilderEditorWindow.uss";
 
-		private int m_selectItemIndex;
+		private int m_selectItemIndex = -1;
 		private readonly List<ModItem> m_fetchResultListItems = new();
 
 		private ModItem SelectItem => m_selectItemIndex >= 0 && m_selectItemIndex < m_fetchResultListItems.Count
@@ -30,16 +30,12 @@ namespace Editor
 		private readonly Dictionary<ModItemKey, bool> m_attaching = new();
 		private readonly Dictionary<ModItemKey, (Texture2D texture, bool downloading)> m_images = new();
 
-		private int m_buildType;
-		private FormatBuild m_buildFormat;
+		[SerializeField] private int m_buildType = 3;
+		[SerializeField] private FormatBuild m_buildFormat = FormatBuild.Binary;
 		private FormatBuild m_buildFormatCached;
-		private PlatformBuild m_platformBuild;
-		private CompressBuild m_compressBuild;
-		private PlatformBuild m_platformBuildCached;
-		private CompressBuild m_compressBuildCached;
 		private bool m_buildProcess;
 		private bool m_fetching;
-		private PublishDestination m_publishDestination;
+		[SerializeField] private PublishDestination m_publishDestination = PublishDestination.ExternalFolder;
 
 		/// <summary>
 		/// Destinations offered for the active vendor, in the order they appear in the radio group.
@@ -48,7 +44,7 @@ namespace Editor
 		/// </summary>
 		private readonly List<PublishDestination> m_destinationOptions = new();
 		private bool m_buttonLastClickOnAnyItem = true;
-		private string m_pathToExternal;
+		[SerializeField] private string m_pathToExternal;
 
 		private enum PublishDestination
 		{
@@ -76,15 +72,13 @@ namespace Editor
 		private HelpBox m_previewMissingBox;
 		private Label m_previewIdLabel;
 
-		private Label m_descriptionText;
 
-		private ObjectField m_configField;
 
 		/// <summary>
 		/// Config chosen in the field, kept even while no item is selected. On a vendor account without any items
 		/// there is nothing to attach a config to, yet one is still needed to create the first item.
 		/// </summary>
-		private MapMetaConfig m_pendingConfig;
+		[SerializeField] private MapMetaConfig m_pendingConfig;
 
 		private HelpBox m_newItemHint;
 		private Button m_newItemButton;
@@ -92,6 +86,7 @@ namespace Editor
 		private VisualElement m_buildAndPublishWrapper;
 
 		private VisualElement m_buildSection;
+        private EnumField m_binaryTexturesField;
 		private EnumFlagsField m_buildTargetsField;
 		private Button m_buildButton;
 		private Button m_validateButton;
@@ -103,15 +98,12 @@ namespace Editor
 		private string[] m_scenePaths = Array.Empty<string>();
 		private EnumField m_formatField;
 		private HelpBox m_formatBlockBox;
-		private VisualElement m_compressRow;
-		private EnumField m_compressField;
 
 		private VisualElement m_buildResultBox;
 
 		private VisualElement m_destinationSection;
 		private HelpBox m_noItemHint;
 		private Label m_publishStatus;
-		private TextField m_versionField;
 		private TextField m_changelogField;
 		private RadioButtonGroup m_destinationGroup;
 
@@ -213,34 +205,7 @@ namespace Editor
 		}
 
 
-		private void BuildLayout(VisualElement root)
-		{
-			root.Clear();
-
-			var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(StyleSheetPath);
-			if (styleSheet != null)
-			{
-				root.styleSheets.Add(styleSheet);
-			}
-
-			root.AddToClassList("mb-root");
-
-			root.Add(BuildVendorBar());
-
-			m_unavailableBox = new VisualElement();
-			m_unavailableHelp = new HelpBox(string.Empty, HelpBoxMessageType.Error);
-			m_unavailableHelp.AddToClassList("mb-unavailable");
-			m_unavailableBox.Add(m_unavailableHelp);
-			m_unavailableBox.style.display = DisplayStyle.None;
-			root.Add(m_unavailableBox);
-
-			m_mainLayout = new VisualElement();
-			m_mainLayout.AddToClassList("mb-main-layout");
-			root.Add(m_mainLayout);
-
-			m_mainLayout.Add(BuildLeftPanel());
-			m_mainLayout.Add(BuildRightPanel());
-		}
+		private void BuildLayout(VisualElement root) => BuildWorkspace(root);
 
 		/// <summary>
 		/// Vendor picker plus sign in state. Sits above everything else because every other control in the window
@@ -251,7 +216,7 @@ namespace Editor
 			m_vendorBar = new VisualElement();
 			m_vendorBar.AddToClassList("mb-vendor-bar");
 
-			m_vendorField = new DropdownField("Vendor", GetVendorDisplayNames(), 0);
+			m_vendorField = new DropdownField(L("Площадка", "Platform"), GetVendorDisplayNames(), 0);
 			m_vendorField.AddToClassList("mb-field");
 			m_vendorField.RegisterValueChangedCallback(OnVendorChanged);
 			m_vendorBar.Add(m_vendorField);
@@ -261,7 +226,7 @@ namespace Editor
 			m_gamePreview.style.display = DisplayStyle.None;
 			m_vendorBar.Add(m_gamePreview);
 
-			m_gameField = new DropdownField("Game", new List<string>(), 0);
+			m_gameField = new DropdownField(L("Игра", "Game"), new List<string>(), 0);
 			m_gameField.AddToClassList("mb-field");
 			m_gameField.AddToClassList("mb-grow");
 			m_gameField.RegisterValueChangedCallback(OnGameChanged);
@@ -271,7 +236,7 @@ namespace Editor
 			m_authLabel.AddToClassList("mb-auth-state");
 			m_vendorBar.Add(m_authLabel);
 
-			m_authButton = new Button(OnAuthButtonClicked) { text = "Sign in" };
+			m_authButton = new Button(OnAuthButtonClicked) { text = L("Войти", "Sign in") };
 			m_vendorBar.Add(m_authButton);
 
 			return m_vendorBar;
@@ -279,36 +244,10 @@ namespace Editor
 
 		private static List<string> GetVendorDisplayNames()
 		{
-			return ModPublisherSession.AvailableVendors.Select(vendor => vendor.DisplayName).ToList();
+			return ModPublisherSession.AvailableVendors.Where(vendor => vendor.VendorId == "modio").Select(vendor => vendor.DisplayName).ToList();
 		}
 
-		private VisualElement BuildLeftPanel()
-		{
-			var left = new ScrollView(ScrollViewMode.Vertical);
-			left.AddToClassList("mb-left-panel");
 
-			left.Add(BuildPreviewBox());
-			left.Add(BuildDescriptionBox());
-
-			m_configField = new ObjectField("Map Meta Config")
-			{
-				objectType = typeof(MapMetaConfig),
-				allowSceneObjects = false,
-			};
-			m_configField.AddToClassList("mb-field");
-			m_configField.RegisterValueChangedCallback(OnConfigFieldChanged);
-			left.Add(m_configField);
-
-			m_buildAndPublishWrapper = new VisualElement();
-			m_buildAndPublishWrapper.Add(BuildBuildSection());
-			m_buildResultBox = new VisualElement();
-			m_buildResultBox.AddToClassList("mb-build-result-box");
-			m_buildAndPublishWrapper.Add(m_buildResultBox);
-			m_buildAndPublishWrapper.Add(BuildDestinationSection());
-			left.Add(m_buildAndPublishWrapper);
-
-			return left;
-		}
 
 		private VisualElement BuildPreviewBox()
 		{
@@ -319,7 +258,7 @@ namespace Editor
 			m_previewImage.AddToClassList("mb-preview-image");
 			previewBox.Add(m_previewImage);
 
-			m_previewMissingBox = new HelpBox("Preview is missed", HelpBoxMessageType.Warning);
+			m_previewMissingBox = new HelpBox(L("Добавьте превью карты", "Add a map preview"), HelpBoxMessageType.Warning);
 			m_previewMissingBox.AddToClassList("mb-preview-missing");
 			previewBox.Add(m_previewMissingBox);
 
@@ -333,35 +272,21 @@ namespace Editor
 			return previewBox;
 		}
 
-		private VisualElement BuildDescriptionBox()
-		{
-			var box = new VisualElement();
-			box.AddToClassList("mb-description-box");
 
-			var header = new Label("Description");
-			header.AddToClassList("mb-section-header");
-			box.Add(header);
-
-			m_descriptionText = new Label(string.Empty) { enableRichText = false };
-			m_descriptionText.AddToClassList("mb-description-text");
-			box.Add(m_descriptionText);
-
-			return box;
-		}
 
 		private VisualElement BuildBuildSection()
 		{
 			m_buildSection = new VisualElement();
 			m_buildSection.AddToClassList("mb-box");
 
-			var header = new Label("Build Settings");
+			var header = new Label(L("Сборка карты", "Build map"));
 			header.AddToClassList("mb-section-header");
 			m_buildSection.Add(header);
 
 			var targetsRow = new VisualElement();
 			targetsRow.AddToClassList("mb-row");
 
-			m_buildTargetsField = new EnumFlagsField("Build Targets", (TempData)0);
+			m_buildTargetsField = new EnumFlagsField(L("Что пересобрать", "Rebuild targets"), (TempData)0);
 			m_buildTargetsField.AddToClassList("mb-field");
 			m_buildTargetsField.AddToClassList("mb-grow");
 			m_buildTargetsField.RegisterValueChangedCallback(OnBuildTargetsChanged);
@@ -369,18 +294,19 @@ namespace Editor
 
 			m_buildSection.Add(targetsRow);
 
-			m_sceneField = new DropdownField("Target Scene", new List<string>(), 0);
+			m_sceneField = new DropdownField(L("Сцена", "Scene"), new List<string>(), 0);
 			m_sceneField.AddToClassList("mb-field");
 			m_sceneField.RegisterValueChangedCallback(OnSceneChanged);
 			m_buildSection.Add(m_sceneField);
 
-			m_formatField = new EnumField("Format", m_buildFormat);
+			if (MapBuilder.IsFormatBlocked(m_buildFormat, out _)) m_buildFormat = FormatBuild.Binary;
+			m_formatField = new EnumField(L("Формат", "Format"), m_buildFormat);
 			m_formatField.AddToClassList("mb-field");
 			m_formatField.RegisterValueChangedCallback(evt =>
 			{
 				m_buildFormat = (FormatBuild)evt.newValue;
-				UpdateCompressVisibility();
-				RefreshFormatAvailability();
+				UpdateBinaryOptionsVisibility();
+				RefreshDetailsPanel();
 			});
 			m_buildSection.Add(m_formatField);
 
@@ -389,29 +315,30 @@ namespace Editor
 			m_formatBlockBox.style.display = DisplayStyle.None;
 			m_buildSection.Add(m_formatBlockBox);
 
-			m_compressRow = new VisualElement();
-			m_compressField = new EnumField("Compression", m_compressBuild);
-			m_compressField.AddToClassList("mb-field");
-			m_compressField.RegisterValueChangedCallback(evt => m_compressBuild = (CompressBuild)evt.newValue);
-			m_compressRow.Add(m_compressField);
-			m_buildSection.Add(m_compressRow);
+            m_binaryTexturesField = new EnumField(L("Текстуры Binary", "Binary textures"), Plugins.CarX.Modding.Creator.Editor.BinaryMapPacker.TextureEncoding)
+            {
+                tooltip = "BC7: smaller GPU textures with high-quality lossy compression. RGBA32: lossless, larger. Both include mipmaps prepared during export."
+            };
+            m_binaryTexturesField.AddToClassList("mb-field");
+            m_binaryTexturesField.RegisterValueChangedCallback(evt => Plugins.CarX.Modding.Creator.Editor.BinaryMapPacker.TextureEncoding = (Plugins.CarX.Modding.Creator.Runtime.BinaryTextureEncoding)evt.newValue);
+            m_buildSection.Add(m_binaryTexturesField);
 
 			var actionsRow = new VisualElement();
 			actionsRow.AddToClassList("mb-build-actions");
 
 			m_validateButton = new Button(OnValidateButtonClicked)
 			{
-				text = "Validate",
+				text = L("Проверить карту", "Validate map"),
 				tooltip = "Check the map against every rule without building it. Nothing in the scene is modified.",
 			};
 			m_validateButton.AddToClassList("mb-build-button");
 			actionsRow.Add(m_validateButton);
 
-			m_buildButton = new Button(OnBuildButtonClicked) { text = "Build", tooltip = "Build the selected targets with the settings above" };
+			m_buildButton = new Button(OnBuildButtonClicked) { text = L("Собрать карту", "Build map"), tooltip = "Build the selected targets with the settings above" };
 			m_buildButton.AddToClassList("mb-build-button");
 			actionsRow.Add(m_buildButton);
 
-			m_cancelButton = new Button(OnCancelButtonClicked) { text = "Cancel", tooltip = "Stop the operation in progress" };
+			m_cancelButton = new Button(OnCancelButtonClicked) { text = L("Отмена", "Cancel"), tooltip = "Stop the operation in progress" };
 			m_cancelButton.AddToClassList("mb-build-button");
 			m_cancelButton.style.display = DisplayStyle.None;
 			actionsRow.Add(m_cancelButton);
@@ -423,6 +350,8 @@ namespace Editor
 			m_buildStatus.style.display = DisplayStyle.None;
 			m_buildSection.Add(m_buildStatus);
 
+            UpdateBinaryOptionsVisibility();
+
 			return m_buildSection;
 		}
 
@@ -432,12 +361,12 @@ namespace Editor
 			box.AddToClassList("mb-box");
 			m_destinationSection = box;
 
-			var header = new Label("Destination");
+			var header = new Label(L("Куда отправить сборку", "Build destination"));
 			header.AddToClassList("mb-section-header");
 			box.Add(header);
 
 			m_noItemHint = new HelpBox(
-				"Select an item on the right to publish to, or create one with New Item once the build is done.",
+				L("Соберите карту, чтобы создать публикацию. Для обновления выберите существующую публикацию ниже.", "Build a map to create a publication. To update one, select an existing publication below."),
 				HelpBoxMessageType.Info);
 			box.Add(m_noItemHint);
 
@@ -447,7 +376,7 @@ namespace Editor
 			m_destinationGroup.RegisterValueChangedCallback(OnDestinationChanged);
 			box.Add(m_destinationGroup);
 
-			var publishHeader = new Label("Publish");
+			var publishHeader = new Label(L("Параметры отправки", "Upload settings"));
 			publishHeader.AddToClassList("mb-section-header");
 			box.Add(publishHeader);
 
@@ -458,36 +387,27 @@ namespace Editor
 
 			m_vendorPanel = new VisualElement();
 
-			m_versionField = new TextField("Version")
-			{
-				tooltip = "Version label for this release, shown against the uploaded file. " +
-				          "Left empty it falls back to the uploader version.",
-			};
-			m_versionField.AddToClassList("mb-field");
-			m_versionField.RegisterValueChangedCallback(evt => WritePublishNotes(notes => notes.version = evt.newValue));
-			m_vendorPanel.Add(m_versionField);
-
-			m_changelogField = new TextField("Changelog")
+			m_changelogField = new TextField(L("Что изменилось", "Changelog"))
 			{
 				multiline = true,
 				tooltip = "What changed in this release. Shown to players on the mod page.",
 			};
 			m_changelogField.AddToClassList("mb-field");
-			StretchToMultiline(m_changelogField, 90f);
+			StretchToMultiline(m_changelogField, 54f);
 			m_changelogField.RegisterValueChangedCallback(evt => WritePublishNotes(notes => notes.changelog = evt.newValue));
 			m_vendorPanel.Add(m_changelogField);
 
-			m_uploadNameToggle = new Toggle("Upload Name") { tooltip = "Overwrite the item title on upload" };
+			m_uploadNameToggle = new Toggle(L("Обновить название", "Update title")) { tooltip = "Overwrite the item title on upload" };
 			m_uploadNameToggle.AddToClassList("mb-field");
 			m_uploadNameToggle.RegisterValueChangedCallback(evt => MapManagerConfig.instance.uploadName = evt.newValue);
 			m_vendorPanel.Add(m_uploadNameToggle);
 
-			m_uploadDescriptionToggle = new Toggle("Upload Description") { tooltip = "Overwrite the item description on upload" };
+			m_uploadDescriptionToggle = new Toggle(L("Обновить описание", "Update description")) { tooltip = "Overwrite the item description on upload" };
 			m_uploadDescriptionToggle.AddToClassList("mb-field");
 			m_uploadDescriptionToggle.RegisterValueChangedCallback(evt => MapManagerConfig.instance.uploadDescription = evt.newValue);
 			m_vendorPanel.Add(m_uploadDescriptionToggle);
 
-			m_uploadPreviewToggle = new Toggle("Upload Preview") { tooltip = "Overwrite the item preview image on upload" };
+			m_uploadPreviewToggle = new Toggle(L("Обновить превью", "Update preview")) { tooltip = "Overwrite the item preview image on upload" };
 			m_uploadPreviewToggle.AddToClassList("mb-field");
 			m_uploadPreviewToggle.RegisterValueChangedCallback(evt => MapManagerConfig.instance.uploadPreview = evt.newValue);
 			m_vendorPanel.Add(m_uploadPreviewToggle);
@@ -501,7 +421,7 @@ namespace Editor
 			m_localHelpBox = new HelpBox(string.Empty, HelpBoxMessageType.Warning);
 			m_localPanel.Add(m_localHelpBox);
 
-			m_localButton = new Button(OnUploadLocalClicked) { text = "Update Local Test Copy", tooltip = "Copy this build into the item's local install folder, without publishing" };
+			m_localButton = new Button(OnUploadLocalClicked) { text = L("Обновить локальную копию", "Update local copy"), tooltip = "Copy this build into the item's local install folder, without publishing" };
 			m_localButton.AddToClassList("mb-publish-button");
 			m_localPanel.Add(m_localButton);
 			box.Add(m_localPanel);
@@ -510,14 +430,14 @@ namespace Editor
 			var externalRow = new VisualElement();
 			externalRow.AddToClassList("mb-row");
 
-			m_externalPathField = new TextField("External Path");
+			m_externalPathField = new TextField(L("Папка", "Folder"));
 			m_externalPathField.AddToClassList("mb-field");
 			m_externalPathField.AddToClassList("mb-grow");
 			m_externalPathField.AddToClassList("mb-external-path-field");
 			m_externalPathField.RegisterValueChangedCallback(evt =>
 			{
 				m_pathToExternal = evt.newValue;
-				m_externalExportButton.SetEnabled(!string.IsNullOrWhiteSpace(m_pathToExternal) && Path.IsPathFullyQualified(m_pathToExternal));
+				RefreshExportButton();
 			});
 			externalRow.Add(m_externalPathField);
 
@@ -526,7 +446,7 @@ namespace Editor
 			externalRow.Add(browseButton);
 			m_externalPanel.Add(externalRow);
 
-			m_externalExportButton = new Button(OnExportExternalClicked) { text = "Export to Folder", tooltip = "Copy this build to any external folder on disk" };
+			m_externalExportButton = new Button(OnExportExternalClicked) { text = L("Экспортировать в папку", "Export to folder"), tooltip = "Copy this build to any external folder on disk" };
 			m_externalExportButton.AddToClassList("mb-publish-button");
 			m_externalPanel.Add(m_externalExportButton);
 			box.Add(m_externalPanel);
@@ -543,12 +463,12 @@ namespace Editor
 			headerRow.AddToClassList("mb-row");
 			headerRow.AddToClassList("mb-list-header");
 
-			var header = new Label("Items");
+			var header = new Label(L("Публикации", "Publications"));
 			header.AddToClassList("mb-section-header");
 			header.AddToClassList("mb-grow");
 			headerRow.Add(header);
 
-			var fetchButton = new Button(Fetch) { text = "Fetch", tooltip = "Reload the list of items from the vendor" };
+			var fetchButton = new Button(Fetch) { text = L("Обновить список", "Refresh list"), tooltip = "Reload the list of items from the vendor" };
 			headerRow.Add(fetchButton);
 			right.Add(headerRow);
 
@@ -565,7 +485,7 @@ namespace Editor
 
 			m_newItemButton = new Button(OnNewItemClicked)
 			{
-				text = "New Item",
+				text = L("Создать публикацию", "Create publication"),
 				tooltip = "Create a new item on the vendor and publish the finished build to it",
 			};
 			m_newItemButton.AddToClassList("mb-new-item-button");
@@ -574,7 +494,7 @@ namespace Editor
 
 			var deleteItemButton = new Button(OnDeleteItemClicked)
 			{
-				text = "Delete…",
+				text = L("Удалить публикацию…", "Delete publication…"),
 				tooltip = "Delete the selected item from the vendor. With nothing selected you are asked for an id, " +
 				          "which is how to remove an item the list cannot show.",
 			};
@@ -594,9 +514,10 @@ namespace Editor
 			}
 
 			var session = MapBuilder.session;
-			var vendors = ModPublisherSession.AvailableVendors;
+			var vendors = ModPublisherSession.AvailableVendors.Where(vendor => vendor.VendorId == "modio").ToList();
 
 			m_vendorField.choices = vendors.Select(vendor => vendor.DisplayName).ToList();
+			m_vendorField.SetEnabled(false);
 
 			var current = vendors.FirstOrDefault(vendor =>
 				string.Equals(vendor.VendorId, session.VendorId, StringComparison.OrdinalIgnoreCase));
@@ -613,16 +534,16 @@ namespace Editor
 
 			m_authLabel.text = state.Status switch
 			{
-				ModAuthStatus.Authenticated => $"Signed in as {state.UserName}",
-				ModAuthStatus.Authenticating => "Signing in…",
-				ModAuthStatus.NotAuthenticated => "Not signed in",
-				_ => "Unavailable",
+				ModAuthStatus.Authenticated => L("Аккаунт: ", "Account: ") + state.UserName,
+				ModAuthStatus.Authenticating => L("Вход…", "Signing in…"),
+				ModAuthStatus.NotAuthenticated => L("Не выполнен вход", "Not signed in"),
+				_ => L("Недоступно", "Unavailable"),
 			};
 
 			// Vendors that inherit an ambient session (Steam) have nothing for a button to do.
 			var interactive = auth?.RequiresInteractiveLogin ?? false;
 			m_authButton.style.display = interactive ? DisplayStyle.Flex : DisplayStyle.None;
-			m_authButton.text = state.IsAuthenticated ? "Sign out" : "Sign in";
+			m_authButton.text = state.IsAuthenticated ? L("Выйти", "Sign out") : L("Войти", "Sign in");
 			m_authButton.SetEnabled(state.Status != ModAuthStatus.Authenticating);
 		}
 
@@ -643,18 +564,19 @@ namespace Editor
 				m_unavailableHelp.text = !session.IsReady
 					? session.Status.Message
 					: string.IsNullOrWhiteSpace(auth?.State.Message)
-						? "Sign in to the selected vendor to continue."
+						? L("Войдите в аккаунт для публикации. Локальный экспорт доступен без входа.", "Sign in to publish. Local export is available without signing in.")
 						: auth.State.Message;
 			}
 
 			m_unavailableBox.style.display = usable ? DisplayStyle.None : DisplayStyle.Flex;
-			m_mainLayout.style.display = usable ? DisplayStyle.Flex : DisplayStyle.None;
+			m_mainLayout.style.display = DisplayStyle.Flex;
+			RefreshDetailsPanel();
 		}
 
 
 		private void RefreshDetailsPanel()
 		{
-			if (m_configField == null)
+			if (m_metadataFields == null)
 			{
 				return;
 			}
@@ -664,52 +586,50 @@ namespace Editor
 
 			MapManagerConfig.GetOrAttach(key, out var attachObj);
 
-			// The config the panel works on: the one attached to the selected item, or the one picked by hand when
-			// nothing is selected. Building only ever needs this - the vendor entry is a publishing concern.
+			// The publication links to the local map selected in the library.
 			var activeConfig = attachObj?.metaConfig != null ? attachObj.metaConfig : m_pendingConfig;
 			var buildData = MapManagerConfig.GetBuildOrEmpty(activeConfig);
 
 			if (attachObj != null && m_buttonLastClickOnAnyItem)
 			{
-				m_compressBuild = buildData.compress;
-				m_platformBuild = buildData.platform;
-				m_buildType = buildData.buildSuccess;
+				m_buildType = 3;
 				MapManagerConfig.instance.targetScene = buildData.targetScene;
 				m_buttonLastClickOnAnyItem = false;
 			}
 
-			// Selecting an item adopts its config; with nothing selected the field keeps whatever was picked by hand,
-			// which is what a brand new vendor account needs in order to create its first item at all.
+			// Keep the local map selected even when it has no publication yet.
 			if (attachObj?.metaConfig != null)
 			{
 				m_pendingConfig = attachObj.metaConfig;
 			}
 
-			m_configField.SetValueWithoutNotify(attachObj != null ? attachObj.metaConfig : m_pendingConfig);
+			RefreshWorkspace(activeConfig, buildData);
 
 			RefreshPreview();
-			RefreshDescription();
 			RefreshNewItemHint();
 
 			var hasConfig = activeConfig != null;
-			m_buildAndPublishWrapper.style.display = hasConfig ? DisplayStyle.Flex : DisplayStyle.None;
+			m_buildAndPublishWrapper.style.display = hasConfig || m_workspaceTab == 0 ? DisplayStyle.Flex : DisplayStyle.None;
 
 			if (!hasConfig)
 			{
 				m_buildResultBox.Clear();
+				m_actionHint.text = L("Выберите локальную карту или добавьте новую.", "Select a local map or add a new one.");
 				return;
 			}
 
 			// Building is unlocked by the config alone. Requiring a vendor entry here would deadlock mod.io, where an
 			// entry cannot be created without a payload to attach - and a payload is what building produces.
 			var hasItem = key.IsValid && attachObj?.metaConfig != null && isSelectAttach;
-			m_buildSection.SetEnabled(true);
+			m_buildSection.SetEnabled(!m_buildProcess);
+			m_mapPage.SetEnabled(!m_buildProcess);
+			m_localMapsPanel.SetEnabled(!m_buildProcess);
+			m_vendorBar.SetEnabled(!m_buildProcess);
 			m_destinationSection.SetEnabled(true);
 
 			m_buildTargetsField.SetValueWithoutNotify((TempData)m_buildType);
 			m_formatField.SetValueWithoutNotify(m_buildFormat);
-			m_compressField.SetValueWithoutNotify(m_compressBuild);
-			UpdateCompressVisibility();
+			UpdateBinaryOptionsVisibility();
 
 			RefreshSceneDropdown(buildData);
 
@@ -718,6 +638,7 @@ namespace Editor
 			m_buildButton.SetEnabled(m_buildType != 0 && !IsDownloadAnyIcon() && !m_buildProcess && !formatBlocked);
 			m_validateButton.SetEnabled(!m_buildProcess && !IsDownloadAnyIcon());
 			m_cancelButton.style.display = m_buildProcess ? DisplayStyle.Flex : DisplayStyle.None;
+			m_cancelButton.SetEnabled(m_buildProcess);
 
 			var uploadState = RefreshBuildResult(activeConfig, buildData);
 
@@ -725,27 +646,24 @@ namespace Editor
 			MapManagerConfig.instance.buildLocal = m_publishDestination == PublishDestination.LocalTest;
 
 			var notes = MapManagerConfig.GetPublishData(activeConfig);
-			m_versionField.SetValueWithoutNotify(notes?.version ?? string.Empty);
 			m_changelogField.SetValueWithoutNotify(notes?.changelog ?? string.Empty);
 
-			// Steam has a change note but no version field, so asking for one there would be asking for nothing.
-			var supportsVersion = MapBuilder.session.Limits?.SupportsVersion ?? false;
-			m_versionField.style.display = supportsVersion ? DisplayStyle.Flex : DisplayStyle.None;
 
 			m_uploadNameToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadName);
 			m_uploadDescriptionToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadDescription);
 			m_uploadPreviewToggle.SetValueWithoutNotify(MapManagerConfig.instance.uploadPreview);
-			m_uploadVendorButton.text = $"Upload to {MapBuilder.session.Publisher?.DisplayName ?? "vendor"}";
-			m_uploadVendorButton.SetEnabled(uploadState && hasItem);
+			m_uploadVendorButton.text = L("Обновить публикацию", "Update publication");
+			m_uploadVendorButton.SetEnabled(uploadState && hasItem && !m_buildProcess && MapBuilder.session.IsReady && MapBuilder.session.IsAuthenticated);
 
 			RefreshLocalPanel(uploadState);
 
 			m_externalPathField.SetValueWithoutNotify(m_pathToExternal);
-			m_externalExportButton.SetEnabled(!string.IsNullOrWhiteSpace(m_pathToExternal) && Path.IsPathFullyQualified(m_pathToExternal));
+			RefreshExportButton();
 
 			UpdateDestinationPanels();
 			var showNoItemHint = !hasItem && m_publishDestination == PublishDestination.Vendor;
 			m_noItemHint.style.display = showNoItemHint ? DisplayStyle.Flex : DisplayStyle.None;
+			UpdateWorkspaceReadiness(uploadState);
 		}
 
 		/// <summary>
@@ -801,6 +719,7 @@ namespace Editor
 			}
 
 			m_publishStatus.text = message;
+			if (!string.IsNullOrEmpty(message)) SetBuildStatus(message);
 			m_publishStatus.style.display = string.IsNullOrEmpty(message) ? DisplayStyle.None : DisplayStyle.Flex;
 		}
 
@@ -820,7 +739,7 @@ namespace Editor
 				  "and that the game is installed on this machine.";
 
 			m_localHelpBox.messageType = resolved ? HelpBoxMessageType.Info : HelpBoxMessageType.Error;
-			m_localButton.SetEnabled(uploadState && resolved);
+			m_localButton.SetEnabled(uploadState && resolved && !m_buildProcess);
 		}
 
 		private void RefreshPreview()
@@ -830,7 +749,7 @@ namespace Editor
 				? attachObj.metaConfig
 				: m_pendingConfig;
 
-			var hasConfig = config != null;
+			var hasConfig = config != null && config.mapMetaConfigValue.largeIcon != null;
 
 			m_previewImage.style.display = hasConfig ? DisplayStyle.Flex : DisplayStyle.None;
 			m_previewMissingBox.style.display = hasConfig ? DisplayStyle.None : DisplayStyle.Flex;
@@ -841,36 +760,10 @@ namespace Editor
 			}
 
 			m_previewIdLabel.text = SelectKey.IsValid ? SelectKey.id : string.Empty;
+			m_previewIdLabel.parent.style.display = SelectKey.IsValid ? DisplayStyle.Flex : DisplayStyle.None;
 		}
 
-		private void RefreshDescription()
-		{
-			var item = SelectItem;
 
-			if (item == null)
-			{
-				m_descriptionText.text = string.Empty;
-				return;
-			}
-
-			const int maxChars = 280;
-			var description = item.Description;
-			var isEmpty = string.IsNullOrWhiteSpace(description);
-			var text = isEmpty ? "No description provided for this item." : description.Trim();
-
-			if (!isEmpty && text.Length > maxChars)
-			{
-				m_descriptionText.tooltip = text;
-				text = text.Substring(0, maxChars) + "…";
-			}
-			else
-			{
-				m_descriptionText.tooltip = string.Empty;
-			}
-
-			m_descriptionText.text = text;
-			m_descriptionText.EnableInClassList("mb-description-text-empty", isEmpty);
-		}
 
 		private void RefreshSceneDropdown(MapManagerConfig.BuildData buildData)
 		{
@@ -908,6 +801,7 @@ namespace Editor
 		private bool RefreshBuildResult(MapMetaConfig config, MapManagerConfig.BuildData buildData)
 		{
 			m_buildResultBox.Clear();
+			m_sceneContentsText.text = L("Соберите карту, чтобы увидеть состав сцены.", "Build the map to view its scene contents.");
 
 			if (config == null)
 			{
@@ -915,27 +809,22 @@ namespace Editor
 			}
 
 			var uploadState = true;
-			var buildNames = Enum.GetNames(typeof(TempData));
-
-			foreach (var buildName in buildNames)
+			if (buildData.buildSuccess == 3 && !IsSelectedBuildReady())
 			{
-				var has = ((TempData)buildData.buildSuccess).HasFlag((TempData)Enum.Parse(typeof(TempData), buildName));
-				uploadState = has && uploadState;
-
-				if (!has)
-				{
-					AddBuildResultBox(buildName + " is not build", HelpBoxMessageType.Error);
-				}
-				else if (buildName == nameof(TempData.Meta) && !buildData.lastMeta.Equals(config.mapMetaConfigValue))
-				{
-					AddBuildResultBox($"Is Changed {buildName}! Please build {buildName}.", HelpBoxMessageType.Warning);
-				}
-
-				if (buildName == nameof(TempData.Map))
-				{
-					AddSceneStats(buildData.lastValid);
-				}
+				uploadState = false;
+				AddBuildResultBox(L("Сборка устарела или её файлы недоступны. Соберите выбранную сцену в текущем формате.", "The build is outdated or its files are missing. Build the selected scene in the current format."), HelpBoxMessageType.Warning);
 			}
+            if (buildData.buildSuccess != 3)
+            {
+                uploadState = false;
+                var missingGeometry = (buildData.buildSuccess & (int)TempData.Map) == 0;
+                var missingMetadata = (buildData.buildSuccess & (int)TempData.Meta) == 0;
+                AddBuildResultBox(missingGeometry && missingMetadata
+                    ? L("Геометрия и метаданные карты ещё не собраны.", "Map geometry and metadata have not been built yet.")
+                    : missingGeometry ? L("Геометрия карты ещё не собрана.", "Map geometry has not been built yet.")
+                    : L("Метаданные карты ещё не собраны.", "Map metadata has not been built yet."), HelpBoxMessageType.Info);
+            }
+            AddSceneStats(buildData.lastValid);
 
 			return uploadState;
 		}
@@ -950,30 +839,17 @@ namespace Editor
 		private void AddSceneStats(ValidItemData stats)
 		{
 			var text = stats.ToString();
-
-			if (string.IsNullOrWhiteSpace(text))
-			{
-				return;
-			}
-
-			var foldout = new Foldout { text = "Scene contents", value = false };
-			foldout.AddToClassList("mb-build-result-item");
-
-			var label = new Label(text) { enableRichText = false };
-			label.AddToClassList("mb-muted");
-			foldout.Add(label);
-
-			m_buildResultBox.Add(foldout);
+			m_sceneContentsText.text = string.IsNullOrWhiteSpace(text)
+                ? L("Соберите карту, чтобы увидеть состав сцены.", "Build the map to view its scene contents.") : text;
 		}
 
-		private void UpdateCompressVisibility()
+		private void UpdateBinaryOptionsVisibility()
 		{
-			m_compressRow.style.display = m_buildFormat != FormatBuild.dro2 ? DisplayStyle.Flex : DisplayStyle.None;
+            if (m_binaryTexturesField != null) m_binaryTexturesField.style.display = m_buildFormat == FormatBuild.Binary ? DisplayStyle.Flex : DisplayStyle.None;
 		}
 
 		/// <summary>
 		/// Shows why the selected format cannot be built by this editor, if it cannot.
-		/// The format stays selectable on purpose: hiding dro1 would leave the author guessing where it went.
 		/// </summary>
 		private bool RefreshFormatAvailability()
 		{
@@ -1025,9 +901,9 @@ namespace Editor
 		{
 			return destination switch
 			{
-				PublishDestination.LocalTest => "Local Test",
-				PublishDestination.ExternalFolder => "External Folder",
-				_ => "Vendor",
+				PublishDestination.LocalTest => L("Локальная установка", "Local install"),
+				PublishDestination.ExternalFolder => L("Экспорт в папку", "Export to folder"),
+				_ => L("Площадка", "Platform"),
 			};
 		}
 
@@ -1039,24 +915,7 @@ namespace Editor
 		}
 
 
-		private void OnConfigFieldChanged(ChangeEvent<UnityEngine.Object> evt)
-		{
-			var key = SelectKey;
 
-			// Remembered even with nothing selected: on a vendor account with no items yet there is nothing to
-			// attach to, and this is the config that seeds the first "New Item".
-			m_pendingConfig = evt.newValue as MapMetaConfig;
-
-			if (MapManagerConfig.GetOrAttach(key, out var attachObj) && attachObj != null)
-			{
-				// Attach writes the link through and saves the asset, so the choice survives a domain reload. Doing
-				// it unconditionally also covers clearing the field, which detaches the item.
-				MapManagerConfig.Attach(key, m_pendingConfig);
-				m_attaching[key] = m_pendingConfig != null;
-			}
-
-			RefreshDetailsPanel();
-		}
 
 		private void OnBuildTargetsChanged(ChangeEvent<Enum> evt)
 		{
@@ -1070,6 +929,7 @@ namespace Editor
 			if (index >= 0 && index < m_scenePaths.Length)
 			{
 				MapManagerConfig.instance.targetScene = m_scenePaths[index];
+				RefreshDetailsPanel();
 			}
 		}
 
@@ -1097,10 +957,13 @@ namespace Editor
 			}
 
 			MapBuilder.ValidateOnly(config, m_buildFormat);
+			m_lastOperationSummary = L("Проверка завершена. Результаты — в окне проверки карты.", "Validation finished. See the map validation window for results.");
+			SetBuildStatus(string.Empty);
 		}
 
 		private async void OnBuildButtonClicked()
 		{
+            if (MapBuilder.IsBuilding) return;
 			var key = SelectKey;
 
 			MapManagerConfig.TryGetAttach(key, out var attachObj);
@@ -1126,8 +989,6 @@ namespace Editor
 			m_loads[key] = true;
 			m_buildProcess = true;
 			MapManagerConfig.instance.mapMetaConfigValue = config;
-			m_compressBuildCached = m_compressBuild;
-			m_platformBuildCached = m_platformBuild;
 			m_buildFormatCached = m_buildFormat;
 
 			BeginOperation();
@@ -1135,15 +996,14 @@ namespace Editor
 
 			try
 			{
-				await MapBuilder.BuildCustom((TempData)m_buildType,
+                await MapBuilder.BuildCustom((TempData)m_buildType,
 					(TempData)buildData.buildSuccess,
 					key,
 					m_buildFormatCached,
-					m_compressBuildCached,
-					m_platformBuildCached,
-					new Progress<string>(SetBuildStatus),
+					new ImmediateProgress<string>(SetBuildStatus),
 					m_operationCts.Token,
-					(path, success) => AddBuild(config, buildData, path, success));
+					(path, success) => AddBuild(config, buildData, path, success),
+                    fraction => { m_operationProgress.value = fraction * 100; m_operationProgress.title = $"{fraction * 100:F0}%"; });
 			}
 			finally
 			{
@@ -1167,14 +1027,25 @@ namespace Editor
 			m_operationCts?.Cancel();
 			m_operationCts?.Dispose();
 			m_operationCts = new CancellationTokenSource();
+			m_operationTimer.Restart();
+            m_operationProgress.value = 0;
+            m_operationProgress.title = "0%";
+            m_operationProgress.style.display = DisplayStyle.Flex;
 		}
 
 		private void EndOperation()
 		{
+			m_operationTimer.Stop();
 			m_operationCts?.Dispose();
 			m_operationCts = null;
 
 			m_buildProcess = false;
+            if (m_operationProgress != null)
+            {
+                m_operationProgress.value = 0;
+                m_operationProgress.title = string.Empty;
+                m_operationProgress.style.display = DisplayStyle.None;
+            }
 			SetBuildStatus(string.Empty);
 			RefreshDetailsPanel();
 		}
@@ -1186,7 +1057,7 @@ namespace Editor
 				return;
 			}
 
-			m_buildStatus.text = message ?? string.Empty;
+			m_buildStatus.text = string.IsNullOrEmpty(message) ? m_lastOperationSummary : LocalizeOperation(message);
 			m_buildStatus.style.display = string.IsNullOrEmpty(m_buildStatus.text) ? DisplayStyle.None : DisplayStyle.Flex;
 		}
 
@@ -1196,20 +1067,19 @@ namespace Editor
 			TempData complete)
 		{
 			m_loads[SelectKey] = false;
+			RecordBuildResult(config, path, complete);
 
 			if (complete == (TempData.Map | TempData.Meta))
 			{
 				Debug.Log("Build Complete : Everything");
 			}
 
-			buildData.compress = m_compressBuildCached;
-			buildData.platform = m_platformBuildCached;
 
 			MapManagerConfig.AddBuild(new MapManagerConfig.BuildData(config,
 				MapManagerConfig.instance.targetScene,
 				path, (int)complete,
-				((TempData)m_buildType).HasFlag(TempData.Map) ? ModMapTestTool.Target : buildData.lastValid,
-				m_buildFormat, m_platformBuildCached, m_compressBuildCached));
+				((TempData)m_buildType).HasFlag(TempData.Map) ? MapBuilder.LastSceneValidation : buildData.lastValid,
+				m_buildFormatCached));
 
 			RefreshDetailsPanel();
 		}

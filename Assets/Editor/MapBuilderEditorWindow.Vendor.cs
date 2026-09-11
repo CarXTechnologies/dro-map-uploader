@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,7 +27,7 @@ namespace Editor
 
 			// Entries belong to the vendor they were fetched from, so nothing from the old list survives the switch.
 			m_fetchResultListItems.Clear();
-			m_selectItemIndex = 0;
+			m_selectItemIndex = -1;
 			RefreshItemsList();
 
 			await MapBuilder.session.SelectVendorAsync(vendor.VendorId, CancellationToken.None);
@@ -43,7 +43,7 @@ namespace Editor
 			var options = MapBuilder.session.Publisher?.GameOptions;
 			var hasOptions = options is { Count: > 0 };
 
-			m_gameField.style.display = hasOptions ? DisplayStyle.Flex : DisplayStyle.None;
+			m_gameField.style.display = options is { Count: > 1 } ? DisplayStyle.Flex : DisplayStyle.None;
 
 			if (!hasOptions)
 			{
@@ -128,7 +128,7 @@ namespace Editor
 
 			// Entries belong to the game they were fetched from, so nothing from the old list survives the switch.
 			m_fetchResultListItems.Clear();
-			m_selectItemIndex = 0;
+			m_selectItemIndex = -1;
 			RefreshItemsList();
 
 			var result = await MapBuilder.session.SelectGameAsync(index, CancellationToken.None);

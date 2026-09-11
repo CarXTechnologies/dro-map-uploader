@@ -48,6 +48,7 @@ namespace Editor
 
 			if (property.serializedObject.isEditingMultipleObjects)
 			{
+				m_msPropIndex = Mathf.Clamp(m_msPropIndex, 0, MarkerData.paramEditor.Length - 1);
 				m_msPropIndex = EditorGUI.Popup(popup, m_msPropIndex, MarkerData.paramEditor);
 				m_msPropParam = MarkerData.paramEditor[m_msPropIndex];
 				m_msPropHead = MarkerData.GetHeadTarget(m_msPropParam);
@@ -67,8 +68,22 @@ namespace Editor
 			}
 			else
 			{
-				propIndex.intValue = EditorGUI.Popup(amountRect, propIndex.intValue, MarkerData.paramEditor);
-				propParam.stringValue = MarkerData.paramEditor[propIndex.intValue];
+				// Saved indexes change when unsupported options are removed. Resolve the actual marker first.
+				var selected = MarkerData.FindEditorIndex(propHead.stringValue, propParam.stringValue);
+				if (string.IsNullOrEmpty(propHead.stringValue) && string.IsNullOrEmpty(propParam.stringValue)) selected = 0;
+				selected = EditorGUI.Popup(amountRect, selected, MarkerData.paramEditor);
+				if (selected < 0)
+				{
+					Space();
+					amountRect.height = propHeight * 3;
+					EditorGUI.HelpBox(amountRect, $"Unsupported marker: {propHead.stringValue}. Select SpawnPoint, Road or Animation, or remove the component.", MessageType.Error);
+					m_height += amountRect.height;
+					EditorGUI.indentLevel = indent;
+					EditorGUI.EndProperty();
+					return;
+				}
+				propIndex.intValue = selected;
+				propParam.stringValue = MarkerData.paramEditor[selected];
 				propHead.stringValue = MarkerData.GetHeadTarget(propParam.stringValue);
 				popup.y -= 18;
 				EditorGUI.DrawRect(popup, new Color(0.3f, 0.3f, 0.3f, 1.0f));
@@ -87,6 +102,23 @@ namespace Editor
 			}
 
 			string paramPath = MarkerData.paramObjectsEditor.ContainsKey(propParam.stringValue) ? propParam.stringValue : propHead.stringValue;
+
+			if (propHead.stringValue == "Animation")
+			{
+				if (propValue.managedReferenceValue is not Plugins.CarX.Modding.Creator.Runtime.AnimationMarkerSettings)
+					propValue.managedReferenceValue = new Plugins.CarX.Modding.Creator.Runtime.AnimationMarkerSettings
+					{
+						animator = gameMarkerData != null ? gameMarkerData.GetComponent<Animator>() : null
+					};
+				propLastHead.stringValue = "Animation";
+				Space();
+				amountRect.height = EditorGUI.GetPropertyHeight(propValue, true);
+				EditorGUI.PropertyField(amountRect, propValue, new GUIContent("Vertex animation"), true);
+				m_height += amountRect.height;
+				EditorGUI.indentLevel = indent;
+				EditorGUI.EndProperty();
+				return;
+			}
 
 			if (MarkerData.paramObjectsEditor.ContainsKey(paramPath))
 			{

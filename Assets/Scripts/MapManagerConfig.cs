@@ -14,24 +14,8 @@ public enum TempData : int
 
 public enum FormatBuild
 {
-	dro1,
-	dro2,
-}
-
-public enum PlatformBuild : int
-{
-	StandaloneWindows = 0,
-	//Switch = 1,
-	//PS4 = 100,
-	//PS5 = 101,
-	//XboxOne = 1004,
-	//XboxSeries = 1005,
-}
-
-public enum CompressBuild : int
-{
-	NoCompress = 0,
-	Compress = 10,
+	Wavefront = 1,
+	Binary = 2,
 }
 
 [CreateAssetMenu(menuName = "Map/MapManagerConfig", fileName = "MapManagerConfig", order = 0)]
@@ -48,15 +32,6 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 	[FormerlySerializedAs("uploadSteamPreview")] [HideInInspector] public bool uploadPreview;
 
 	[HideInInspector] public bool buildLocal;
-
-	/// <summary>
-	/// Editor version dro1 builds are locked to. The game loads dro1 asset bundles with this exact engine version,
-	/// so building them from any other editor is blocked - the bundle would publish fine and load as an empty map.
-	/// Update this together with the game when the game's engine moves. Empty means dro1 is not version locked.
-	/// </summary>
-	[Tooltip("dro1 asset bundles are only readable by this exact Unity version, because it is what the game runs. " +
-	         "Building dro1 from any other editor is blocked. Leave empty to lift the lock.")]
-	public string dro1EditorVersion = "2023.2.20f1";
 
 	/// <summary>
 	/// Link between a mod entry on a vendor and the map config that produces its content.
@@ -97,8 +72,6 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 		public ValidItemData lastValid;
 		public MapMetaConfigValue lastMeta;
 		public FormatBuild format;
-		public PlatformBuild platform;
-		public CompressBuild compress;
 		public string targetScene;
 
 		public BuildData(MapMetaConfig config,
@@ -106,17 +79,14 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 			string path,
 			int buildSuccess,
 			ValidItemData lastValid,
-			FormatBuild format,
-			PlatformBuild platform,
-			CompressBuild compress)
+			FormatBuild format)
 		{
 			this.config = config;
 			this.path = path;
 			this.buildSuccess = buildSuccess;
 			this.lastValid = (ValidItemData)lastValid.Clone();
 			lastMeta = config.mapMetaConfigValue;
-			this.platform = platform;
-			this.compress = compress;
+			lastMeta.authors = lastMeta.authors == null ? null : (string[])lastMeta.authors.Clone();
 			this.targetScene = targetScene;
 			this.format = format;
 		}
@@ -232,6 +202,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 		}
 
 		var result = instance.builds.Find(b => b.config != null && b.config.id == config.id);
+		if (result.format != FormatBuild.Wavefront && result.format != FormatBuild.Binary) result.buildSuccess = 0;
 		return result;
 	}
 

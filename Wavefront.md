@@ -1,29 +1,29 @@
-# Uploading mods in the **dro2** format
+# Uploading mods in the **Wavefront** format
 
-This document describes the **dro2** mod format supported by the Map Uploader.
-For the general map authoring workflow (scene setup, markers, minimap, workshop publishing) see the main **[README](README.md)** — everything described there still applies. This file only covers what is *specific* to dro2.
+This document describes the **Wavefront** representation supported by MapUploader. It is not a game version. The primary binary representation is documented in [Binary format](Assets/Plugins/CarX.Modding.Creator/BinaryFormat.md). Both require a compatible consuming application; game-specific marker behavior belongs to its integration layer.
+For the general map authoring workflow (scene setup, markers, minimap, workshop publishing) see the main **[README](README.md)** — everything described there still applies. This file only covers what is *specific* to Wavefront.
 
-- [What is dro2](#what-is-dro2)
+- [What is Wavefront](#what-is-wavefront)
 - [Supported content](#supported-content)
 - [Selecting the format](#selecting-the-format)
 - [Publishing](#publishing)
 
-## What is dro2
+## What is Wavefront
 
-**dro2** is the second-generation mod packaging format used by the uploader. Instead of building Unity **AssetBundles** (which are version-locked to the exact Unity Editor and player build), dro2 exports the map into a **plain-data catalog**:
+**Wavefront** exports the map into a **plain-data catalog**:
 
 - geometry as `.obj` files,
 - materials as `.mtl` files,
 - textures as `.png` files,
 - scene structure and gameplay data as `.json` files.
 
-Because nothing in the output depends on Unity's serialization, a dro2 mod is not tied to the Editor version it was built with, and its content can be inspected and diffed as regular files on disk.
+Because nothing in the output depends on Unity's serialization, a Wavefront mod is not tied to the Editor version it was built with, and its content can be inspected and diffed as regular files on disk.
 
-Both formats share the same scene authoring rules, the same component whitelist and the same `MapMetaConfig` — you can rebuild an existing dro1 map as dro2 without changing the scene, as long as the material setup is supported;
+Wavefront and Binary share the same scene authoring rules, component whitelist and `MapMetaConfig`.
 
 ## Supported content
 
-This is the **complete** list of what the new format currently exports. Anything else in the scene is ignored by the dro2 build.
+This is the **complete** list of what the new format currently exports. Unsupported runtime components are skipped and reported without blocking the build. Invalid data in supported components can still block export. Optional preview components are reported as information.
 
 ### ECS static geometry
 
@@ -40,7 +40,7 @@ Identical mesh + material + collider combinations are stored once and reused by 
 
 ### Spawn points
 
-`SpawnPoint` markers (`GameMarkerData`) define where cars appear. Unlike dro1, dro2 supports **multiple** spawn points per map, and the **name of the spawn point GameObject** is exported together with its transform — name the objects meaningfully, the name travels with the mod and identifies the spawn point in game.
+`SpawnPoint` markers (`GameMarkerData`) define where cars appear. The map supports **multiple** spawn points per map, and the **name of the spawn point GameObject** is exported together with its transform — name the objects meaningfully, the name travels with the mod and identifies the spawn point in game.
 
 ### Minimap
 
@@ -52,25 +52,22 @@ Exactly **one** `Minimap` component per map. Its textures are exported as PNG an
 
 `Asphalt`, `Grass`, `Sand`, `Earth`, `Snow`, `Ice`, `Gravel`.
 
-The marker also carries the friction and bump parameters of the selected surface template. Road objects are automatically flagged static during the build.
+The marker also carries the friction and bump parameters of the selected surface template.
 
 ### What is not exported
 
-These are supported by dro1 and have no place in the dro2 catalog. A dro2 build drops them without failing, so the
-map still builds and publishes — with that content missing in game. The uploader now warns about each of them
-during [validation](README.md#validation) rather than leaving you to find out from the published mod.
+Preview environment components are optional and are reported as information. Other unsupported components are reported during [validation](README.md#validation).
 
-| Category | Not exported by dro2 |
+| Category | Not exported by Wavefront |
 | --- | --- |
-| **Physics** | BoxCollider, SphereCollider, CapsuleCollider, Rigidbody, FixedJoint, SpringJoint, HingeJoint |
+| **Physics** | FixedJoint, SpringJoint, HingeJoint |
 | **Graphics** | ReflectionProbe, Volume (and their HDRP data components) |
-| **Renderer** | Directional and Area lights, Animator |
+| **Renderer** | Directional and Area lights; Animator is baked only for Animation markers |
 | **UI** | Canvas, CanvasScaler, CanvasRenderer, RectTransform, TextMeshProUGUI, RawImage |
 | **Particles** | ParticleSystem, ParticleSystemRenderer, VisualEffect (VFX Graph) |
 | **Other** | VideoPlayer |
 
-Collision in dro2 comes from `MeshCollider` alone. A prop whose only collider is a BoxCollider is exported as
-geometry with nothing to collide against.
+MeshCollider, BoxCollider, SphereCollider, CapsuleCollider and Rigidbody are exported. Vertex animations use baked atlases; see the Creator documentation.
 
 Also dropped, with a warning at export time:
 
@@ -84,18 +81,17 @@ Also dropped, with a warning at export time:
 2. Select (or create) a workshop item on the right and attach a `MapMetaConfig` to it.
 3. In **Build Settings**:
    - **Target Scene** — the scene to build (it must be added to *File → Build Settings*).
-   - **Format** — choose **dro2**.
-   - **Compression** — the row disappears when dro2 is selected; the setting is not used by this format.
+   - **Format** — choose **Wavefront**.
+   - **Compression** — the row disappears when Wavefront is selected; the setting is not used by this format.
    - **Build Targets** — flags: `Map`, `Meta`, or both.
 4. Press **Build**.
 
 ## Publishing
 
 - **External Folder** — copies the build to any folder on disk. Useful for inspecting the catalog or for manual distribution.
-- **Vendor** — uploads the catalog to the selected mod vendor. The uploader no longer measures a single asset bundle
-  file, so a dro2 catalog is validated and uploaded like any other build. See **[PUBLISHING.md](PUBLISHING.md)**.
+- **Vendor** — uploads the catalog to the selected mod vendor. A Wavefront catalog is validated and uploaded as a set of data files. See **[PUBLISHING.md](PUBLISHING.md)**.
 
-> Note! Whether the shipped game reads a dro2 mod delivered through a vendor depends on the game build you are testing
+> Note! Whether the shipped game reads a Wavefront mod delivered through a vendor depends on the game build you are testing
 > against. Loading from a local folder is the path that is known to work:
 > Export the build into `Mods/<ModName>/` so that the catalog files lie directly inside that folder:
 >

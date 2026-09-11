@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,12 +18,15 @@ namespace Editor
 		private async Task FetchItems()
 		{
 			var session = MapBuilder.session;
-			var ready = await session.EnsureInitializedAsync(CancellationToken.None);
+			var ready = session.VendorId == "modio"
+                ? await session.EnsureInitializedAsync(CancellationToken.None)
+                : await session.SelectVendorAsync("modio", CancellationToken.None);
 
 			RefreshVendorBar();
 
 			if (!ready.Success || !session.IsAuthenticated)
 			{
+				RefreshLocalMaps();
 				RefreshAvailability();
 				return;
 			}
@@ -33,6 +36,7 @@ namespace Editor
 				await Task.Delay(100);
 			}
 
+			m_selectItemIndex = -1;
 			m_fetchResultListItems.Clear();
 			var fetched = await session.Publisher.FetchOwnedItemsAsync(OnItemFetched, CancellationToken.None);
 
@@ -53,6 +57,8 @@ namespace Editor
 			}
 
 			MapManagerConfig.ValidBuildsAndAttaching(session.VendorId, m_fetchResultListItems);
+            m_selectItemIndex = m_fetchResultListItems.FindIndex(item => MapManagerConfig.TryGetAttach(item.Key, out var link) && link.metaConfig == m_pendingConfig && m_pendingConfig != null);
+			RefreshLocalMaps();
 			RefreshItemsList();
 			RefreshDetailsPanel();
 		}
@@ -133,8 +139,8 @@ namespace Editor
 			{
 				// An empty scroll area reads as "still loading" or "something broke"; say which it is.
 				var vendorName = MapBuilder.session.Publisher?.DisplayName ?? "the vendor";
-				var hint = new Label($"Nothing published to {vendorName} yet.\n" +
-				                     "Assign a Map Meta Config on the left, build it, then use New Item.");
+				var hint = new Label(string.Format(L("В {0} пока нет публикаций.\n", "No publications on {0} yet.\n"), vendorName) +
+				                     L("Соберите карту и нажмите «Создать публикацию».", "Build the map and click Create publication."));
 				hint.AddToClassList("mb-empty-hint");
 				m_itemsScroll.Add(hint);
 				return;
@@ -142,6 +148,7 @@ namespace Editor
 
 			for (var i = 0; i < m_fetchResultListItems.Count; i++)
 			{
+				if (MapManagerConfig.TryGetAttach(m_fetchResultListItems[i].Key, out var linked) && linked.metaConfig != null && linked.metaConfig != m_pendingConfig) continue;
 				m_itemsScroll.Add(BuildItemRow(i));
 			}
 		}
@@ -179,7 +186,7 @@ namespace Editor
 
 			var limits = MapBuilder.session.Limits;
 			var maxMb = limits == null ? 0f : limits.MaxPayloadSizeInMb + limits.MaxMetaSizeInMb;
-			var size = $"{Mathf.FloorToInt(item.PayloadSizeBytes / ModMapTestTool.BYTES_TO_MEGABYTES)} / {maxMb} mb";
+			var size = $"{Mathf.FloorToInt(item.PayloadSizeBytes / MapSceneRules.BytesPerMegabyte)} / {maxMb} mb";
 
 			var sizeLabel = new Label(string.IsNullOrWhiteSpace(item.StatusLabel)
 				? size
@@ -201,7 +208,7 @@ namespace Editor
 
 			if (!MapManagerConfig.TryGetAttach(item.Key, out var attachData) || attachData.metaConfig == null)
 			{
-				var warning = new Label("Detach") { tooltip = "No MapMetaConfig attached to this item yet" };
+				var warning = new Label(L("Выбрать для этой карты", "Select for this map")) { tooltip = L("Связать эту публикацию с выбранной локальной картой", "Link this publication to the selected local map") };
 				warning.AddToClassList("mb-item-warning");
 				row.Add(warning);
 			}
@@ -293,6 +300,9 @@ namespace Editor
 
 		private void OnItemRowClicked(int index)
 		{
+			if (m_buildProcess || m_pendingConfig == null) return;
+			MapManagerConfig.Attach(m_fetchResultListItems[index].Key, m_pendingConfig);
+			m_attaching[m_fetchResultListItems[index].Key] = true;
 			m_selectItemIndex = index;
 			m_buttonLastClickOnAnyItem = true;
 			RefreshItemsList();

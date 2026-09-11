@@ -2,7 +2,9 @@
 
 *[Русская версия](README.ru.md)*
 
-Step-by-step guide to preparing a track in the Unity project and publishing it.
+Step-by-step guide to preparing a map in the Unity project and publishing it.
+
+The mod data format is independent of a particular game. Binary packages use `mod.cxmod`; Wavefront is the alternative loose-file representation. Currently the only content type is `map`. A consuming game needs a compatible loader and adapters for rendering, physics and gameplay markers. Selecting a publishing platform does not select a file format.
 
 Tracks can be published to the **Steam Workshop** or to **mod.io**; the vendor is picked at the top of the MapBuilder
 window. Setting up the vendors — SDKs, credentials, sign in — is covered in **[PUBLISHING.md](PUBLISHING.md)**.
@@ -12,13 +14,12 @@ window. Setting up the vendors — SDKs, credentials, sign in — is covered in 
 - [Adding core components](#adding-core-components)
   - [Assigning surface collisions](#assigning-surface-collisions)
   - [Assigning a spawn point on the map](#assigning-a-spawn-point-on-the-map)
-  - [Assigning ambient sounds](#assigning-ambient-sounds)
   - [Template system (road only)](#template-system-road-only)
   - [Adding a mini-map](#adding-a-mini-map)
   - [Capturing prototypes: icon, preview, minimap](#capturing-prototypes-icon-preview-minimap)
 - [Uploading the track to the Workshop](#uploading-the-track-to-the-workshop)
   - [Build Settings](#build-settings)
-  - [Mod format: dro1 vs dro2](#mod-format-dro1-vs-dro2)
+  - [Mod format: Wavefront and Binary](#mod-format-wavefront-and-binary)
   - [Upload Settings](#upload-settings)
 - [Validation](#validation)
 - [Supported components](#supported-components)
@@ -94,12 +95,13 @@ git submodule update --init --recursive
 
    <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/3.png?raw=true" alt="Prefab folder" style="width:300px;"/>
 
+The scene may contain any number of top-level objects. A shared parent named `root` is optional: the builder exports all scene roots without reparenting the source objects. Existing maps with a `root` group remain supported. The builder does not create temporary scenes. Rigidbody and Animation bindings and animation atlas deduplication span the whole exported scene.
+
 ## Adding core components
 
 The project supports several component types that are ported into the game. The main ones are:
 
 - the point where the car appears on the map,
-- ambient sounds,
 - physical materials of surfaces.
 
 These components are assigned with the **GameMarkerData** helper. To add it to a GameObject or Prefab, click **Add Component** in the Inspector and type `GameMarkerData`. A mini-map can be added as well.
@@ -118,22 +120,14 @@ For the track object that represents the surface, set the GameMarkerData type to
 Create an empty object via **GameObject → Create Empty** (or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd>). In the Transform component, set the coordinates where the car should appear in the game. Add the **GameMarkerData** component and choose the **SpawnPoint** type.
 
 > [!IMPORTANT]
-> A **dro1** map may have exactly one vehicle spawn point. **dro2** supports several — name each object meaningfully,
+> Both formats support several spawn points — name each object meaningfully,
 > because the name is exported with the spawn point and identifies it in game.
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/5.png?raw=true" alt="Spawn point setup" style="width:400px;"/>
 
-### Assigning ambient sounds
+### Vertex animation
 
-Create an empty object via **GameObject → Create Empty** (or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd>). Add the **GameMarkerData** component, select the **Ambient** type, and then pick the sound type that best suits the map in the dropdown.
-
-<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/6.png?raw=true" alt="Ambient marker setup" style="width:400px;"/>
-
-With an Ambient marker you can also use the **DrawZoneBehaviour** component — a helper that draws the zone where the assigned sounds will be heard.
-
-<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/7.png?raw=true" alt="Ambient zone gizmo" style="width:300px;"/>
-
-If you need another helper script, you can write your own and add it to `Assets/Resources/MapSkipComponent`.
+Use **Animation** with an Animator to bake animation into an atlas. **Ambient**, **TimeObjectActivator** and **NetworkObject** are unsupported. Network physics uses Rigidbody without a separate marker.
 
 ### Template system (road only)
 
@@ -211,9 +205,9 @@ Every map needs exactly one minimap. Create an empty object in the scene (as des
 
 | Setting | Description |
 | --- | --- |
-| **Target Scene** | The scene used to build the map bundle (the scene must be in Build Settings). |
-| **Format** | The mod packaging format: **dro1** or **dro2** — see [Mod format: dro1 vs dro2](#mod-format-dro1-vs-dro2). |
-| **Compression** | Shown and used for **dro1** builds only. |
+| **Target Scene** | The scene used to build the map (the scene must be in Build Settings). |
+| **Format** | The mod packaging format: **Wavefront** or **Binary** — see [Mod format: Wavefront and Binary](#mod-format-wavefront-and-binary). |
+| **Binary textures** | BC7 or RGBA32, including prepared mipmaps. Container compression is automatic. |
 | **Build Targets** (flags) | The build targets you want to build or rebuild. |
 | **Validate** | Runs every check against the map without building anything. See [Validation](#validation). |
 | **Build** | Builds all selected Build Targets. |
@@ -221,19 +215,14 @@ Every map needs exactly one minimap. Create an empty object in the scene (as des
 
 <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/20.png?raw=true" alt="Build settings" style="width:400px;"/>
 
-### Mod format: dro1 vs dro2
+### Mod format: Wavefront and Binary
 
-- **dro1** — the original format. The scene and its meta data are packed into Unity **AssetBundles**, with an optional Compression setting.
+- **Wavefront** exports geometry/materials/textures/metadata as OBJ / MTL / PNG / JSON files.
+- **Binary** packages the map into compressed `mod.cxmod`, with compact geometry, typed scene data and prepared textures. This is the default format.
 
-  > [!IMPORTANT]
-  > dro1 is locked to **Unity 2023.2.20f1** — the engine version the shipped game runs. An asset bundle is only
-  > readable by the exact engine that wrote it, so a dro1 bundle built by any other editor would publish fine and
-  > load as an empty map in game. The uploader therefore refuses to build dro1 from a different editor version.
-  > The required version is set on `MapManagerConfig` (**Dro1 Editor Version**) and should be updated together with
-  > the game when its engine moves.
-- **dro2** — the newer format. The map is exported into a plain-data catalog (obj / mtl / png / json) instead of AssetBundles, so it is not tied to the Unity version it was built with. The Compression setting is unused and hidden when dro2 is selected.
+Both export all scene roots directly and support the same scene features. Rebuild **Map and Meta** after switching formats. Only maps (`contentType: "map"`) are supported.
 
-📄 Full dro2 documentation: **[DRO2.md](DRO2.md)** — output structure, mesh/material/texture export rules, LOD and marker handling, limits and troubleshooting.
+See [Wavefront export](Wavefront.md) and [Binary format](Assets/Plugins/CarX.Modding.Creator/BinaryFormat.md).
 
 ### Upload Settings
 
@@ -269,9 +258,9 @@ What is checked:
 | --- | --- |
 | Meta | Name present, allowed characters and within the vendor's length limit; description and summary lengths; icon assigned, readable, PNG and within the size limit; preview readable and within 10 MB |
 | Components | Everything against the [supported components](#supported-components) list and its per-type budget; missing (deleted) scripts |
-| Markers | A spawn point exists; dro1 allows exactly one; duplicate spawn point names on dro2; markers with no type selected; Road markers with no Collider |
-| Format | Anything supported by dro1 that a dro2 build would silently drop |
-| Lighting | More than one Directional Light; light types dro2 cannot export |
+| Markers | A spawn point exists; duplicate spawn point names; markers with no type selected; Road markers with no Collider |
+| Format | Components not exported by Wavefront/Binary; optional preview components are informational |
+| Lighting | More than one Directional Light; light types Wavefront cannot export |
 | Geometry | Renderers with no mesh or empty material slots; MeshColliders with no mesh; LOD groups over 8 levels or with no renderers |
 | Physics | Non-convex MeshCollider driven by a non-kinematic Rigidbody |
 | Minimap | Bound Size left at zero; missing or non-Texture2D minimap textures |
@@ -283,10 +272,12 @@ Objects tagged **Garbage** are skipped, exactly as they are by the build.
 | Category | Components |
 | --- | --- |
 | **Physics** | MeshCollider, BoxCollider, SphereCollider, CapsuleCollider, Rigidbody |
-| **Graphics** | ReflectionProbe, Volume |
-| **Renderer** | MeshRenderer, MeshFilter, Light, LODGroup, ParticleSystemRenderer, VFX particle |
-| **UI** | Canvas, RawImage, TextMeshProUGUI |
-| **Other** | VideoPlayer (1280×720, 30 fps, 15 sec) |
+| **Geometry** | MeshRenderer, MeshFilter, LODGroup |
+| **Lighting** | Point and Spot Light, HDAdditionalLightData |
+| **Animation** | Animator and SkinnedMeshRenderer under GameMarkerData Animation, baked to VAT |
+| **Map data** | SpawnPoint, Road, Animation; Minimap |
+
+Volume and ReflectionProbe are optional preview components. UI, particles, video and joints are not exported and produce validation errors. Rules and budgets live in `Assets/Editor/MapSceneRules.cs`.
 
 ## Requirements
 

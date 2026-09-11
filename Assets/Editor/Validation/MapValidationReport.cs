@@ -158,9 +158,13 @@ namespace Editor.Validation
 			{
 				Debug.LogError(text);
 			}
-			else
+			else if (WarningCount > 0)
 			{
 				Debug.LogWarning(text);
+			}
+			else
+			{
+				Debug.Log(text);
 			}
 		}
 

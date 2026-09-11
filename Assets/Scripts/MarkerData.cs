@@ -35,21 +35,16 @@ public class MarkerData
 		"Road/snow_gravel",
 		"Road/wood",
 		"Road/wood_plank",
-		"Ambient/Crowd",
-		"Ambient/Crowd_parking",
-		"Ambient/Garage1",
-		"Ambient/Garage2",
-		"Ambient/Kami",
-		"Ambient/Pacific",
-		"Ambient/Stadium",
-		"Ambient/Thunder",
-		"Ambient/Thunder2",
-		"Ambient/Track",
-		"Ambient/Waterfall",
-		"Ambient/Winter",
-		"TimeObjectActivator",
-		"NetworkObject"
+		"Animation"
 	};
+
+	public static bool IsSupportedHead(string head) => head == "SpawnPoint" || head == "Road" || head == "Animation";
+
+	public static int FindEditorIndex(string head, string param)
+	{
+		if (!IsSupportedHead(head)) return -1;
+		return Array.FindIndex(paramEditor, item => item == param || (item == head && item.IndexOf('/') < 0));
+	}
 
 	public string head;
 	public string param;
@@ -66,8 +61,7 @@ public class MarkerData
 		new()
 		{
 			{ "Road", name => AssetUtils.GetDBConfig<SurfaceTemplate>(name.Replace("Road/", string.Empty)).physicMaterial },
-			{ "TimeObjectActivator", name => new TimeObjectActivatorProperties() },
-			{ "NetworkObject", name => new NetworkObjectProperties() },
+			{ "Animation", name => new Plugins.CarX.Modding.Creator.Runtime.AnimationMarkerSettings() },
 		};
 
 	public static string[] paramEditorOnlyParameters
@@ -87,7 +81,7 @@ public class MarkerData
 
 	public void Update()
 	{
-		if (templateConfig == null)
+		if (templateConfig == null && head != "Animation")
 		{
 			value = null;
 		}

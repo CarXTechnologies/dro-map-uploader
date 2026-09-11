@@ -2,9 +2,12 @@
     "name": "MapUploader.Tests.EditMode",
     "rootNamespace": "MapUploader.Tests",
     "references": [
+        "CarX.Modding.Creator",
+        "CarX.Modding.Creator.Editor",
         "MapUploader.Rules",
         "MapUploader.Runtime",
         "MapUploader.Editor",
+        "Unity.RenderPipelines.Core.Runtime",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

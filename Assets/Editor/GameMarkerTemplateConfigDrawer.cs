@@ -56,7 +56,8 @@ namespace Editor
 			Space();
 			amountRect.x -= 16;
 			amountRect.width /= 3;
-			propSelectHead.intValue = EditorGUI.Popup(amountRect, propSelectHead.intValue, MarkerData.paramEditorOnlyParameters);
+			propSelectHead.intValue = EditorGUI.Popup(amountRect,
+				Mathf.Clamp(propSelectHead.intValue, 0, MarkerData.paramEditorOnlyParameters.Length - 1), MarkerData.paramEditorOnlyParameters);
 			amountRect.x += amountRect.width;
 			propTemplateName.stringValue = EditorGUI.TextField(amountRect, propTemplateName.stringValue);
 

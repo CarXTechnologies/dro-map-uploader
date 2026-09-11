@@ -20,21 +20,6 @@ namespace Editor.Validation
 		private const HideFlags EngineOwned =
 			HideFlags.HideInHierarchy | HideFlags.DontSaveInEditor | HideFlags.DontSaveInBuild;
 
-		private static readonly HashSet<string> Dro2Exported = new()
-		{
-			nameof(Transform),
-			nameof(MeshFilter),
-			nameof(MeshRenderer),
-			nameof(MeshCollider),
-			nameof(LODGroup),
-			nameof(Light),
-			"HDAdditionalLightData",
-			nameof(GameMarkerData),
-			nameof(Minimap),
-			nameof(CacheData),
-			"SceneObjectIDMapSceneAsset",
-		};
-
 		public static void Validate(
 			MapValidationReport report,
 			IReadOnlyList<GameObject> roots,
@@ -52,10 +37,9 @@ namespace Editor.Validation
 
 			CheckComponents(report, transforms, rules, skipTypes);
 			CheckBudget(report, rules);
-			CheckFormatCoverage(report, format, rules);
-			CheckMarkers(report, transforms, format);
-			CheckLighting(report, transforms, format);
-			CheckGeometry(report, transforms, format);
+			CheckMarkers(report, transforms);
+			CheckLighting(report, transforms);
+			CheckGeometry(report, transforms);
 			CheckPhysics(report, transforms);
 			CheckMinimap(report, transforms);
 
@@ -73,6 +57,7 @@ namespace Editor.Validation
 			{
 				var item = rules.data[index];
 				item.Reset();
+				item.current = 0;
 				rules.data[index] = item;
 			}
 		}
@@ -126,6 +111,8 @@ namespace Editor.Validation
 		private static void CheckComponents(MapValidationReport report, List<Transform> transforms, ValidItemData rules,
 			IReadOnlyList<string> skipTypes)
 		{
+            var animationRoots = Plugins.CarX.Modding.Creator.Editor.VertexAnimationBaker.GetAnimationRoots(
+                transforms.Select(t => t.root).Distinct(), IsExcluded);
 			foreach (var transform in transforms)
 			{
 				var components = transform.GetComponents<Component>();
@@ -136,31 +123,52 @@ namespace Editor.Validation
 
 					if (component == null)
 					{
-						report.AddCapped(MapValidationSeverity.Error, CategoryComponents, "missing-script",
-							$"'{transform.name}' has a missing script in component slot {i}. Remove the slot or restore the script.",
+						report.AddCapped(MapValidationSeverity.Info, CategoryComponents, "missing-script",
+							$"'{transform.name}' has a missing script in component slot {i}. This slot is skipped during export.",
 							transform.gameObject);
 						continue;
 					}
 
-					if (ModMapTestTool.ValidType(component, rules.data))
+					if (((component is Animator || component is SkinnedMeshRenderer) &&
+					     animationRoots.Any(root => transform.IsChildOf(root))) ||
+					    MapSceneRules.CountExportedComponent(component, rules.data))
 					{
 						continue;
 					}
 
 					var typeName = component.GetType().Name;
 
+					if (IsPreviewEnvironment(typeName))
+					{
+						report.AddCapped(MapValidationSeverity.Info, CategoryFormat, "preview-" + typeName,
+							$"'{typeName}' is used only for the SDK preview and is not exported or required.", component);
+						continue;
+					}
+					if (typeName == "SceneObjectIDMapSceneAsset") continue;
+
+					if (component is Animator || component is SkinnedMeshRenderer)
+					{
+						report.AddCapped(MapValidationSeverity.Info, CategoryComponents, "unbaked-animation",
+							$"'{typeName}' on '{transform.name}' requires a GameMarkerData Animation marker on the Animator root. " +
+							"This component is skipped; add the marker to export baked vertex animation.", component);
+						continue;
+					}
+
 					if (skipTypes != null && skipTypes.Contains(typeName))
 					{
 						continue;
 					}
 
-					report.AddCapped(MapValidationSeverity.Error, CategoryComponents, "unsupported-" + typeName,
+					report.AddCapped(MapValidationSeverity.Info, CategoryComponents, "unsupported-" + typeName,
 						$"'{typeName}' on '{transform.name}' is not a supported component and will not be exported. " +
-						"Remove it, or add it to Assets/Resources/MapSkipComponent if it is an editor only helper.",
+						"It is skipped automatically; supported components on this object are still exported.",
 						component);
 				}
 			}
 		}
+
+		private static bool IsPreviewEnvironment(string type) =>
+			type == "Volume" || type == nameof(ReflectionProbe) || type == "HDAdditionalReflectionData";
 
 		private static void CheckBudget(MapValidationReport report, ValidItemData rules)
 		{
@@ -172,8 +180,6 @@ namespace Editor.Validation
 			for (var index = 0; index < rules.data.Count; index++)
 			{
 				var item = rules.data[index];
-				item.ValidProcess();
-				rules.data[index] = item;
 
 				if (item.current < item.min)
 				{
@@ -189,38 +195,10 @@ namespace Editor.Validation
 						item.components != null && item.components.Count > 0 ? item.components[0] : null);
 				}
 
-				if (item.validComponentProcess is { isSuccess: false })
-				{
-					foreach (var line in SplitLines(item.validComponentProcess.processMessage))
-					{
-						report.Error(CategoryBudget, line);
-					}
-				}
 			}
 		}
 
-		private static void CheckFormatCoverage(MapValidationReport report, FormatBuild format, ValidItemData rules)
-		{
-			if (format != FormatBuild.dro2 || rules.data == null)
-			{
-				return;
-			}
-
-			foreach (var item in rules.data)
-			{
-				if (item.current <= 0 || Dro2Exported.Contains(item.type))
-				{
-					continue;
-				}
-
-				report.Warning(CategoryFormat,
-					$"'{item.type}' x{item.current} is supported by dro1 but is not part of the dro2 catalog - " +
-					"it will not appear in the published mod. Build as dro1 if the map needs it.",
-					item.components != null && item.components.Count > 0 ? item.components[0] : null);
-			}
-		}
-
-		private static void CheckMarkers(MapValidationReport report, List<Transform> transforms, FormatBuild format)
+		private static void CheckMarkers(MapValidationReport report, List<Transform> transforms)
 		{
 			var spawnPoints = new List<GameMarkerData>();
 			var markers = new List<GameMarkerData>();
@@ -245,9 +223,25 @@ namespace Editor.Validation
 					continue;
 				}
 
+				if (!MarkerData.IsSupportedHead(marker.markerData.head))
+				{
+					report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "unsupported-marker-" + head,
+						$"'{transform.name}' uses unsupported marker '{marker.markerData.head}'. " +
+						"Supported types are SpawnPoint, Road and Animation. Remove or replace this marker.", marker);
+					continue;
+				}
+
 				if (head == "spawnpoint")
 				{
 					spawnPoints.Add(marker);
+				}
+
+				if (head == "animation")
+				{
+					var settings = marker.markerData.value as Plugins.CarX.Modding.Creator.Runtime.AnimationMarkerSettings;
+					var animator = settings?.animator != null ? settings.animator : marker.GetComponent<Animator>();
+					if (animator == null || animator.runtimeAnimatorController == null || animator.runtimeAnimatorController.animationClips.Length == 0)
+						report.Error(CategoryMarkers, "Animation marker requires an Animator with animation clips.", marker);
 				}
 
 				if (head == "road" && marker.GetComponentInChildren<Collider>(true) == null)
@@ -276,17 +270,7 @@ namespace Editor.Validation
 					break;
 
 				default:
-					if (format == FormatBuild.dro1)
-					{
-						report.Error(CategoryMarkers,
-							$"dro1 supports exactly one SpawnPoint and the map has {spawnPoints.Count}. " +
-							"Remove the extras or build as dro2, which supports several.",
-							spawnPoints[1]);
-					}
-					else
-					{
-						CheckSpawnPointNames(report, spawnPoints);
-					}
+					CheckSpawnPointNames(report, spawnPoints);
 
 					break;
 			}
@@ -299,14 +283,14 @@ namespace Editor.Validation
 				if (group.Count() > 1)
 				{
 					report.Warning(CategoryMarkers,
-						$"{group.Count()} spawn points are all named '{group.Key}'. dro2 exports the object name as " +
+						$"{group.Count()} spawn points are all named '{group.Key}'. Wavefront/Binary exports the object name as " +
 						"the spawn point's identity, so give each one a distinct, meaningful name.",
 						group.First());
 				}
 			}
 		}
 
-		private static void CheckLighting(MapValidationReport report, List<Transform> transforms, FormatBuild format)
+		private static void CheckLighting(MapValidationReport report, List<Transform> transforms)
 		{
 			var directional = new List<Light>();
 
@@ -324,15 +308,15 @@ namespace Editor.Validation
 					directional.Add(light);
 				}
 
-				if (format != FormatBuild.dro2 || !light.enabled)
+				if (!light.enabled)
 				{
 					continue;
 				}
 
 				if (light.type != LightType.Point && light.type != LightType.Spot)
 				{
-					report.AddCapped(MapValidationSeverity.Warning, CategoryLighting, "dro2-light-type",
-						$"'{transform.name}' is a {light.type} light. dro2 exports Point and Spot lights only, so this " +
+					report.AddCapped(MapValidationSeverity.Warning, CategoryLighting, "Wavefront/Binary-light-type",
+						$"'{transform.name}' is a {light.type} light. Wavefront/Binary exports Point and Spot lights only, so this " +
 						"one will not reach the mod.",
 						light);
 				}
@@ -341,13 +325,13 @@ namespace Editor.Validation
 			if (directional.Count > 1)
 			{
 				report.Warning(CategoryLighting,
-					$"The map has {directional.Count} Directional Lights. Use one - several of them light the scene " +
-					"differently in game than they do in the editor.",
+					$"The map has {directional.Count} Directional Lights. These affect the SDK preview only; " +
+					"the game supplies its own environment lighting.",
 					directional[1]);
 			}
 		}
 
-		private static void CheckGeometry(MapValidationReport report, List<Transform> transforms, FormatBuild format)
+		private static void CheckGeometry(MapValidationReport report, List<Transform> transforms)
 		{
 			foreach (var transform in transforms)
 			{
@@ -383,11 +367,11 @@ namespace Editor.Validation
 						meshCollider);
 				}
 
-				CheckLodGroup(report, transform, format);
+				CheckLodGroup(report, transform);
 			}
 		}
 
-		private static void CheckLodGroup(MapValidationReport report, Transform transform, FormatBuild format)
+		private static void CheckLodGroup(MapValidationReport report, Transform transform)
 		{
 			var lodGroup = transform.GetComponent<LODGroup>();
 
@@ -398,7 +382,7 @@ namespace Editor.Validation
 
 			if (lodGroup.lodCount > 8)
 			{
-				report.AddCapped(format == FormatBuild.dro2 ? MapValidationSeverity.Error : MapValidationSeverity.Warning,
+				report.AddCapped(MapValidationSeverity.Error,
 					CategoryGeometry, "lod-too-many",
 					$"'{transform.name}' has {lodGroup.lodCount} LOD levels; at most 8 are supported and the whole " +
 					"group is skipped on export. Merge or remove levels.",
@@ -494,11 +478,5 @@ namespace Editor.Validation
 			return marker == null || marker.markerData == null ? string.Empty : marker.markerData.GetHead();
 		}
 
-		private static IEnumerable<string> SplitLines(string value)
-		{
-			return string.IsNullOrWhiteSpace(value)
-				? Enumerable.Empty<string>()
-				: value.Split('\n').Select(line => line.Trim()).Where(line => line.Length > 0);
-		}
 	}
 }
