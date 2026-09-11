@@ -6,8 +6,7 @@ Step-by-step guide to preparing a map in the Unity project and publishing it.
 
 The mod data format is independent of a particular game. Binary packages use `mod.cxmod`; Wavefront is the alternative loose-file representation. Currently the only content type is `map`. A consuming game needs a compatible loader and adapters for rendering, physics and gameplay markers. Selecting a publishing platform does not select a file format.
 
-Tracks can be published to the **Steam Workshop** or to **mod.io**; the vendor is picked at the top of the MapBuilder
-window. Setting up the vendors — SDKs, credentials, sign in — is covered in **[PUBLISHING.md](PUBLISHING.md)**.
+The current MapBuilder UI publishes to **mod.io** or exports to a local folder. Publisher setup is described in **[PUBLISHING.md](PUBLISHING.md)**.
 
 - [Preparing the track upload project](#preparing-the-track-upload-project)
 - [Importing the 3D model into the project](#importing-the-3d-model-into-the-project)
@@ -17,7 +16,7 @@ window. Setting up the vendors — SDKs, credentials, sign in — is covered in 
   - [Template system (road only)](#template-system-road-only)
   - [Adding a mini-map](#adding-a-mini-map)
   - [Capturing prototypes: icon, preview, minimap](#capturing-prototypes-icon-preview-minimap)
-- [Uploading the track to the Workshop](#uploading-the-track-to-the-workshop)
+- [Publishing a map](#publishing-a-map)
   - [Build Settings](#build-settings)
   - [Mod format: Wavefront and Binary](#mod-format-wavefront-and-binary)
   - [Upload Settings](#upload-settings)
@@ -36,7 +35,6 @@ window. Setting up the vendors — SDKs, credentials, sign in — is covered in 
    > [!WARNING]
    > **Code → Download ZIP** does *not* include submodules — `Assets/Plugins/CarX.Modding.Creator` will be an empty folder and the project will not compile.
 
-   <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/1.png?raw=true" alt="Downloading the project archive" style="width:600px;"/>
 
 2. Install **Unity Editor 6000.3.19f1** (64-bit only): **[download installer](https://download.unity3d.com/download_unity/7689f4515d75/Windows64EditorInstaller/UnitySetup64-6000.3.19f1.exe)**.
 
@@ -85,7 +83,7 @@ git submodule update --init --recursive
 3. Drag & drop your `.fbx` / [`.obj`](https://www.autodesk.com/products/fbx/overview) / [`.dae`](https://www.khronos.org/collada/) model into `Assets/MapResources/<your_folder>/`.
 4. If the models come without materials, create them via **Assets → Create → Material** and configure them as shown below.
 
-   <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/2.png?raw=true" alt="Material setup" style="width:400px;"/>
+   <img src="Image/2.png" alt="Material setup" style="width:400px;"/>
 
 5. Open the created scene and drag the 3D model onto it to create a GameObject.
 6. Add the required components to the created GameObject.
@@ -93,7 +91,7 @@ git submodule update --init --recursive
 8. Right-click the object in the scene and choose **Prefab → Unpack Completely**.
 9. Drag the GameObject from the scene into the new `Prefabs` folder — it can now be reused as many times as needed.
 
-   <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/3.png?raw=true" alt="Prefab folder" style="width:300px;"/>
+   <img src="Image/3.png" alt="Prefab folder" style="width:300px;"/>
 
 The scene may contain any number of top-level objects. A shared parent named `root` is optional: the builder exports all scene roots without reparenting the source objects. Existing maps with a `root` group remain supported. The builder does not create temporary scenes. Rigidbody and Animation bindings and animation atlas deduplication span the whole exported scene.
 
@@ -110,7 +108,7 @@ These components are assigned with the **GameMarkerData** helper. To add it to a
 
 For the track object that represents the surface, set the GameMarkerData type to **Road** and pick, in the dropdown, the material type used in the game when interacting with this surface.
 
-<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/4.png?raw=true" alt="Road marker setup" style="width:500px;"/>
+<img src="Image/4.png" alt="Road marker setup" style="width:500px;"/>
 
 > [!NOTE]
 > Any GameObject/Prefab with collision must also have a Collider component (Box / Sphere / Capsule / Mesh Collider). This is required for collision accuracy.
@@ -123,7 +121,7 @@ Create an empty object via **GameObject → Create Empty** (or <kbd>Ctrl</kbd>+<
 > Both formats support several spawn points — name each object meaningfully,
 > because the name is exported with the spawn point and identifies it in game.
 
-<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/5.png?raw=true" alt="Spawn point setup" style="width:400px;"/>
+<img src="Image/5.png" alt="Spawn point setup" style="width:400px;"/>
 
 ### Vertex animation
 
@@ -133,19 +131,19 @@ Use **Animation** with an Animator to bake animation into an atlas. **Ambient**,
 
 1. Create a template config.
 
-   <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/22.png?raw=true" alt="Creating a template config" style="width:500px;"/>
+   <img src="Image/22.png" alt="Creating a template config" style="width:500px;"/>
 
 2. Create and redefine the template parameters.
 
-   <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/23.png?raw=true" alt="Template parameters" style="width:350px;"/>
+   <img src="Image/23.png" alt="Template parameters" style="width:350px;"/>
 
 3. Select the template config in the GameMarkerData component.
 
-   <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/24.png?raw=true" alt="Selecting the template config" style="width:500px;"/>
+   <img src="Image/24.png" alt="Selecting the template config" style="width:500px;"/>
 
 4. Select a template to reassign the parameters.
 
-   <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/25.png?raw=true" alt="Selecting a template" style="width:400px;"/>
+   <img src="Image/25.png" alt="Selecting a template" style="width:400px;"/>
 
 ### Adding a mini-map
 
@@ -157,7 +155,7 @@ Every map needs exactly one minimap. Create an empty object in the scene (as des
 > [!NOTE]
 > The map must be centered relative to zero coordinates.
 
-<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/8.png?raw=true" alt="Minimap setup" style="width:800px;"/>
+<img src="Image/8.png" alt="Minimap setup" style="width:800px;"/>
 
 ### Capturing prototypes: icon, preview, minimap
 
@@ -166,81 +164,64 @@ Every map needs exactly one minimap. Create an empty object in the scene (as des
 3. Press **Capture** at the bottom of the component in the Inspector.
 4. Save the prototype to disk.
 
-<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/14.png?raw=true" alt="Capture camera" style="width:300px;"/>
+<img src="Image/14.png" alt="Capture camera" style="width:300px;"/>
 
-## Uploading the track to the Workshop
+## Publishing a map
 
-1. Open the **Tools → MapBuilder** window.
+1. Open **Tools → MapBuilder**. The header shows your account, **Platform** (currently mod.io) and the **EN / RU** language selector. English is the default.
+2. Select a map in **Local maps**, or press **+ New map** to create its settings asset. Existing `MapMetaConfig` assets appear in the library automatically; there is no separate config selector on each tab.
+3. On **Map**, fill in **Name**, **Version**, **Summary**, **Description**, **Authors**, **URL**, **Preview** and **Icon**. Version is the author's release label (for example `1.2.0`), not the container format version; an empty value uses `1.0.0`. An empty Summary uses the first description line. Use readable PNG images for Icon and Preview.
 
-   ![MapBuilder window](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/17.png?raw=true)
-
-2. Create or select a community item.
-
-   <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/18.png?raw=true" alt="Community item selection" style="width:600px;"/>
-
-   > [!IMPORTANT]
-   > Add your scenes to the Build Settings, otherwise they will not be visible in MapBuilder.
-   >
-   > <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/15.png?raw=true" alt="Build settings scene list" style="width:400px;"/>
-
-3. Create a map configuration in the map folder.
-
-   <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/26.png?raw=true" alt="Creating a map config" style="width:600px;"/>
-
-4. Fill in the configuration file:
-
-   - **Workshop Name** — the map name shown in the Workshop. Letters, digits, spaces and `- _ ' . , : ! ? ( ) & + /`.
-   - **Summary** *(optional)* — one line shown next to the map in a listing. mod.io requires one and caps it at 250 characters; left empty, the first line of the description is used instead.
-   - **Workshop Description** *(optional)* — the description shown in the Workshop.
-   - **Icon** — the map icon shown in the list of Workshop maps in the game (Read/Write enabled required, PNG only).
-   - **Preview** — the map preview shown in the Workshop and when entering the map in the game (Read/Write enabled required, PNG only).
-
-   ![Map meta config](https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/16.png?raw=true)
-
-5. To set up a scene for the build, select the **MapMetaConfig** in the MapBuilder window.
-
-   <img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/27.png?raw=true" alt="Selecting MapMetaConfig" style="width:600px;"/>
+![Map tab: metadata and images](Image/current/map-guide.png)
 
 ### Build Settings
 
-| Setting | Description |
-| --- | --- |
-| **Target Scene** | The scene used to build the map (the scene must be in Build Settings). |
-| **Format** | The mod packaging format: **Wavefront** or **Binary** — see [Mod format: Wavefront and Binary](#mod-format-wavefront-and-binary). |
-| **Binary textures** | BC7 or RGBA32, including prepared mipmaps. Container compression is automatic. |
-| **Build Targets** (flags) | The build targets you want to build or rebuild. |
-| **Validate** | Runs every check against the map without building anything. See [Validation](#validation). |
-| **Build** | Builds all selected Build Targets. |
-| **Cancel** | Appears while an operation is running and stops it. |
+Open **Build**. Add the target scene to Unity's build scene list if it does not appear in **Scene**.
 
-<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/20.png?raw=true" alt="Build settings" style="width:400px;"/>
+| Control | Purpose |
+| --- | --- |
+| **Scene** | Scene to export. |
+| **Format** | Binary (default) or Wavefront. |
+| **Advanced settings** | Opens **Rebuild targets** and, for Binary, **Binary textures** (BC7 or RGBA32 with prepared mipmaps). Container compression is automatic. |
+| **Scene contents** | Shows component counts and limits. |
+| **Validate map** | Checks the map without building. See [Validation](#validation). |
+| **Build map** | Builds the selected targets. Use Everything for a complete build. |
+| **Open build folder** | Opens the generated output. |
+| **Go to publishing →** | Opens Publish. |
+
+Build progress and **Cancel** appear in the bottom bar. Some Unity export stages still run on the editor thread, so responsiveness can vary during a build.
+
+![Build tab](Image/current/build-guide.png)
 
 ### Mod format: Wavefront and Binary
 
 - **Wavefront** exports geometry/materials/textures/metadata as OBJ / MTL / PNG / JSON files.
 - **Binary** packages the map into compressed `mod.cxmod`, with compact geometry, typed scene data and prepared textures. This is the default format.
 
-Both export all scene roots directly and support the same scene features. Rebuild **Map and Meta** after switching formats. Only maps (`contentType: "map"`) are supported.
+Both export all scene roots directly and support the same scene features. Rebuild **Map and Meta** after switching formats. Only maps (`contentType: "map"`) are supported. The format is independent of a particular game; the consuming application needs compatible adapters.
 
-See [Wavefront export](Wavefront.md) and [Binary format](Assets/Plugins/CarX.Modding.Creator/BinaryFormat.md).
+See [Wavefront export](Wavefront.md) and [Binary format](BinaryFormat.md).
 
 ### Upload Settings
 
-| Setting | Description |
-| --- | --- |
-| **Vendor** *(top bar)* | Where the map is published — Steam Workshop or mod.io. See [PUBLISHING.md](PUBLISHING.md). |
-| **Upload Description** | If enabled, the description on the mod page is updated. |
-| **Upload Name** | If enabled, the map name on the mod page is updated. |
-| **Upload Preview** | If enabled, the map icon on the mod page is updated. |
-| **Destination → Vendor** | Uploads to the current item if all Build Targets for the selected config succeeded. |
-| **Destination → Local Test** | Replaces the build in the vendor's local install folder only. Steam only. |
-| **Destination → External Folder** | Copies the build to any folder on disk. |
+On **Publish**, choose **Platform** to publish to mod.io, or **Export to folder** for a local copy. Building and exporting locally do not require a publication.
 
-<img src="https://github.com/CarXTechnologies/dro-map-uploader/blob/target/1.1/Image/21.png?raw=true" alt="Upload settings" style="width:400px;"/>
+1. Build Map and Meta first, then sign in from the header to publish.
+2. For a new mod, press **Create publication**. It creates the entry and uploads the built files. After the entry is linked, rebuild Meta to include its assigned id and press **Update publication**.
+3. For an existing mod, select it under **Publications**, enter **Changelog**, choose **Update title / Update description / Update preview**, and press **Update publication**. These switches control changes to the publication page.
+4. Use **Refresh list** to reload publications. The local map list shows the linked mod.io file version when loaded; this is separate from the locally edited Version.
+
+![Publish tab: mod.io publication controls](Image/current/publish-guide.png)
+
+For local testing, select **Export to folder**, choose **Folder**, then press **Export to folder**. Use the mod directory expected by the consuming application. The current UI has no Steam Local Test option.
+
+![Publish tab: export to a folder](Image/current/export-guide.png)
+
+Publisher configuration and integration details: [PUBLISHING.md](PUBLISHING.md).
 
 ## Validation
 
-Press **Validate** in the Build Settings section to check the map without building it. Nothing in the scene is
+Press **Validate map** on the **Build** tab to check the map without building it. Nothing in the scene is
 modified, so it can be run as often as you like — it is the fastest way to find out whether a map is ready.
 
 The same checks run automatically as part of a build. Either way the result opens in a **Map Validation** window
@@ -250,7 +231,7 @@ want it there, and **Copy** puts it on the clipboard.
 
 - **Errors** stop the build. Fix them all — they are shown together on purpose, so you do not discover them one
   rebuild at a time.
-- **Warnings** do not stop anything, but each one means something you authored will not reach players.
+- **Warnings** do not stop anything, and describe skipped content or other issues worth reviewing.
 
 What is checked:
 
@@ -277,7 +258,7 @@ Objects tagged **Garbage** are skipped, exactly as they are by the build.
 | **Animation** | Animator and SkinnedMeshRenderer under GameMarkerData Animation, baked to VAT |
 | **Map data** | SpawnPoint, Road, Animation; Minimap |
 
-Volume and ReflectionProbe are optional preview components. UI, particles, video and joints are not exported and produce validation errors. Rules and budgets live in `Assets/Editor/MapSceneRules.cs`.
+Volume and ReflectionProbe are optional preview components. Unsupported components (including UI, particles, video and joints) and unsupported marker types are skipped with warnings, not build-blocking errors. A Rigidbody without usable colliders is skipped; its render geometry can still be exported. Rules and budgets live in `Assets/Editor/MapSceneRules.cs`.
 
 ## Requirements
 
@@ -286,21 +267,15 @@ Volume and ReflectionProbe are optional preview components. UI, particles, video
 - Keep the meta size under 24 MB (including preview, icon, description and title).
 - Be mindful of the component limitations.
 
-The remaining limits depend on the vendor you publish to, and the uploader validates against whichever one is
-selected:
+The current mod.io configuration sets these limits; project administrators can change them in the publisher config:
 
-| Limit | Steam Workshop | mod.io |
-| --- | --- | --- |
-| Preview / logo | 1 MB | 8 MB |
-| Map name | 128 characters | 50 characters |
-| Description | 8000 characters | 50000 characters |
-| Summary | not used | required, 250 characters |
+| Field | Limit |
+| --- | --- |
+| Icon / logo | 8 MB |
+| Name | 50 characters |
+| Description | 50000 characters |
+| Summary | 250 characters |
 
-- A non-convex MeshCollider with a non-kinematic Rigidbody is no longer supported.
+A non-convex MeshCollider on a non-kinematic Rigidbody is invalid and must be fixed. Unsupported components alone do not block a build.
 
-If the map is configured incorrectly, an error is shown during upload — the listed causes have to be fixed on your side.
-
-Once these steps are complete, the map is published to the vendor you selected. A freshly uploaded map is **private / hidden** on both vendors, so you can test it while it stays visible only to you — on Steam, open **Workshop → Track Workshop** in the game. You can switch it to public on the map page on the vendor site.
-
-> [!WARNING]
-> On Steam, the **Friends Only** visibility option currently has issues caused by the external library used for Steam API integration. We plan to fix this in an upcoming release.
+New publications are created hidden. Review the uploaded file on mod.io and change visibility on its page when ready.

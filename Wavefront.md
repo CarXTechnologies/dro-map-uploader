@@ -1,6 +1,6 @@
 # Uploading mods in the **Wavefront** format
 
-This document describes the **Wavefront** representation supported by MapUploader. It is not a game version. The primary binary representation is documented in [Binary format](Assets/Plugins/CarX.Modding.Creator/BinaryFormat.md). Both require a compatible consuming application; game-specific marker behavior belongs to its integration layer.
+This document describes the **Wavefront** representation supported by MapUploader. It is not a game version. The primary binary representation is documented in [Binary format](BinaryFormat.md). Both require a compatible consuming application; game-specific marker behavior belongs to its integration layer.
 For the general map authoring workflow (scene setup, markers, minimap, workshop publishing) see the main **[README](README.md)** — everything described there still applies. This file only covers what is *specific* to Wavefront.
 
 - [What is Wavefront](#what-is-wavefront)
@@ -77,19 +77,16 @@ Also dropped, with a warning at export time:
 
 ## Selecting the format
 
-1. Open **Tools → MapBuilder**.
-2. Select (or create) a workshop item on the right and attach a `MapMetaConfig` to it.
-3. In **Build Settings**:
-   - **Target Scene** — the scene to build (it must be added to *File → Build Settings*).
-   - **Format** — choose **Wavefront**.
-   - **Compression** — the row disappears when Wavefront is selected; the setting is not used by this format.
-   - **Build Targets** — flags: `Map`, `Meta`, or both.
-4. Press **Build**.
+1. Open **Tools → MapBuilder** and select a local map, or use **+ New map**.
+2. Fill in its metadata on **Map**.
+3. Open **Build**, select **Scene** and choose **Wavefront** under **Format**. The scene must be in Unity's build scene list.
+4. Under **Advanced settings**, select **Rebuild targets → Everything** for a complete build. Binary texture settings are not shown for Wavefront.
+5. Press **Validate map**, then **Build map**. Progress and Cancel appear in the bottom bar.
 
 ## Publishing
 
-- **External Folder** — copies the build to any folder on disk. Useful for inspecting the catalog or for manual distribution.
-- **Vendor** — uploads the catalog to the selected mod vendor. A Wavefront catalog is validated and uploaded as a set of data files. See **[PUBLISHING.md](PUBLISHING.md)**.
+- **Publish → Export to folder** — copies the build to any folder on disk. Useful for inspecting the catalog or for manual distribution.
+- **Publish → Platform** — uploads the catalog to mod.io. A Wavefront catalog is validated and uploaded as a set of data files. See **[PUBLISHING.md](PUBLISHING.md)**.
 
 > Note! Whether the shipped game reads a Wavefront mod delivered through a vendor depends on the game build you are testing
 > against. Loading from a local folder is the path that is known to work:

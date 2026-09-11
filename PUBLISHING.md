@@ -1,5 +1,8 @@
 # Mod delivery vendors
 
+The current MapBuilder UI exposes **mod.io** under **Platform**, and **Export to folder** for local output. Steam remains an implementation adapter; it is hidden in the UI. Sections about Steam below describe adapter capabilities, not available author-facing controls. For screenshots and the current workflow, see [README](README.md#publishing-a-map).
+
+
 The uploader does not talk to Steam or mod.io directly. Everything goes through one vendor agnostic contract that
 lives in the **CarX.Modding.Creator** submodule, so a project can ship with only the vendors it actually needs — and
 another project can add its own without touching the uploader.
@@ -88,7 +91,7 @@ discoverable — and it is **separate per vendor**, because a Steam app id and a
 issued by different people, and mod.io additionally needs an api key per game.
 
 The picked game drives everything at once: the vendor's api calls *and* the uploader's Local Test folder, so the two
-cannot drift apart. It is chosen from the **Game** dropdown at the top of the MapBuilder window, next to the vendor.
+cannot drift apart. Configure the selected game in the vendor config asset; the current MapBuilder header has no Game dropdown.
 
 | Asset | Per-game field | Where it comes from |
 | --- | --- | --- |
@@ -108,8 +111,8 @@ Settings shared by every game on a vendor stay outside the list: `Apply Content 
 and Steam's `Local Mods Folder`.
 
 > [!IMPORTANT]
-> **Game Id**, **API Key** and **Server Url** are the values that are not pre-filled. Copy all three off the API
-> access page before the first upload; until then the MapBuilder window will say the vendor is not configured.
+> **Game Id**, **API Key** and **Server Url** are the values that are not pre-filled. Copy Game Id and API Key from the API
+> access page before the first upload; leave Server Url empty to derive the per-game endpoint; until then the MapBuilder window will say the vendor is not configured.
 > Make sure you are reading the row for the right game — an account with access to several games lists them all, and
 > a wrong Game Id uploads maps into the wrong title.
 
@@ -148,48 +151,28 @@ Open **Tools → MapBuilder**. The bar at the top picks the vendor and shows the
 
 ## Publishing
 
-The **Destination** section offers three targets:
+On **Publish**, **Build destination** offers two choices:
 
 | Destination | What it does |
 | --- | --- |
-| **Vendor** | Uploads the build to the selected item on the active vendor. |
-| **Local Test** | Copies the build into the installed game's own mods folder, `<game install>/Mods/<item id>`, so it can be loaded without publishing. Steam only, because that is where the game install path comes from — the option is not offered for other vendors. |
-| **External Folder** | Copies the build to any folder on disk. Works regardless of vendor. |
+| **Platform** | Uploads to mod.io. |
+| **Export to folder** | Copies a completed build to **External path**, without requiring a published item. |
 
-The **Upload Name / Description / Preview** toggles control which metadata fields are overwritten on the vendor page;
-everything left off keeps whatever is already there.
-
-**Version** and **Changelog** are written by the map author and travel with the uploaded file:
-
-| Vendor | Version | Changelog |
-| --- | --- | --- |
-| mod.io | shown against the file on the mod page | shown to players as the release notes |
-| Steam Workshop | no such field — the input is hidden | the update's change note, under Change Notes on the item |
-
-Both are stored per map, not per published item, because they are needed before an entry exists — the file is
-attached while the entry is created — and they have to survive a rebuild. Leaving **Version** empty falls back to
-the uploader's own version, since a file with no version at all reads as a mistake on the mod page.
+**Update title / Update description / Update preview** control which page metadata is overwritten during an update. **Version** is edited on **Map** and **Changelog** on **Publish**. They are stored per local map. An empty Version uses `1.0.0`; it is independent of the binary container version.
 
 ### Order of operations
 
-The same on every vendor: **build → if it succeeded → create the entry and send the files**.
+1. Select a map in **Local maps**, or create its settings with **+ New map**.
+2. Fill in **Map**, then use **Build → Build map** to build Map and Meta (Everything).
+3. Sign in, open **Publish → Platform**, and press **Create publication**. This creates the entry and sends the built files in one operation; a completed build is required.
+4. The new entry is linked to the local map. Rebuild Meta so it includes the assigned vendor id, then press **Update publication**.
+5. For later updates, rebuild the changed targets, select the linked publication, enter Changelog and press **Update publication**.
 
-1. Assign a **Map Meta Config**.
-2. **Build** Map and Meta. The meta stamps the map config's id as a placeholder, since no entry exists yet.
-3. **New Item** — creates the entry *and* publishes that build to it in one step. Disabled until both targets are
-   built, with the hint saying what is missing.
-4. The panel then asks you to **rebuild Meta**, which now stamps the real vendor id, and **Upload**.
-
-Building itself does not require an entry: pick a `MapMetaConfig` on the left and the Build section unlocks, with or
-without a selection on the right. Only the Destination section needs an existing entry.
-
-An entry is never created empty, even on vendors that would allow it. A blank entry is only ever half of an
-operation, and nothing downstream can tell "created, upload pending" apart from "created, upload failed" — on mod.io
-it is worse still, since a mod with no file cannot be read back at all.
+**Refresh list** reloads publications. The local library displays the active mod.io file version when available, separately from the author's local Version. Progress and Cancel are in the bottom bar.
 
 ## Deleting an item
 
-**Delete…**, next to **New Item**, removes an entry from the vendor after a confirmation. It is permanent on both
+**Delete publication…**, next to **Create publication**, removes an entry from the vendor after a confirmation. It is permanent on both
 vendors — Steam calls `DeleteFileAsync`, mod.io calls `DELETE /games/{id}/mods/{id}`.
 
 With an item selected it deletes that one. **With nothing selected it asks for an id instead**, and that is not a
@@ -276,7 +259,7 @@ one first. If you create an item with no finished build, it warns you: the resul
 file reaches it, and the list is how you would otherwise select it.
 
 > [!IMPORTANT]
-> If your list already fails to load, you have a fileless mod on the account. Remove it with **Delete…** and enter
+> If your list already fails to load, you have a fileless mod on the account. Remove it with **Delete publication…** and enter
 > its id — that path deliberately does not need the list, see [Deleting an item](#deleting-an-item).
 
 ### The item list is refreshed through SyncUserCreations
