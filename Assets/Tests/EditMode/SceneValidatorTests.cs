@@ -277,12 +277,14 @@ namespace MapUploader.Tests
 		[TestCase("Ambient")]
 		[TestCase("TimeObjectActivator")]
 		[TestCase("NetworkObject")]
-		public void RejectsMarkersWithoutClientSupport(string head)
+		public void WarnsAndSkipsMarkersWithoutClientSupport(string head)
 		{
 			var root = NewObject("Track");
 			NewMarker("Old marker", head, root);
 			var report = Validate(FormatBuild.Binary, root);
 			Assert.IsTrue(Has(report, SceneValidator.CategoryMarkers, "unsupported marker '" + head + "'"));
+			Assert.IsTrue(report.Issues.Where(issue => issue.message.Contains("unsupported marker '" + head + "'"))
+				.All(issue => issue.severity == MapValidationSeverity.Warning));
 			Assert.IsFalse(MarkerData.paramEditor.Any(item => MarkerData.GetHeadTarget(item) == head));
 		}
 

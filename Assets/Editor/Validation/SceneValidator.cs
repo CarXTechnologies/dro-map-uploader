@@ -225,9 +225,9 @@ namespace Editor.Validation
 
 				if (!MarkerData.IsSupportedHead(marker.markerData.head))
 				{
-					report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "unsupported-marker-" + head,
+					report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "unsupported-marker-" + head,
 						$"'{transform.name}' uses unsupported marker '{marker.markerData.head}'. " +
-						"Supported types are SpawnPoint, Road and Animation. Remove or replace this marker.", marker);
+						"This marker will be skipped during export. Supported types are SpawnPoint, Road and Animation.", marker);
 					continue;
 				}
 

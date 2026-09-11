@@ -154,11 +154,7 @@ namespace Editor.Validation
 
 			var text = $"Map validation - {where}: {Headline()}. The Map Validation window has the list.";
 
-			if (HasErrors)
-			{
-				Debug.LogError(text);
-			}
-			else if (WarningCount > 0)
+			if (HasErrors || WarningCount > 0)
 			{
 				Debug.LogWarning(text);
 			}
