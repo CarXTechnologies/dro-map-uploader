@@ -73,6 +73,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 		public MapMetaConfigValue lastMeta;
 		public FormatBuild format;
 		public string targetScene;
+        public string optimizationKey;
 
 		public BuildData(MapMetaConfig config,
 			string targetScene,
@@ -82,6 +83,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 			FormatBuild format)
 		{
 			this.config = config;
+            optimizationKey = config.OptimizationKey;
 			this.path = path;
 			this.buildSuccess = buildSuccess;
 			this.lastValid = (ValidItemData)lastValid.Clone();
@@ -202,6 +204,7 @@ public class MapManagerConfig : SingletonScriptableObject<MapManagerConfig>
 		}
 
 		var result = instance.builds.Find(b => b.config != null && b.config.id == config.id);
+		if ((result.optimizationKey ?? string.Empty) != config.OptimizationKey) result.buildSuccess &= ~(int)TempData.Map;
 		if (result.format != FormatBuild.Wavefront && result.format != FormatBuild.Binary) result.buildSuccess = 0;
 		return result;
 	}

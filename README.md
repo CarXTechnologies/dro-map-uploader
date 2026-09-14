@@ -176,6 +176,8 @@ Every map needs exactly one minimap. Create an empty object in the scene (as des
 
 ### Build Settings
 
+**Build → Optimization** provides sector splitting/merging, optional collider simplification and the **Generate sector LODs** checkbox. See [Build optimization](BuildOptimization.md) for settings and exclusions.
+
 Open **Build**. Add the target scene to Unity's build scene list if it does not appear in **Scene**.
 
 | Control | Purpose |

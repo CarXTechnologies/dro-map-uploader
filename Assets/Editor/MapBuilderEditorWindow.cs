@@ -589,6 +589,11 @@ namespace Editor
 			// The publication links to the local map selected in the library.
 			var activeConfig = attachObj?.metaConfig != null ? attachObj.metaConfig : m_pendingConfig;
 			var buildData = MapManagerConfig.GetBuildOrEmpty(activeConfig);
+            if (m_optimizationPanel != null && m_optimizationConfig != activeConfig)
+            {
+                m_optimizationConfig = activeConfig;
+                BuildOptimizationPanel.Populate(m_optimizationPanel, activeConfig, English, () => { RefreshLocalMaps(); RefreshDetailsPanel(); });
+            }
 
 			if (attachObj != null && m_buttonLastClickOnAnyItem)
 			{

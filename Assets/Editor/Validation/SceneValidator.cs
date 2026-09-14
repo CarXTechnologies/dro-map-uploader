@@ -41,6 +41,7 @@ namespace Editor.Validation
 			CheckLighting(report, transforms);
 			CheckGeometry(report, transforms);
 			CheckPhysics(report, transforms);
+            CheckSectorBudgets(report, transforms);
 			CheckMinimap(report, transforms);
 
 			report.FlushSuppressed();
@@ -421,6 +422,31 @@ namespace Editor.Validation
 				}
 			}
 		}
+
+        private static void CheckSectorBudgets(MapValidationReport report, List<Transform> transforms)
+        {
+            var settings = (MapManagerConfig.instance.mapMetaConfigValue?.optimization ?? new Plugins.CarX.Modding.Creator.Runtime.BuildOptimizationSettings()).Snapshot();
+            foreach (var t in transforms)
+            {
+                if (!Plugins.CarX.Modding.Creator.Editor.SceneExportOptimization.IsEligible(t)) continue;
+                void Check(Mesh mesh, Component context, string kind)
+                {
+                    if (mesh == null) return;
+                    long triangles = 0;
+                    for (int i = 0; i < mesh.subMeshCount; i++) if (mesh.GetTopology(i) == MeshTopology.Triangles) triangles += mesh.GetIndexCount(i) / 3;
+                    var bounds = Plugins.CarX.Modding.Creator.Editor.SceneExportOptimization.WorldBounds(mesh, t.localToWorldMatrix);
+                    var size = bounds.size;
+                    if (triangles <= settings.maxTriangles && Mathf.Max(size.x, Mathf.Max(size.y, size.z)) <= settings.sectorSize) return;
+                    report.AddCapped(MapValidationSeverity.Warning, CategoryGeometry, "sector-" + kind,
+                        $"'{t.name}' ({mesh.name}): static {kind}, {triangles:N0} triangles, world bounds {size.x:F1} x {size.y:F1} x {size.z:F1} m. " +
+                        $"Exceeds sector budget ({settings.sectorSize:F0} m / {settings.maxTriangles:N0} triangles). Review Build > Optimization; size alone does not prove a performance issue.", context);
+                }
+                foreach (var collider in t.GetComponents<MeshCollider>())
+                    if (collider.enabled && !collider.isTrigger && !collider.convex) Check(collider.sharedMesh, collider, "collider");
+                var renderer = t.GetComponent<MeshRenderer>(); var filter = t.GetComponent<MeshFilter>();
+                if (renderer != null && renderer.enabled && filter != null) Check(filter.sharedMesh, renderer, "render mesh");
+            }
+        }
 
 		private static void CheckMinimap(MapValidationReport report, List<Transform> transforms)
 		{

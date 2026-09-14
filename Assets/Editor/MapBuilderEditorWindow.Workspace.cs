@@ -40,6 +40,9 @@ namespace Editor
         private Label m_sceneContentsText;
         private Button m_advancedToggle, m_sceneContentsToggle;
         private int m_buildDetails;
+        private VisualElement m_optimizationPanel;
+        private Button m_optimizationToggle;
+        private MapMetaConfig m_optimizationConfig;
         private ScrollView m_localMaps;
         private ToolbarSearchField m_mapSearch;
         private Label m_mapTitle, m_mapSubtitle, m_actionHint, m_buildSummary;
@@ -110,13 +113,16 @@ namespace Editor
             var detailButtons = new VisualElement(); detailButtons.AddToClassList("mb-build-detail-buttons"); buildHeader.Add(detailButtons);
             m_advancedToggle = new Button(() => ToggleBuildDetails(1)) { text = L("Дополнительные настройки", "Advanced settings") };
             m_sceneContentsToggle = new Button(() => ToggleBuildDetails(2)) { text = L("Состав сцены", "Scene contents") };
-            detailButtons.Add(m_advancedToggle); detailButtons.Add(m_sceneContentsToggle);
+            m_optimizationToggle = new Button(() => ToggleBuildDetails(3)) { text = L("Оптимизация", "Optimization") };
+            detailButtons.Add(m_advancedToggle); detailButtons.Add(m_optimizationToggle); detailButtons.Add(m_sceneContentsToggle);
             m_advancedPanel = new VisualElement(); m_advancedPanel.AddToClassList("mb-build-detail-panel");
             m_advancedPanel.Add(m_buildTargetsField); m_advancedPanel.Add(m_binaryTexturesField);
             m_buildSection.Insert(1, m_advancedPanel);
             m_sceneContentsPanel = new VisualElement(); m_sceneContentsPanel.AddToClassList("mb-build-detail-panel");
             m_sceneContentsText = new Label { enableRichText = false }; m_sceneContentsText.style.whiteSpace = WhiteSpace.Normal;
             m_sceneContentsPanel.Add(m_sceneContentsText); m_buildSection.Insert(2, m_sceneContentsPanel);
+            m_optimizationPanel = new VisualElement(); m_optimizationPanel.AddToClassList("mb-build-detail-panel");
+            m_buildSection.Insert(3, m_optimizationPanel); m_optimizationConfig = null;
             RefreshBuildDetails();
             m_buildButton.AddToClassList("mb-primary");
             m_buildSummary = new Label(); m_buildSummary.AddToClassList("mb-build-summary"); m_buildPage.Add(m_buildSummary);
@@ -170,7 +176,7 @@ namespace Editor
             string.IsNullOrWhiteSpace(config.mapMetaConfigValue.mapName) ? config.name : config.mapMetaConfigValue.mapName;
 
         private static bool IsBuildCurrent(MapMetaConfig config, MapManagerConfig.BuildData build) =>
-            config != null && build.buildSuccess == 3 && !string.IsNullOrEmpty(build.path) &&
+            config != null && (build.optimizationKey ?? string.Empty) == config.OptimizationKey && build.buildSuccess == 3 && !string.IsNullOrEmpty(build.path) &&
             Directory.Exists(Path.Combine(build.path, "MapTemp")) && Directory.Exists(Path.Combine(build.path, "MetaTemp")) &&
             !MapBuilder.IsFormatBlocked(build.format, out _) &&
             build.lastMeta.Equals(config.mapMetaConfigValue);
@@ -337,6 +343,8 @@ namespace Editor
 
         private void RefreshBuildDetails()
         {
+            m_optimizationPanel.style.display = m_buildDetails == 3 ? DisplayStyle.Flex : DisplayStyle.None;
+            m_optimizationToggle.EnableInClassList("mb-detail-selected", m_buildDetails == 3);
             m_advancedPanel.style.display = m_buildDetails == 1 ? DisplayStyle.Flex : DisplayStyle.None;
             m_sceneContentsPanel.style.display = m_buildDetails == 2 ? DisplayStyle.Flex : DisplayStyle.None;
             m_advancedToggle.EnableInClassList("mb-detail-selected", m_buildDetails == 1);

@@ -28,6 +28,7 @@ namespace Editor
 
 		private static IModCollectionProvider m_provider = new EditorCollectionProvider();
 		private static ModResults m_results;
+        private static SceneExportOptimization m_optimization;
 
 		private static MapValidationReport m_report;
 
@@ -136,13 +137,22 @@ namespace Editor
 			InitPath();
 		}
 
-		private static bool CollectScene()
+		private static async Task<bool> CollectSceneAsync(CancellationToken token)
 		{
 			var scene = SceneManager.GetActiveScene();
 			var roots = scene.GetRootGameObjects();
 			if (HasSceneErrors(roots)) return false;
 
-			var collector = new SceneFormatCollector(roots.Select(root => root.transform), scene.name, "Garbage");
+			var exportRoots = roots.Select(root => root.transform).ToArray();
+            var settings = MapManagerConfig.instance.mapMetaConfigValue.optimization;
+            if (settings != null && settings.enabled)
+            {
+                RigidbodyExporter.EnsureMeshReadability(exportRoots);
+                m_optimization = new SceneExportOptimization();
+                await m_optimization.BuildAsync(exportRoots, settings, token);
+                if (m_optimization.Root != null) exportRoots = exportRoots.Concat(new[] { m_optimization.Root }).ToArray();
+            }
+            var collector = new SceneFormatCollector(exportRoots, scene.name, "Garbage") { Optimization = m_optimization };
 			m_results = collector.CollectModResults(m_provider, ModdingVersion.GetFullVersionFormat());
 			return m_results.success;
 		}
@@ -261,6 +271,7 @@ namespace Editor
 			m_provider = new EditorCollectionProvider(formatBuild == FormatBuild.Binary);
 			// Failed rebuilds cannot retain old success bits. A format change requires both parts.
 			if (MapManagerConfig.Build.format != formatBuild) success = 0;
+            if ((MapManagerConfig.Build.optimizationKey ?? string.Empty) != MapManagerConfig.instance.mapMetaConfigValue.OptimizationKey) success &= ~TempData.Map;
 			success &= ~target;
 			SelectCache();
             IsBuilding = true;
@@ -285,7 +296,7 @@ namespace Editor
 					ClearDirectory(GetTemporary(TempData.Map));
 					progress?.Report("Validating and collecting the scene…");
 					await Task.Delay(1, cancellationToken);
-                    if (!CollectScene()) return;
+                    if (!await CollectSceneAsync(cancellationToken)) return;
 					cancellationToken.ThrowIfCancellationRequested();
 					progress?.Report("Building the map…");
 					await Task.Delay(1, cancellationToken);
@@ -317,6 +328,7 @@ namespace Editor
                 IsBuilding = false;
                 AssetDatabase.AllowAutoRefresh();
                 UnityGoObjExporter.ClearCache();
+                m_optimization?.Dispose(); m_optimization = null;
 				m_results = null;
 
 				progress?.Report(string.Empty);
