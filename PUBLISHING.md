@@ -156,7 +156,7 @@ On **Publish**, **Build destination** offers two choices:
 | Destination | What it does |
 | --- | --- |
 | **Platform** | Uploads to mod.io. |
-| **Export to folder** | Copies a completed build to **External path**, without requiring a published item. |
+| **Export to folder** | Copies a completed build to **Folder**, without requiring a published item. |
 
 **Update title / Update description / Update preview** control which page metadata is overwritten during an update. **Version** is edited on **Map** and **Changelog** on **Publish**. They are stored per local map. An empty Version uses `1.0.0`; it is independent of the binary container version.
 
@@ -208,7 +208,7 @@ These are the places where the two vendors genuinely disagree, and how the share
 | Topic | Steam Workshop | mod.io |
 | --- | --- | --- |
 | Creating an entry | Would accept a blank item, but the tool always sends the build with it | Refuses without a **name, summary and logo** — the MapMetaConfig must have an icon |
-| Summary | No separate field | Required, max 250 chars — the uploader uses the first line of the map description |
+| Summary | No separate field | Required, max 250 chars — uses Summary from the Map tab, falling back to the first description line when empty |
 | Title length | 128 | 50 |
 | Version on a file | Not supported — the field is hidden | Stored and shown on the mod page |
 | Status in the item list | Public / Friends only / Private / Banned / Awaiting agreement | Only "file uploaded" — see below |

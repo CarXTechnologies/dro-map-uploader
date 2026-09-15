@@ -91,7 +91,7 @@ git submodule update --init --recursive
 8. Right-click the object in the scene and choose **Prefab → Unpack Completely**.
 9. Drag the GameObject from the scene into the new `Prefabs` folder — it can now be reused as many times as needed.
 
-   <img src="Image/3.png" alt="Prefab folder" style="width:300px;"/>
+   <img src="Image/3.png" alt="Prefab → Unpack Completely menu" style="width:300px;"/>
 
 The scene may contain any number of top-level objects. A shared parent named `root` is optional: the builder exports all scene roots without reparenting the source objects. Existing maps with a `root` group remain supported. The builder does not create temporary scenes. Rigidbody and Animation bindings and animation atlas deduplication span the whole exported scene.
 
@@ -109,6 +109,8 @@ These components are assigned with the **GameMarkerData** helper. To add it to a
 For the track object that represents the surface, set the GameMarkerData type to **Road** and pick, in the dropdown, the material type used in the game when interacting with this surface.
 
 <img src="Image/4.png" alt="Road marker setup" style="width:500px;"/>
+
+The Road and SpawnPoint screenshots show an older marker menu. Use SpawnPoint, Road or Animation in the current version; Ambient is unsupported.
 
 > [!NOTE]
 > Any GameObject/Prefab with collision must also have a Collider component (Box / Sphere / Capsule / Mesh Collider). This is required for collision accuracy.
@@ -166,6 +168,8 @@ Every map needs exactly one minimap. Create an empty object in the scene (as des
 
 <img src="Image/14.png" alt="Capture camera" style="width:300px;"/>
 
+This screenshot shows the older context-menu command. In the current version, use the Capture button at the bottom of the Inspector.
+
 ## Publishing a map
 
 1. Open **Tools → MapBuilder**. The header shows your account, **Platform** (currently mod.io) and the **EN / RU** language selector. English is the default.
@@ -195,6 +199,8 @@ Build progress and **Cancel** appear in the bottom bar. Some Unity export stages
 
 ![Build tab](Image/current/build-guide.png)
 
+This screenshot predates the Optimization button, which now appears between Advanced settings and Scene contents.
+
 ### Mod format: Wavefront and Binary
 
 - **Wavefront** exports geometry/materials/textures/metadata as OBJ / MTL / PNG / JSON files.
@@ -202,7 +208,7 @@ Build progress and **Cancel** appear in the bottom bar. Some Unity export stages
 
 Both export all scene roots directly and support the same scene features. Rebuild **Map and Meta** after switching formats. Only maps (`contentType: "map"`) are supported. The format is independent of a particular game; the consuming application needs compatible adapters.
 
-See [Wavefront export](Wavefront.md) and [Binary format](BinaryFormat.md).
+See [Wavefront export](Wavefront.md). Binary build controls are described in [Build Settings](#build-settings); a separate binary format specification is not included in this repository.
 
 ### Upload Settings
 

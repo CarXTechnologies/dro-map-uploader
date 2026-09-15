@@ -1,6 +1,6 @@
 # Uploading mods in the **Wavefront** format
 
-This document describes the **Wavefront** representation supported by MapUploader. It is not a game version. The primary binary representation is documented in [Binary format](BinaryFormat.md). Both require a compatible consuming application; game-specific marker behavior belongs to its integration layer.
+This document describes the **Wavefront** representation supported by MapUploader. It is not a game version. The alternative binary representation is described in the main [README](README.md). Both require a compatible consuming application; game-specific marker behavior belongs to its integration layer.
 For the general map authoring workflow (scene setup, markers, minimap, workshop publishing) see the main **[README](README.md)** — everything described there still applies. This file only covers what is *specific* to Wavefront.
 
 - [What is Wavefront](#what-is-wavefront)
