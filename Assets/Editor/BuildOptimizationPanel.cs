@@ -42,6 +42,12 @@ namespace Editor
             options.Add(new HelpBox(L(
                 "Исходная сцена не меняется. Границы секторов сохраняются. Анимации, Rigidbody и авторские LOD не объединяются. Материалы объединяются только при точном совпадении. Допуск упрощения — оценка алгоритма, а не гарантия расстояния до исходной поверхности; проверьте проезд после сборки.",
                 "Source scene stays unchanged. Sector borders are preserved. Animations, Rigidbody and authored LODs are excluded. Materials must match exactly. Simplification tolerance is an algorithmic estimate, not a guaranteed surface distance; verify driving after building."), HelpBoxMessageType.Info));
+            const string meshOptimizerDocumentationUrl = "https://github.com/zeux/meshoptimizer#readme";
+            root.Add(new Button(() => Application.OpenURL(meshOptimizerDocumentationUrl))
+            {
+                text = L("Документация Mesh Optimizer ↗", "Mesh Optimizer documentation ↗"),
+                tooltip = meshOptimizerDocumentationUrl
+            });
             void Refresh()
             {
                 var s = config.optimization;
