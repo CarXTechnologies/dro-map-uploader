@@ -425,7 +425,12 @@ namespace Editor.Validation
 
         private static void CheckSectorBudgets(MapValidationReport report, List<Transform> transforms)
         {
-            var settings = (MapManagerConfig.instance.mapMetaConfigValue?.optimization ?? new Plugins.CarX.Modding.Creator.Runtime.BuildOptimizationSettings()).Snapshot();
+            var config = MapManagerConfig.instance.mapMetaConfigValue;
+            var settings = (config?.optimization ?? new Plugins.CarX.Modding.Creator.Runtime.BuildOptimizationSettings()).Snapshot();
+            if (!settings.enabled)
+                report.Warning(CategoryGeometry,
+                    "Build optimization is off: static meshes and colliders are exported as-is, without sector chunking, collider simplification or LODs. " +
+                    "Large maps get more draw calls, heavier physics and longer loading. Enable it in Build > Optimization.", config);
             foreach (var t in transforms)
             {
                 if (!Plugins.CarX.Modding.Creator.Editor.SceneExportOptimization.IsEligible(t)) continue;

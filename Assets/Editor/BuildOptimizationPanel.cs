@@ -24,6 +24,10 @@ namespace Editor
                 field.AddToClassList("mb-field"); target.Add(field);
             }
             Field(root, "enabled", "Оптимизировать сборку", "Optimize build");
+            var disabledWarning = new HelpBox(L(
+                "Оптимизация выключена: статические меши и коллайдеры экспортируются как есть, без разбиения на секторы, упрощения коллизии и LOD. На больших картах это заметно увеличивает draw calls, стоимость физики и время загрузки. Рекомендуется включить.",
+                "Optimization is off: static meshes and colliders are exported as-is, without sector chunking, collider simplification or LODs. On large maps this noticeably increases draw calls, physics cost and load time. Enabling it is recommended."), HelpBoxMessageType.Warning);
+            root.Add(disabledWarning);
             root.Add(options);
             Field(options, "sectorSize", "Размер сектора (м)", "Sector size (m)");
             Field(options, "maxTriangles", "Треугольников на меш", "Max triangles per mesh");
@@ -52,6 +56,7 @@ namespace Editor
             {
                 var s = config.optimization;
                 options.SetEnabled(s.enabled);
+                disabledWarning.style.display = s.enabled ? DisplayStyle.None : DisplayStyle.Flex;
                 collision.style.display = s.simplifyColliders && s.sectorColliders ? DisplayStyle.Flex : DisplayStyle.None;
                 lods.style.display = s.generateSectorLods && s.sectorRenderMeshes ? DisplayStyle.Flex : DisplayStyle.None;
             }
