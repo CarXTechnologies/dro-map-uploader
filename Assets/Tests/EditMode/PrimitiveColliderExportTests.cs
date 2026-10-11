@@ -31,8 +31,8 @@ namespace MapUploader.Tests
 		}
 
 		private LODInfo Collect() => (LODInfo)typeof(SceneFormatCollector)
-			.GetMethod("CollectLodInfo", BindingFlags.NonPublic | BindingFlags.Static)
-			.Invoke(null, new object[] { source, null });
+			.GetMethod("CollectLodInfo", BindingFlags.NonPublic | BindingFlags.Instance)
+			.Invoke(new SceneFormatCollector(source.transform, "test", "Garbage"), new object[] { source, null });
 
 		[TestCase(0)]
 		[TestCase(1)]

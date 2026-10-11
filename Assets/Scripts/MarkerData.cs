@@ -35,10 +35,14 @@ public class MarkerData
 		"Road/snow_gravel",
 		"Road/wood",
 		"Road/wood_plank",
-		"Animation"
+		"Animation",
+		"Material"
 	};
 
-	public static bool IsSupportedHead(string head) => head == "SpawnPoint" || head == "Road" || head == "Animation";
+	public static bool IsSupportedHead(string head) => head == "SpawnPoint" || head == "Road" || head == "Animation" || head == MaterialHead;
+
+	/// <summary>Маркер Material: переопределение материалов рендерера вариантами rendercore (только Binary).</summary>
+	public const string MaterialHead = Plugins.CarX.Modding.Creator.Runtime.RenderCoreMaterialMarkerSettings.MarkerHead;
 
 	public static int FindEditorIndex(string head, string param)
 	{
@@ -62,6 +66,7 @@ public class MarkerData
 		{
 			{ "Road", name => AssetUtils.GetDBConfig<SurfaceTemplate>(name.Replace("Road/", string.Empty)).physicMaterial },
 			{ "Animation", name => new Plugins.CarX.Modding.Creator.Runtime.AnimationMarkerSettings() },
+			{ MaterialHead, name => new Plugins.CarX.Modding.Creator.Runtime.RenderCoreMaterialMarkerSettings() },
 		};
 
 	public static string[] paramEditorOnlyParameters
@@ -81,7 +86,7 @@ public class MarkerData
 
 	public void Update()
 	{
-		if (templateConfig == null && head != "Animation")
+		if (templateConfig == null && head != "Animation" && head != MaterialHead)
 		{
 			value = null;
 		}

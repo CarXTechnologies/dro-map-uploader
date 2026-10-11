@@ -13,6 +13,7 @@ The current MapBuilder UI publishes to **mod.io** or exports to a local folder. 
 - [Adding core components](#adding-core-components)
   - [Assigning surface collisions](#assigning-surface-collisions)
   - [Assigning a spawn point on the map](#assigning-a-spawn-point-on-the-map)
+  - [Render core materials (Binary only)](#render-core-materials-binary-only)
   - [Template system (road only)](#template-system-road-only)
   - [Adding a mini-map](#adding-a-mini-map)
   - [Capturing prototypes: icon, preview, minimap](#capturing-prototypes-icon-preview-minimap)
@@ -110,7 +111,7 @@ For the track object that represents the surface, set the GameMarkerData type to
 
 <img src="Image/4.png" alt="Road marker setup" style="width:500px;"/>
 
-The Road and SpawnPoint screenshots show an older marker menu. Use SpawnPoint, Road or Animation in the current version; Ambient is unsupported.
+The Road and SpawnPoint screenshots show an older marker menu. Use SpawnPoint, Road, Animation or Material in the current version; Ambient is unsupported.
 
 > [!NOTE]
 > Any GameObject/Prefab with collision must also have a Collider component (Box / Sphere / Capsule / Mesh Collider). This is required for collision accuracy.
@@ -128,6 +129,16 @@ Create an empty object via **GameObject → Create Empty** (or <kbd>Ctrl</kbd>+<
 ### Vertex animation
 
 Use **Animation** with an Animator to bake animation into an atlas. **Ambient**, **TimeObjectActivator** and **NetworkObject** are unsupported. Network physics uses Rigidbody without a separate marker.
+
+### Render core materials (Binary only)
+
+By default the game picks a render core material from the HDRP settings (opaque, alpha test, transparent, emission). The **Material** marker replaces a material with an explicit render core variant — foliage, window, interior, color mask, road sign emission and others — with its own textures and parameters.
+
+1. Add **GameMarkerData** to the object with the **MeshRenderer** and select **Material**. On an object with a **LODGroup** the marker applies to the renderers of all its LODs.
+2. The marker lists the renderer materials (**Add renderer materials** adds new ones). For each material choose a **Render core variant**.
+3. Press **Export from material**: the variant fields are filled from the HDRP Lit / Layered Lit material. Packed maps, tinted diffuse and emission maps are saved as PNG into a `RenderCore` folder next to the material; unchanged source maps are used directly. Fields without an HDRP counterpart (interior map, road sign mask, UV multipliers) are listed in the Console — set them by hand.
+
+The same material without a marker, or with different settings, is exported separately, so a marker changes only its own object. Wavefront ignores the marker. The original material is still exported as a fallback for a game build that does not know the variant. Baked vertex animations keep their own materials.
 
 ### Template system (road only)
 
@@ -264,7 +275,7 @@ Objects tagged **Garbage** are skipped, exactly as they are by the build.
 | **Geometry** | MeshRenderer, MeshFilter, LODGroup |
 | **Lighting** | Point and Spot Light, HDAdditionalLightData |
 | **Animation** | Animator and SkinnedMeshRenderer under GameMarkerData Animation, baked to VAT |
-| **Map data** | SpawnPoint, Road, Animation; Minimap |
+| **Map data** | SpawnPoint, Road, Animation, Material (Binary); Minimap |
 
 Volume and ReflectionProbe are optional preview components. Unsupported components (including UI, particles, video and joints) and unsupported marker types are skipped with warnings, not build-blocking errors. A Rigidbody without usable colliders is skipped; its render geometry can still be exported. Rules and budgets live in `Assets/Editor/MapSceneRules.cs`.
 

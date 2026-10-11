@@ -71,7 +71,9 @@ namespace MapUploader.Tests
             Assert.Throws<InvalidDataException>(() => BinaryModData.Read<AnimationMeta>(bytes));
             var future = (byte[])bytes.Clone(); future[4] = 99;
             Assert.Throws<InvalidDataException>(() => BinaryModData.Read<ModMeta>(future));
-            Assert.Catch<IOException>(() => BinaryModData.Read<ModMeta>(bytes.Take(bytes.Length - 1).ToArray()));
+            // BinaryModData v2 checks field lengths before reading, so truncation is reported as invalid data rather than end of stream.
+            var truncated = Assert.Catch(() => BinaryModData.Read<ModMeta>(bytes.Take(bytes.Length - 1).ToArray()));
+            Assert.IsTrue(truncated is InvalidDataException || truncated is EndOfStreamException);
             Assert.Throws<InvalidDataException>(() => BinaryModData.Read<ModMeta>(bytes.Concat(new byte[1]).ToArray()));
         }
         [Test] public void DeduplicatesPayloadsAndReadsWithoutExtracting()

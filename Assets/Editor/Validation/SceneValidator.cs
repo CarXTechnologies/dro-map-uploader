@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Plugins.CarX.Modding.Creator.Editor;
+using Plugins.CarX.Modding.Creator.Runtime;
 using UnityEngine;
 
 namespace Editor.Validation
@@ -16,6 +18,7 @@ namespace Editor.Validation
 		public const string CategoryMinimap = "Minimap";
 
 		private const string GarbageTag = "Garbage";
+		private static readonly string MaterialMarkerHead = MarkerData.MaterialHead.ToLowerInvariant();
 
 		private const HideFlags EngineOwned =
 			HideFlags.HideInHierarchy | HideFlags.DontSaveInEditor | HideFlags.DontSaveInBuild;
@@ -228,7 +231,7 @@ namespace Editor.Validation
 				{
 					report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "unsupported-marker-" + head,
 						$"'{transform.name}' uses unsupported marker '{marker.markerData.head}'. " +
-						"This marker will be skipped during export. Supported types are SpawnPoint, Road and Animation.", marker);
+						"This marker will be skipped during export. Supported types are SpawnPoint, Road, Animation and Material.", marker);
 					continue;
 				}
 
@@ -243,6 +246,11 @@ namespace Editor.Validation
 					var animator = settings?.animator != null ? settings.animator : marker.GetComponent<Animator>();
 					if (animator == null || animator.runtimeAnimatorController == null || animator.runtimeAnimatorController.animationClips.Length == 0)
 						report.Error(CategoryMarkers, "Animation marker requires an Animator with animation clips.", marker);
+				}
+
+				if (head == MaterialMarkerHead)
+				{
+					CheckMaterialMarker(report, marker);
 				}
 
 				if (head == "road" && marker.GetComponentInChildren<Collider>(true) == null)
@@ -274,6 +282,75 @@ namespace Editor.Validation
 					CheckSpawnPointNames(report, spawnPoints);
 
 					break;
+			}
+		}
+
+		/// <summary>Маркер Material: только Binary, есть что переопределять, известный вариант, материал из рендерера, задан diffuse.</summary>
+		private static void CheckMaterialMarker(MapValidationReport report, GameMarkerData marker)
+		{
+			var name = marker.transform.name;
+
+			if (report.format != FormatBuild.Binary)
+			{
+				report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-wavefront",
+					$"'{name}' has a Material marker, but render core materials are exported only in the Binary format. " +
+					"Wavefront ignores the marker and exports the original materials.", marker);
+			}
+
+			var settings = marker.markerData.value as RenderCoreMaterialMarkerSettings;
+
+			if (settings == null || settings.overrides.Count == 0)
+			{
+				report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-empty",
+					$"'{name}' has a Material marker without materials. Press 'Add renderer materials' or remove the marker.", marker);
+				return;
+			}
+
+			var rendererMaterials = RenderCoreMaterialMarkerSettingsDrawer.GetRendererMaterials(marker.gameObject);
+
+			if (rendererMaterials.Count == 0)
+			{
+				report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-no-renderer",
+					$"'{name}' has a Material marker, but neither a MeshRenderer nor a LODGroup on the same object, so it changes nothing.", marker);
+				return;
+			}
+
+			if (VertexAnimationBaker.GetAnimationRoots(marker.transform.root).Any(root => marker.transform.IsChildOf(root)))
+			{
+				report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-animation",
+					$"'{name}' is part of a baked vertex animation. Its Material marker is ignored: animated objects keep their own materials.", marker);
+			}
+
+			foreach (var materialOverride in settings.overrides)
+			{
+				if (materialOverride.source == null)
+				{
+					report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "material-marker-no-source",
+						$"'{name}' has a Material marker entry without a source material. Assign it or remove the entry.", marker);
+					continue;
+				}
+
+				var source = materialOverride.source.name;
+
+				if (!ModRenderCoreVariants.TryGet(materialOverride.variant, out var variant))
+				{
+					report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "material-marker-variant",
+						$"'{name}': material '{source}' has no supported render core variant ('{materialOverride.variant}').", marker);
+					continue;
+				}
+
+				if (!rendererMaterials.Contains(materialOverride.source))
+				{
+					report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-unused",
+						$"'{name}': material '{source}' is not used by the renderer, so its render core override is never applied.", marker);
+				}
+
+				if (variant.TryGetProperty("u_sTexture", out _) && materialOverride.Find("u_sTexture")?.texture == null)
+				{
+					report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-diffuse",
+						$"'{name}': render core material '{source}' ({variant.name}) has no diffuse texture and will render white. " +
+						"Press 'Export from material' or assign the texture.", marker);
+				}
 			}
 		}
 

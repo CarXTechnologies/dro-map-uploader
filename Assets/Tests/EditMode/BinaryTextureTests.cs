@@ -98,7 +98,7 @@ namespace MapUploader.Tests
             var provider = new TexturePngProvider(new DefaultFileProvider(directory));
             var legacy = provider.Unpack(png).GetAwaiter().GetResult();
             var prepared = provider.Unpack(BinaryTextureBaker.Encode(png, true, BinaryTextureEncoding.Rgba32)).GetAwaiter().GetResult();
-            try { Assert.AreEqual(legacy.width, prepared.width); Assert.AreEqual(legacy.height, prepared.height); Assert.IsTrue(legacy.isReadable); Assert.IsFalse(prepared.isReadable); }
+            try { Assert.AreEqual(legacy.width, prepared.width); Assert.AreEqual(legacy.height, prepared.height); Assert.IsFalse(legacy.isReadable); Assert.IsFalse(prepared.isReadable); }
             finally { Object.DestroyImmediate(legacy); Object.DestroyImmediate(prepared); }
         }
         private void Staging()
@@ -153,6 +153,29 @@ namespace MapUploader.Tests
             Assert.IsFalse(BinaryTexture.Inspect(vat.surfaces[0].diffuseBytes).linear);
             Assert.IsTrue(BinaryTexture.Inspect(vat.surfaces[0].normalBytes).linear);
             Assert.IsTrue(BinaryTexture.Inspect(vat.surfaces[0].maskBytes).linear);
+        }
+        [Test] public void PreparedRenderCoreMaterialKeepsFallbackAndTextureColorSpaces()
+        {
+            Staging();
+            File.WriteAllBytes(Path.Combine(directory, "models/base.png"), Png(new Color32(200, 100, 50, 255)));
+            var renderCore = new ModRenderCoreMaterial { variant = "MAT_ROUGHNESS_NORMAL_ALPHATEST", properties = new[] {
+                new ModRenderCoreProperty { name = "u_sTexture", type = ModRenderCorePropertyType.Texture, texture = "base.png" },
+                new ModRenderCoreProperty { name = "u_sPackedMap", type = ModRenderCorePropertyType.Texture, texture = "base.png" },
+                new ModRenderCoreProperty { name = "u_vThirdColor", type = ModRenderCorePropertyType.Color, value = Vector4.one * .3f } } };
+            File.WriteAllText(Path.Combine(directory, "models/a.rc.json"), JsonUtility.ToJson(renderCore));
+            File.WriteAllText(Path.Combine(directory, "models/a.mtl"), "newmtl a\ncx_rc MAT_ROUGHNESS_NORMAL_ALPHATEST a.rc.json\nillum 1\nmap_Kd base.png\n");
+            string target = Path.Combine(directory, "mod.cxmod"); BinaryMapPacker.Pack(target, BinaryTextureEncoding.Rgba32, directory);
+            var archive = new BinaryModArchive(target);
+            var material = BinaryModData.Read<BinaryMaterialLibrary>(archive.Read("models/a.mtl")).materials[0];
+            Assert.AreEqual("MAT_ROUGHNESS_NORMAL_ALPHATEST", material.renderCoreVariant); Assert.AreEqual("a.rc.json", material.renderCoreResource);
+            // The ordinary material stays as the fallback for a client that does not know the variant.
+            Assert.AreEqual(1, material.properties.Count(p => p.semantic == "map_Kd"));
+            var actual = BinaryModData.Read<ModRenderCoreMaterial>(archive.Read("models/a.rc.json"));
+            Assert.AreEqual(renderCore.variant, actual.variant);
+            Assert.IsFalse(BinaryTexture.Inspect(archive.Read("models/" + actual.properties[0].texture)).linear);
+            Assert.IsTrue(BinaryTexture.Inspect(archive.Read("models/" + actual.properties[1].texture)).linear);
+            Assert.AreEqual(renderCore.properties[2].value, actual.properties[2].value);
+            Assert.IsFalse(archive.Contains("models/base.png"));
         }
         [Test] public void BakesEmissionTintAndRetainsHdrIntensity()
         {

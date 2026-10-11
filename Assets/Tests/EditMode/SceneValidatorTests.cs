@@ -381,7 +381,8 @@ namespace MapUploader.Tests
 
 		[TestCase(MapValidationSeverity.Info, LogType.Log, "note")]
 		[TestCase(MapValidationSeverity.Warning, LogType.Warning, "warning")]
-		[TestCase(MapValidationSeverity.Error, LogType.Error, "error")]
+		// The console summary of a report with errors is a warning; the Map Validation window lists the errors themselves.
+		[TestCase(MapValidationSeverity.Error, LogType.Warning, "error")]
 		public void ConsoleSummaryUsesTheReportSeverity(MapValidationSeverity severity, LogType logType, string label)
 		{
 			var report = new MapValidationReport { title = "Preview" };

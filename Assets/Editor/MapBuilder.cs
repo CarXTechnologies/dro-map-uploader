@@ -269,6 +269,8 @@ namespace Editor
 			m_report = NewReport(formatBuild);
 			m_results = null;
 			m_provider = new EditorCollectionProvider(formatBuild == FormatBuild.Binary);
+			// Маркер Material переопределяет материалы только в Binary; сбрасывается UnityGoObjExporter.ClearCache в конце сборки.
+			RenderCoreMaterialOverrides.Enabled = formatBuild == FormatBuild.Binary;
 			// Failed rebuilds cannot retain old success bits. A format change requires both parts.
 			if (MapManagerConfig.Build.format != formatBuild) success = 0;
             if ((MapManagerConfig.Build.optimizationKey ?? string.Empty) != MapManagerConfig.instance.mapMetaConfigValue.OptimizationKey) success &= ~TempData.Map;

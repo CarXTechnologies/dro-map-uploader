@@ -1,4 +1,5 @@
 using System.Linq;
+using Plugins.CarX.Modding.Creator.Runtime;
 using UnityEditor;
 using UnityEngine;
 
@@ -76,7 +77,7 @@ namespace Editor
 				{
 					Space();
 					amountRect.height = propHeight * 3;
-					EditorGUI.HelpBox(amountRect, $"Unsupported marker: {propHead.stringValue}. Select SpawnPoint, Road or Animation, or remove the component.", MessageType.Error);
+					EditorGUI.HelpBox(amountRect, $"Unsupported marker: {propHead.stringValue}. Select SpawnPoint, Road, Animation or Material, or remove the component.", MessageType.Error);
 					m_height += amountRect.height;
 					EditorGUI.indentLevel = indent;
 					EditorGUI.EndProperty();
@@ -114,6 +115,23 @@ namespace Editor
 				Space();
 				amountRect.height = EditorGUI.GetPropertyHeight(propValue, true);
 				EditorGUI.PropertyField(amountRect, propValue, new GUIContent("Vertex animation"), true);
+				m_height += amountRect.height;
+				EditorGUI.indentLevel = indent;
+				EditorGUI.EndProperty();
+				return;
+			}
+
+			if (propHead.stringValue == MarkerData.MaterialHead)
+			{
+				if (propValue.managedReferenceValue is not RenderCoreMaterialMarkerSettings)
+				{
+					propValue.managedReferenceValue = RenderCoreMaterialMarkerSettingsDrawer.CreateSettings(gameMarkerData);
+				}
+
+				propLastHead.stringValue = MarkerData.MaterialHead;
+				Space();
+				amountRect.height = EditorGUI.GetPropertyHeight(propValue, true);
+				EditorGUI.PropertyField(amountRect, propValue, new GUIContent("Render core materials"), true);
 				m_height += amountRect.height;
 				EditorGUI.indentLevel = indent;
 				EditorGUI.EndProperty();
