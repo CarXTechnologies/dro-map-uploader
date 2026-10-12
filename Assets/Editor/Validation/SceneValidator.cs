@@ -285,7 +285,10 @@ namespace Editor.Validation
 			}
 		}
 
-		/// <summary>Маркер Material: только Binary, есть что переопределять, известный вариант, материал из рендерера, задан diffuse.</summary>
+		/// <summary>
+		/// Маркер Material: только Binary, есть что переопределять, вариант известен и доступен в модах, материал из рендерера, нет лишних
+		/// значений, значения запечены для текущей ревизии варианта, задан diffuse, цвет вершин подходит варианту.
+		/// </summary>
 		private static void CheckMaterialMarker(MapValidationReport report, GameMarkerData marker)
 		{
 			var name = marker.transform.name;
@@ -332,10 +335,19 @@ namespace Editor.Validation
 
 				var source = materialOverride.source.name;
 
-				if (!ModRenderCoreVariants.TryGet(materialOverride.variant, out var variant))
+				if (!ModRenderCoreVariants.TryFind(materialOverride.variant, out ModRenderCoreVariant variant))
 				{
 					report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "material-marker-variant",
 						$"'{name}': material '{source}' has no supported render core variant ('{materialOverride.variant}').", marker);
+					continue;
+				}
+
+				// Вариант есть в зеркале, но в модах не работает (например, MAT_INTERIOR без второго UV): экспорт его пропустит.
+				if (!variant.Available)
+				{
+					report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "material-marker-variant-unavailable",
+						$"'{name}': material '{source}' uses render core variant {variant.name}, which is unavailable in mods: " +
+						$"{variant.unavailableReason}. Choose another variant.", marker);
 					continue;
 				}
 
@@ -345,13 +357,204 @@ namespace Editor.Validation
 						$"'{name}': material '{source}' is not used by the renderer, so its render core override is never applied.", marker);
 				}
 
-				if (variant.TryGetProperty("u_sTexture", out _) && materialOverride.Find("u_sTexture")?.texture == null)
+				CheckOrphanValues(report, marker, materialOverride, variant);
+				CheckBakedRevision(report, marker, materialOverride, variant);
+
+				ModRenderCoreVariantProperty diffuse = FindDiffuse(variant);
+
+				if (diffuse != null && materialOverride.Find(diffuse.name)?.texture == null)
 				{
 					report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-diffuse",
 						$"'{name}': render core material '{source}' ({variant.name}) has no diffuse texture and will render white. " +
 						"Press 'Export from material' or assign the texture.", marker);
 				}
 			}
+
+			CheckMaterialMarkerVertexColors(report, marker, settings);
+		}
+
+		/// <summary>Сохранённые значения свойств, которых у варианта нет: остались от другого варианта или удалены из rendercore.</summary>
+		private static void CheckOrphanValues(MapValidationReport report, GameMarkerData marker, RenderCoreMaterialOverride materialOverride,
+			ModRenderCoreVariant variant)
+		{
+			if (materialOverride.values == null)
+			{
+				return;
+			}
+
+			List<string> orphans = materialOverride.values
+				.Where(value => value != null && !variant.TryGetProperty(value.name, out _))
+				.Select(value => string.IsNullOrEmpty(value.name) ? "<unnamed>" : value.name)
+				.ToList();
+
+			if (orphans.Count == 0)
+			{
+				return;
+			}
+
+			report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-orphan-value",
+				$"'{marker.transform.name}': render core material '{materialOverride.source.name}' ({variant.name}) stores values that the variant " +
+				$"does not have: {string.Join(", ", orphans)}. They are not exported. Press 'Export from material' or 'Remove' next to " +
+				"'Unused values' in the marker.", marker);
+		}
+
+		/// <summary>
+		/// Значения записи запечены для более старой ревизии варианта, чем в таблице SDK (0 — запись до появления поля — считается
+		/// ревизией 1). Экспорт пишет в документ ревизию запекания, поэтому игра с текущей таблицей возьмёт запасной материал, пока автор
+		/// не повторит Export from material. Публичный, чтобы тесты проверяли правило на варианте с ревизией выше 1.
+		/// </summary>
+		public static void CheckBakedRevision(MapValidationReport report, GameMarkerData marker, RenderCoreMaterialOverride materialOverride,
+			ModRenderCoreVariant variant)
+		{
+			if (materialOverride.BakedRevision >= variant.revision)
+			{
+				return;
+			}
+
+			string source = materialOverride.source != null ? materialOverride.source.name : "<no material>";
+
+			report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-stale-bake",
+				$"'{marker.transform.name}': render core material '{source}' ({variant.name}) was exported from material for revision " +
+				$"{materialOverride.BakedRevision}, but this SDK has revision {variant.revision} of the variant. The game uses the fallback " +
+				"material until you re-run Export from material on this entry.", marker);
+		}
+
+		/// <summary>Свойство diffuse варианта: первое с источником Diffuse на слое 0 (имя слота у вариантов может отличаться).</summary>
+		private static ModRenderCoreVariantProperty FindDiffuse(ModRenderCoreVariant variant)
+		{
+			foreach (ModRenderCoreVariantProperty property in variant.properties)
+			{
+				if (property.source == ModRenderCoreSource.Diffuse && property.layer == 0)
+				{
+					return property;
+				}
+			}
+
+			return null;
+		}
+
+		/// <summary>
+		/// Цвет вершин мешей маркера. MAT_LAYERS4 (LayerBlend) смешивает слои по цвету вершин: меш без цвета экспортируется белым, и виден
+		/// только четвёртый слой. Клиент делает белым весь меш с эмиссией, но не меш с LayerBlend: на общем меше эмиссия умножится на маску слоёв.
+		/// Эмиссия — и от варианта переопределения, и от материала HDRP без применимого переопределения (его экспорт пишет эмиссию в .mtl).
+		/// </summary>
+		private static void CheckMaterialMarkerVertexColors(MapValidationReport report, GameMarkerData marker,
+			RenderCoreMaterialMarkerSettings settings)
+		{
+			foreach (MeshRenderer renderer in GetMarkedRenderers(marker.gameObject))
+			{
+				MeshFilter filter = renderer.GetComponent<MeshFilter>();
+				Mesh mesh = filter != null ? filter.sharedMesh : null;
+
+				if (mesh == null)
+				{
+					continue;
+				}
+
+				string layerBlend = null;
+				string emission = null;
+
+				foreach (Material material in renderer.sharedMaterials)
+				{
+					if (material == null)
+					{
+						continue;
+					}
+
+					ModRenderCoreVertexColors usage = GetVertexColorUsage(settings, material, out string usedBy);
+
+					if (usage == ModRenderCoreVertexColors.LayerBlend)
+					{
+						layerBlend ??= usedBy;
+					}
+					else if (usage == ModRenderCoreVertexColors.EmissionMultiplier)
+					{
+						emission ??= usedBy;
+					}
+				}
+
+				if (layerBlend == null)
+				{
+					continue;
+				}
+
+				if (!mesh.HasVertexAttribute(UnityEngine.Rendering.VertexAttribute.Color))
+				{
+					report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-vertex-colors",
+						$"'{renderer.name}': mesh '{mesh.name}' has no vertex colors, but {layerBlend} blends its layers by them " +
+						"(RGB - layer mask, A - albedo tint). It is exported white, so only the fourth layer shows. Paint vertex colors in the mesh.",
+						marker);
+				}
+
+				if (emission != null)
+				{
+					report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-vertex-colors",
+						$"'{renderer.name}': mesh '{mesh.name}' mixes {layerBlend} and {emission} submeshes. The game keeps the layer blend " +
+						"vertex colors for the whole mesh, so the emission is multiplied by them. Move the emissive part to a separate object " +
+						"without layer blend materials: build optimization merges layer blend objects only with each other.",
+						marker);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Как материал рендерера использует цвет вершин в игре и чем это вызвано (для сообщения). Применимое переопределение маркера —
+		/// по своему варианту. Без него (нет записи, вариант неизвестен или недоступен) экспортируется исходный материал, и его эмиссию
+		/// определяет то же правило, что и экспорт (<see cref="RenderCoreMaterialOverrides.GetVertexColorUsage"/>).
+		/// </summary>
+		private static ModRenderCoreVertexColors GetVertexColorUsage(RenderCoreMaterialMarkerSettings settings, Material material, out string usedBy)
+		{
+			RenderCoreMaterialOverride materialOverride = settings.Find(material);
+
+			if (materialOverride != null && ModRenderCoreVariants.TryGet(materialOverride.variant, out ModRenderCoreVariant variant))
+			{
+				usedBy = variant.name;
+				return variant.vertexColors;
+			}
+
+			usedBy = $"emissive material '{material.name}'";
+			return RenderCoreMaterialOverrides.GetVertexColorUsage(material);
+		}
+
+		/// <summary>
+		/// Рендереры, к которым применяется маркер: MeshRenderer объекта и LOD его LODGroup. Рендерер LOD со своим маркером Material
+		/// берёт свой маркер, как и в экспорте (RenderCoreMaterialOverrides.Resolve).
+		/// </summary>
+		private static IEnumerable<MeshRenderer> GetMarkedRenderers(GameObject gameObject)
+		{
+			var renderers = new List<MeshRenderer>();
+			MeshRenderer ownRenderer = gameObject.GetComponent<MeshRenderer>();
+
+			if (ownRenderer != null)
+			{
+				renderers.Add(ownRenderer);
+			}
+
+			LODGroup lodGroup = gameObject.GetComponent<LODGroup>();
+
+			if (lodGroup == null)
+			{
+				return renderers;
+			}
+
+			foreach (LOD lod in lodGroup.GetLODs())
+			{
+				if (lod.renderers == null)
+				{
+					continue;
+				}
+
+				foreach (Renderer renderer in lod.renderers)
+				{
+					if (renderer is MeshRenderer meshRenderer && meshRenderer != null && !renderers.Contains(meshRenderer) &&
+						(meshRenderer.gameObject == gameObject || RenderCoreMaterialOverrides.FindSettings(meshRenderer.gameObject) == null))
+					{
+						renderers.Add(meshRenderer);
+					}
+				}
+			}
+
+			return renderers;
 		}
 
 		private static void CheckSpawnPointNames(MapValidationReport report, List<GameMarkerData> spawnPoints)

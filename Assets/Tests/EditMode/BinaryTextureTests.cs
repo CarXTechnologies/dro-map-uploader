@@ -163,11 +163,17 @@ namespace MapUploader.Tests
                 new ModRenderCoreProperty { name = "u_sPackedMap", type = ModRenderCorePropertyType.Texture, texture = "base.png" },
                 new ModRenderCoreProperty { name = "u_vThirdColor", type = ModRenderCorePropertyType.Color, value = Vector4.one * .3f } } };
             File.WriteAllText(Path.Combine(directory, "models/a.rc.json"), JsonUtility.ToJson(renderCore));
-            File.WriteAllText(Path.Combine(directory, "models/a.mtl"), "newmtl a\ncx_rc MAT_ROUGHNESS_NORMAL_ALPHATEST a.rc.json\nillum 1\nmap_Kd base.png\n");
+            // b: the same document with a variant revision line, which the export writes only for revisions above 1.
+            File.WriteAllText(Path.Combine(directory, "models/a.mtl"), "newmtl a\ncx_rc MAT_ROUGHNESS_NORMAL_ALPHATEST a.rc.json\nillum 1\nmap_Kd base.png\n"
+                + "newmtl b\ncx_rc MAT_ROUGHNESS_NORMAL_ALPHATEST a.rc.json\ncx_rc_rev 2\nillum 1\nmap_Kd base.png\n");
             string target = Path.Combine(directory, "mod.cxmod"); BinaryMapPacker.Pack(target, BinaryTextureEncoding.Rgba32, directory);
             var archive = new BinaryModArchive(target);
-            var material = BinaryModData.Read<BinaryMaterialLibrary>(archive.Read("models/a.mtl")).materials[0];
+            var materials = BinaryModData.Read<BinaryMaterialLibrary>(archive.Read("models/a.mtl")).materials;
+            var material = materials[0];
             Assert.AreEqual("MAT_ROUGHNESS_NORMAL_ALPHATEST", material.renderCoreVariant); Assert.AreEqual("a.rc.json", material.renderCoreResource);
+            // Without a cx_rc_rev line the revision reads as 0, which the client treats as revision 1.
+            Assert.AreEqual(0, material.renderCoreRevision); Assert.AreEqual(2, materials[1].renderCoreRevision);
+            Assert.AreEqual("MAT_ROUGHNESS_NORMAL_ALPHATEST", materials[1].renderCoreVariant); Assert.AreEqual("a.rc.json", materials[1].renderCoreResource);
             // The ordinary material stays as the fallback for a client that does not know the variant.
             Assert.AreEqual(1, material.properties.Count(p => p.semantic == "map_Kd"));
             var actual = BinaryModData.Read<ModRenderCoreMaterial>(archive.Read("models/a.rc.json"));
@@ -176,6 +182,10 @@ namespace MapUploader.Tests
             Assert.IsTrue(BinaryTexture.Inspect(archive.Read("models/" + actual.properties[1].texture)).linear);
             Assert.AreEqual(renderCore.properties[2].value, actual.properties[2].value);
             Assert.IsFalse(archive.Contains("models/base.png"));
+            // A malformed revision fails the build with the offending line.
+            File.WriteAllText(Path.Combine(directory, "models/a.mtl"), "newmtl a\ncx_rc MAT_ROUGHNESS_NORMAL_ALPHATEST a.rc.json\ncx_rc_rev 0\nmap_Kd base.png\n");
+            var invalid = Assert.Throws<InvalidDataException>(() => BinaryMapPacker.Pack(Path.Combine(directory, "invalid.cxmod"), BinaryTextureEncoding.Rgba32, directory));
+            StringAssert.Contains("cx_rc_rev 0", invalid.Message);
         }
         [Test] public void BakesEmissionTintAndRetainsHdrIntensity()
         {

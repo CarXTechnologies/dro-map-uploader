@@ -132,13 +132,17 @@ Use **Animation** with an Animator to bake animation into an atlas. **Ambient**,
 
 ### Render core materials (Binary only)
 
-By default the game picks a render core material from the HDRP settings (opaque, alpha test, transparent, emission). The **Material** marker replaces a material with an explicit render core variant — foliage, window, interior, color mask, road sign emission and others — with its own textures and parameters.
+By default the game picks a render core material from the HDRP settings (opaque, alpha test, transparent, emission). The **Material** marker replaces a material with an explicit render core variant — foliage, window, color mask, road sign emission, four-layer blend and others — with its own textures and parameters. Interior mapping (`MAT_INTERIOR`) is unavailable until mod meshes carry a second UV set: the variant needs it, and the exporter writes only the first one.
 
 1. Add **GameMarkerData** to the object with the **MeshRenderer** and select **Material**. On an object with a **LODGroup** the marker applies to the renderers of all its LODs.
-2. The marker lists the renderer materials (**Add renderer materials** adds new ones). For each material choose a **Render core variant**.
-3. Press **Export from material**: the variant fields are filled from the HDRP Lit / Layered Lit material. Packed maps, tinted diffuse and emission maps are saved as PNG into a `RenderCore` folder next to the material; unchanged source maps are used directly. Fields without an HDRP counterpart (interior map, road sign mask, UV multipliers) are listed in the Console — set them by hand.
+2. The marker lists the renderer materials (**Add renderer materials** adds new ones). For each material choose a **Render core variant**; the list contains only variants that work in mods. Each packed map shows its channel layout, for example `R Roughness · G — · B Alpha · A —`.
+3. Press **Export from material**: the variant fields are filled from the HDRP Lit / Layered Lit material. Packed maps, tinted diffuse and emission maps are saved as PNG into a `RenderCore` folder next to the material; unchanged source maps are used directly. Fields without an HDRP counterpart (color mask, mask color, layer UV multipliers) are listed in the Console — set them by hand.
 
-The same material without a marker, or with different settings, is exported separately, so a marker changes only its own object. Wavefront ignores the marker. The original material is still exported as a fallback for a game build that does not know the variant. Baked vertex animations keep their own materials.
+`MAT_LAYERS4` blends its four layers by mesh vertex colors: RGB is the layer mask, alpha tints the albedo. A mesh without vertex colors is exported white and shows only the fourth layer. The game keeps the vertex colors of a mesh with `MAT_LAYERS4`, so emission on its other submeshes is multiplied by them — both from an emission variant and from an HDRP emissive material without a marker entry. Put emissive parts on a separate object without `MAT_LAYERS4`: build optimization merges objects that use `MAT_LAYERS4` only with each other, so the separate object stays a separate mesh. Map Validation warns about a mesh without vertex colors and about a mesh that mixes `MAT_LAYERS4` and emission.
+
+The same material without a marker, or with different settings, is exported separately, so a marker changes only its own object. Wavefront ignores the marker. The original material is still exported as a fallback for a game build that does not know or cannot apply the variant. Baked vertex animations keep their own materials.
+
+The variant list is generated from a mirror of render core; the game project checks the mirror against its render core. Variants, their packed-map channels and the update rules are described in [RenderCoreMaterial.md](Assets/Plugins/CarX.Modding.Creator/RenderCoreMaterial.md) of the SDK.
 
 ### Template system (road only)
 

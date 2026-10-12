@@ -4,6 +4,7 @@ using System.Linq;
 using Editor;
 using Editor.Validation;
 using NUnit.Framework;
+using Plugins.CarX.Modding.Creator.Runtime;
 using UnityEngine;
 
 namespace MapUploader.Tests
@@ -11,6 +12,7 @@ namespace MapUploader.Tests
 	public class SceneValidatorTests
 	{
 		private readonly List<GameObject> m_created = new();
+		private readonly List<UnityEngine.Object> m_assets = new();
 
 		[TearDown]
 		public void DestroyCreatedObjects()
@@ -23,7 +25,16 @@ namespace MapUploader.Tests
 				}
 			}
 
+			foreach (UnityEngine.Object asset in m_assets)
+			{
+				if (asset != null)
+				{
+					UnityEngine.Object.DestroyImmediate(asset);
+				}
+			}
+
 			m_created.Clear();
+			m_assets.Clear();
 		}
 
 		[Test]
@@ -367,6 +378,213 @@ namespace MapUploader.Tests
 			Assert.AreEqual(false, Has(report, SceneValidator.CategoryBudget, "'ReflectionProbe'"));
 		}
 
+		[Test]
+		public void ReportsAnUnknownRenderCoreVariant()
+		{
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: false), NewOverride("MAT_NO_SUCH_VARIANT"));
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Error, "has no supported render core variant ('MAT_NO_SUCH_VARIANT')"));
+		}
+
+		[Test]
+		public void ReportsAnUnavailableRenderCoreVariantWithItsReason()
+		{
+			ModRenderCoreVariant unavailable = ModRenderCoreVariants.All.FirstOrDefault(variant => !variant.Available);
+
+			if (unavailable == null)
+			{
+				Assert.Ignore("The render core mirror has no unavailable variant.");
+			}
+
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), NewOverride(unavailable.name));
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Error, unavailable.name + ", which is unavailable in mods: " + unavailable.unavailableReason));
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, "has no supported render core variant"));
+		}
+
+		[Test]
+		public void WarnsAboutStoredValuesTheVariantDoesNotHave()
+		{
+			ModRenderCoreVariant variant = FirstOffered(candidate => candidate.properties.Count > 0, "non-empty");
+			RenderCoreMaterialOverride materialOverride = NewOverride(variant.name);
+			materialOverride.GetOrAdd(variant.properties[0]);
+			materialOverride.values.Add(new RenderCoreMaterialValue { name = "u_sRemovedProperty" });
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), materialOverride);
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			// В списке только лишнее значение: свойство варианта в нём не упоминается.
+			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Warning, "does not have: u_sRemovedProperty. They are not exported."));
+		}
+
+		[Test]
+		public void AcceptsStoredValuesOfTheVariantOnly()
+		{
+			ModRenderCoreVariant variant = FirstOffered(candidate => candidate.properties.Count > 0, "non-empty");
+			RenderCoreMaterialOverride materialOverride = NewOverride(variant.name);
+
+			foreach (ModRenderCoreVariantProperty property in variant.properties)
+			{
+				materialOverride.GetOrAdd(property);
+			}
+
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), materialOverride);
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, "does not have:"));
+		}
+
+		[Test]
+		public void FindsTheDiffuseTextureByItsRoleAndLayer()
+		{
+			ModRenderCoreVariant variant = FirstOffered(candidate => candidate.properties.Count(IsDiffuse) > 1, "layered diffuse");
+			RenderCoreMaterialOverride materialOverride = NewOverride(variant.name);
+
+			// Текстуры всех слоёв, кроме нулевого: diffuse по-прежнему не задан.
+			foreach (ModRenderCoreVariantProperty property in variant.properties.Where(property => IsDiffuse(property) && property.layer != 0))
+			{
+				materialOverride.GetOrAdd(property).texture = NewTexture();
+			}
+
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), materialOverride);
+			Assert.IsTrue(HasIssue(Validate(FormatBuild.Binary, root), MapValidationSeverity.Warning, "has no diffuse texture"));
+
+			ModRenderCoreVariantProperty baseLayer = variant.properties.First(property => IsDiffuse(property) && property.layer == 0);
+			materialOverride.GetOrAdd(baseLayer).texture = NewTexture();
+			Assert.IsFalse(Has(Validate(FormatBuild.Binary, root), SceneValidator.CategoryMarkers, "has no diffuse texture"));
+		}
+
+		[TestCase(false, true)]
+		[TestCase(true, false)]
+		public void WarnsAboutALayerBlendVariantOnAMeshWithoutVertexColors(bool withColors, bool expectsWarning)
+		{
+			ModRenderCoreVariant layerBlend = FirstOffered(candidate => candidate.vertexColors == ModRenderCoreVertexColors.LayerBlend, "layer blend");
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors), NewOverride(layerBlend.name));
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Warning, "has no vertex colors, but " + layerBlend.name));
+		}
+
+		[Test]
+		public void WarnsAboutLayerBlendAndEmissionSubmeshesOnOneMesh()
+		{
+			ModRenderCoreVariant layerBlend = FirstOffered(candidate => candidate.vertexColors == ModRenderCoreVertexColors.LayerBlend, "layer blend");
+			ModRenderCoreVariant emission = FirstOffered(candidate => candidate.vertexColors == ModRenderCoreVertexColors.EmissionMultiplier, "emission");
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 2, withColors: true), NewOverride(layerBlend.name), NewOverride(emission.name));
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Warning, $"mixes {layerBlend.name} and {emission.name} submeshes"));
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, "has no vertex colors"));
+		}
+
+		// Отдельные объекты остаются отдельными мешами и после оптимизации сборки: она склеивает объекты с LayerBlend только между собой.
+		[Test]
+		public void AcceptsLayerBlendAndEmissionOnSeparateMeshes()
+		{
+			ModRenderCoreVariant layerBlend = FirstOffered(candidate => candidate.vertexColors == ModRenderCoreVertexColors.LayerBlend, "layer blend");
+			ModRenderCoreVariant emission = FirstOffered(candidate => candidate.vertexColors == ModRenderCoreVertexColors.EmissionMultiplier, "emission");
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), NewOverride(layerBlend.name));
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), NewOverride(emission.name));
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, "submeshes"));
+		}
+
+		/// <summary>
+		/// Материал без применимого переопределения (записи нет или её вариант неизвестен) экспортируется как есть, и эмиссию HDRP игра
+		/// считает эмиссией: на одном меше с MAT_LAYERS4 она так же умножается на цвет вершин.
+		/// </summary>
+		[TestCase(true, false, true)]
+		[TestCase(true, true, true)]
+		[TestCase(false, false, false)]
+		public void CountsEmissionOfAMaterialWithoutAUsableOverride(bool emissive, bool withUnknownEntry, bool expectsWarning)
+		{
+			ModRenderCoreVariant layerBlend = FirstOffered(candidate => candidate.vertexColors == ModRenderCoreVertexColors.LayerBlend, "layer blend");
+			RenderCoreMaterialOverride layerBlendOverride = NewOverride(layerBlend.name);
+			Material lamp = NewHdrpMaterial("Lamp", emissive ? new Color(r: 2f, g: 1f, b: 0f) : Color.black);
+			var overrides = new List<RenderCoreMaterialOverride> { layerBlendOverride };
+
+			if (withUnknownEntry)
+			{
+				overrides.Add(new RenderCoreMaterialOverride { source = lamp, variant = "MAT_NO_SUCH_VARIANT" });
+			}
+
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 2, withColors: true), new[] { layerBlendOverride.source, lamp }, overrides.ToArray());
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Warning, $"mixes {layerBlend.name} and emissive material 'Lamp' submeshes"));
+		}
+
+		[TestCase(0, true)]
+		[TestCase(1, true)]
+		[TestCase(2, false)]
+		[TestCase(3, false)]
+		public void WarnsAboutAnEntryBakedForAnOlderRevision(int storedRevision, bool expectsWarning)
+		{
+			ModRenderCoreVariant offered = FirstOffered(candidate => true, "any");
+			ModRenderCoreVariant bumped = WithRevision(offered, revision: 2);
+			RenderCoreMaterialOverride materialOverride = NewOverride(offered.name);
+			materialOverride.revision = storedRevision;
+			GameMarkerData marker = NewMaterialMarker(NewObject("Track"), NewMesh(subMeshCount: 1, withColors: true), materialOverride);
+			var report = new MapValidationReport();
+
+			SceneValidator.CheckBakedRevision(report, marker, materialOverride, bumped);
+
+			// Ревизия 0 (запись до появления поля) считается ревизией 1.
+			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Warning,
+				$"({offered.name}) was exported from material for revision {Math.Max(1, storedRevision)}, but this SDK has revision 2"));
+			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Warning, "re-run Export from material"));
+		}
+
+		[Test]
+		public void ChecksTheBakedRevisionOfEveryMarkerEntry()
+		{
+			ModRenderCoreVariant variant = FirstOffered(candidate => true, "any");
+			RenderCoreMaterialOverride materialOverride = NewOverride(variant.name);
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), materialOverride);
+
+			// Запись без ревизии устарела, только если таблица уже повысила ревизию варианта.
+			Assert.AreEqual(variant.revision > 1, HasIssue(Validate(FormatBuild.Binary, root), MapValidationSeverity.Warning, "re-run Export from material"));
+
+			materialOverride.revision = variant.revision;
+			Assert.IsFalse(HasIssue(Validate(FormatBuild.Binary, root), MapValidationSeverity.Warning, "re-run Export from material"));
+		}
+
+		[Test]
+		public void NewMarkerEntriesRecordTheRevisionOfTheSuggestedVariant()
+		{
+			Material material = NewHdrpMaterial("Wall", Color.black);
+			GameObject gameObject = NewObject("Wall", typeof(MeshFilter), typeof(MeshRenderer), typeof(GameMarkerData));
+			gameObject.GetComponent<MeshRenderer>().sharedMaterial = material;
+
+			RenderCoreMaterialMarkerSettings settings = RenderCoreMaterialMarkerSettingsDrawer.CreateSettings(gameObject.GetComponent<GameMarkerData>());
+
+			Assert.AreEqual(1, settings.overrides.Count);
+			RenderCoreMaterialOverride entry = settings.overrides[0];
+			Assert.IsTrue(ModRenderCoreVariants.TryGet(entry.variant, out ModRenderCoreVariant variant), entry.variant);
+			// Не 0: запись создана для текущей раскладки варианта.
+			Assert.AreEqual(variant.revision, entry.revision);
+		}
+
 		private MapValidationReport Validate(FormatBuild format, params GameObject[] roots)
 		{
 			return Validate(format, roots, new List<string>());
@@ -433,6 +651,112 @@ namespace MapUploader.Tests
 			var light = NewObject(name, parent, typeof(Light)).GetComponent<Light>();
 			light.type = type;
 			return light;
+		}
+
+		private static bool HasIssue(MapValidationReport report, MapValidationSeverity severity, string fragment)
+		{
+			return report.Issues.Any(issue =>
+				issue.category == SceneValidator.CategoryMarkers &&
+				issue.severity == severity &&
+				issue.message.IndexOf(fragment, StringComparison.Ordinal) >= 0);
+		}
+
+		private static bool IsDiffuse(ModRenderCoreVariantProperty property)
+		{
+			return property.source == ModRenderCoreSource.Diffuse;
+		}
+
+		/// <summary>Первый вариант зеркала, доступный в маркере; без подходящего тест пропускается.</summary>
+		private static ModRenderCoreVariant FirstOffered(Func<ModRenderCoreVariant, bool> predicate, string kind)
+		{
+			ModRenderCoreVariant variant = ModRenderCoreVariants.Offered.FirstOrDefault(predicate);
+
+			if (variant == null)
+			{
+				Assert.Ignore($"The render core mirror offers no {kind} variant.");
+			}
+
+			return variant;
+		}
+
+		/// <summary>Объект с MeshRenderer и маркером Material: по материалу рендерера на каждую запись маркера.</summary>
+		private GameMarkerData NewMaterialMarker(GameObject parent, Mesh mesh, params RenderCoreMaterialOverride[] overrides)
+		{
+			return NewMaterialMarker(parent, mesh, overrides.Select(materialOverride => materialOverride.source).ToArray(), overrides);
+		}
+
+		/// <summary>Объект с MeshRenderer с материалами <paramref name="materials"/> и маркером Material с записями <paramref name="overrides"/>.</summary>
+		private GameMarkerData NewMaterialMarker(GameObject parent, Mesh mesh, Material[] materials, params RenderCoreMaterialOverride[] overrides)
+		{
+			GameObject gameObject = NewObject("Marked " + mesh.name, parent, typeof(MeshFilter), typeof(MeshRenderer), typeof(GameMarkerData));
+			gameObject.GetComponent<MeshFilter>().sharedMesh = mesh;
+			gameObject.GetComponent<MeshRenderer>().sharedMaterials = materials;
+
+			var settings = new RenderCoreMaterialMarkerSettings();
+			settings.overrides.AddRange(overrides);
+
+			GameMarkerData marker = gameObject.GetComponent<GameMarkerData>();
+			marker.markerData = new MarkerData { head = MarkerData.MaterialHead, param = MarkerData.MaterialHead, value = settings };
+			return marker;
+		}
+
+		private RenderCoreMaterialOverride NewOverride(string variant)
+		{
+			var material = new Material(Shader.Find("Hidden/InternalErrorShader")) { name = variant + " source" };
+			m_assets.Add(material);
+			return new RenderCoreMaterialOverride { source = material, variant = variant };
+		}
+
+		/// <summary>Материал HDRP Lit с цветом эмиссии <paramref name="emissiveColor"/>; без HDRP в проекте тест пропускается.</summary>
+		private Material NewHdrpMaterial(string name, Color emissiveColor)
+		{
+			Shader shader = Shader.Find("HDRP/Lit");
+
+			if (shader == null)
+			{
+				Assert.Ignore("HDRP/Lit is not available in this project.");
+			}
+
+			var material = new Material(shader) { name = name };
+			material.SetColor("_EmissiveColor", emissiveColor);
+			m_assets.Add(material);
+			return material;
+		}
+
+		/// <summary>Копия варианта таблицы с другой ревизией: в текущей таблице все ревизии могут быть равны 1.</summary>
+		private static ModRenderCoreVariant WithRevision(ModRenderCoreVariant variant, int revision)
+		{
+			return new ModRenderCoreVariant(variant.name, variant.id, variant.queue, variant.renderType, variant.keywords, variant.vertexColors,
+				variant.requiredStreams, variant.unavailableReason, revision, variant.properties);
+		}
+
+		/// <summary>Треугольник на каждый сабмеш, с цветом вершин или без него.</summary>
+		private Mesh NewMesh(int subMeshCount, bool withColors)
+		{
+			var mesh = new Mesh { name = "Mesh" + m_assets.Count };
+			mesh.vertices = new[] { Vector3.zero, Vector3.right, Vector3.up };
+
+			if (withColors)
+			{
+				mesh.colors = new[] { Color.red, Color.green, Color.blue };
+			}
+
+			mesh.subMeshCount = subMeshCount;
+
+			for (int i = 0; i < subMeshCount; i++)
+			{
+				mesh.SetTriangles(new[] { 0, 1, 2 }, i);
+			}
+
+			m_assets.Add(mesh);
+			return mesh;
+		}
+
+		private Texture2D NewTexture()
+		{
+			var texture = new Texture2D(width: 2, height: 2);
+			m_assets.Add(texture);
+			return texture;
 		}
 	}
 }
