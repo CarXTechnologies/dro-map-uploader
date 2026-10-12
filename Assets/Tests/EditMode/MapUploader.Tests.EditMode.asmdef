@@ -4,6 +4,7 @@
     "references": [
         "CarX.Modding.Creator",
         "CarX.Modding.Creator.Editor",
+        "CarX.Modding.Creator.Publishing",
         "MapUploader.Rules",
         "MapUploader.Runtime",
         "MapUploader.Editor",

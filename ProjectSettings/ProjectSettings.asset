@@ -684,7 +684,7 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Standalone: CARX_MODDING_STEAM;CARX_MODDING_MODIO
+    Standalone: CARX_MODDING_STEAM;CARX_MODDING_MODIO;CARX_MODDING_MODIO_UPLOAD_PROGRESS
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

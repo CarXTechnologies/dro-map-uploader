@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ICSharpCode.SharpZipLib.Zip;
+// CARX PATCH: ModioTransferProgress, see CARX_PATCHES.md section 2.
+using Modio.API;
 using Modio.Users;
 using Modio.Errors;
 using Modio.Extensions;
@@ -1329,6 +1331,13 @@ namespace Modio.FileIO
             // So the substring is reliable we get the full path here
             filePath = Path.GetFullPath(filePath);
 
+            // CARX PATCH: progress (source bytes read / total) only while a ModioTransferProgress scope is open.
+            bool reportProgress = ModioTransferProgress.IsListening;
+            long progressTotal = reportProgress ? GetCompressProgressTotal(filePath) : 0;
+            long progressDone = 0;
+
+            if (reportProgress) ModioTransferProgress.ReportCompress(progressDone, progressTotal);
+
             await using var zipStream = new ZipOutputStream(outputTo);
 
             foreach ((Error error, string fileName) in IterateFilesInDirectory(filePath))
@@ -1341,10 +1350,78 @@ namespace Modio.FileIO
                 if (string.IsNullOrEmpty(entryName)) 
                     entryName = Path.GetFileName(filePath);
 
+                // CARX PATCH: count the bytes read from the file while it is compressed and report them.
+                if (reportProgress)
+                {
+                    progressDone = await CompressStreamReportingProgress(entryName, fileStream, zipStream, progressDone, progressTotal);
+                    continue;
+                }
+
                 await CompressStream(entryName, fileStream, zipStream);
             }
 
             return returnError;
+        }
+
+        // CARX PATCH: total size of the files CompressToZip compresses, from the same enumeration; 0 when unknown.
+        long GetCompressProgressTotal(string filePath)
+        {
+            long total = 0;
+
+            try
+            {
+                foreach ((Error error, string fileName) in IterateFilesInDirectory(filePath))
+                {
+                    if (error) continue;
+
+                    total += new FileInfo(fileName).Length;
+                }
+            }
+            catch (Exception exception)
+            {
+                // Progress must not change the outcome; the compression below meets the same problem and reports it.
+                ModioLog.Verbose?.Log($"Unable to size {filePath} for compression progress: {exception}");
+                return 0;
+            }
+
+            return total;
+        }
+
+        // CARX PATCH: CompressStream with the bytes read reported on this thread every frame. The copy itself may run
+        // on pool threads (Stream.CopyToAsync does not resume on the caller's context), so it is polled from here
+        // rather than reported from the read, keeping the reports on the thread the plugin runs on.
+        async Task<long> CompressStreamReportingProgress(
+            string entryName,
+            Stream stream,
+            ZipOutputStream zipStream,
+            long doneBefore,
+            long total
+        )
+        {
+            var countingStream = new ReadCountingStreamWrapper(stream);
+            Task compressTask = CompressStream(entryName, countingStream, zipStream);
+            long reported = doneBefore;
+
+            while (!compressTask.IsCompleted)
+            {
+                long done = doneBefore + countingStream.BytesRead;
+
+                if (done != reported)
+                {
+                    reported = done;
+                    ModioTransferProgress.ReportCompress(done, total);
+                }
+
+                await Task.Yield();
+            }
+
+            await compressTask;
+
+            long finalDone = doneBefore + countingStream.BytesRead;
+
+            if (finalDone != reported) ModioTransferProgress.ReportCompress(finalDone, total);
+
+            return finalDone;
         }
 
         public virtual async Task<(Error, Stream)> CompressToZipStream(string filePath, long modId)

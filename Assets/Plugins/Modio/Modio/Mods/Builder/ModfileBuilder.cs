@@ -20,6 +20,9 @@ namespace Modio.Mods.Builder
 
         ModioId ParentId => _parentModBuilder.EditTarget.Id;
         readonly ModBuilder _parentModBuilder;
+        // CARX PATCH: upload progress, see CARX_PATCHES.md section 2.
+        IProgress<ModfileUploadProgress> _uploadProgress;
+        UploadProgressReporter _progressReporter;
         
         internal ModfileBuilder(ModBuilder parent) => _parentModBuilder = parent;
 
@@ -85,6 +88,20 @@ namespace Modio.Mods.Builder
             return this;
         }
 
+        // CARX PATCH: upload progress, see CARX_PATCHES.md section 2.
+        /// <summary>
+        /// Receives the progress of publishing this modfile: <see cref="ModfileUploadStage.Compressing"/> the source
+        /// directory, <see cref="ModfileUploadStage.Uploading"/> the zip, then <see cref="ModfileUploadStage.Processing"/>
+        /// once its last byte is sent and mod.io is yet to answer. <c>null</c> (the default) reports nothing.
+        /// </summary>
+        /// <remarks>Reports are made on the thread the plugin runs on (the main thread in Unity), as often as every
+        /// frame; throttle in <paramref name="progress"/> if needed.</remarks>
+        public ModfileBuilder SetUploadProgress(IProgress<ModfileUploadProgress> progress)
+        {
+            _uploadProgress = progress;
+            return this;
+        }
+
         public ModBuilder FinishModfile() => _parentModBuilder;
         
         internal async Task<Error> PublishModfile()
@@ -101,6 +118,11 @@ namespace Modio.Mods.Builder
                 return new Error(ErrorCode.BAD_PARAMETER);
             }
 
+            // CARX PATCH: listen to compression and upload progress only while SetUploadProgress is set; the scope is
+            // closed when this method leaves, whatever the path.
+            _progressReporter = UploadProgressReporter.Open(_uploadProgress);
+            using UploadProgressReporter progressScope = _progressReporter;
+
             (Error error, Stream dataStorageStream) = await ModioClient.DataStorage.CompressToZipStream(FilePath, ParentId);
 
             if (error)
@@ -109,6 +131,9 @@ namespace Modio.Mods.Builder
             await using(Stream readStream = dataStorageStream)
             {
                 const long oneHundredMiB = 100 * 1024 * 1024;
+
+                // CARX PATCH: compressing is done, the zip is uploaded from here on.
+                _progressReporter?.BeginUpload(readStream.Length);
 
                 if (readStream.Length > oneHundredMiB) //recommended limit
                 {
@@ -133,9 +158,16 @@ namespace Modio.Mods.Builder
                         null
                     );
 
+                    // CARX PATCH: this one request carries the whole zip; set before the task starts sending.
+                    _progressReporter?.BeginRequest(0, readStream.Length, true);
+
                     var uploadTask = GetAddModfileTask(addModfileRequest);
 
                     (error, _) = await uploadTask;
+
+                    // CARX PATCH: a success means the last byte was sent, even if no poll saw it go.
+                    _progressReporter?.EndRequest();
+                    if (!error) _progressReporter?.ReportProcessing();
                 }
             }
             await ModioClient.DataStorage.CleanUpCompressToZipStream(ParentId);
@@ -165,6 +197,9 @@ namespace Modio.Mods.Builder
 
             if (error) return error;
 
+            // CARX PATCH: the last part is sent; mod.io assembles the parts and adds the modfile from here on.
+            _progressReporter?.ReportProcessing();
+
             if (session.error) return session.error;
 
             (Error error, MultipartUploadObject? multipartUploadObject) end =
@@ -181,7 +216,8 @@ namespace Modio.Mods.Builder
                 new AddModfileRequest(ModioAPIFileParameter.None, Version, ChangeLog, MetadataBlob, platformStrings, uploadId)
             );
 
-            return Error.None;
+            // CARX PATCH: return the AddModfile result, not always Error.None; see CARX_PATCHES.md section 3.
+            return upload.error;
         }
         
         async Task<Error> AddAllMulipartUploadParts(
@@ -219,6 +255,9 @@ namespace Modio.Mods.Builder
                     data = buffer;
                 }
 
+                // CARX PATCH: map this part's upload progress onto the whole zip.
+                _progressReporter?.BeginRequest(startByte, data.Length, false);
+
                 (Error error, MultipartUploadPartObject? multipartUploadPartObject) part =
                     await ModioAPI.FilesMultipartUploads.AddMultipartUploadPart(
                         uploadId,
@@ -226,6 +265,9 @@ namespace Modio.Mods.Builder
                         $"bytes {startByte}-{endByte}/{readStream.Length}",
                         data
                     );
+
+                // CARX PATCH: see above.
+                _progressReporter?.EndRequest();
 
                 if (part.error)
                 {
@@ -278,7 +320,8 @@ namespace Modio.Mods.Builder
                 new AddModfileRequest(ModioAPIFileParameter.None, version, changelog, metadataBlob, platforms, uploadId)
             );
 
-            return (Error.None, upload.modfileObject);
+            // CARX PATCH: return the AddModfile result, not always Error.None; see CARX_PATCHES.md section 3.
+            return (upload.error, upload.modfileObject);
         }
 
         /// <summary>
@@ -319,5 +362,117 @@ namespace Modio.Mods.Builder
             Platform.Oculus       => "oculus",
             _                     => string.Empty,
         };
+
+        // CARX PATCH: upload progress, see CARX_PATCHES.md section 2.
+        /// <summary>
+        /// Turns the ambient <see cref="ModioTransferProgress"/> reports of one <see cref="PublishModfile"/> into
+        /// <see cref="ModfileUploadProgress"/>. Opening it opens the scope, disposing it closes the scope; a closed
+        /// reporter ignores everything.
+        /// </summary>
+        sealed class UploadProgressReporter : ModioTransferProgress.IListener, IDisposable
+        {
+            readonly IProgress<ModfileUploadProgress> _progress;
+            readonly IDisposable _scope;
+            bool _closed;
+            bool _uploading;
+            bool _processing;
+            long _zipLength;
+            long _uploadedBytes;
+            bool _requestActive;
+            long _requestStart;
+            long _requestLength;
+            bool _requestEndsUpload;
+
+            UploadProgressReporter(IProgress<ModfileUploadProgress> progress)
+            {
+                _progress = progress;
+                _scope = ModioTransferProgress.BeginScope(this);
+            }
+
+            /// <returns><c>null</c> when <paramref name="progress"/> is null: no scope is opened then.</returns>
+            public static UploadProgressReporter Open(IProgress<ModfileUploadProgress> progress)
+                => progress != null ? new UploadProgressReporter(progress) : null;
+
+            public void OnCompress(long doneBytes, long totalBytes)
+            {
+                if (_closed || _uploading) return;
+
+                Report(new ModfileUploadProgress(ModfileUploadStage.Compressing, doneBytes, totalBytes));
+            }
+
+            public void BeginUpload(long zipLength)
+            {
+                if (_closed || _uploading) return;
+
+                _uploading = true;
+                _zipLength = zipLength;
+                _uploadedBytes = 0;
+                Report(new ModfileUploadProgress(ModfileUploadStage.Uploading, 0, zipLength));
+            }
+
+            /// <summary>Maps the upload fraction of the requests that follow onto bytes <paramref name="startByte"/>
+            /// to <paramref name="startByte"/> + <paramref name="length"/> of the zip.</summary>
+            /// <param name="endsUpload">Whether this request sending its last byte means the whole zip is sent.</param>
+            public void BeginRequest(long startByte, long length, bool endsUpload)
+            {
+                _requestActive = true;
+                _requestStart = startByte;
+                _requestLength = length;
+                _requestEndsUpload = endsUpload;
+            }
+
+            public void EndRequest() => _requestActive = false;
+
+            public void OnRequestUpload(float fraction)
+            {
+                // Requests outside BeginRequest/EndRequest (upload session, reauthentication, ...) carry no zip bytes.
+                if (_closed || !_uploading || _processing || !_requestActive) return;
+
+                if (!(fraction > 0f))
+                    fraction = 0f;
+                else if (fraction > 1f)
+                    fraction = 1f;
+
+                long doneBytes = Math.Min(_requestStart + (long)(fraction * (double)_requestLength), _zipLength);
+
+                // Never backwards, e.g. when a part is sent again after reauthentication.
+                if (doneBytes > _uploadedBytes)
+                {
+                    _uploadedBytes = doneBytes;
+                    Report(new ModfileUploadProgress(ModfileUploadStage.Uploading, doneBytes, _zipLength));
+                }
+
+                if (fraction >= 1f && _requestEndsUpload) ReportProcessing();
+            }
+
+            public void ReportProcessing()
+            {
+                if (_closed || !_uploading || _processing) return;
+
+                _processing = true;
+                Report(new ModfileUploadProgress(ModfileUploadStage.Processing, _zipLength, _zipLength));
+            }
+
+            public void Dispose()
+            {
+                if (_closed) return;
+
+                _closed = true;
+                _scope.Dispose();
+            }
+
+            void Report(ModfileUploadProgress progress)
+            {
+                // A failing progress consumer must not fail the upload.
+                try
+                {
+                    _progress.Report(progress);
+                }
+                catch (Exception exception)
+                {
+                    ModioLog.Error?.Log($"Exception reporting modfile upload progress {progress}: {exception}");
+                }
+            }
+        }
     }
 }

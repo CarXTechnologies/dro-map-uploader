@@ -31,11 +31,16 @@ namespace Editor
 		/// Registers a new entry on the active vendor and publishes the finished build to it in one step.
 		/// A complete build is required: see <see cref="StageBuildForCreate"/> for why that holds for every vendor.
 		/// </summary>
+		/// <param name="progress">Names the steps taken here, before anything is sent to the vendor.</param>
+		/// <param name="uploadProgress">
+		/// Handed to the vendor: packing, sending and processing of the content, see <see cref="ModUploadProgress"/>.
+		/// </param>
 		public static async Task CreateNewCommunityItem(
 			MapMetaConfig config,
 			CancellationToken cancellationToken,
 			Action<ModItemKey> callback,
-			IProgress<string> progress = null)
+			IProgress<string> progress = null,
+			IProgress<ModUploadProgress> uploadProgress = null)
 		{
 			// No modal progress bar here either - see the note in UploadCommunityItem.
 			Debug.Log($"Creating a new item on {session.Publisher?.DisplayName ?? "the vendor"}...");
@@ -49,6 +54,9 @@ namespace Editor
 					Debug.LogError(ready.Message);
 					return;
 				}
+
+				// The last point where Cancel can still be honoured: neither publisher observes the token once called.
+				cancellationToken.ThrowIfCancellationRequested();
 
 				// Staged first: without content there is nothing to create, and the vendor must not be touched.
 				progress?.Report("Preparing publication files…");
@@ -81,8 +89,9 @@ namespace Editor
 					publisherContext.DefaultVisibility,
 					publisherContext.ContentTags);
 
+				// Stays up only until the vendor's first upload progress report replaces it.
 				progress?.Report("Sending files / waiting for mod.io…");
-				var result = await session.Publisher.CreateItemAsync(request, cancellationToken);
+				var result = await session.Publisher.CreateItemAsync(request, uploadProgress, cancellationToken);
 
 				if (!result.Success)
 				{
@@ -149,11 +158,15 @@ namespace Editor
 		/// Pushes a finished build to the active vendor, or copies it into the vendor's local install folder when
 		/// <paramref name="localBuild"/> is set and the vendor supports local installs.
 		/// </summary>
+		/// <param name="progress">
+		/// Handed to the vendor: packing, sending and processing of the content, see <see cref="ModUploadProgress"/>.
+		/// Not used for a local copy, which is synchronous.
+		/// </param>
 		public static async Task UploadCommunityItem(
 			MapManagerConfig.BuildData buildData,
 			ModItem published,
 			bool localBuild,
-			IProgress<float> progress,
+			IProgress<ModUploadProgress> progress,
 			CancellationToken cancellationToken,
 			Action<ModItemKey> callback)
 		{
@@ -185,7 +198,7 @@ namespace Editor
 			// Deliberately no EditorUtility.DisplayProgressBar around this. A modal progress bar held across async
 			// work stalls the editor's task pump: everything up to the first real suspension runs, and the
 			// continuation never comes back - leaving a bar that cannot be dismissed and an upload that never starts.
-			// Progress is reported through the log and the row spinner instead.
+			// Progress goes to the caller through `progress` instead, and the window draws it in its own footer.
 			Debug.Log($"Uploading '{published.Title}'...");
 
 			var uploadedKey = default(ModItemKey);
@@ -198,6 +211,9 @@ namespace Editor
 					Debug.LogError(ready.Message);
 					return;
 				}
+
+				// The last point where Cancel can still be honoured: neither publisher observes the token once called.
+				cancellationToken.ThrowIfCancellationRequested();
 
 				if (IsBuildTooLarge())
 				{

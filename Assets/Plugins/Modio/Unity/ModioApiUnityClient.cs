@@ -717,6 +717,11 @@ namespace Modio.Unity
         {
             UnityWebRequestAsyncOperation operation = webRequest.SendWebRequest();
 
+            // CARX PATCH: report how much of the request body has been sent to an open ModioTransferProgress scope
+            // (see CARX_PATCHES.md section 2). uploadHandler.data is not touched: it copies the whole body.
+            bool reportUpload = webRequest.uploadHandler != null && ModioTransferProgress.IsListening;
+            float reportedUpload = 0f;
+
             while (!operation.isDone)
             {
                 if (token.IsCancellationRequested || shutdownToken.IsCancellationRequested)
@@ -724,6 +729,8 @@ namespace Modio.Unity
                     webRequest.Abort();
                     break;
                 }
+                // CARX PATCH: see above.
+                if (reportUpload) reportedUpload = ReportUploadProgress(webRequest, reportedUpload);
                 await Task.Yield();
             }
             
@@ -733,7 +740,24 @@ namespace Modio.Unity
             if (token.IsCancellationRequested)
                 return new Error(ErrorCode.OPERATION_CANCELLED);
 
+            // CARX PATCH: the final value, for a body that went out between the last poll and completion.
+            if (reportUpload) ReportUploadProgress(webRequest, reportedUpload);
+
             return Error.None;
+        }
+
+        // CARX PATCH: reports uploadProgress when it grew past the last reported value; returns the reported value.
+        static float ReportUploadProgress(UnityWebRequest webRequest, float reported)
+        {
+            float progress = webRequest.uploadProgress;
+
+            if (progress > 1f) progress = 1f;
+
+            // Also skips NaN and the negative "unknown" value.
+            if (!(progress > reported)) return reported;
+
+            ModioTransferProgress.ReportRequestUpload(progress);
+            return progress;
         }
 
         public void Dispose()

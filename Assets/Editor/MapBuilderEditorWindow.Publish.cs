@@ -15,6 +15,22 @@ namespace Editor
 {
 	public partial class MapBuilderEditorWindow
 	{
+		/// <summary>
+		/// How often the publish status is redrawn on its own. Uploads report in bursts and processing on the vendor
+		/// not at all, so without this the elapsed time would freeze and the window would look stuck.
+		/// </summary>
+		private const long PublishTickerIntervalMs = 500;
+
+		private IVisualElementScheduledItem m_publishTicker;
+
+		/// <summary>Latest report from the vendor for the running publish operation; null until the first one.</summary>
+		private ModUploadProgress? m_publishProgress;
+
+		/// <summary>What the status line says until the vendor's first report - the steps taken before sending.</summary>
+		private string m_publishStepText;
+
+		private static string PublishVendorName => MapBuilder.session.Publisher?.DisplayName;
+
 		private void OnUploadVendorClicked()
 		{
 			Upload(localBuild: false);
@@ -41,26 +57,32 @@ namespace Editor
 			m_buildProcess = true;
 			MapManagerConfig.instance.mapMetaConfigValue = attachObj.metaConfig;
 
-			// Publishing runs without a modal progress bar, so this line is the only in-window sign of activity.
-			SetPublishStatus(localBuild ? "Copying to the local install folder…" : "Uploading…");
-
 			BeginOperation();
-			RefreshDetailsPanel();
 
-			var progress = new Progress<float>(fraction =>
-            {
-                if (!m_buildProcess || m_operationCts == null) return;
-                SetPublishStatus($"Uploading… {Mathf.RoundToInt(Mathf.Clamp01(fraction) * 100f)}%");
-                m_operationProgress.value = Mathf.Clamp01(fraction) * 100;
-                m_operationProgress.title = $"{m_operationProgress.value:F0}%";
-            });
+			// Publishing runs without a modal progress bar, so the status line and the footer bar are the only
+			// in-window sign of activity - the ticker keeps the elapsed time moving even between reports.
+			BeginPublishProgress(localBuild
+				? L("Копирование в папку локальной установки…", "Copying to the local install folder…")
+				: UploadProgressText.StageTitle(ModUploadStage.Preparing, PublishVendorName, English));
+			RefreshDetailsPanel();
+			var uploaded = false;
+			var cancellationToken = m_operationCts.Token;
 
 			try
 			{
-				await MapBuilder.UploadCommunityItem(buildData, item, localBuild, progress, m_operationCts.Token,
+				// The staging in MapBuilder is synchronous and, with the vendor already initialized, nothing awaits before
+				// it - so the status, the bar and Cancel set above would only be painted at the first network request.
+				if (!await WaitForRepaint(cancellationToken))
+				{
+					Debug.LogWarning(localBuild ? "Copying to the local install folder was cancelled." : "Upload cancelled.");
+					return;
+				}
+
+				await MapBuilder.UploadCommunityItem(buildData, item, localBuild, CreatePublishProgress(), cancellationToken,
 					uploadedKey =>
 					{
 						m_loads[item.Key] = false;
+						uploaded = uploadedKey.IsValid;
 						SetPublishStatus(string.Empty);
 
 						if (uploadedKey.IsValid)
@@ -71,8 +93,16 @@ namespace Editor
 			}
 			finally
 			{
+				EndPublishProgress();
 				m_loads[item.Key] = false;
 				SetPublishStatus(string.Empty);
+
+				// The progress line disappears with the operation, so the footer says how it ended.
+				m_lastOperationSummary = !uploaded
+					? L("Обновление не завершено. Подробности в Console.", "Update did not complete. See the Console.")
+					: localBuild
+						? L("Локальная копия обновлена.", "Local copy updated.")
+						: L("Публикация обновлена.", "Publication updated.");
 				EndOperation();
 				if (!localBuild) await FetchItems();
 			}
@@ -98,7 +128,7 @@ namespace Editor
 
 			if (config == null)
 			{
-				SetPublishStatus("Assign a Map Meta Config before exporting.");
+				SetPublishStatus(L("Выберите настройки карты перед экспортом.", "Assign a Map Meta Config before exporting."));
 				return;
 			}
 
@@ -107,8 +137,8 @@ namespace Editor
 
 			// The copy is synchronous and writes outside the project, so the status line is the only sign it ran.
 			SetPublishStatus(MapBuilder.BuildDataTransitionToDirectory(buildData, m_pathToExternal)
-				? $"Exported to {m_pathToExternal}"
-				: "Nothing to export — see the Console.");
+				? L("Экспортировано в ", "Exported to ") + m_pathToExternal
+				: L("Нечего экспортировать — подробности в Console.", "Nothing to export — see the Console."));
 		}
 
 		private async void OnNewItemClicked()
@@ -126,24 +156,29 @@ namespace Editor
 
 			m_buildProcess = true;
 			BeginOperation();
-			m_operationProgress.title = L("Подготовка…", "Preparing…");
-			SetBuildStatus("Creating the item…");
+			BeginPublishProgress(LocalizeOperation("Creating the item…"));
 			RefreshDetailsPanel();
 			var createdKey = default(ModItemKey);
+			var cancellationToken = m_operationCts.Token;
 
 			try
 			{
-				await MapBuilder.CreateNewCommunityItem(config, m_operationCts.Token,
+				// Same as in Upload: the build is staged synchronously before anything awaits, so paint first.
+				if (!await WaitForRepaint(cancellationToken))
+				{
+					Debug.LogWarning("Creating the community item was cancelled.");
+					return;
+				}
+
+				await MapBuilder.CreateNewCommunityItem(config, cancellationToken,
 					newKey => createdKey = newKey,
-					new ImmediateProgress<string>(stage =>
-					{
-						SetBuildStatus(stage);
-						m_operationProgress.title = LocalizeOperation(stage);
-					}));
+					new ImmediateProgress<string>(ReportPublishStep),
+					CreatePublishProgress());
 				if (createdKey.IsValid) OnItemCreated(config, createdKey);
 			}
 			finally
 			{
+				EndPublishProgress();
 				m_lastOperationSummary = createdKey.IsValid
 					? L("Публикация создана.", "Publication created.")
 					: L("Публикация не завершена. Подробности в Console.", "Publication did not complete. See the Console.");
@@ -256,6 +291,144 @@ namespace Editor
 			m_newItemHint.text = message;
 			m_newItemHint.style.display = DisplayStyle.Flex;
 			m_newItemButton?.SetEnabled(false);
+		}
+
+		/// <summary>
+		/// Starts drawing a publish operation: <paramref name="stepText"/> until the vendor reports, and the elapsed
+		/// time ticking under it either way. Call after <see cref="BeginOperation"/>, which restarts the timer, and
+		/// pair with <see cref="EndPublishProgress"/> in a finally.
+		/// </summary>
+		private void BeginPublishProgress(string stepText)
+		{
+			m_publishProgress = null;
+			m_publishStepText = stepText;
+
+			m_publishTicker?.Pause();
+			m_publishTicker = rootVisualElement.schedule.Execute(RenderPublishProgress).Every(PublishTickerIntervalMs);
+			RefreshCancelButton();
+			RenderPublishProgress();
+		}
+
+		private void EndPublishProgress()
+		{
+			m_publishTicker?.Pause();
+			m_publishTicker = null;
+			m_publishProgress = null;
+			m_publishStepText = null;
+			// Unlocks Cancel and restores its tooltip; EndOperation hides it right after.
+			RefreshCancelButton();
+			SetPublishStatus(string.Empty);
+		}
+
+		/// <summary>
+		/// Gives the window a chance to paint before synchronous work blocks the main thread. Completes after two editor
+		/// updates - the first lets the panel lay out what was just set, the second comes after the repaint that follows -
+		/// or as soon as <paramref name="cancellationToken"/> fires: Cancel, or the window closing, which cancels the
+		/// running operation in OnDisable.
+		/// </summary>
+		/// <returns>False when the wait ended by cancellation, so the caller skips the work it was about to start.</returns>
+		private static Task<bool> WaitForRepaint(CancellationToken cancellationToken)
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromResult(false);
+			}
+
+			// Asynchronous continuations: completing from inside EditorApplication.update or from Cancel() must not run
+			// the caller's synchronous staging (or its cleanup, which disposes the token source) inline.
+			var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+			var updates = 0;
+			var registration = default(CancellationTokenRegistration);
+
+			void Finish(bool painted)
+			{
+				EditorApplication.update -= OnUpdate;
+				registration.Dispose();
+				completion.TrySetResult(painted);
+			}
+
+			void OnUpdate()
+			{
+				if (++updates >= 2)
+				{
+					Finish(true);
+				}
+			}
+
+			EditorApplication.update += OnUpdate;
+			registration = cancellationToken.Register(() => Finish(false));
+			return completion.Task;
+		}
+
+		/// <summary>
+		/// The sink handed to the vendor for the operation that is running now.
+		/// </summary>
+		private IProgress<ModUploadProgress> CreatePublishProgress()
+		{
+			var operation = m_operationCts;
+
+			// Progress<T> posts to the main thread, so a report can land after its operation ended - or after the next
+			// one began. Both are dropped: only the operation that created this sink may draw.
+			return new Progress<ModUploadProgress>(report =>
+			{
+				if (!m_buildProcess || m_operationCts == null || m_operationCts != operation) return;
+				var first = !m_publishProgress.HasValue;
+				m_publishProgress = report;
+
+				// The vendor is sending from here on and cannot be stopped, so Cancel is locked for the rest of it.
+				if (first) RefreshCancelButton();
+				RenderPublishProgress();
+			});
+		}
+
+		/// <summary>
+		/// A step named by <see cref="MapBuilder.CreateNewCommunityItem"/> before anything is sent. Shown until the
+		/// vendor's own reports take over.
+		/// </summary>
+		private void ReportPublishStep(string step)
+		{
+			if (!m_buildProcess || string.IsNullOrEmpty(step)) return;
+			m_publishStepText = LocalizeOperation(step);
+			RenderPublishProgress();
+		}
+
+		/// <summary>
+		/// Draws the running publish operation into the status lines and the footer bar. Called on every report and by
+		/// the ticker, so it has to be cheap and safe to call when nothing changed.
+		/// </summary>
+		private void RenderPublishProgress()
+		{
+			if (!m_buildProcess || m_operationProgress == null) return;
+
+			var elapsed = m_operationTimer.Elapsed;
+			string title;
+			string status;
+
+			if (m_publishProgress is { } progress)
+			{
+				// Checked before cancellation: once the vendor reports it is sending, a Cancel pressed earlier no longer
+				// stops anything, so the live progress stays on screen instead of "Cancelling…" for the rest of it.
+				var vendor = PublishVendorName;
+				title = UploadProgressText.StageTitle(progress.Stage, vendor, English);
+				status = UploadProgressText.Format(progress, elapsed, vendor, English);
+
+				// Overall progress is meant to never go back; holding the bar still costs less than trusting that.
+				m_operationProgress.value = Mathf.Max(m_operationProgress.value, UploadProgressText.BarValue(progress));
+			}
+			else if (m_operationCts != null && m_operationCts.IsCancellationRequested)
+			{
+				// Otherwise the next tick would paint the step text back over "Cancelling…".
+				title = LocalizeOperation("Cancelling…");
+				status = UploadProgressText.WithElapsed(title, elapsed);
+			}
+			else
+			{
+				title = m_publishStepText ?? string.Empty;
+				status = UploadProgressText.WithElapsed(m_publishStepText, elapsed);
+			}
+
+			m_operationProgress.title = title;
+			SetPublishStatus(status);
 		}
 	}
 }

@@ -11,7 +11,7 @@ namespace Editor
 {
     public partial class MapBuilderEditorWindow
     {
-        private const string LanguagePreference = "CarX.MapBuilder.Language";
+        internal const string LanguagePreference = "CarX.MapBuilder.Language";
         private static bool English;
         private static string L(string russian, string english) => English ? english : russian;
 

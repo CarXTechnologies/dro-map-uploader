@@ -96,9 +96,20 @@ namespace Editor
 				return;
 			}
 
+			// Build and Validate are locked while any preview loads (IsDownloadAnyIcon), so the details panel is redrawn when
+			// the first download starts and when the last one ends; otherwise its buttons keep whatever state they were drawn in.
+			var wasDownloading = IsDownloadAnyIcon();
+
 			m_images[item.Key] = (null, true);
 			m_loads[item.Key] = true;
 			RefreshItemRow(item.Key);
+
+			// Only when this start actually switches the lock on. Mid-fetch the list is still empty, so IsDownloadAnyIcon
+			// stays false and the lock cannot engage yet - FetchItems redraws the panel itself once the list is filled.
+			if (!wasDownloading && IsDownloadAnyIcon())
+			{
+				RefreshDetailsPanel();
+			}
 
 			await UIUtils.DownloadSprite(item.PreviewUrl, (_, texture2D) =>
 			{
@@ -109,6 +120,11 @@ namespace Editor
 				if (SelectKey == item.Key)
 				{
 					RefreshPreview();
+				}
+
+				if (!IsDownloadAnyIcon())
+				{
+					RefreshDetailsPanel();
 				}
 			});
 		}

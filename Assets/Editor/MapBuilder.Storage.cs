@@ -1,6 +1,7 @@
 using System.IO;
 using Plugins.CarX.Modding.Creator.Editor;
 using Plugins.CarX.Modding.Creator.Runtime;
+using UnityEditor;
 using UnityEngine;
 
 namespace Editor
@@ -11,6 +12,10 @@ namespace Editor
 		private static readonly string assetBuildPath = assetDir + "Standalone";
 		private static readonly string assetBuildPathTemporaryOrigin = assetDir + "StandaloneTemporary";
 		private static string assetBuildPathTemporary = assetBuildPathTemporaryOrigin;
+
+		// The packing bar is drawn outside the window, so it reads the window's language preference directly.
+		private static string PackingTitle =>
+			EditorPrefs.GetString(MapBuilderEditorWindow.LanguagePreference, "en") == "en" ? "Packing the map" : "Упаковка карты";
 
 		private static void ClearDirectory(string path, bool recursive = true)
 		{
@@ -84,7 +89,20 @@ namespace Editor
 			string meta = GetTemporary(TempData.Meta);
 			if (m_buildFormat == FormatBuild.Binary)
 			{
-				BinaryMapPacker.Pack(Path.Combine(directory, BinaryModArchive.FileName), map, meta);
+				// A modal bar is fine here, unlike around the async upload (see UploadCommunityItem): packing is
+				// synchronous with no await inside, the packer reports on this thread, and the bar is cleared before
+				// control returns to the caller. Without it the editor just freezes while the textures are re-encoded.
+				try
+				{
+					BinaryMapPacker.Pack(Path.Combine(directory, BinaryModArchive.FileName),
+						(info, fraction) => EditorUtility.DisplayProgressBar(PackingTitle, info ?? string.Empty, fraction),
+						map, meta);
+				}
+				finally
+				{
+					EditorUtility.ClearProgressBar();
+				}
+
 				return;
 			}
 			// Switching back to Wavefront must not leave an authoritative stale container.

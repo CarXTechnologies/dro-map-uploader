@@ -338,7 +338,7 @@ namespace Editor
 			m_buildButton.AddToClassList("mb-build-button");
 			actionsRow.Add(m_buildButton);
 
-			m_cancelButton = new Button(OnCancelButtonClicked) { text = L("Отмена", "Cancel"), tooltip = "Stop the operation in progress" };
+			m_cancelButton = new Button(OnCancelButtonClicked) { text = L("Отмена", "Cancel"), tooltip = CancelButtonTooltip };
 			m_cancelButton.AddToClassList("mb-build-button");
 			m_cancelButton.style.display = DisplayStyle.None;
 			actionsRow.Add(m_cancelButton);
@@ -642,8 +642,7 @@ namespace Editor
 
 			m_buildButton.SetEnabled(m_buildType != 0 && !IsDownloadAnyIcon() && !m_buildProcess && !formatBlocked);
 			m_validateButton.SetEnabled(!m_buildProcess && !IsDownloadAnyIcon());
-			m_cancelButton.style.display = m_buildProcess ? DisplayStyle.Flex : DisplayStyle.None;
-			m_cancelButton.SetEnabled(m_buildProcess);
+			RefreshCancelButton();
 
 			var uploadState = RefreshBuildResult(activeConfig, buildData);
 
@@ -723,7 +722,8 @@ namespace Editor
 				return;
 			}
 
-			m_publishStatus.text = message;
+			// Through the same table as the footer, so a known English step never shows untranslated here.
+			m_publishStatus.text = LocalizeOperation(message);
 			if (!string.IsNullOrEmpty(message)) SetBuildStatus(message);
 			m_publishStatus.style.display = string.IsNullOrEmpty(message) ? DisplayStyle.None : DisplayStyle.Flex;
 		}
@@ -1018,13 +1018,41 @@ namespace Editor
 
 		private void OnCancelButtonClicked()
 		{
-			if (m_operationCts == null || m_operationCts.IsCancellationRequested)
+			// The button is disabled once the vendor sends (IsCancelLocked); this only covers a click already queued.
+			if (m_operationCts == null || m_operationCts.IsCancellationRequested || IsCancelLocked)
 			{
 				return;
 			}
 
 			m_operationCts.Cancel();
 			SetBuildStatus("Cancelling…");
+		}
+
+		private static string CancelButtonTooltip => L("Остановить текущую операцию", "Stop the operation in progress");
+
+		/// <summary>
+		/// True once the vendor has reported on the running publish operation. Neither publisher can honour the token
+		/// after sending starts, so a Cancel from then on would only hide the live progress behind "Cancelling…".
+		/// </summary>
+		private bool IsCancelLocked => m_buildProcess && m_publishProgress.HasValue;
+
+		/// <summary>
+		/// Shows Cancel while an operation runs, and keeps it disabled - saying why - once the vendor is sending.
+		/// Called by every redraw of the details panel, so a redraw in the middle of an upload cannot unlock it again.
+		/// </summary>
+		private void RefreshCancelButton()
+		{
+			if (m_cancelButton == null)
+			{
+				return;
+			}
+
+			var locked = IsCancelLocked;
+			m_cancelButton.style.display = m_buildProcess ? DisplayStyle.Flex : DisplayStyle.None;
+			m_cancelButton.SetEnabled(m_buildProcess && !locked);
+			m_cancelButton.tooltip = locked
+				? L("Отправку на площадку уже нельзя прервать", "Sending to the platform cannot be cancelled once started")
+				: CancelButtonTooltip;
 		}
 
 		private void BeginOperation()
@@ -1051,6 +1079,8 @@ namespace Editor
                 m_operationProgress.title = string.Empty;
                 m_operationProgress.style.display = DisplayStyle.None;
             }
+			// Here as well as in RefreshDetailsPanel, which returns before reaching the button when no map is selected.
+			RefreshCancelButton();
 			SetBuildStatus(string.Empty);
 			RefreshDetailsPanel();
 		}
