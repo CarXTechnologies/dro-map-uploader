@@ -133,8 +133,7 @@ namespace Editor
                 var path = MapManagerConfig.GetBuildOrEmpty(m_pendingConfig).path;
                 if (Directory.Exists(path)) EditorUtility.RevealInFinder(path);
             }) { text = L("Открыть папку сборки", "Open build folder") };
-            buildActions.Add(m_openBuildFolder);
-            buildActions.Add(new Button(() => SelectWorkspaceTab(2)) { text = L("Перейти к публикации →", "Go to publishing →") }); m_buildPage.Add(buildActions);
+            buildActions.Add(m_openBuildFolder); m_buildPage.Add(buildActions);
 
             m_publishPage = new ScrollView(); m_publishPage.AddToClassList("mb-page"); m_buildAndPublishWrapper.Add(m_publishPage);
             BuildVendorBar();
@@ -147,8 +146,10 @@ namespace Editor
             heading.Insert(heading.IndexOf(language), m_vendorField);
             m_unavailableBox = new VisualElement(); m_unavailableHelp = new HelpBox("", HelpBoxMessageType.Info);
             m_unavailableBox.Add(m_unavailableHelp); m_unavailableBox.style.display = DisplayStyle.None; m_publishPage.Add(m_unavailableBox);
-            m_publishPage.Add(BuildDestinationSection());
-            m_publications = BuildRightPanel(); m_publications.AddToClassList("mb-publications"); m_publishPage.Add(m_publications);
+            // Publications on the left, what and where to send on the right (stacked in a narrow window).
+            var publishColumns = new VisualElement(); publishColumns.AddToClassList("mb-publish-columns"); m_publishPage.Add(publishColumns);
+            m_publications = BuildRightPanel(); m_publications.AddToClassList("mb-publications"); publishColumns.Add(m_publications);
+            var destination = BuildDestinationSection(); destination.AddToClassList("mb-publish-main"); publishColumns.Add(destination);
             var hints = new VisualElement(); hints.AddToClassList("mb-workspace-hints"); workspace.Add(hints);
             m_actionHint = new Label(); m_actionHint.AddToClassList("mb-action-hint"); hints.Add(m_actionHint);
             m_formatHint = new Label(L("Binary — компактный контейнер карты. Проверка найдёт ошибки до сборки.", "Binary is a compact map container. Validate the map to find issues before building."));
