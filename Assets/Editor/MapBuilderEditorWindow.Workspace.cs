@@ -242,11 +242,9 @@ namespace Editor
         private void RefreshWorkspace(MapMetaConfig config, MapManagerConfig.BuildData build)
         {
             m_mapTitle.text = MapDisplayName(config);
-            var scene = string.IsNullOrEmpty(build.targetScene) ? L("Сцена выбирается во вкладке «Сборка»", "Choose a scene in the Build tab") : Path.GetFileNameWithoutExtension(build.targetScene);
-            // The scene is usually named like the map, and the title right above already says that.
-            var repeatsTitle = string.Equals(scene, m_mapTitle.text, System.StringComparison.OrdinalIgnoreCase);
-            m_mapSubtitle.text = config == null ? L("Создайте карту или выберите настройки существующей.", "Create a map or select an existing map config.") :
-                repeatsTitle ? m_buildFormat.ToString() : $"{scene}  ·  {m_buildFormat}";
+            // Only a hint when no map is selected; with a map the title says enough (scene and format live in the Build tab).
+            m_mapSubtitle.text = config == null ? L("Создайте карту или выберите настройки существующей.", "Create a map or select an existing map config.") : string.Empty;
+            m_mapSubtitle.style.display = string.IsNullOrEmpty(m_mapSubtitle.text) ? DisplayStyle.None : DisplayStyle.Flex;
             if (config != null && !m_buildSummaries.ContainsKey(config) && EditorPrefs.HasKey("CarX.MapBuilder.BuildSummary." + config.id))
                 m_buildSummaries[config] = EditorPrefs.GetString("CarX.MapBuilder.BuildSummary." + config.id);
             m_buildSummary.text = config != null && m_buildSummaries.TryGetValue(config, out var summary) ? summary : string.Empty;
