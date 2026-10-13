@@ -585,6 +585,221 @@ namespace MapUploader.Tests
 			Assert.AreEqual(variant.revision, entry.revision);
 		}
 
+		private const string FoliageWithoutMarker = "is double-sided and alpha-tested (vegetation?) without a Material marker entry";
+		private const string FoliageLighting = "gives it foliage lighting";
+		private const string VariantMismatch = "is mapped to different render core variants";
+
+		// Only double-sided alpha-clipped materials are vegetation, and the marker (and so the warning) exists only in Binary builds.
+		[TestCase(FormatBuild.Binary, true, true, true)]
+		[TestCase(FormatBuild.Wavefront, true, true, false)]
+		[TestCase(FormatBuild.Binary, true, false, false)]
+		[TestCase(FormatBuild.Binary, false, true, false)]
+		public void WarnsAboutFoliageWithoutAMaterialMarker(FormatBuild format, bool alphaClipping, bool doubleSided, bool expectsWarning)
+		{
+			Material leaves = NewFoliageMaterial("Leaves", alphaClipping, doubleSided);
+			GameObject root = NewObject("Track");
+			NewRenderer("Bush", root, leaves);
+
+			MapValidationReport report = Validate(format, root);
+
+			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Warning, $"'Bush': material 'Leaves' {FoliageWithoutMarker}"));
+			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Warning, "MAT_FOLIAGE_ALPHATEST / MAT_FOLIAGE_SIMPLE_ALPHATEST"));
+		}
+
+		[Test]
+		public void ReportsAFoliageMaterialOnceForAllItsObjects()
+		{
+			Material leaves = NewFoliageMaterial("Leaves");
+			GameObject root = NewObject("Track");
+
+			for (int i = 0; i < 5; i++)
+			{
+				NewRenderer("Bush" + i, root, leaves);
+			}
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.AreEqual(1, report.Issues.Count(issue => issue.message.Contains(FoliageWithoutMarker)));
+			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Warning, $"'Bush0', 'Bush1', 'Bush2' and 2 more objects: material 'Leaves' {FoliageWithoutMarker}"));
+		}
+
+		[Test]
+		public void AcceptsFoliageCoveredByItsOwnMarker()
+		{
+			Material leaves = NewFoliageMaterial("Leaves");
+			GameObject root = NewObject("Track");
+			AddMaterialMarker(NewRenderer("Bush", root, leaves).gameObject, Entry(leaves, FoliageVariant()));
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, FoliageWithoutMarker));
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, FoliageLighting));
+		}
+
+		// The marker on the LODGroup object applies to every LOD renderer without a marker of its own.
+		[Test]
+		public void AcceptsFoliageLodsCoveredByTheLodGroupMarker()
+		{
+			Material leaves = NewFoliageMaterial("Leaves");
+			GameObject root = NewObject("Track");
+			GameObject fir = NewLodGroup("Fir", root, NewRenderer("Fir_LOD0", root, leaves), NewRenderer("Fir_LOD1", root, leaves));
+			AddMaterialMarker(fir, Entry(leaves, FoliageVariant()));
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, FoliageWithoutMarker));
+		}
+
+		// As in the export, a LOD with its own marker takes only that marker, even when it has no entry for the material.
+		[Test]
+		public void WarnsAboutAFoliageLodWhoseOwnMarkerHasNoEntry()
+		{
+			Material leaves = NewFoliageMaterial("Leaves");
+			Material bark = NewHdrpMaterial("Bark", Color.black);
+			GameObject root = NewObject("Track");
+			MeshRenderer lod1 = NewRenderer("Fir_LOD1", root, leaves, bark);
+			GameObject fir = NewLodGroup("Fir", root, NewRenderer("Fir_LOD0", root, leaves), lod1);
+			AddMaterialMarker(fir, Entry(leaves, FoliageVariant()));
+			AddMaterialMarker(lod1.gameObject, Entry(bark, FirstOffered(candidate => candidate.renderType == ModRenderCoreRenderType.Opaque, "opaque")));
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Warning, $"'Fir_LOD1': material 'Leaves' {FoliageWithoutMarker}"));
+			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Warning, "The Material marker on 'Fir_LOD1' has no entry for this material"));
+		}
+
+		// Baked vertex animation keeps the original materials and ignores Material markers.
+		[Test]
+		public void SkipsFoliageInsideABakedAnimation()
+		{
+			Material leaves = NewFoliageMaterial("Leaves");
+			GameObject root = NewObject("Track");
+			GameObject windmill = NewMarker("Windmill", "Animation", root).gameObject;
+			windmill.AddComponent<Animator>();
+			NewRenderer("Vines", windmill, leaves);
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, FoliageWithoutMarker));
+		}
+
+		// The export keeps inactive objects (the game shows them) except inactive parts of a Rigidbody.
+		[TestCase(false, true)]
+		[TestCase(true, false)]
+		public void ChecksInactiveFoliageTheExportKeeps(bool underRigidbody, bool expectsWarning)
+		{
+			Material leaves = NewFoliageMaterial("Leaves");
+			GameObject root = NewObject("Track");
+			GameObject parent = underRigidbody ? NewObject("Crate", root, typeof(Rigidbody)) : root;
+			NewRenderer("Bush", parent, leaves).gameObject.SetActive(false);
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Warning, $"'Bush': material 'Leaves' {FoliageWithoutMarker}"));
+		}
+
+		// An entry with an unknown variant is already an error; the foliage warning would only repeat it.
+		[Test]
+		public void LeavesAFoliageEntryWithAnUnknownVariantToTheVariantError()
+		{
+			Material leaves = NewFoliageMaterial("Leaves");
+			GameObject root = NewObject("Track");
+			AddMaterialMarker(NewRenderer("Bush", root, leaves).gameObject, new RenderCoreMaterialOverride { source = leaves, variant = "MAT_NO_SUCH_VARIANT" });
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Error, "has no supported render core variant ('MAT_NO_SUCH_VARIANT')"));
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, FoliageWithoutMarker));
+		}
+
+		// TestMap fir: the LODGroup maps the leaves to a foliage variant, while LOD3 has its own marker with a cutout variant.
+		[Test]
+		public void WarnsWhenOneLodMapsTheMaterialToAnotherVariant()
+		{
+			ModRenderCoreVariant foliage = FoliageVariant();
+			ModRenderCoreVariant cutout = CutoutVariant();
+			Material leaves = NewFoliageMaterial("Leaves");
+			GameObject root = NewObject("Track");
+			MeshRenderer lod3 = NewRenderer("Fir_LOD3", root, leaves);
+			GameObject fir = NewLodGroup("Fir", root, NewRenderer("Fir_LOD0", root, leaves), lod3);
+			AddMaterialMarker(fir, Entry(leaves, foliage));
+			AddMaterialMarker(lod3.gameObject, Entry(leaves, cutout));
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Warning,
+				$"Material 'Leaves' {VariantMismatch} by Material markers: {foliage.name} on 'Fir'; {cutout.name} on 'Fir_LOD3'."));
+			Assert.AreEqual(1, report.Issues.Count(issue => issue.message.Contains(VariantMismatch)));
+		}
+
+		[Test]
+		public void AcceptsTheSameVariantInEveryMarker()
+		{
+			ModRenderCoreVariant variant = FirstOffered(candidate => true, "any");
+			RenderCoreMaterialOverride first = NewOverride(variant.name);
+			var second = new RenderCoreMaterialOverride { source = first.source, variant = variant.name };
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), first);
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), second);
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, VariantMismatch));
+		}
+
+		// Only applied entries count: an unknown variant exports the fallback material and is reported as an error of its own.
+		[TestCase("MAT_NO_SUCH_VARIANT", false)]
+		[TestCase(null, true)]
+		public void ComparesTheVariantsOfAppliedEntriesOnly(string otherVariant, bool expectsWarning)
+		{
+			ModRenderCoreVariant variant = FirstOffered(candidate => true, "any");
+			ModRenderCoreVariant other = FirstOffered(candidate => candidate.name != variant.name, "second");
+			RenderCoreMaterialOverride first = NewOverride(variant.name);
+			var second = new RenderCoreMaterialOverride { source = first.source, variant = otherVariant ?? other.name };
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), first);
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), second);
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Warning, $"Material '{first.source.name}' {VariantMismatch}"));
+		}
+
+		[Test]
+		public void IgnoresVariantMismatchesInWavefront()
+		{
+			ModRenderCoreVariant variant = FirstOffered(candidate => true, "any");
+			ModRenderCoreVariant other = FirstOffered(candidate => candidate.name != variant.name, "second");
+			RenderCoreMaterialOverride first = NewOverride(variant.name);
+			var second = new RenderCoreMaterialOverride { source = first.source, variant = other.name };
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), first);
+			NewMaterialMarker(root, NewMesh(subMeshCount: 1, withColors: true), second);
+
+			Assert.IsFalse(Has(Validate(FormatBuild.Wavefront, root), SceneValidator.CategoryMarkers, VariantMismatch));
+		}
+
+		// A cutout variant keeps the alpha test of vegetation but not its lighting; only foliage-looking materials in Binary builds get the hint,
+		// and only as information: the same flags fit fences and grates.
+		[TestCase(FormatBuild.Binary, true, false, true)]
+		[TestCase(FormatBuild.Binary, true, true, false)]
+		[TestCase(FormatBuild.Binary, false, false, false)]
+		[TestCase(FormatBuild.Wavefront, true, false, false)]
+		public void WarnsAboutFoliageMappedToACutoutVariant(FormatBuild format, bool foliageMaterial, bool foliageVariant, bool expectsWarning)
+		{
+			ModRenderCoreVariant variant = foliageVariant ? FoliageVariant() : CutoutVariant();
+			Material leaves = NewFoliageMaterial("Leaves", doubleSided: foliageMaterial);
+			GameObject root = NewObject("Track");
+			AddMaterialMarker(NewRenderer("Bush", root, leaves).gameObject, Entry(leaves, variant));
+
+			MapValidationReport report = Validate(format, root);
+
+			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Info,
+				$"'Bush': material 'Leaves' is double-sided and alpha-tested (vegetation?) and is mapped to {variant.name}"));
+			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Info, FoliageLighting));
+			Assert.IsFalse(HasIssue(report, MapValidationSeverity.Warning, FoliageLighting));
+		}
+
 		private MapValidationReport Validate(FormatBuild format, params GameObject[] roots)
 		{
 			return Validate(format, roots, new List<string>());
@@ -688,16 +903,78 @@ namespace MapUploader.Tests
 		/// <summary>Объект с MeshRenderer с материалами <paramref name="materials"/> и маркером Material с записями <paramref name="overrides"/>.</summary>
 		private GameMarkerData NewMaterialMarker(GameObject parent, Mesh mesh, Material[] materials, params RenderCoreMaterialOverride[] overrides)
 		{
-			GameObject gameObject = NewObject("Marked " + mesh.name, parent, typeof(MeshFilter), typeof(MeshRenderer), typeof(GameMarkerData));
+			GameObject gameObject = NewObject("Marked " + mesh.name, parent, typeof(MeshFilter), typeof(MeshRenderer));
 			gameObject.GetComponent<MeshFilter>().sharedMesh = mesh;
 			gameObject.GetComponent<MeshRenderer>().sharedMaterials = materials;
+			return AddMaterialMarker(gameObject, overrides);
+		}
 
+		/// <summary>Material marker with entries <paramref name="overrides"/> on an existing object (a renderer or a LODGroup).</summary>
+		private static GameMarkerData AddMaterialMarker(GameObject gameObject, params RenderCoreMaterialOverride[] overrides)
+		{
 			var settings = new RenderCoreMaterialMarkerSettings();
 			settings.overrides.AddRange(overrides);
 
-			GameMarkerData marker = gameObject.GetComponent<GameMarkerData>();
+			GameMarkerData marker = gameObject.AddComponent<GameMarkerData>();
 			marker.markerData = new MarkerData { head = MarkerData.MaterialHead, param = MarkerData.MaterialHead, value = settings };
 			return marker;
+		}
+
+		/// <summary>Entry of the current revision of <paramref name="variant"/> for <paramref name="source"/>.</summary>
+		private static RenderCoreMaterialOverride Entry(Material source, ModRenderCoreVariant variant)
+		{
+			return new RenderCoreMaterialOverride { source = source, variant = variant.name, revision = variant.revision };
+		}
+
+		/// <summary>Object with a one-triangle MeshRenderer per material.</summary>
+		private MeshRenderer NewRenderer(string name, GameObject parent, params Material[] materials)
+		{
+			GameObject gameObject = NewObject(name, parent, typeof(MeshFilter), typeof(MeshRenderer));
+			gameObject.GetComponent<MeshFilter>().sharedMesh = NewMesh(subMeshCount: materials.Length, withColors: true);
+			MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
+			renderer.sharedMaterials = materials;
+			return renderer;
+		}
+
+		/// <summary>LODGroup object with one LOD level per renderer, created under <paramref name="parent"/>; the renderers become its children.</summary>
+		private GameObject NewLodGroup(string name, GameObject parent, params MeshRenderer[] levels)
+		{
+			GameObject gameObject = NewObject(name, parent, typeof(LODGroup));
+			var lods = new LOD[levels.Length];
+
+			for (int i = 0; i < levels.Length; i++)
+			{
+				levels[i].transform.SetParent(gameObject.transform);
+				lods[i] = new LOD(screenRelativeTransitionHeight: 0.5f / (i + 1), renderers: new Renderer[] { levels[i] });
+			}
+
+			gameObject.GetComponent<LODGroup>().SetLODs(lods);
+			return gameObject;
+		}
+
+		/// <summary>HDRP Lit material with Alpha Clipping and Double-Sided switched by the HDRP floats the baker reads.</summary>
+		private Material NewFoliageMaterial(string name, bool alphaClipping = true, bool doubleSided = true)
+		{
+			Material material = NewHdrpMaterial(name, Color.black);
+			material.SetFloat("_AlphaCutoffEnable", alphaClipping ? 1f : 0f);
+			material.SetFloat("_DoubleSidedEnable", doubleSided ? 1f : 0f);
+			return material;
+		}
+
+		private static bool IsFoliageVariant(ModRenderCoreVariant variant)
+		{
+			return variant.name.StartsWith("MAT_FOLIAGE_", StringComparison.Ordinal);
+		}
+
+		private static ModRenderCoreVariant FoliageVariant()
+		{
+			return FirstOffered(candidate => candidate.renderType == ModRenderCoreRenderType.AlphaTest && IsFoliageVariant(candidate), "foliage");
+		}
+
+		private static ModRenderCoreVariant CutoutVariant()
+		{
+			return FirstOffered(candidate => candidate.renderType == ModRenderCoreRenderType.AlphaTest && !IsFoliageVariant(candidate),
+				"non-foliage alpha test");
 		}
 
 		private RenderCoreMaterialOverride NewOverride(string variant)

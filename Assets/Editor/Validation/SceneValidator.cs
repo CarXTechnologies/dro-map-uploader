@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Plugins.CarX.Modding.Creator.Editor;
@@ -20,6 +21,12 @@ namespace Editor.Validation
 		private const string GarbageTag = "Garbage";
 		private static readonly string MaterialMarkerHead = MarkerData.MaterialHead.ToLowerInvariant();
 
+		/// <summary>Render core variants with foliage lighting (MAT_FOLIAGE_ALPHATEST, MAT_FOLIAGE_SIMPLE_ALPHATEST).</summary>
+		private const string FoliageVariantPrefix = "MAT_FOLIAGE_";
+
+		/// <summary>How many object names a message lists before "and N more".</summary>
+		private const int ListedObjects = 3;
+
 		private const HideFlags EngineOwned =
 			HideFlags.HideInHierarchy | HideFlags.DontSaveInEditor | HideFlags.DontSaveInBuild;
 
@@ -41,6 +48,7 @@ namespace Editor.Validation
 			CheckComponents(report, transforms, rules, skipTypes);
 			CheckBudget(report, rules);
 			CheckMarkers(report, transforms);
+			CheckMaterialMarkerCoverage(report, transforms);
 			CheckLighting(report, transforms);
 			CheckGeometry(report, transforms);
 			CheckPhysics(report, transforms);
@@ -399,6 +407,24 @@ namespace Editor.Validation
 		}
 
 		/// <summary>
+		/// Binary only, a hint: a material that looks like foliage (double-sided, alpha-clipped, see <see cref="RenderCoreMaterialBaker.IsFoliage"/>)
+		/// is mapped by an applied marker entry to a non-foliage alpha-test variant. The same flags fit fences, grates and cables, and an explicit
+		/// entry is the author's decision, so this is information, not a warning.
+		/// </summary>
+		private static void CheckFoliageVariant(MapValidationReport report, GameObject markerObject, Material source, ModRenderCoreVariant variant)
+		{
+			report.AddCapped(MapValidationSeverity.Info, CategoryMarkers, "material-marker-foliage-variant",
+				$"'{markerObject.name}': material '{source.name}' is double-sided and alpha-tested (vegetation?) and is mapped to {variant.name}. " +
+				"If it is vegetation, MAT_FOLIAGE_ALPHATEST (with a normal map) or MAT_FOLIAGE_SIMPLE_ALPHATEST (without) gives it foliage lighting; " +
+				$"for a fence, grate or cable keep {variant.name}.", markerObject);
+		}
+
+		private static bool IsFoliageVariant(ModRenderCoreVariant variant)
+		{
+			return variant.name.StartsWith(FoliageVariantPrefix, StringComparison.Ordinal);
+		}
+
+		/// <summary>
 		/// Значения записи запечены для более старой ревизии варианта, чем в таблице SDK (0 — запись до появления поля — считается
 		/// ревизией 1). Экспорт пишет в документ ревизию запекания, поэтому игра с текущей таблицей возьмёт запасной материал, пока автор
 		/// не повторит Export from material. Публичный, чтобы тесты проверяли правило на варианте с ревизией выше 1.
@@ -555,6 +581,153 @@ namespace Editor.Validation
 			}
 
 			return renderers;
+		}
+
+		/// <summary>
+		/// Binary only: Material marker coverage of the exported renderers, by the exporter's rules (<see cref="MaterialMarkerCoverage"/>).
+		/// Double-sided alpha-tested vegetation without a marker entry renders as the Cutout fallback without foliage lighting, and a source
+		/// material mapped to different variants by different marker entries renders differently from object to object (for example on one LOD).
+		/// Only applied entries count: an entry with an unknown or unavailable variant is reported by <see cref="CheckMaterialMarker"/>.
+		/// </summary>
+		private static void CheckMaterialMarkerCoverage(MapValidationReport report, List<Transform> transforms)
+		{
+			if (report.format != FormatBuild.Binary)
+			{
+				return;
+			}
+
+			List<Transform> animationRoots = VertexAnimationBaker.GetAnimationRoots(transforms.Select(transform => transform.root).Distinct(), IsExcluded);
+			var foliage = new Dictionary<Material, bool>();
+			var uncovered = new Dictionary<Material, List<MeshRenderer>>();
+			var markersWithoutEntry = new Dictionary<Material, GameObject>();
+			var variantUses = new Dictionary<Material, Dictionary<string, List<GameObject>>>();
+			var foliageHints = new HashSet<(GameObject, Material)>();
+
+			foreach ((MeshRenderer renderer, GameObject markerObject, RenderCoreMaterialMarkerSettings settings) in
+				MaterialMarkerCoverage.Collect(transforms, animationRoots))
+			{
+				foreach (Material material in renderer.sharedMaterials)
+				{
+					if (material == null)
+					{
+						continue;
+					}
+
+					RenderCoreMaterialOverride materialOverride = settings != null ? settings.Find(material) : null;
+
+					if (materialOverride == null)
+					{
+						if (IsFoliage(material, foliage))
+						{
+							AddDistinct(uncovered, material, renderer);
+
+							if (settings != null)
+							{
+								markersWithoutEntry.TryAdd(material, markerObject);
+							}
+						}
+
+						continue;
+					}
+
+					if (ModRenderCoreVariants.TryGet(materialOverride.variant, out ModRenderCoreVariant variant))
+					{
+						if (!variantUses.TryGetValue(material, out Dictionary<string, List<GameObject>> uses))
+						{
+							uses = new Dictionary<string, List<GameObject>>();
+							variantUses.Add(material, uses);
+						}
+
+						AddDistinct(uses, variant.name, markerObject);
+
+						if (variant.renderType == ModRenderCoreRenderType.AlphaTest && !IsFoliageVariant(variant) && IsFoliage(material, foliage) &&
+							foliageHints.Add((markerObject, material)))
+						{
+							CheckFoliageVariant(report, markerObject, material, variant);
+						}
+					}
+				}
+			}
+
+			ReportUncoveredFoliage(report, uncovered, markersWithoutEntry);
+			ReportVariantMismatches(report, variantUses);
+		}
+
+		/// <summary>One warning per foliage material: its renderers without a marker entry, the first one as the context.</summary>
+		private static void ReportUncoveredFoliage(MapValidationReport report, Dictionary<Material, List<MeshRenderer>> uncovered,
+			Dictionary<Material, GameObject> markersWithoutEntry)
+		{
+			foreach (KeyValuePair<Material, List<MeshRenderer>> pair in uncovered)
+			{
+				string message = $"{DescribeObjects(pair.Value.Select(renderer => renderer.name).ToList())}: material '{pair.Key.name}' is " +
+					"double-sided and alpha-tested (vegetation?) without a Material marker entry: it renders as the Cutout fallback " +
+					"(MAT_ROUGHNESS_NORMAL_ALPHATEST) without foliage lighting. If it is vegetation, add a Material marker with MAT_FOLIAGE_ALPHATEST / " +
+					"MAT_FOLIAGE_SIMPLE_ALPHATEST. For a fence, grate or cable, add an entry with MAT_ROUGHNESS_NORMAL_ALPHATEST to keep the cutout and " +
+					"silence this.";
+
+				if (markersWithoutEntry.TryGetValue(pair.Key, out GameObject markerObject))
+				{
+					message += $" The Material marker on '{markerObject.name}' has no entry for this material: press 'Add renderer materials' there.";
+				}
+
+				report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-foliage-missing", message, pair.Value[0]);
+			}
+		}
+
+		/// <summary>
+		/// One warning per source material that applied marker entries map to different variants. The context is a marker of the least used
+		/// variant: usually the odd one out.
+		/// </summary>
+		private static void ReportVariantMismatches(MapValidationReport report, Dictionary<Material, Dictionary<string, List<GameObject>>> variantUses)
+		{
+			foreach (KeyValuePair<Material, Dictionary<string, List<GameObject>>> pair in variantUses)
+			{
+				if (pair.Value.Count < 2)
+				{
+					continue;
+				}
+
+				string uses = string.Join("; ", pair.Value.Select(use => $"{use.Key} on {DescribeObjects(use.Value.Select(marker => marker.name).ToList())}"));
+				GameObject context = pair.Value.OrderBy(use => use.Value.Count).First().Value[0];
+
+				report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-variant-mismatch",
+					$"Material '{pair.Key.name}' is mapped to different render core variants by Material markers: {uses}. Objects with this material " +
+					"render differently (for example, one LOD loses foliage lighting). Use one variant for this material in all marker entries.", context);
+			}
+		}
+
+		private static bool IsFoliage(Material material, Dictionary<Material, bool> cache)
+		{
+			if (!cache.TryGetValue(material, out bool foliage))
+			{
+				foliage = RenderCoreMaterialBaker.IsFoliage(material);
+				cache.Add(material, foliage);
+			}
+
+			return foliage;
+		}
+
+		private static void AddDistinct<TKey, TValue>(Dictionary<TKey, List<TValue>> lists, TKey key, TValue value)
+		{
+			if (!lists.TryGetValue(key, out List<TValue> list))
+			{
+				list = new List<TValue>();
+				lists.Add(key, list);
+			}
+
+			if (!list.Contains(value))
+			{
+				list.Add(value);
+			}
+		}
+
+		/// <summary>"'A'", "'A', 'B'" or "'A', 'B', 'C' and 4 more objects".</summary>
+		private static string DescribeObjects(List<string> names)
+		{
+			string listed = string.Join(", ", names.Take(ListedObjects).Select(name => $"'{name}'"));
+			int more = names.Count - ListedObjects;
+
+			return more > 0 ? $"{listed} and {more} more object{(more == 1 ? string.Empty : "s")}" : listed;
 		}
 
 		private static void CheckSpawnPointNames(MapValidationReport report, List<GameMarkerData> spawnPoints)
