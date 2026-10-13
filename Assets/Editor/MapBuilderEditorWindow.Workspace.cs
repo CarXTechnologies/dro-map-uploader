@@ -146,10 +146,10 @@ namespace Editor
             heading.Insert(heading.IndexOf(language), m_vendorField);
             m_unavailableBox = new VisualElement(); m_unavailableHelp = new HelpBox("", HelpBoxMessageType.Info);
             m_unavailableBox.Add(m_unavailableHelp); m_unavailableBox.style.display = DisplayStyle.None; m_publishPage.Add(m_unavailableBox);
-            // Publications on the left, what and where to send on the right (stacked in a narrow window).
+            // What and where to send on the left, publications on the right (stacked in a narrow window).
             var publishColumns = new VisualElement(); publishColumns.AddToClassList("mb-publish-columns"); m_publishPage.Add(publishColumns);
-            m_publications = BuildRightPanel(); m_publications.AddToClassList("mb-publications"); publishColumns.Add(m_publications);
             var destination = BuildDestinationSection(); destination.AddToClassList("mb-publish-main"); publishColumns.Add(destination);
+            m_publications = BuildRightPanel(); m_publications.AddToClassList("mb-publications"); publishColumns.Add(m_publications);
             var hints = new VisualElement(); hints.AddToClassList("mb-workspace-hints"); workspace.Add(hints);
             m_actionHint = new Label(); m_actionHint.AddToClassList("mb-action-hint"); hints.Add(m_actionHint);
             m_formatHint = new Label(L("Binary — компактный контейнер карты. Проверка найдёт ошибки до сборки.", "Binary is a compact map container. Validate the map to find issues before building."));
