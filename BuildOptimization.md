@@ -9,7 +9,7 @@ Open **Build → Optimization** and enable **Optimize build** for the selected m
 | Partition static colliders | Splits eligible non-convex, non-trigger MeshColliders. |
 | Partition static render meshes | Splits eligible static MeshRenderer geometry. |
 | Merge compatible meshes in each sector | Merges render geometry only with the exact same material and compatible renderer settings. Collider groups preserve layer, physics material, cooking options and Road surface marker. Similar material names are insufficient. |
-| Simplify colliders | Collision simplification, controlled by triangle ratio (default 0.5) and error tolerance in metres (default 0.01). Enabled by default. |
+| Simplify colliders | Collision simplification, controlled by triangle ratio (default 0.5) and error tolerance in metres (default 0.01). Disabled by default: a simplified collision mesh drifts from the visible geometry. Existing map configs keep their saved value. |
 | Generate sector LODs | Render LOD generation through meshoptimizer. Enabled by default: 2 additional levels, triangle ratio 0.5 per level, error tolerance 0.05 m (multiplied by the level). Set 1–3 additional levels. |
 
 LOD generation requires **Partition static render meshes**. Sector boundary vertices remain locked during simplification. A level may retain more triangles than its target ratio, or be omitted when it cannot be reduced within the constraints. The last LOD stays visible at distance. Render LODs do not create additional physical colliders.
