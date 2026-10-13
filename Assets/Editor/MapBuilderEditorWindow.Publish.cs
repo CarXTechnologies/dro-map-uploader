@@ -401,16 +401,13 @@ namespace Editor
 			if (!m_buildProcess || m_operationProgress == null) return;
 
 			var elapsed = m_operationTimer.Elapsed;
-			string title;
 			string status;
 
 			if (m_publishProgress is { } progress)
 			{
 				// Checked before cancellation: once the vendor reports it is sending, a Cancel pressed earlier no longer
 				// stops anything, so the live progress stays on screen instead of "Cancelling…" for the rest of it.
-				var vendor = PublishVendorName;
-				title = UploadProgressText.StageTitle(progress.Stage, vendor, English);
-				status = UploadProgressText.Format(progress, elapsed, vendor, English);
+				status = UploadProgressText.Format(progress, elapsed, PublishVendorName, English);
 
 				// Overall progress is meant to never go back; holding the bar still costs less than trusting that.
 				m_operationProgress.value = Mathf.Max(m_operationProgress.value, UploadProgressText.BarValue(progress));
@@ -418,17 +415,17 @@ namespace Editor
 			else if (m_operationCts != null && m_operationCts.IsCancellationRequested)
 			{
 				// Otherwise the next tick would paint the step text back over "Cancelling…".
-				title = LocalizeOperation("Cancelling…");
-				status = UploadProgressText.WithElapsed(title, elapsed);
+				status = UploadProgressText.WithElapsed(LocalizeOperation("Cancelling…"), elapsed);
 			}
 			else
 			{
-				title = m_publishStepText ?? string.Empty;
 				status = UploadProgressText.WithElapsed(m_publishStepText, elapsed);
 			}
 
-			m_operationProgress.title = title;
-			SetPublishStatus(status);
+			// The whole state goes into the bar; no status line repeats it next to the bar or in the publish panel.
+			m_operationProgress.title = status;
+			SetPublishStatus(string.Empty);
+			if (m_buildStatus != null) m_buildStatus.style.display = DisplayStyle.None;
 		}
 	}
 }

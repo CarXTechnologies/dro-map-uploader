@@ -92,6 +92,8 @@ namespace Editor
 		private Button m_validateButton;
 		private Button m_cancelButton;
 		private Label m_buildStatus;
+		// Step of the running build shown in the footer bar title; null between operations.
+		private string m_operationStep;
 		private CancellationTokenSource m_operationCts;
 		private DropdownField m_sceneField;
 		private string[] m_sceneNames = Array.Empty<string>();
@@ -1008,7 +1010,7 @@ namespace Editor
 					new ImmediateProgress<string>(SetBuildStatus),
 					m_operationCts.Token,
 					(path, success) => AddBuild(config, buildData, path, success),
-                    fraction => { m_operationProgress.value = fraction * 100; m_operationProgress.title = $"{fraction * 100:F0}%"; });
+                    fraction => { m_operationProgress.value = fraction * 100; RenderOperationBarTitle(); });
 			}
 			finally
 			{
@@ -1061,9 +1063,12 @@ namespace Editor
 			m_operationCts?.Dispose();
 			m_operationCts = new CancellationTokenSource();
 			m_operationTimer.Restart();
+			m_operationStep = null;
             m_operationProgress.value = 0;
             m_operationProgress.title = "0%";
             m_operationProgress.style.display = DisplayStyle.Flex;
+			// The bar carries the state from here on; the summary of the previous operation must not sit beside it.
+			if (m_buildStatus != null) m_buildStatus.style.display = DisplayStyle.None;
 		}
 
 		private void EndOperation()
@@ -1073,6 +1078,7 @@ namespace Editor
 			m_operationCts = null;
 
 			m_buildProcess = false;
+			m_operationStep = null;
             if (m_operationProgress != null)
             {
                 m_operationProgress.value = 0;
@@ -1085,10 +1091,36 @@ namespace Editor
 			RefreshDetailsPanel();
 		}
 
+		private bool IsOperationBarShown => m_operationProgress != null && m_operationProgress.style.display == DisplayStyle.Flex;
+
+		/// <summary>
+		/// The footer bar title of a build: its current step and percent. Publish operations draw their own title
+		/// (RenderPublishProgress) on every report and tick, so they are left alone here.
+		/// </summary>
+		private void RenderOperationBarTitle()
+		{
+			if (!IsOperationBarShown || m_publishTicker != null) return;
+			var percent = $"{m_operationProgress.value:F0}%";
+			m_operationProgress.title = string.IsNullOrEmpty(m_operationStep) ? percent : $"{m_operationStep} {percent}";
+		}
+
 		private void SetBuildStatus(string message)
 		{
 			if (m_buildStatus == null)
 			{
+				return;
+			}
+
+			// While the footer bar is up it carries the state of the operation; the label beside it would only repeat it.
+			if (IsOperationBarShown)
+			{
+				if (!string.IsNullOrEmpty(message))
+				{
+					m_operationStep = LocalizeOperation(message);
+					RenderOperationBarTitle();
+				}
+
+				m_buildStatus.style.display = DisplayStyle.None;
 				return;
 			}
 

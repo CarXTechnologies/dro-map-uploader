@@ -364,7 +364,8 @@ namespace Editor
 
         private void UpdateWorkspaceReadiness(bool ready)
         {
-            m_actionHint.text = ready ? L("Сборка готова к отправке.", "Build ready to upload.") : L("Для экспорта сначала соберите карту и её данные во вкладке «Сборка».", "Before exporting, build the map and its metadata in the Build tab.");
+            // A ready build needs no words: the hint only says what is still missing.
+            m_actionHint.text = ready ? string.Empty : L("Для экспорта сначала соберите карту и её данные во вкладке «Сборка».", "Before exporting, build the map and its metadata in the Build tab.");
             if (ready && m_publishDestination == PublishDestination.ExternalFolder && string.IsNullOrWhiteSpace(m_pathToExternal))
                 m_actionHint.text = L("Выберите папку для экспорта.", "Choose an export folder.");
             m_newItemButton.SetEnabled(ready && !m_buildProcess && MapBuilder.session.IsReady && MapBuilder.session.IsAuthenticated);
