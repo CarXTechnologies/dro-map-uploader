@@ -585,8 +585,8 @@ namespace Editor.Validation
 
 		/// <summary>
 		/// Binary only: Material marker coverage of the exported renderers, by the exporter's rules (<see cref="MaterialMarkerCoverage"/>).
-		/// Double-sided alpha-tested vegetation without a marker entry renders as the Cutout fallback without foliage lighting, and a source
-		/// material mapped to different variants by different marker entries renders differently from object to object (for example on one LOD).
+		/// A source material mapped to different variants by different marker entries renders differently from object to object (for example
+		/// on one LOD).
 		/// Only applied entries count: an entry with an unknown or unavailable variant is reported by <see cref="CheckMaterialMarker"/>.
 		/// </summary>
 		private static void CheckMaterialMarkerCoverage(MapValidationReport report, List<Transform> transforms)
@@ -598,8 +598,6 @@ namespace Editor.Validation
 
 			List<Transform> animationRoots = VertexAnimationBaker.GetAnimationRoots(transforms.Select(transform => transform.root).Distinct(), IsExcluded);
 			var foliage = new Dictionary<Material, bool>();
-			var uncovered = new Dictionary<Material, List<MeshRenderer>>();
-			var markersWithoutEntry = new Dictionary<Material, GameObject>();
 			var variantUses = new Dictionary<Material, Dictionary<string, List<GameObject>>>();
 			var foliageHints = new HashSet<(GameObject, Material)>();
 
@@ -617,16 +615,6 @@ namespace Editor.Validation
 
 					if (materialOverride == null)
 					{
-						if (IsFoliage(material, foliage))
-						{
-							AddDistinct(uncovered, material, renderer);
-
-							if (settings != null)
-							{
-								markersWithoutEntry.TryAdd(material, markerObject);
-							}
-						}
-
 						continue;
 					}
 
@@ -649,29 +637,7 @@ namespace Editor.Validation
 				}
 			}
 
-			ReportUncoveredFoliage(report, uncovered, markersWithoutEntry);
 			ReportVariantMismatches(report, variantUses);
-		}
-
-		/// <summary>One warning per foliage material: its renderers without a marker entry, the first one as the context.</summary>
-		private static void ReportUncoveredFoliage(MapValidationReport report, Dictionary<Material, List<MeshRenderer>> uncovered,
-			Dictionary<Material, GameObject> markersWithoutEntry)
-		{
-			foreach (KeyValuePair<Material, List<MeshRenderer>> pair in uncovered)
-			{
-				string message = $"{DescribeObjects(pair.Value.Select(renderer => renderer.name).ToList())}: material '{pair.Key.name}' is " +
-					"double-sided and alpha-tested (vegetation?) without a Material marker entry: it renders as the Cutout fallback " +
-					"(MAT_ROUGHNESS_NORMAL_ALPHATEST) without foliage lighting. If it is vegetation, add a Material marker with MAT_FOLIAGE_ALPHATEST / " +
-					"MAT_FOLIAGE_SIMPLE_ALPHATEST. For a fence, grate or cable, add an entry with MAT_ROUGHNESS_NORMAL_ALPHATEST to keep the cutout and " +
-					"silence this.";
-
-				if (markersWithoutEntry.TryGetValue(pair.Key, out GameObject markerObject))
-				{
-					message += $" The Material marker on '{markerObject.name}' has no entry for this material: press 'Add renderer materials' there.";
-				}
-
-				report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "material-marker-foliage-missing", message, pair.Value[0]);
-			}
 		}
 
 		/// <summary>

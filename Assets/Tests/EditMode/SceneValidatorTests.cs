@@ -585,42 +585,20 @@ namespace MapUploader.Tests
 			Assert.AreEqual(variant.revision, entry.revision);
 		}
 
-		private const string FoliageWithoutMarker = "is double-sided and alpha-tested (vegetation?) without a Material marker entry";
 		private const string FoliageLighting = "gives it foliage lighting";
 		private const string VariantMismatch = "is mapped to different render core variants";
 
-		// Only double-sided alpha-clipped materials are vegetation, and the marker (and so the warning) exists only in Binary builds.
-		[TestCase(FormatBuild.Binary, true, true, true)]
-		[TestCase(FormatBuild.Wavefront, true, true, false)]
-		[TestCase(FormatBuild.Binary, true, false, false)]
-		[TestCase(FormatBuild.Binary, false, true, false)]
-		public void WarnsAboutFoliageWithoutAMaterialMarker(FormatBuild format, bool alphaClipping, bool doubleSided, bool expectsWarning)
-		{
-			Material leaves = NewFoliageMaterial("Leaves", alphaClipping, doubleSided);
-			GameObject root = NewObject("Track");
-			NewRenderer("Bush", root, leaves);
-
-			MapValidationReport report = Validate(format, root);
-
-			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Warning, $"'Bush': material 'Leaves' {FoliageWithoutMarker}"));
-			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Warning, "MAT_FOLIAGE_ALPHATEST / MAT_FOLIAGE_SIMPLE_ALPHATEST"));
-		}
-
+		// Растительность без записи в маркере Material не проверяется: такая листва рисуется обычным Cutout, и это решение автора карты.
 		[Test]
-		public void ReportsAFoliageMaterialOnceForAllItsObjects()
+		public void DoesNotWarnAboutFoliageWithoutAMaterialMarker()
 		{
 			Material leaves = NewFoliageMaterial("Leaves");
 			GameObject root = NewObject("Track");
-
-			for (int i = 0; i < 5; i++)
-			{
-				NewRenderer("Bush" + i, root, leaves);
-			}
+			NewRenderer("Bush", root, leaves);
 
 			MapValidationReport report = Validate(FormatBuild.Binary, root);
 
-			Assert.AreEqual(1, report.Issues.Count(issue => issue.message.Contains(FoliageWithoutMarker)));
-			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Warning, $"'Bush0', 'Bush1', 'Bush2' and 2 more objects: material 'Leaves' {FoliageWithoutMarker}"));
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, "Leaves"));
 		}
 
 		[Test]
@@ -632,73 +610,10 @@ namespace MapUploader.Tests
 
 			MapValidationReport report = Validate(FormatBuild.Binary, root);
 
-			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, FoliageWithoutMarker));
 			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, FoliageLighting));
 		}
 
-		// The marker on the LODGroup object applies to every LOD renderer without a marker of its own.
-		[Test]
-		public void AcceptsFoliageLodsCoveredByTheLodGroupMarker()
-		{
-			Material leaves = NewFoliageMaterial("Leaves");
-			GameObject root = NewObject("Track");
-			GameObject fir = NewLodGroup("Fir", root, NewRenderer("Fir_LOD0", root, leaves), NewRenderer("Fir_LOD1", root, leaves));
-			AddMaterialMarker(fir, Entry(leaves, FoliageVariant()));
-
-			MapValidationReport report = Validate(FormatBuild.Binary, root);
-
-			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, FoliageWithoutMarker));
-		}
-
-		// As in the export, a LOD with its own marker takes only that marker, even when it has no entry for the material.
-		[Test]
-		public void WarnsAboutAFoliageLodWhoseOwnMarkerHasNoEntry()
-		{
-			Material leaves = NewFoliageMaterial("Leaves");
-			Material bark = NewHdrpMaterial("Bark", Color.black);
-			GameObject root = NewObject("Track");
-			MeshRenderer lod1 = NewRenderer("Fir_LOD1", root, leaves, bark);
-			GameObject fir = NewLodGroup("Fir", root, NewRenderer("Fir_LOD0", root, leaves), lod1);
-			AddMaterialMarker(fir, Entry(leaves, FoliageVariant()));
-			AddMaterialMarker(lod1.gameObject, Entry(bark, FirstOffered(candidate => candidate.renderType == ModRenderCoreRenderType.Opaque, "opaque")));
-
-			MapValidationReport report = Validate(FormatBuild.Binary, root);
-
-			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Warning, $"'Fir_LOD1': material 'Leaves' {FoliageWithoutMarker}"));
-			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Warning, "The Material marker on 'Fir_LOD1' has no entry for this material"));
-		}
-
-		// Baked vertex animation keeps the original materials and ignores Material markers.
-		[Test]
-		public void SkipsFoliageInsideABakedAnimation()
-		{
-			Material leaves = NewFoliageMaterial("Leaves");
-			GameObject root = NewObject("Track");
-			GameObject windmill = NewMarker("Windmill", "Animation", root).gameObject;
-			windmill.AddComponent<Animator>();
-			NewRenderer("Vines", windmill, leaves);
-
-			MapValidationReport report = Validate(FormatBuild.Binary, root);
-
-			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, FoliageWithoutMarker));
-		}
-
-		// The export keeps inactive objects (the game shows them) except inactive parts of a Rigidbody.
-		[TestCase(false, true)]
-		[TestCase(true, false)]
-		public void ChecksInactiveFoliageTheExportKeeps(bool underRigidbody, bool expectsWarning)
-		{
-			Material leaves = NewFoliageMaterial("Leaves");
-			GameObject root = NewObject("Track");
-			GameObject parent = underRigidbody ? NewObject("Crate", root, typeof(Rigidbody)) : root;
-			NewRenderer("Bush", parent, leaves).gameObject.SetActive(false);
-
-			MapValidationReport report = Validate(FormatBuild.Binary, root);
-
-			Assert.AreEqual(expectsWarning, HasIssue(report, MapValidationSeverity.Warning, $"'Bush': material 'Leaves' {FoliageWithoutMarker}"));
-		}
-
-		// An entry with an unknown variant is already an error; the foliage warning would only repeat it.
+		// An entry with an unknown variant is already an error; the foliage hint would only repeat it.
 		[Test]
 		public void LeavesAFoliageEntryWithAnUnknownVariantToTheVariantError()
 		{
@@ -709,7 +624,7 @@ namespace MapUploader.Tests
 			MapValidationReport report = Validate(FormatBuild.Binary, root);
 
 			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Error, "has no supported render core variant ('MAT_NO_SUCH_VARIANT')"));
-			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, FoliageWithoutMarker));
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, FoliageLighting));
 		}
 
 		// TestMap fir: the LODGroup maps the leaves to a foliage variant, while LOD3 has its own marker with a cutout variant.
