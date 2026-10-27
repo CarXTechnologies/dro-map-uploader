@@ -11,9 +11,6 @@ This guide is in English only.
 ```text
 README.md                 English landing page
 README.ru.md              Russian landing page
-PUBLISHING.md             redirect stub → docs/en|ru/advanced/publishing-vendors.md
-Wavefront.md              redirect stub → docs/en|ru/advanced/mod-format.md
-BuildOptimization.md      redirect stub → docs/en|ru/build.md#optimization
 docs/
   CONTRIBUTING.md         this guide
   en/                     English pages
@@ -52,7 +49,7 @@ To add a page:
 
 Result: the link check in [Check the Markdown](#lint) reports no missing pages.
 
-Never move or rename a published page without leaving a redirect stub at the old path. A stub keeps the old title as its heading and has one line in each language that links to the new page, like `PUBLISHING.md`, `Wavefront.md` and `BuildOptimization.md`. Keep the stubs, so that links from outside the repository keep working.
+When you move or rename a page, update every link to it in the same pull request, in both languages, and delete the old file. Don't leave redirect stubs.
 
 ## Principles
 
@@ -535,7 +532,7 @@ Re-capture in every pull request that changes what a shot shows:
 <a name="lint"></a>
 ## Check the Markdown
 
-CI doesn't check the docs yet, apart from requiring that `README.md` names the Unity version from `ProjectSettings/ProjectVersion.txt`. Before you open a pull request, run these checks in Git Bash in the repository folder. They cover `README.md`, `README.ru.md`, `docs/en/` and `docs/ru/`; the link check also covers the redirect stubs and this guide. They print nothing, or `0 problem(s)`, when everything passes.
+CI doesn't check the docs yet, apart from requiring that `README.md` names the Unity version from `ProjectSettings/ProjectVersion.txt`. Before you open a pull request, run these checks in Git Bash in the repository folder. They cover `README.md`, `README.ru.md`, `docs/en/` and `docs/ru/`; the link check also covers this guide. They print nothing, or `0 problem(s)`, when everything passes.
 
 ### Links and anchors
 
@@ -544,7 +541,7 @@ This script checks that every relative link and image points to an existing file
 ```bash
 python - <<'EOF'
 import pathlib, re
-files = [pathlib.Path(p) for p in ('README.md', 'README.ru.md', 'PUBLISHING.md', 'Wavefront.md', 'BuildOptimization.md', 'docs/CONTRIBUTING.md')]
+files = [pathlib.Path(p) for p in ('README.md', 'README.ru.md', 'docs/CONTRIBUTING.md')]
 files += sorted(pathlib.Path('docs').glob('[er][nu]/**/*.md'))
 def anchors(path):
     text = path.read_text(encoding='utf-8')
@@ -688,5 +685,5 @@ Copy this list into the description of every pull request that changes the docs,
 - [ ] `<!-- verify-menu -->` lines are checked against `unity-menus.txt`, or still marked
 - [ ] The checks in "Check the Markdown" pass
 - [ ] The diff has no files from `Assets/Editor/DocsCapture/` and no re-serialized `TestMapConfig.asset`, `MapManagerConfig.asset` or `EditorBuildSettings.asset`
-- [ ] A moved or renamed page leaves a redirect stub at its old path
+- [ ] Every link to a moved or renamed page points to its new path, and the old file is deleted
 ```
