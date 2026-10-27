@@ -278,10 +278,11 @@ TestMap
 │                      advertising_stand_small_6 и advertising_stand_small_7
 ├─ ReflectionProbe     только для предпросмотра (не экспортируется)
 ├─ Minimap             единственный компонент Minimap карты
-└─ Screen              тег Garbage: камеры съёмки PreviewScreen и MinimapScreen
+├─ Screen              тег Garbage: камеры съёмки PreviewScreen и MinimapScreen
+└─ AmbientSounds       8 экземпляров префаба 'Ambient' с неподдерживаемым маркером
 ```
 
-Если нажать **Проверить карту** на TestMap, ошибок и предупреждений не будет, только заметки: одна на `sunlight` для предпросмотра и по одной на Volume, ReflectionProbe и HDAdditionalReflectionData, которые нужны только для предпросмотра. См. [Проверка карты](validation.md).
+Если нажать **Проверить карту** на TestMap, ошибок не будет. Будут предупреждения о 8 маркерах `Ambient` и о 12 LODGroup без рендереров, а также заметки о `sunlight` для предпросмотра и о Volume, ReflectionProbe и HDAdditionalReflectionData, которые нужны только для предпросмотра. См. [Проверка карты](validation.md).
 
 ## Дальнейшие шаги
 

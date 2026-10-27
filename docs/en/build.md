@@ -199,7 +199,7 @@ The panel lists each supported component type in the scene, one line per type, w
 For example, after a build of the `TestMap` sample, the panel lists the following. SphereCollider is missing from the list because the sample has none.
 
 ```
-Transform : 852 count (1 min - 20000 max)
+Transform : 861 count (1 min - 20000 max)
 MeshCollider : 104 count (0 min - 10000 max)
 BoxCollider : 46 count (0 min - 10000 max)
 CapsuleCollider : 16 count (0 min - 1000 max)
@@ -208,8 +208,8 @@ MeshRenderer : 537 count (0 min - 10000 max)
 MeshFilter : 537 count (0 min - 10000 max)
 Light : 5 count (0 min - 500 max)
 HDAdditionalLightData : 5 count (0 min - 500 max)
-LODGroup : 151 count (0 min - 10000 max)
-GameMarkerData : 163 count (1 min - 10000 max)
+LODGroup : 163 count (0 min - 10000 max)
+GameMarkerData : 171 count (1 min - 10000 max)
 Minimap : 1 count (1 min - 1 max)
 ```
 

@@ -278,10 +278,11 @@ TestMap
 │                      advertising_stand_small_6 and advertising_stand_small_7
 ├─ ReflectionProbe     preview only (not exported)
 ├─ Minimap             the map's one Minimap component
-└─ Screen              tagged Garbage: capture cameras PreviewScreen and MinimapScreen
+├─ Screen              tagged Garbage: capture cameras PreviewScreen and MinimapScreen
+└─ AmbientSounds       8 'Ambient' prefab instances with an unsupported marker
 ```
 
-**Validate map** on TestMap shows no errors or warnings, only notes: one for the preview `sunlight` and one each for the preview-only Volume, ReflectionProbe and HDAdditionalReflectionData. See [Fix validation problems](validation.md).
+**Validate map** on TestMap shows no errors. It shows warnings for the 8 `Ambient` markers and for 12 LODGroups with no renderers, and notes for the preview `sunlight` and for the preview-only Volume, ReflectionProbe and HDAdditionalReflectionData. See [Fix validation problems](validation.md).
 
 ## Next steps
 

@@ -341,7 +341,7 @@ Result: the warning for that object disappears from the next validation.
 
 If the object should be another marker, select a supported type in the type menu instead. Moving physics objects need no marker: give them a Rigidbody, as described in Add dynamic objects on the Set up the scene page.
 
-The TestMap sample has no unsupported markers. `Assets/ExamplePrefab/Ambient.prefab` still has an `Ambient` marker, so each instance of it in a scene gives this warning.
+The TestMap sample still has 8 `Ambient` markers under `AmbientSounds`, so validating TestMap shows 8 such warnings. `Assets/ExamplePrefab/Ambient.prefab` has the same marker, so each instance of it in a scene gives this warning too.
 
 ## Next steps
 

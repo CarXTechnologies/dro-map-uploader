@@ -55,7 +55,7 @@ After a build, the **Map Validation** window opens only when the report has at l
 
 The **Map Validation** window lists every issue from one run, grouped by category. Its first line names the map, the scene and the format as `<map name>  -  <scene>  (<format>)`. The window and its messages are in English in both interface languages. <!-- src: Assets/Editor/Validation/MapValidationWindow.cs:63 -->
 
-The following screenshot shows the window for the TestMap sample with one added Road marker object, `DemoRoadWithoutCollider`, that has no collider. The other issues come from TestMap itself and are notes, which don't stop a build: one for the preview sun and one for each preview-only component.
+The following screenshot shows the window for the TestMap sample with one added Road marker object, `DemoRoadWithoutCollider`, that has no collider. The other issues come from TestMap itself and don't stop a build: warnings for its 8 unsupported `Ambient` markers and, in the collapsed **Geometry** category, for 12 LODGroups with no renderers, and notes for the preview sun and each preview-only component.
 
 <img src="../images/shared/validation-window.png" width="900" alt="Screenshot of the Map Validation window with a Markers error; markers 1–5 on the headline, filters, toolbar, category and Select.">
 
