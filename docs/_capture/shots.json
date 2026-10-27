@@ -1,0 +1,1487 @@
+{
+  "comment": "Capture spec for docs/images. DocsCapture.cs produces <raw>/<en|ru|shared>/<id>.png+.json; annotate.py crops and numbers them. folder 'lang' = one image per language in docs/images/en|ru, 'shared' = docs/images/shared. width = displayed width in the Markdown <img width>. Anchors match the layout JSON: type, class, name, binding, text (string or {en,ru}), textStarts, index; or px [x,y,w,h] in raw pixels. place: left (default), right, top-right, top-left, above, above-left, below, below-left, center; dx/dy in displayed pixels.",
+  "shots": [
+    {
+      "id": "window-overview",
+      "folder": "lang",
+      "width": 1000,
+      "crop": "content",
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "type": "Button",
+            "text": {
+              "en": "Sign out",
+              "ru": "Выйти"
+            }
+          },
+          "place": "right"
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "type": "DropdownField",
+            "class": "mb-field"
+          },
+          "place": "left"
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "type": "DropdownField",
+            "text": "",
+            "index": 0
+          },
+          "place": "below"
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "class": "mb-library-add"
+          },
+          "place": "top-right"
+        },
+        {
+          "n": 5,
+          "anchor": {
+            "class": "mb-map-row-info"
+          },
+          "place": "top-right"
+        },
+        {
+          "n": 6,
+          "anchor": {
+            "type": "Button",
+            "text": {
+              "en": "Publish",
+              "ru": "Публикация"
+            }
+          },
+          "place": "right"
+        },
+        {
+          "n": 7,
+          "anchor": {
+            "class": "mb-publish-status"
+          },
+          "place": "above-left",
+          "dx": 0
+        }
+      ]
+    },
+    {
+      "id": "map-settings",
+      "folder": "lang",
+      "width": 720,
+      "crop": {
+        "left": {
+          "anchor": {
+            "class": "mb-workspace"
+          },
+          "edge": "left",
+          "pad": -10
+        },
+        "top": {
+          "anchor": {
+            "type": "TextField",
+            "binding": "mapMetaConfigValue.mapName"
+          },
+          "edge": "top",
+          "pad": -14
+        },
+        "right": {
+          "anchor": {
+            "type": "TextField",
+            "binding": "mapMetaConfigValue.summary"
+          },
+          "edge": "right",
+          "pad": 16
+        },
+        "bottom": {
+          "anchor": {
+            "type": "TextField",
+            "binding": "mapMetaConfigValue.url"
+          },
+          "edge": "bottom",
+          "pad": 12
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "type": "TextField",
+            "binding": "mapMetaConfigValue.mapName"
+          },
+          "place": "top-left",
+          "dx": 52,
+          "dy": 2
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "type": "TextField",
+            "binding": "mapMetaConfigValue.mapVersion"
+          },
+          "place": "top-left",
+          "dx": 56,
+          "dy": 2
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "type": "TextField",
+            "binding": "mapMetaConfigValue.summary"
+          },
+          "place": "top-left",
+          "dx": {
+            "en": 132,
+            "ru": 214
+          },
+          "dy": 2
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "type": "TextField",
+            "binding": "mapMetaConfigValue.mapDescription"
+          },
+          "place": "top-left",
+          "dx": {
+            "en": 86,
+            "ru": 78
+          },
+          "dy": 2
+        },
+        {
+          "n": 5,
+          "anchor": {
+            "type": "Label",
+            "text": {
+              "en": "Preview · 16:9",
+              "ru": "Превью · 16:9"
+            }
+          },
+          "place": "top-left",
+          "dx": {
+            "en": 100,
+            "ru": 100
+          },
+          "dy": 2
+        },
+        {
+          "n": 6,
+          "anchor": {
+            "type": "Label",
+            "text": {
+              "en": "Icon · 16:9",
+              "ru": "Иконка · 16:9"
+            }
+          },
+          "place": "top-left",
+          "dx": {
+            "en": 80,
+            "ru": 100
+          },
+          "dy": 2
+        },
+        {
+          "n": 7,
+          "anchor": {
+            "type": "Foldout",
+            "binding": "mapMetaConfigValue.authors"
+          },
+          "place": "top-left",
+          "dx": {
+            "en": 80,
+            "ru": 80
+          },
+          "dy": 2
+        },
+        {
+          "n": 8,
+          "anchor": {
+            "type": "TextField",
+            "binding": "mapMetaConfigValue.url"
+          },
+          "place": "top-left",
+          "dx": {
+            "en": 40,
+            "ru": 64
+          },
+          "dy": 2
+        }
+      ]
+    },
+    {
+      "id": "build-tab",
+      "folder": "lang",
+      "width": 728,
+      "crop": {
+        "left": {
+          "anchor": {
+            "class": "mb-pages"
+          },
+          "edge": "left",
+          "pad": -10
+        },
+        "top": {
+          "anchor": {
+            "class": "mb-pages"
+          },
+          "edge": "top",
+          "pad": -6
+        },
+        "right": {
+          "anchor": {
+            "type": "Button",
+            "text": {
+              "en": "Scene contents",
+              "ru": "Состав сцены"
+            }
+          },
+          "edge": "right",
+          "pad": 24
+        },
+        "bottom": {
+          "anchor": {
+            "type": "Button",
+            "text": {
+              "en": "Open build folder",
+              "ru": "Открыть папку сборки"
+            }
+          },
+          "edge": "bottom",
+          "pad": 12
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "class": "mb-build-detail-buttons"
+          },
+          "place": "left"
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "type": "DropdownField",
+            "class": "mb-field",
+            "text": {
+              "en": "Scene",
+              "ru": "Сцена"
+            }
+          },
+          "place": "top-left",
+          "dx": {
+            "en": 62,
+            "ru": 62
+          },
+          "dy": 4
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "type": "EnumField",
+            "text": {
+              "en": "Format",
+              "ru": "Формат"
+            }
+          },
+          "place": "top-left",
+          "dx": {
+            "en": 66,
+            "ru": 70
+          },
+          "dy": 4
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "type": "Button",
+            "text": {
+              "en": "Validate map",
+              "ru": "Проверить карту"
+            }
+          },
+          "place": "top-left"
+        },
+        {
+          "n": 5,
+          "anchor": {
+            "type": "Button",
+            "text": {
+              "en": "Build map",
+              "ru": "Собрать карту"
+            }
+          },
+          "place": "right"
+        },
+        {
+          "n": 6,
+          "anchor": {
+            "class": "mb-build-summary"
+          },
+          "place": "above-left",
+          "dx": 0
+        },
+        {
+          "n": 7,
+          "anchor": {
+            "type": "Button",
+            "text": {
+              "en": "Open build folder",
+              "ru": "Открыть папку сборки"
+            }
+          },
+          "place": "right"
+        }
+      ]
+    },
+    {
+      "id": "build-optimization",
+      "folder": "lang",
+      "width": 700,
+      "crop": {
+        "left": {
+          "anchor": {
+            "class": "mb-pages"
+          },
+          "edge": "left",
+          "pad": -10
+        },
+        "top": {
+          "anchor": {
+            "class": "mb-pages"
+          },
+          "edge": "top",
+          "pad": -6
+        },
+        "right": {
+          "anchor": {
+            "type": "Button",
+            "text": {
+              "en": "Scene contents",
+              "ru": "Состав сцены"
+            }
+          },
+          "edge": "right",
+          "pad": 24
+        },
+        "bottom": {
+          "anchor": {
+            "type": "Button",
+            "textStarts": {
+              "en": "Mesh Optimizer",
+              "ru": "Документация Mesh"
+            }
+          },
+          "edge": "bottom",
+          "pad": 10
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "type": "Toggle",
+            "binding": "optimization.enabled"
+          },
+          "place": "left"
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "type": "FloatField",
+            "binding": "optimization.sectorSize"
+          },
+          "place": "left"
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "type": "Toggle",
+            "binding": "optimization.sectorColliders"
+          },
+          "place": "left"
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "type": "Toggle",
+            "binding": "optimization.simplifyColliders"
+          },
+          "place": "left"
+        },
+        {
+          "n": 5,
+          "anchor": {
+            "type": "Toggle",
+            "binding": "optimization.generateSectorLods"
+          },
+          "place": "left"
+        },
+        {
+          "n": 6,
+          "anchor": {
+            "type": "Button",
+            "textStarts": {
+              "en": "Mesh Optimizer",
+              "ru": "Документация Mesh"
+            }
+          },
+          "place": "left"
+        }
+      ]
+    },
+    {
+      "id": "export-folder",
+      "folder": "lang",
+      "width": 680,
+      "crop": {
+        "left": {
+          "anchor": {
+            "class": "mb-pages"
+          },
+          "edge": "left",
+          "pad": -10
+        },
+        "top": {
+          "anchor": {
+            "class": "mb-pages"
+          },
+          "edge": "top",
+          "pad": -6
+        },
+        "right": {
+          "anchor": {
+            "type": "Label",
+            "class": "mb-section-header",
+            "text": {
+              "en": "Upload settings",
+              "ru": "Параметры отправки"
+            }
+          },
+          "edge": "right",
+          "pad": 20
+        },
+        "bottom": {
+          "anchor": {
+            "type": "Button",
+            "class": "mb-publish-button"
+          },
+          "edge": "bottom",
+          "pad": 12
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "type": "Label",
+            "text": {
+              "en": "Export to folder",
+              "ru": "Экспорт в папку"
+            }
+          },
+          "place": "right"
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "class": "mb-external-path-field"
+          },
+          "place": "top-left",
+          "dx": {
+            "en": 56,
+            "ru": 50
+          },
+          "dy": 4
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "class": "mb-icon-button"
+          },
+          "place": "right"
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "type": "Button",
+            "class": "mb-publish-button"
+          },
+          "place": "right"
+        }
+      ]
+    },
+    {
+      "id": "publish-modio",
+      "folder": "lang",
+      "width": 892,
+      "crop": {
+        "left": {
+          "anchor": {
+            "class": "mb-pages"
+          },
+          "edge": "left",
+          "pad": -10
+        },
+        "top": {
+          "anchor": {
+            "class": "mb-pages"
+          },
+          "edge": "top",
+          "pad": -6
+        },
+        "right": {
+          "anchor": {
+            "class": "mb-pages"
+          },
+          "edge": "right",
+          "pad": 0
+        },
+        "bottom": {
+          "anchor": {
+            "type": "Button",
+            "class": "mb-publish-button"
+          },
+          "edge": "bottom",
+          "pad": 20
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "type": "Label",
+            "text": {
+              "en": "Platform",
+              "ru": "Площадка"
+            },
+            "index": 1
+          },
+          "place": "right"
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "type": "TextField",
+            "class": "mb-field",
+            "textStarts": {
+              "en": "Changelog",
+              "ru": "Что изменилось"
+            }
+          },
+          "place": "top-right"
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "type": "Label",
+            "text": {
+              "en": "Update title",
+              "ru": "Обновить название"
+            }
+          },
+          "place": "right",
+          "dx": 30
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "type": "Button",
+            "class": "mb-publish-button"
+          },
+          "place": "right"
+        },
+        {
+          "n": 5,
+          "anchor": {
+            "class": "mb-item-row-selected"
+          },
+          "place": "top-right"
+        },
+        {
+          "n": 6,
+          "anchor": {
+            "type": "Button",
+            "text": {
+              "en": "Refresh list",
+              "ru": "Обновить список"
+            }
+          },
+          "place": "left"
+        },
+        {
+          "n": 7,
+          "anchor": {
+            "class": "mb-new-item-button"
+          },
+          "place": "below-left"
+        },
+        {
+          "n": 8,
+          "anchor": {
+            "type": "Button",
+            "text": {
+              "en": "Delete publication…",
+              "ru": "Удалить публикацию…"
+            }
+          },
+          "place": "below"
+        }
+      ]
+    },
+    {
+      "id": "validation-window",
+      "folder": "shared",
+      "width": 900,
+      "crop": {
+        "left": 0,
+        "top": {
+          "anchor": {
+            "px": [
+              0,
+              46,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        },
+        "right": {
+          "anchor": {
+            "px": [
+              1575,
+              0,
+              0,
+              0
+            ]
+          },
+          "edge": "left",
+          "pad": 0
+        },
+        "bottom": {
+          "anchor": {
+            "px": [
+              0,
+              525,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "px": [
+              644,
+              110,
+              0,
+              30
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "px": [
+              681,
+              165,
+              0,
+              28
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "px": [
+              1243,
+              162,
+              330,
+              34
+            ]
+          },
+          "place": "left"
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "px": [
+              35,
+              425,
+              120,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 5,
+          "anchor": {
+            "px": [
+              1461,
+              457,
+              108,
+              30
+            ]
+          },
+          "place": "left"
+        }
+      ]
+    },
+    {
+      "id": "scene-hdrp-lit-material",
+      "folder": "shared",
+      "width": 460,
+      "crop": {
+        "left": 0,
+        "top": {
+          "anchor": {
+            "px": [
+              0,
+              46,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        },
+        "right": {
+          "anchor": {
+            "px": [
+              805,
+              0,
+              0,
+              0
+            ]
+          },
+          "edge": "left",
+          "pad": 0
+        },
+        "bottom": {
+          "anchor": {
+            "px": [
+              0,
+              1422,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "px": [
+              58,
+              152,
+              165,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "px": [
+              117,
+              626,
+              98,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "px": [
+              117,
+              665,
+              102,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "px": [
+              117,
+              853,
+              120,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 5,
+          "anchor": {
+            "px": [
+              117,
+              1203,
+              135,
+              26
+            ]
+          },
+          "place": "right"
+        }
+      ]
+    },
+    {
+      "id": "markers-material",
+      "folder": "shared",
+      "width": 460,
+      "crop": {
+        "left": 0,
+        "top": {
+          "anchor": {
+            "px": [
+              0,
+              46,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        },
+        "right": {
+          "anchor": {
+            "px": [
+              805,
+              0,
+              0,
+              0
+            ]
+          },
+          "edge": "left",
+          "pad": 0
+        },
+        "bottom": {
+          "anchor": {
+            "px": [
+              0,
+              744,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "px": [
+              62,
+              340,
+              733,
+              66
+            ]
+          },
+          "place": "left",
+          "force": true
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "px": [
+              62,
+              413,
+              733,
+              28
+            ]
+          },
+          "place": "left",
+          "force": true
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "px": [
+              40,
+              448,
+              0,
+              26
+            ]
+          },
+          "place": "left",
+          "force": true
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "px": [
+              87,
+              518,
+              190,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 5,
+          "anchor": {
+            "px": [
+              87,
+              553,
+              708,
+              28
+            ]
+          },
+          "place": "left",
+          "force": true
+        },
+        {
+          "n": 6,
+          "anchor": {
+            "px": [
+              114,
+              658,
+              92,
+              26
+            ]
+          },
+          "place": "right"
+        }
+      ]
+    },
+    {
+      "id": "minimap-component",
+      "folder": "shared",
+      "width": 460,
+      "crop": {
+        "left": 0,
+        "top": {
+          "anchor": {
+            "px": [
+              0,
+              46,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        },
+        "right": {
+          "anchor": {
+            "px": [
+              805,
+              0,
+              0,
+              0
+            ]
+          },
+          "edge": "left",
+          "pad": 0
+        },
+        "bottom": {
+          "anchor": {
+            "px": [
+              0,
+              754,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "px": [
+              33,
+              266,
+              60,
+              32
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "px": [
+              33,
+              397,
+              146,
+              30
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "px": [
+              33,
+              433,
+              148,
+              30
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "px": [
+              33,
+              469,
+              122,
+              30
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 5,
+          "anchor": {
+            "px": [
+              111,
+              586,
+              128,
+              30
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 6,
+          "anchor": {
+            "px": [
+              33,
+              668,
+              95,
+              26
+            ]
+          },
+          "place": "right"
+        }
+      ]
+    },
+    {
+      "id": "minimap-capture-camera",
+      "folder": "shared",
+      "width": 460,
+      "crop": {
+        "left": 0,
+        "top": {
+          "anchor": {
+            "px": [
+              0,
+              46,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        },
+        "right": {
+          "anchor": {
+            "px": [
+              805,
+              0,
+              0,
+              0
+            ]
+          },
+          "edge": "left",
+          "pad": 0
+        },
+        "bottom": {
+          "anchor": {
+            "px": [
+              0,
+              894,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "px": [
+              33,
+              388,
+              58,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "px": [
+              33,
+              458,
+              84,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "px": [
+              33,
+              493,
+              162,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "px": [
+              33,
+              541,
+              763,
+              38
+            ]
+          },
+          "place": "top-left",
+          "dx": 330,
+          "dy": 10
+        }
+      ]
+    },
+    {
+      "id": "markers-road-template",
+      "folder": "shared",
+      "width": 460,
+      "crop": {
+        "left": 0,
+        "top": {
+          "anchor": {
+            "px": [
+              0,
+              46,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        },
+        "right": {
+          "anchor": {
+            "px": [
+              805,
+              0,
+              0,
+              0
+            ]
+          },
+          "edge": "left",
+          "pad": 0
+        },
+        "bottom": {
+          "anchor": {
+            "px": [
+              0,
+              772,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "px": [
+              105,
+              195,
+              140,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "px": [
+              35,
+              308,
+              135,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "px": [
+              62,
+              343,
+              163,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "px": [
+              63,
+              374,
+              122,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 5,
+          "anchor": {
+            "px": [
+              59,
+              410,
+              75,
+              26
+            ]
+          },
+          "place": "left",
+          "force": true
+        }
+      ]
+    },
+    {
+      "id": "markers-template-config",
+      "folder": "shared",
+      "width": 460,
+      "crop": {
+        "left": 0,
+        "top": {
+          "anchor": {
+            "px": [
+              0,
+              46,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        },
+        "right": {
+          "anchor": {
+            "px": [
+              805,
+              0,
+              0,
+              0
+            ]
+          },
+          "edge": "left",
+          "pad": 0
+        },
+        "bottom": {
+          "anchor": {
+            "px": [
+              0,
+              690,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "px": [
+              61,
+              183,
+              122,
+              26
+            ]
+          },
+          "place": "right"
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "px": [
+              687,
+              182,
+              108,
+              28
+            ]
+          },
+          "place": "left"
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "px": [
+              33,
+              594,
+              242,
+              30
+            ]
+          },
+          "place": "below"
+        },
+        {
+          "n": 4,
+          "anchor": {
+            "px": [
+              278,
+              594,
+              243,
+              30
+            ]
+          },
+          "place": "below"
+        },
+        {
+          "n": 5,
+          "anchor": {
+            "px": [
+              525,
+              594,
+              242,
+              30
+            ]
+          },
+          "place": "below"
+        }
+      ]
+    },
+    {
+      "id": "minimap-top-view",
+      "folder": "shared",
+      "width": 640,
+      "brightness": 2.6,
+      "crop": {
+        "left": 0,
+        "top": {
+          "anchor": {
+            "px": [
+              0,
+              46,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        },
+        "right": {
+          "anchor": {
+            "px": [
+              1225,
+              0,
+              0,
+              0
+            ]
+          },
+          "edge": "left",
+          "pad": 0
+        },
+        "bottom": {
+          "anchor": {
+            "px": [
+              0,
+              1271,
+              0,
+              0
+            ]
+          },
+          "edge": "top",
+          "pad": 0
+        }
+      },
+      "callouts": [
+        {
+          "n": 1,
+          "anchor": {
+            "px": [
+              1171,
+              99,
+              0,
+              0
+            ]
+          },
+          "place": "center",
+          "dx": -20,
+          "dy": 20
+        },
+        {
+          "n": 2,
+          "anchor": {
+            "px": [
+              612,
+              658,
+              0,
+              0
+            ]
+          },
+          "place": "center"
+        },
+        {
+          "n": 3,
+          "anchor": {
+            "px": [
+              612,
+              99,
+              0,
+              0
+            ]
+          },
+          "place": "center",
+          "dy": 20
+        }
+      ],
+      "maxScale": 1.0
+    }
+  ]
+}

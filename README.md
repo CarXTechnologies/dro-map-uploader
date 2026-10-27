@@ -1,304 +1,122 @@
-# 🗺 Uploading tracks
+# MapUploader for CarX Drift Racing Online 2
 
-*[Русская версия](README.ru.md)*
+**English** · [Русский](README.ru.md)
 
-Step-by-step guide to preparing a map in the Unity project and publishing it.
+Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
 
-The mod data format is independent of a particular game. Binary packages use `mod.cxmod`; Wavefront is the alternative loose-file representation. Currently the only content type is `map`. A consuming game needs a compatible loader and adapters for rendering, physics and gameplay markers. Selecting a publishing platform does not select a file format.
+Build maps for CarX Drift Racing Online 2 in Unity, test them in the game, and publish them to mod.io.
 
-The current MapBuilder UI publishes to **mod.io** or exports to a local folder. Publisher setup is described in **[PUBLISHING.md](PUBLISHING.md)**.
+You fill in the map settings, build, export and publish the map in the **MapBuilder** window, which you open from **Tools** > **MapBuilder**:
 
-- [Preparing the track upload project](#preparing-the-track-upload-project)
-- [Importing the 3D model into the project](#importing-the-3d-model-into-the-project)
-- [Adding core components](#adding-core-components)
-  - [Assigning surface collisions](#assigning-surface-collisions)
-  - [Assigning a spawn point on the map](#assigning-a-spawn-point-on-the-map)
-  - [Render core materials (Binary only)](#render-core-materials-binary-only)
-  - [Template system (road only)](#template-system-road-only)
-  - [Adding a mini-map](#adding-a-mini-map)
-  - [Capturing prototypes: icon, preview, minimap](#capturing-prototypes-icon-preview-minimap)
-- [Publishing a map](#publishing-a-map)
-  - [Build Settings](#build-settings)
-  - [Mod format: Wavefront and Binary](#mod-format-wavefront-and-binary)
-  - [Upload Settings](#upload-settings)
-- [Validation](#validation)
-- [Supported components](#supported-components)
-- [Requirements](#requirements)
+<img src="docs/images/en/window-overview.png" width="1000" alt="Screenshot of the MapBuilder window with the TestMap sample selected; markers 1–7 on the main areas.">
 
-## Preparing the track upload project
+| # | Element | What it does |
+| --- | --- | --- |
+| 1 | Account state, **Sign in** / **Sign out** | Shows your mod.io account state: `Not signed in` with **Sign in**, or `Account: <name>` with **Sign out**, as in the screenshot. You need to sign in only to publish; validation and building work without it. |
+| 2 | **Platform** field in the header | Shows where publications go. It is fixed to `mod.io`. |
+| 3 | Language dropdown (**EN** / **RU**) | Switches the interface language. The choice is saved in the Unity editor preferences on this computer. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:14,58 --> |
+| 4 | **LOCAL MAPS** | Lists every map config in the project, with a search box. **+ New map** creates a new map config. |
+| 5 | Map row | Shows the map name, its build status (`Not built`, `Ready to export` or `Rebuild needed`) and the state of its mod.io publication, such as `mod.io: not linked`. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:198,209 --> |
+| 6 | **Map**, **Build** and **Publish** tabs | Open the map settings, the validation and build controls, and the export and publishing controls. |
+| 7 | Footer | Shows the status line: the selected map, such as `Local map: TestMap`, or the result of the last operation. While an operation runs, it shows a progress bar and **Cancel**. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:220 --> |
 
-1. Get the project. The repository contains a **git submodule** (`Assets/Plugins/CarX.Modding.Creator`), so clone it with `git` rather than downloading the ZIP:
+[Open MapBuilder](docs/en/getting-started.md#window) describes the window in more detail.
+
+## Before you start
+
+- Windows 10 or 11, 64-bit. The build optimizer ships only for the Windows x64 Editor; on another system, clear **Optimize build** in each map's **Optimization** settings on the **Build** tab. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:127-130 -->
+- Git, to clone the project with its submodule.
+- Unity Editor 6000.3.19f1, exactly this version, because another version upgrades the project in place. No extra platform modules are needed.
+- A PC copy of CarX Drift Racing Online 2 with mod support, to test the map locally.
+- A mod.io account, only for publishing.
+
+> [!WARNING]
+> **Code** > **Download ZIP** leaves the submodule folder `Assets/Plugins/CarX.Modding.Creator` empty, so the project doesn't compile. Clone the repository with git instead.
+
+Next: [Get started](docs/en/getting-started.md)
+
+## Quick start
+
+To make, test and publish your first map:
+
+1. In a terminal, clone the repository with its submodule. The `-b feature/2.0/3.0` option checks out the branch that these docs describe.
 
    ```bash
-   git clone --recurse-submodules https://github.com/CarXTechnologies/dro-map-uploader
+   git clone --recurse-submodules -b feature/2.0/3.0 https://github.com/CarXTechnologies/dro-map-uploader
    ```
 
-   > [!WARNING]
-   > **Code → Download ZIP** does *not* include submodules — `Assets/Plugins/CarX.Modding.Creator` will be an empty folder and the project will not compile.
+   If git stops at the submodule with `Permission denied (publickey)`, fetch the submodule over HTTPS as described in [Get the project](docs/en/getting-started.md#clone). <!-- src: .gitmodules:3 -->
 
+1. Open the cloned folder in Unity 6000.3.19f1 and wait for the first import to finish. See [Get started](docs/en/getting-started.md).
+1. In the **Project** window, create the folder `Assets/MapResources/<MapName>/`, where `<MapName>` is a short folder name such as `MyTrack`, and create a scene with the same name in it. The scene name must start with a letter and use only letters, digits and `_`. See [Create the map folder and scene](docs/en/scene-setup.md#scene). <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:32-40 -->
+1. In the **Project** window, import your model into the same folder and drag it into the **Hierarchy**. In the **Inspector**, give every drivable surface a collider. See [Import models](docs/en/scene-setup.md#import) and [Add colliders](docs/en/scene-setup.md#colliders).
+1. In the **Hierarchy**, select each object that has a collider. In the **Inspector**, add the GameMarkerData component, and in its type menu, select a surface under **Road**, such as **Road** > **asphalt**. See [Mark road surfaces](docs/en/markers.md#road).
+1. Create an empty GameObject and place it where the car starts. In the **Inspector**, add the GameMarkerData component to it; its type is already `SpawnPoint`. See [Add spawn points](docs/en/markers.md#spawn).
+1. Create another empty GameObject at the root of the scene. In the **Inspector**, add the Minimap component, set its bounds and assign the minimap image. See [Add the minimap](docs/en/minimap-and-images.md#minimap).
+1. In the Unity menu bar, select **Tools** > **MapBuilder**. Under **LOCAL MAPS**, select **+ New map**, and save the map config in `Assets/MapResources/<MapName>/`. See [Create or select a map](docs/en/map-settings.md#new-map).
+1. On the **Map** tab, in **Name**, enter the name that players see; it doesn't have to match `<MapName>`. Drag your icon onto the **Icon · 16:9** box: a PNG with Read/Write turned on. See [Fill in the map settings](docs/en/map-settings.md#map-tab).
+1. On the **Build** tab, select **Validate map** and fix every error. Then select the **Build map** button. The map row changes to `Ready to export`. See [Build the map](docs/en/build.md) and [Fix validation problems](docs/en/validation.md). <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:198 -->
+1. On the **Publish** tab, under **Build destination**, select the **Export to folder** option. In **Folder**, enter the absolute path `<game folder>/Mods/<MapName>`, where `<game folder>` is the folder with the game executable. Select the **Export to folder** button, then load the map in the game. See [Test the map in the game](docs/en/test-in-game.md). <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
+1. In the **MapBuilder** header, select **Sign in** and complete the mod.io sign-in. See [Sign in to mod.io](docs/en/publish.md#sign-in).
+1. On the **Publish** tab, under **Build destination**, select the **Platform** option. Under **Publications**, select **Create publication**.
 
-2. Install **Unity Editor 6000.3.19f1** (64-bit only): **[download installer](https://download.unity3d.com/download_unity/7689f4515d75/Windows64EditorInstaller/UnitySetup64-6000.3.19f1.exe)**.
+Result: the footer shows `Publication created.`, and the map is on mod.io as a hidden publication. To finish the publication and make it public, follow the remaining steps in [Create a publication](docs/en/publish.md#create). <!-- src: Assets/Editor/MapBuilderEditorWindow.Publish.cs:183 -->
 
-   > [!IMPORTANT]
-   > The version has to match exactly. It is recorded in `ProjectSettings/ProjectVersion.txt`, and opening the
-   > project with a different editor upgrades it in place - which is a change you did not ask for and cannot easily
-   > undo.
-3. Launch Unity, go to **File → Open Project** and select the project folder (it must contain the `Assets` and `Packages` folders).
+## How it works
 
-When the project opens, you can move on to the next step.
-
-### Updating an existing clone
-
-If you already cloned the repository without `--recurse-submodules`, or after pulling changes that move the submodule:
-
-```bash
-git submodule update --init --recursive
+```mermaid
+flowchart LR
+    model["3D model"] --> scene["Scene in Assets/MapResources"]
+    scene --> markers["GameMarkerData markers"]
+    markers --> images["Minimap, icon, preview"]
+    images --> validate["Validate map"]
+    validate --> build["Build map<br>Binary or Wavefront"]
+    build --> export["Export to folder"]
+    export --> mods["Game Mods folder"]
+    build --> publish["Publish to mod.io"]
 ```
 
-To pull the latest state of everything, including submodules:
+You set up a Unity scene with markers and images, validate and build it, export the build to the game's `Mods` folder to test it, and publish the same build to mod.io.
 
-```bash
-git pull --recurse-submodules
-git submodule update --init --recursive
-```
+## Documentation
 
-To wipe the working copy and re-fetch everything from scratch — **this discards all local changes**, including untracked files:
-
-```bash
-git reset --hard
-git clean -xffd                     # -f twice also removes untracked submodule folders
-git submodule update --init --recursive --force
-```
-
-If the submodule fails to fetch over SSH (`git@github.com: Permission denied`), tell git to use HTTPS instead:
-
-```bash
-git config --global url."https://github.com/".insteadOf git@github.com:
-git submodule update --init --recursive
-```
-
-## Importing the 3D model into the project
-
-1. In `Assets/MapResources/`, create a folder named after your map.
-2. Inside that folder, create a scene via **Assets → Create → Scene**.
-3. Drag & drop your `.fbx` / [`.obj`](https://www.autodesk.com/products/fbx/overview) / [`.dae`](https://www.khronos.org/collada/) model into `Assets/MapResources/<your_folder>/`.
-4. If the models come without materials, create them via **Assets → Create → Material** and configure them as shown below.
-
-   <img src="Image/2.png" alt="Material setup" style="width:400px;"/>
-
-5. Open the created scene and drag the 3D model onto it to create a GameObject.
-6. Add the required components to the created GameObject.
-7. To make the object reusable (Prefab), create the folder `Assets/MapResources/<your_folder>/Prefabs`.
-8. Right-click the object in the scene and choose **Prefab → Unpack Completely**.
-9. Drag the GameObject from the scene into the new `Prefabs` folder — it can now be reused as many times as needed.
-
-   <img src="Image/3.png" alt="Prefab → Unpack Completely menu" style="width:300px;"/>
-
-The scene may contain any number of top-level objects. A shared parent named `root` is optional: the builder exports all scene roots without reparenting the source objects. Existing maps with a `root` group remain supported. The builder does not create temporary scenes. Rigidbody and Animation bindings and animation atlas deduplication span the whole exported scene.
-
-## Adding core components
-
-The project supports several component types that are ported into the game. The main ones are:
-
-- the point where the car appears on the map,
-- physical materials of surfaces.
-
-These components are assigned with the **GameMarkerData** helper. To add it to a GameObject or Prefab, click **Add Component** in the Inspector and type `GameMarkerData`. A mini-map can be added as well.
-
-### Assigning surface collisions
-
-For the track object that represents the surface, set the GameMarkerData type to **Road** and pick, in the dropdown, the material type used in the game when interacting with this surface.
-
-<img src="Image/4.png" alt="Road marker setup" style="width:500px;"/>
-
-The Road and SpawnPoint screenshots show an older marker menu. Use SpawnPoint, Road, Animation or Material in the current version; Ambient is unsupported.
-
-> [!NOTE]
-> Any GameObject/Prefab with collision must also have a Collider component (Box / Sphere / Capsule / Mesh Collider). This is required for collision accuracy.
-
-### Assigning a spawn point on the map
-
-Create an empty object via **GameObject → Create Empty** (or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd>). In the Transform component, set the coordinates where the car should appear in the game. Add the **GameMarkerData** component and choose the **SpawnPoint** type.
-
-> [!IMPORTANT]
-> Both formats support several spawn points — name each object meaningfully,
-> because the name is exported with the spawn point and identifies it in game.
-
-<img src="Image/5.png" alt="Spawn point setup" style="width:400px;"/>
-
-### Vertex animation
-
-Use **Animation** with an Animator to bake animation into an atlas. **Ambient**, **TimeObjectActivator** and **NetworkObject** are unsupported. Network physics uses Rigidbody without a separate marker.
-
-### Render core materials (Binary only)
-
-By default the game picks a render core material from the HDRP settings (opaque, alpha test, transparent, emission). The **Material** marker replaces a material with an explicit render core variant — foliage, window, color mask, road sign emission, four-layer blend and others — with its own textures and parameters. Interior mapping (`MAT_INTERIOR`) is unavailable until mod meshes carry a second UV set: the variant needs it, and the exporter writes only the first one.
-
-1. Add **GameMarkerData** to the object with the **MeshRenderer** and select **Material**. On an object with a **LODGroup** the marker applies to the renderers of all its LODs.
-2. The marker lists the renderer materials (**Add renderer materials** adds new ones). For each material choose a **Render core variant**; the list contains only variants that work in mods. Each packed map shows its channel layout, for example `R Roughness · G — · B Alpha · A —`.
-3. Press **Export from material**: the variant fields are filled from the HDRP Lit / Layered Lit material. Packed maps, tinted diffuse and emission maps are saved as PNG into a `RenderCore` folder next to the material; unchanged source maps are used directly. Fields without an HDRP counterpart (color mask, mask color, layer UV multipliers) are listed in the Console — set them by hand.
-
-`MAT_LAYERS4` blends its four layers by mesh vertex colors: RGB is the layer mask, alpha tints the albedo. A mesh without vertex colors is exported white and shows only the fourth layer. The game keeps the vertex colors of a mesh with `MAT_LAYERS4`, so emission on its other submeshes is multiplied by them — both from an emission variant and from an HDRP emissive material without a marker entry. Put emissive parts on a separate object without `MAT_LAYERS4`: build optimization merges objects that use `MAT_LAYERS4` only with each other, so the separate object stays a separate mesh. Map Validation warns about a mesh without vertex colors and about a mesh that mixes `MAT_LAYERS4` and emission.
-
-The same material without a marker, or with different settings, is exported separately, so a marker changes only its own object. Wavefront ignores the marker. The original material is still exported as a fallback for a game build that does not know or cannot apply the variant. Baked vertex animations keep their own materials.
-
-The variant list is generated from a mirror of render core; the game project checks the mirror against its render core. Variants, their packed-map channels and the update rules are described in [RenderCoreMaterial.md](Assets/Plugins/CarX.Modding.Creator/RenderCoreMaterial.md) of the SDK.
-
-### Template system (road only)
-
-1. Create a template config.
-
-   <img src="Image/22.png" alt="Creating a template config" style="width:500px;"/>
-
-2. Create and redefine the template parameters.
-
-   <img src="Image/23.png" alt="Template parameters" style="width:350px;"/>
-
-3. Select the template config in the GameMarkerData component.
-
-   <img src="Image/24.png" alt="Selecting the template config" style="width:500px;"/>
-
-4. Select a template to reassign the parameters.
-
-   <img src="Image/25.png" alt="Selecting a template" style="width:400px;"/>
-
-### Adding a mini-map
-
-Every map needs exactly one minimap. Create an empty object in the scene (as described above), add the **Minimap** component and select the Minimap Layer. In **Textures → Element 0**, assign at least one texture — MainTexture. While configuring the map you can use the auxiliary functions to generate a template, load it into a graphics editor and design your own minimap on top of it.
-
-- **Bound center** — the minimap's offset relative to the center.
-- **Bound size** — the map's size in world scale.
-
-> [!NOTE]
-> The map must be centered relative to zero coordinates.
-
-<img src="Image/8.png" alt="Minimap setup" style="width:800px;"/>
-
-### Capturing prototypes: icon, preview, minimap
-
-1. Add the **CaptureCamera** component to a Camera GameObject.
-2. Set up the camera for your prototype.
-3. Press **Capture** at the bottom of the component in the Inspector.
-4. Save the prototype to disk.
-
-<img src="Image/14.png" alt="Capture camera" style="width:300px;"/>
-
-This screenshot shows the older context-menu command. In the current version, use the Capture button at the bottom of the Inspector.
-
-## Publishing a map
-
-1. Open **Tools → MapBuilder**. The header shows your account, **Platform** (currently mod.io) and the **EN / RU** language selector. English is the default.
-2. Select a map in **Local maps**, or press **+ New map** to create its settings asset. Existing `MapMetaConfig` assets appear in the library automatically; there is no separate config selector on each tab.
-3. On **Map**, fill in **Name**, **Version**, **Summary**, **Description**, **Authors**, **URL**, **Preview** and **Icon**. Version is the author's release label (for example `1.2.0`), not the container format version; an empty value uses `1.0.0`. An empty Summary uses the first description line. Use readable PNG images for Icon and Preview.
-
-![Map tab: metadata and images](Image/current/map-guide.png)
-
-### Build Settings
-
-**Build → Optimization** provides sector splitting/merging, optional collider simplification and the **Generate sector LODs** checkbox. See [Build optimization](BuildOptimization.md) for settings and exclusions.
-
-Open **Build**. Add the target scene to Unity's build scene list if it does not appear in **Scene**.
-
-| Control | Purpose |
+| Page | What you do there |
 | --- | --- |
-| **Scene** | Scene to export. |
-| **Format** | Binary (default) or Wavefront. |
-| **Advanced settings** | Opens **Rebuild targets** and, for Binary, **Binary textures** (BC7 or RGBA32 with prepared mipmaps). Container compression is automatic. |
-| **Scene contents** | Shows component counts and limits. |
-| **Validate map** | Checks the map without building. See [Validation](#validation). |
-| **Build map** | Builds the selected targets. Use Everything for a complete build. |
-| **Open build folder** | Opens the generated output. |
-| **Go to publishing →** | Opens Publish. |
+| [Get started](docs/en/getting-started.md) | Clone the project, install Unity, open MapBuilder and choose its interface language. |
+| [Set up the scene](docs/en/scene-setup.md) | Create the map folder and scene, and set up models, materials, colliders, dynamic objects, LOD groups and lighting. |
+| [Add markers](docs/en/markers.md) | Place spawn points, mark road surfaces, animate objects and replace materials with render core variants. |
+| [Minimap, icon and preview](docs/en/minimap-and-images.md) | Add the minimap, capture images with CaptureCamera and check the image requirements. |
+| [Fill in the map settings](docs/en/map-settings.md) | Create a map config and fill in the **Map** tab. |
+| [Build the map](docs/en/build.md) | Choose the scene and format, build the map, tune optimization and find the build cache. |
+| [Fix validation problems](docs/en/validation.md) | Run **Validate map** and read the **Map Validation** window. |
+| [Test the map in the game](docs/en/test-in-game.md) | Export the map to the game's `Mods` folder, drive it and run the pre-publish checklist. |
+| [Publish to mod.io](docs/en/publish.md) | Sign in, then create, update and delete publications. |
+| [Troubleshooting](docs/en/troubleshooting.md) | Find the cause and fix for validation messages, build errors, greyed-out controls and in-game problems. |
+| [Reference](docs/en/reference.md) | Look up limits, supported components, road surfaces, menus, stored settings and the glossary. |
 
-Build progress and **Cancel** appear in the bottom bar. Some Unity export stages still run on the editor thread, so responsiveness can vary during a build.
+The [documentation contents](docs/en/README.md) list the same pages in reading order.
 
-![Build tab](Image/current/build-guide.png)
+## Limits at a glance
 
-This screenshot predates the Optimization button, which now appears between Advanced settings and Scene contents.
-
-### Mod format: Wavefront and Binary
-
-- **Wavefront** exports geometry/materials/textures/metadata as OBJ / MTL / PNG / JSON files.
-- **Binary** packages the map into compressed `mod.cxmod`, with compact geometry, typed scene data and prepared textures. This is the default format.
-
-Both export all scene roots directly and support the same scene features. Rebuild **Map and Meta** after switching formats. Only maps (`contentType: "map"`) are supported. The format is independent of a particular game; the consuming application needs compatible adapters.
-
-See [Wavefront export](Wavefront.md). Binary build controls are described in [Build Settings](#build-settings); a separate binary format specification is not included in this repository.
-
-### Upload Settings
-
-On **Publish**, choose **Platform** to publish to mod.io, or **Export to folder** for a local copy. Building and exporting locally do not require a publication.
-
-1. Build Map and Meta first, then sign in from the header to publish.
-2. For a new mod, press **Create publication**. It creates the entry and uploads the built files. After the entry is linked, rebuild Meta to include its assigned id and press **Update publication**.
-3. For an existing mod, select it under **Publications**, enter **Changelog**, choose **Update title / Update description / Update preview**, and press **Update publication**. These switches control changes to the publication page.
-4. Use **Refresh list** to reload publications. The local map list shows the linked mod.io file version when loaded; this is separate from the locally edited Version.
-
-![Publish tab: mod.io publication controls](Image/current/publish-guide.png)
-
-For local testing, select **Export to folder**, choose **Folder**, then press **Export to folder**. Use the mod directory expected by the consuming application. The current UI has no Steam Local Test option.
-
-![Publish tab: export to a folder](Image/current/export-guide.png)
-
-Publisher configuration and integration details: [PUBLISHING.md](PUBLISHING.md).
-
-## Validation
-
-Press **Validate map** on the **Build** tab to check the map without building it. Nothing in the scene is
-modified, so it can be run as often as you like — it is the fastest way to find out whether a map is ready.
-
-The same checks run automatically as part of a build. Either way the result opens in a **Map Validation** window
-listing everything that was found in one pass, each row with a **Select** button that takes you to the object
-responsible. The console only gets a one line summary — **To console** in the window logs the full list when you
-want it there, and **Copy** puts it on the clipboard.
-
-- **Errors** stop the build. Fix them all — they are shown together on purpose, so you do not discover them one
-  rebuild at a time.
-- **Warnings** do not stop anything, and describe skipped content or other issues worth reviewing.
-
-What is checked:
-
-| Area | Checks |
+| What | Limit |
 | --- | --- |
-| Meta | Name present, allowed characters and within the vendor's length limit; description and summary lengths; icon assigned, readable, PNG and within the size limit; preview readable and within 10 MB |
-| Components | Everything against the [supported components](#supported-components) list and its per-type budget; missing (deleted) scripts |
-| Markers | A spawn point exists; duplicate spawn point names; markers with no type selected; Road markers with no Collider |
-| Format | Components not exported by Wavefront/Binary; optional preview components are informational |
-| Lighting | More than one Directional Light; light types Wavefront cannot export |
-| Geometry | Renderers with no mesh or empty material slots; MeshColliders with no mesh; LOD groups over 8 levels or with no renderers |
-| Physics | Non-convex MeshCollider driven by a non-kinematic Rigidbody |
-| Minimap | Bound Size left at zero; missing or non-Texture2D minimap textures |
+| Name | 50 characters: letters, digits, spaces and `- _ ' . , : ! ? ( ) & + /`, with no leading or trailing spaces. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:8; Assets/Resources/CarX.Modding/ModIoConfig.asset:28 --> |
+| Summary | 250 characters. Only the first line is used. When Summary is empty, the first line of the description is used; when both are empty, the summary is `<Name> track.` <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:47-60; Assets/Resources/CarX.Modding/ModIoConfig.asset:29 --> |
+| Description | 50 000 characters. mod.io receives it from **Create publication** when it isn't empty, and from **Update publication** with **Update description** selected. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:30; Assets/Editor/MapBuilder.Publishing.cs:91,235-237 --> |
+| Icon | Required. PNG with Read/Write on, ≤ 8 MB. mod.io needs at least 512 × 288; 16:9 is recommended, and the tool doesn't check the pixel size. <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:99-117; Assets/Resources/CarX.Modding/ModIoConfig.asset:27; Assets/Plugins/Modio/Modio/API/Generated/Definitions/RequestObjects/EditModRequest.cs:31 --> |
+| Preview | Optional. PNG with Read/Write on, ≤ 10 MB. 16:9 is recommended; the tool doesn't check it. <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:14,120-137 --> |
+| Scene name | Starts with a letter and uses only letters, digits and `_`. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:32-45 --> |
+| Build size | Map ≤ 4096 MB, metadata ≤ 24 MB, measured on the build cache folders `MapTemp` and `MetaTemp`, not on `mod.cxmod`. Checked only when you create or update a publication. <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182; Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26 --> |
+| Scene contents | Exactly 1 Minimap; at least 1 SpawnPoint; ≤ 500 lights (only Point and Spot lights are exported, and in the game they turn on only at night); ≤ 1000 Rigidbodies; ≤ 8 LOD levels per LODGroup. <!-- src: Assets/Editor/MapSceneRules.cs:11-24; Assets/Editor/Validation/SceneValidator.cs:278-284,811; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:98-100; DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModLightsDayNightBehaviour.cs:36-53 --> |
 
-Objects tagged **Garbage** are skipped, exactly as they are by the build.
+Next: [Reference](docs/en/reference.md)
 
-## Supported components
+## Getting help
 
-| Category | Components |
-| --- | --- |
-| **Physics** | MeshCollider, BoxCollider, SphereCollider, CapsuleCollider, Rigidbody |
-| **Geometry** | MeshRenderer, MeshFilter, LODGroup |
-| **Lighting** | Point and Spot Light, HDAdditionalLightData |
-| **Animation** | Animator and SkinnedMeshRenderer under GameMarkerData Animation, baked to VAT |
-| **Map data** | SpawnPoint, Road, Animation, Material (Binary); Minimap |
+Check [Troubleshooting](docs/en/troubleshooting.md) first. To report a wrong step or an outdated screenshot, open an issue in [this repository's issue tracker](https://github.com/CarXTechnologies/dro-map-uploader/issues) and name the page and the branch.
 
-Volume and ReflectionProbe are optional preview components. Unsupported components (including UI, particles, video and joints) and unsupported marker types are skipped with warnings, not build-blocking errors. A Rigidbody without usable colliders is skipped; its render geometry can still be exported. Rules and budgets live in `Assets/Editor/MapSceneRules.cs`.
+## For integrators
 
-## Requirements
+You don't need these pages to make or publish a map. They describe the mod file format and the publishing layer for people who extend MapUploader or read its output.
 
-- Avoid using multiple Directional Light sources.
-- Keep the map size under 4 GB.
-- Keep the meta size under 24 MB (including preview, icon, description and title).
-- Be mindful of the component limitations.
-
-The current mod.io configuration sets these limits; project administrators can change them in the publisher config:
-
-| Field | Limit |
-| --- | --- |
-| Icon / logo | 8 MB |
-| Name | 50 characters |
-| Description | 50000 characters |
-| Summary | 250 characters |
-
-A non-convex MeshCollider on a non-kinematic Rigidbody is invalid and must be fixed. Unsupported components alone do not block a build.
-
-New publications are created hidden. Review the uploaded file on mod.io and change visibility on its page when ready.
+[Mod format: Wavefront and Binary](docs/en/advanced/mod-format.md) · [Publishing vendors](docs/en/advanced/publishing-vendors.md)
