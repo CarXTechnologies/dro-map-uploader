@@ -23,6 +23,8 @@ namespace Editor
 		private static void Capture(CaptureCamera capture)
 		{
 			var camera = capture.GetComponent<Camera>();
+			// Occlusion data is baked for the gameplay cameras, so it is off for the capture and restored afterwards.
+			var lastUseOcclusionCulling = camera.useOcclusionCulling;
 			camera.useOcclusionCulling = false;
 
 			var inWidth = capture.Width * capture.Samples;
@@ -77,14 +79,15 @@ namespace Editor
 			}
 			else
 			{
-				texture2D = RenderWithBackground(capture, camera, hdCameraData,
-					hdCameraData != null ? lastBackgroundColorHDR : (Color?)null, inWidth, inHeight);
+				// Without Clip Background the camera keeps its own Background Type, so a Sky camera captures the sky.
+				texture2D = RenderWithBackground(capture, camera, hdCameraData, null, inWidth, inHeight);
 			}
 
 			var filepath = EditorUtility.SaveFilePanel("Save Capture", Application.dataPath, "", "png");
 
 			RenderTexture.active = lastRenderTarget;
 			camera.targetTexture = null;
+			camera.useOcclusionCulling = lastUseOcclusionCulling;
 
 			if (hdCameraData != null)
 			{
@@ -95,13 +98,25 @@ namespace Editor
 			if (!string.IsNullOrEmpty(filepath))
 			{
 				File.WriteAllBytes(filepath, texture2D.EncodeToPNG());
-				AssetDatabase.Refresh();
-				filepath = "Assets" + filepath.Replace(Application.dataPath, string.Empty);
-				var asset = (TextureImporter)AssetImporter.GetAtPath(filepath);
-				asset.isReadable = true;
-				asset.alphaIsTransparency = capture.ClipBackground;
-				AssetDatabase.ImportAsset(filepath, ImportAssetOptions.ForceUpdate);
-				AssetDatabase.Refresh();
+
+				// Import settings apply only to a file inside the project; a file saved elsewhere is just written.
+				var fullPath = Path.GetFullPath(filepath).Replace('\\', '/');
+				var assetsPath = Path.GetFullPath(Application.dataPath).Replace('\\', '/') + "/";
+				if (fullPath.StartsWith(assetsPath, System.StringComparison.OrdinalIgnoreCase))
+				{
+					var assetPath = "Assets/" + fullPath.Substring(assetsPath.Length);
+					AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
+					if (AssetImporter.GetAtPath(assetPath) is TextureImporter importer)
+					{
+						importer.isReadable = true;
+						importer.alphaIsTransparency = capture.ClipBackground;
+						importer.SaveAndReimport();
+					}
+				}
+				else
+				{
+					Debug.Log($"Capture saved outside the project: {fullPath}. Copy it into Assets to use it as an icon, preview or minimap.");
+				}
 			}
 
 			Object.DestroyImmediate(texture2D);

@@ -733,7 +733,15 @@ namespace Editor.Validation
 					continue;
 				}
 
-				if (light.type != LightType.Point && light.type != LightType.Spot)
+				if (light.type == LightType.Directional)
+				{
+					// A preview sun is expected: the game lights the map with its own sun and sky.
+					report.AddCapped(MapValidationSeverity.Info, CategoryLighting, "Wavefront/Binary-light-type",
+						$"'{transform.name}' is a Directional light. It lights the SDK preview only; the game uses its own sun, " +
+						"so it is not exported.",
+						light);
+				}
+				else if (light.type != LightType.Point && light.type != LightType.Spot)
 				{
 					report.AddCapped(MapValidationSeverity.Warning, CategoryLighting, "Wavefront/Binary-light-type",
 						$"'{transform.name}' is a {light.type} light. Wavefront/Binary exports Point and Spot lights only, so this " +
@@ -853,9 +861,11 @@ namespace Editor.Validation
             foreach (var t in transforms)
             {
                 if (!Plugins.CarX.Modding.Creator.Editor.SceneExportOptimization.IsEligible(t)) continue;
-                void Check(Mesh mesh, Component context, string kind)
+                // Meshes that optimization splits into sectors fit the budget after export; warn only about the ones
+                // that are exported as they are.
+                void Check(Mesh mesh, Component context, string kind, bool partitioned)
                 {
-                    if (mesh == null) return;
+                    if (mesh == null || (settings.enabled && partitioned)) return;
                     long triangles = 0;
                     for (int i = 0; i < mesh.subMeshCount; i++) if (mesh.GetTopology(i) == MeshTopology.Triangles) triangles += mesh.GetIndexCount(i) / 3;
                     var bounds = Plugins.CarX.Modding.Creator.Editor.SceneExportOptimization.WorldBounds(mesh, t.localToWorldMatrix);
@@ -866,9 +876,9 @@ namespace Editor.Validation
                         $"Exceeds sector budget ({settings.sectorSize:F0} m / {settings.maxTriangles:N0} triangles). Review Build > Optimization; size alone does not prove a performance issue.", context);
                 }
                 foreach (var collider in t.GetComponents<MeshCollider>())
-                    if (collider.enabled && !collider.isTrigger && !collider.convex) Check(collider.sharedMesh, collider, "collider");
+                    if (collider.enabled && !collider.isTrigger && !collider.convex) Check(collider.sharedMesh, collider, "collider", settings.sectorColliders);
                 var renderer = t.GetComponent<MeshRenderer>(); var filter = t.GetComponent<MeshFilter>();
-                if (renderer != null && renderer.enabled && filter != null) Check(filter.sharedMesh, renderer, "render mesh");
+                if (renderer != null && renderer.enabled && filter != null) Check(filter.sharedMesh, renderer, "render mesh", settings.sectorRenderMeshes);
             }
         }
 

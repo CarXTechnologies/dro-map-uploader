@@ -87,7 +87,8 @@ namespace Editor
 					ResolveVersion(meta),
 					notes?.changelog,
 					publisherContext.DefaultVisibility,
-					publisherContext.ContentTags);
+					publisherContext.ContentTags,
+					meta.mapDescription);
 
 				// Stays up only until the vendor's first upload progress report replaces it.
 				progress?.Report("Sending files / waiting for mod.io…");

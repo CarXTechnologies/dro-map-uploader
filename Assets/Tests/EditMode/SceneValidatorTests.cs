@@ -180,11 +180,23 @@ namespace MapUploader.Tests
 		public void WarnsAboutUnsupportedLightTypes()
 		{
 			var root = NewObject("Track");
+			NewLight("Panel", LightType.Rectangle, root);
+
+			var report = Validate(FormatBuild.Wavefront, root);
+
+			Assert.IsTrue(HasLightingIssue(report, MapValidationSeverity.Warning, "Wavefront/Binary exports Point and Spot lights only"));
+		}
+
+		[Test]
+		public void NotesThatADirectionalLightLightsOnlyThePreview()
+		{
+			var root = NewObject("Track");
 			NewLight("Sun", LightType.Directional, root);
 
 			var report = Validate(FormatBuild.Wavefront, root);
 
-			Assert.IsTrue(Has(report, SceneValidator.CategoryLighting, "Wavefront/Binary exports Point and Spot lights only"));
+			Assert.IsTrue(HasLightingIssue(report, MapValidationSeverity.Info, "lights the SDK preview only"));
+			Assert.IsFalse(HasLightingIssue(report, MapValidationSeverity.Warning, "Wavefront/Binary exports Point and Spot lights only"));
 		}
 
 		[Test]
@@ -781,6 +793,14 @@ namespace MapUploader.Tests
 			var light = NewObject(name, parent, typeof(Light)).GetComponent<Light>();
 			light.type = type;
 			return light;
+		}
+
+		private static bool HasLightingIssue(MapValidationReport report, MapValidationSeverity severity, string fragment)
+		{
+			return report.Issues.Any(issue =>
+				issue.category == SceneValidator.CategoryLighting &&
+				issue.severity == severity &&
+				issue.message.IndexOf(fragment, StringComparison.Ordinal) >= 0);
 		}
 
 		private static bool HasIssue(MapValidationReport report, MapValidationSeverity severity, string fragment)
