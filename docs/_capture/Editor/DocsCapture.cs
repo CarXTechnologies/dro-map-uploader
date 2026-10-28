@@ -11,6 +11,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using ModItem = Plugins.CarX.Modding.Creator.Runtime.Publishing.ModItem;
 using Object = UnityEngine.Object;
 
 namespace MapUploader.DocsCapture
@@ -20,7 +21,10 @@ namespace MapUploader.DocsCapture
 	/// into Assets/Editor/DocsCapture only while capturing (see docs/_capture/README.md). Each shot is saved as a raw PNG of
 	/// the whole window plus a JSON file with the rectangles of every visible UI Toolkit element; docs/_capture/annotate.py
 	/// crops, numbers and compresses them into docs/images.
-	/// The run never saves a scene and restores every asset, EditorPrefs key and gizmo setting it touches.
+	/// The run never saves a scene. It writes back the assets it changes and restores the EditorPrefs keys and gizmo settings
+	/// it touches; docs/_capture/README.md lists what it doesn't restore.
+	/// Private members of MapBuilderEditorWindow and MapValidationWindow are read by reflection; every lookup throws with the
+	/// member name when the member is gone, so a renamed member fails the run instead of silently changing a shot.
 	/// </summary>
 	public static class DocsCapture
 	{
@@ -29,15 +33,23 @@ namespace MapUploader.DocsCapture
 		private const string ManagerConfigPath = "Assets/Resources/MapManagerConfig.asset";
 		private const string TemplateConfigPath = "Assets/Resources/GameMarkerTemplateConfig.asset";
 		private const string MaterialPath = "Assets/MapResources/TestMap/Art/0x4F368125.mat";
-		private const string LanguagePreference = "CarX.MapBuilder.Language";
 		private const string HdrpLitUiStateKey = "CoreRP:Material:UI_State:HDRP/Lit";
 		private const string ExportFolderExample = "C:/Games/CarX Drift Racing Online 2/Mods/TestMap";
 		private const BindingFlags Instance = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 		private const BindingFlags Static = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
 
+		// The shots RunAll takes, by raw folder. docs/_capture/shots.json describes the same ids.
+		private static readonly string[] LanguageShots = { "window-overview", "map-settings", "build-tab", "build-optimization", "export-folder", "publish-modio" };
+		private static readonly string[] SharedShots =
+		{
+			"validation-window", "scene-hdrp-lit-material", "markers-road-template", "markers-template-config", "markers-material",
+			"minimap-component", "minimap-capture-camera", "minimap-top-view",
+		};
+
 		private static readonly Stack<IEnumerator> s_routines = new();
 		private static bool s_exitWhenDone;
 		private static bool s_failed;
+		private static bool s_finishing;
 		private static string s_outDir;
 		private static StringBuilder s_log;
 		private static readonly Dictionary<string, byte[]> s_fileSnapshot = new();
@@ -47,6 +59,9 @@ namespace MapUploader.DocsCapture
 		private static readonly HashSet<string> s_only = new();
 
 		private static Type MapBuilderWindowType => typeof(global::Editor.MapBuilderEditorWindow);
+
+		// MapBuilderEditorWindow.LanguagePreference is internal to MapUploader.Editor, so it is read by reflection.
+		private static string LanguagePreference => (string)StaticField(MapBuilderWindowType, "LanguagePreference");
 
 		// ---------- entry points ----------
 
@@ -91,11 +106,45 @@ namespace MapUploader.DocsCapture
 		{
 			s_log = new StringBuilder();
 			s_failed = false;
+			s_finishing = false;
+			// A snapshot left from an earlier run in this editor session must never be written back.
+			s_fileSnapshot.Clear();
+			s_prefsSnapshot.Clear();
+			s_gizmoSnapshot.Clear();
+			s_openedWindows.Clear();
 			s_routines.Clear();
 			s_routines.Push(routine);
 			EditorApplication.update -= Tick;
 			EditorApplication.update += Tick;
 			Log($"DocsCapture started, out = {s_outDir}");
+			foreach (var id in s_only.Where(id => !LanguageShots.Contains(id) && !SharedShots.Contains(id))) Fail("unknown shot id " + id);
+			try
+			{
+				CleanOutput();
+			}
+			catch (Exception e)
+			{
+				Fail($"could not delete the raw shots of an earlier run in {s_outDir}: {e.Message}");
+			}
+		}
+
+		// A full run deletes every raw shot; a run with -docsCaptureOnly deletes the raw shots of those ids. So annotate.py
+		// never picks up a raw shot of an earlier run in place of one this run failed to take.
+		private static void CleanOutput()
+		{
+			foreach (var folder in new[] { "en", "ru", "shared" })
+			{
+				var dir = Path.Combine(s_outDir, folder);
+				if (!Directory.Exists(dir)) continue;
+				foreach (var file in Directory.GetFiles(dir))
+				{
+					var name = Path.GetFileName(file);
+					bool stale = s_only.Count == 0
+						? name.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || name.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
+						: s_only.Any(id => name == id + ".png" || name == id + ".json" || name == id + ".debug.png");
+					if (stale) File.Delete(file);
+				}
+			}
 		}
 
 		private static void Tick()
@@ -116,7 +165,16 @@ namespace MapUploader.DocsCapture
 			{
 				s_failed = true;
 				Log("EXCEPTION: " + e);
-				s_routines.Clear();
+				DisposeRoutines();
+				if (s_finishing)
+				{
+					// Finish itself threw: stop here instead of starting Finish again, which would loop.
+					Log("DocsCapture FAILED while restoring the project; restore the files listed in docs/_capture/README.md by hand.");
+					EditorApplication.update -= Tick;
+					if (s_exitWhenDone) EditorApplication.Exit(1);
+					return;
+				}
+
 				s_routines.Push(Finish());
 				return;
 			}
@@ -128,6 +186,29 @@ namespace MapUploader.DocsCapture
 			}
 
 			if (top.Current is IEnumerator nested) s_routines.Push(nested);
+		}
+
+		// Disposing the suspended routines runs their finally blocks, which put back what they changed (see TopViewShot).
+		private static void DisposeRoutines()
+		{
+			while (s_routines.Count > 0)
+			{
+				var routine = s_routines.Pop();
+				try
+				{
+					(routine as IDisposable)?.Dispose();
+				}
+				catch (Exception e)
+				{
+					Log("EXCEPTION while cleaning up: " + e);
+				}
+			}
+		}
+
+		private static void Fail(string message)
+		{
+			s_failed = true;
+			Log("FAILED: " + message);
 		}
 
 		private static void Log(string message)
@@ -153,7 +234,7 @@ namespace MapUploader.DocsCapture
 			{
 				if (EditorApplication.timeSinceStartup > end)
 				{
-					Log($"timeout waiting for {what}");
+					Fail($"timeout after {timeoutSeconds} s waiting for {what}");
 					yield break;
 				}
 
@@ -188,10 +269,15 @@ namespace MapUploader.DocsCapture
 			yield return Wait(3);
 			ApplyDemoMetadata();
 
-
+			// The Map tab shots of both languages come before the first build and the first publication link, so that the
+			// map row in window-overview shows the same build and mod.io state in English and Russian.
 			foreach (var lang in new[] { "en", "ru" })
 			{
 				if (Wanted("window-overview") || Wanted("map-settings")) yield return MapTabShots(lang);
+			}
+
+			foreach (var lang in new[] { "en", "ru" })
+			{
 				if (Wanted("build-tab") || Wanted("build-optimization") || Wanted("export-folder") || Wanted("publish-modio")) yield return BuildAndPublishShots(lang);
 			}
 
@@ -210,27 +296,58 @@ namespace MapUploader.DocsCapture
 
 		private static IEnumerator Finish()
 		{
+			s_finishing = true;
 			foreach (var w in s_openedWindows.Where(w => w != null).ToList())
 			{
 				try { w.Close(); } catch (Exception e) { Log("close: " + e.Message); }
 			}
 
 			s_openedWindows.Clear();
-			CloseToolWindows();
+			Try("close tool windows", CloseToolWindows);
 			yield return Wait(3);
 			Restore();
 			yield return Wait(2);
 			try { EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single); } catch (Exception e) { Log("reopen scene: " + e.Message); }
+			CheckRawShots();
 			Log(s_failed ? "DocsCapture FAILED" : "DocsCapture done");
 			if (s_exitWhenDone) EditorApplication.Exit(s_failed ? 1 : 0);
 		}
 
+		// Every wanted shot must have its raw PNG and JSON; a shot that was skipped without an error still fails the run.
+		private static void CheckRawShots()
+		{
+			foreach (var id in LanguageShots.Concat(SharedShots).Where(Wanted))
+			{
+				foreach (var folder in LanguageShots.Contains(id) ? new[] { "en", "ru" } : new[] { "shared" })
+				{
+					var raw = Path.Combine(s_outDir, folder, id);
+					if (!File.Exists(raw + ".png") || !File.Exists(raw + ".json")) Fail($"no raw shot {folder}/{id}");
+				}
+			}
+		}
+
+		// Runs one restore step; a failure is logged and fails the run, and the remaining steps still run.
+		private static void Try(string what, Action action)
+		{
+			try
+			{
+				action();
+			}
+			catch (Exception e)
+			{
+				Fail($"{what}: {e}");
+			}
+		}
+
 		private static void Preflight()
 		{
-			Log($"unity {Application.unityVersion}, pixelsPerPoint {EditorGUIUtility.pixelsPerPoint}, proSkin {EditorGUIUtility.isProSkin}");
-			if (!Mathf.Approximately(EditorGUIUtility.pixelsPerPoint, 1f)) Log("NOTE: pixelsPerPoint != 1; raw images are larger, annotate.py scales anchors by ppp.");
+			float ppp = EditorGUIUtility.pixelsPerPoint;
+			Log($"unity {Application.unityVersion}, pixelsPerPoint {ppp}, proSkin {EditorGUIUtility.isProSkin}");
+			Log($"annotate.py multiplies the point values in shots.json (crop edges, pads, px anchors) by pixelsPerPoint {ppp}.");
+			if (ppp < 1.75f) Log("NOTE: display scale below 175%; annotate.py never upscales, so some images come out smaller than at 175%.");
 			if (!EditorGUIUtility.isProSkin) Log("WARNING: light editor skin; the style guide expects the dark skin.");
 			var cfg = Config;
+			if (cfg == null) throw new InvalidOperationException("no MapMetaConfig at " + ConfigPath);
 			Log($"config id {cfg.id}, guid {AssetDatabase.AssetPathToGUID(ConfigPath)}");
 			bool inBuild = EditorBuildSettings.scenes.Any(s => s.enabled && s.path == ScenePath);
 			Log($"TestMap enabled in build scenes: {inBuild}");
@@ -262,6 +379,7 @@ namespace MapUploader.DocsCapture
 			}
 		}
 
+		// The prefix is a literal in MapBuilderEditorWindow.Workspace.cs, where the build summary is saved; keep them equal.
 		private static string BuildSummaryKey => "CarX.MapBuilder.BuildSummary." + Config.id;
 
 		private static string PrefValue(string key)
@@ -285,25 +403,34 @@ namespace MapUploader.DocsCapture
 		{
 			foreach (var kv in s_fileSnapshot)
 			{
-				File.WriteAllBytes(Path.Combine(ProjectRoot, kv.Key), kv.Value);
-				AssetDatabase.ImportAsset(kv.Key, ImportAssetOptions.ForceUpdate);
+				Try("restore " + kv.Key, () =>
+				{
+					File.WriteAllBytes(Path.Combine(ProjectRoot, kv.Key), kv.Value);
+					AssetDatabase.ImportAsset(kv.Key, ImportAssetOptions.ForceUpdate);
+				});
 			}
 
 			foreach (var kv in s_prefsSnapshot)
 			{
-				if (kv.Value == null) EditorPrefs.DeleteKey(kv.Key);
-				else if (kv.Value.StartsWith("i:")) EditorPrefs.SetInt(kv.Key, int.Parse(kv.Value.Substring(2)));
-				else EditorPrefs.SetString(kv.Key, kv.Value.Substring(2));
+				Try("restore EditorPrefs " + kv.Key, () =>
+				{
+					if (kv.Value == null) EditorPrefs.DeleteKey(kv.Key);
+					else if (kv.Value.StartsWith("i:")) EditorPrefs.SetInt(kv.Key, int.Parse(kv.Value.Substring(2)));
+					else EditorPrefs.SetString(kv.Key, kv.Value.Substring(2));
+				});
 			}
 
-			foreach (var kv in s_gizmoSnapshot) GizmoUtility.SetIconEnabled(kv.Key, kv.Value);
+			foreach (var kv in s_gizmoSnapshot) Try("restore gizmo icon " + kv.Key.Name, () => GizmoUtility.SetIconEnabled(kv.Key, kv.Value));
 
-			var bakeDir = "Assets/MapResources/TestMap/Art/light_tower/RenderCore";
-			if (AssetDatabase.IsValidFolder(bakeDir))
+			Try("delete the material bake folder", () =>
 			{
-				AssetDatabase.DeleteAsset(bakeDir);
-				Log("deleted " + bakeDir);
-			}
+				var bakeDir = "Assets/MapResources/TestMap/Art/light_tower/RenderCore";
+				if (AssetDatabase.IsValidFolder(bakeDir))
+				{
+					AssetDatabase.DeleteAsset(bakeDir);
+					Log("deleted " + bakeDir);
+				}
+			});
 
 			try
 			{
@@ -315,7 +442,7 @@ namespace MapUploader.DocsCapture
 				Log("cache cleanup: " + e.Message);
 			}
 
-			AssetDatabase.Refresh();
+			Try("refresh the asset database", () => AssetDatabase.Refresh());
 			Log("restored snapshot");
 		}
 
@@ -358,21 +485,42 @@ namespace MapUploader.DocsCapture
 			s_mb.position = new Rect(60, 60, 1136, 760);
 			s_openedWindows.Add(s_mb);
 			yield return Wait(3);
-			yield return WaitUntil(() => !(bool)Field(s_mb, "m_fetching") && !(bool)Call(s_mb, "IsDownloadAnyIcon"), 60, "MapBuilder fetch");
+			yield return WaitUntil(IsMapBuilderIdle, 60, "MapBuilder fetch");
 			Call(s_mb, "SelectLocalMap", Config);
 			s_mb.Focus();
 			yield return Settle(s_mb, 4);
 		}
 
-		private static object Field(object target, string name) => target.GetType().GetField(name, Instance)?.GetValue(target);
-		private static void SetField(object target, string name, object value) => target.GetType().GetField(name, Instance).SetValue(target, value);
+		private static bool IsMapBuilderIdle() => !Field<bool>(s_mb, "m_fetching") && !Call<bool>(s_mb, "IsDownloadAnyIcon");
 
-		private static object Call(object target, string name, params object[] args)
+		// ---------- reflection ----------
+		// Every lookup throws with the type and member name when the member is gone or has another type.
+
+		private static FieldInfo FindField(Type type, string name, BindingFlags flags) =>
+			type.GetField(name, flags) ?? throw new MissingFieldException(type.FullName, name);
+
+		private static PropertyInfo FindProperty(Type type, string name) =>
+			type.GetProperty(name, Instance) ?? throw new MissingMemberException(type.FullName, name);
+
+		private static MethodInfo FindMethod(Type type, string name) =>
+			type.GetMethod(name, Instance) ?? throw new MissingMethodException(type.FullName, name);
+
+		private static Type FindType(Assembly assembly, string fullName) =>
+			assembly.GetType(fullName) ?? throw new TypeLoadException($"type {fullName} not found in {assembly.GetName().Name}");
+
+		private static T As<T>(object value, Type owner, string name)
 		{
-			var method = target.GetType().GetMethod(name, Instance);
-			if (method == null) throw new MissingMethodException(target.GetType().Name, name);
-			return method.Invoke(target, args);
+			if (value is T typed) return typed;
+			throw new InvalidCastException($"{owner.FullName}.{name} is {value?.GetType().FullName ?? "null"}, expected {typeof(T).FullName}");
 		}
+
+		private static object Field(object target, string name) => FindField(target.GetType(), name, Instance).GetValue(target);
+		private static T Field<T>(object target, string name) => As<T>(Field(target, name), target.GetType(), name);
+		private static object StaticField(Type type, string name) => FindField(type, name, Static).GetValue(null);
+		private static void SetField(object target, string name, object value) => FindField(target.GetType(), name, Instance).SetValue(target, value);
+
+		private static object Call(object target, string name, params object[] args) => FindMethod(target.GetType(), name).Invoke(target, args);
+		private static T Call<T>(object target, string name, params object[] args) => As<T>(Call(target, name, args), target.GetType(), name);
 
 		private static void Tab(int tab) => Call(s_mb, "SelectWorkspaceTab", tab);
 
@@ -384,7 +532,8 @@ namespace MapUploader.DocsCapture
 
 		private static void Destination(int value)
 		{
-			var enumType = MapBuilderWindowType.GetNestedType("PublishDestination", BindingFlags.NonPublic);
+			var enumType = MapBuilderWindowType.GetNestedType("PublishDestination", BindingFlags.NonPublic)
+				?? throw new TypeLoadException($"nested type {MapBuilderWindowType.FullName}.PublishDestination not found");
 			SetField(s_mb, "m_publishDestination", Enum.ToObject(enumType, value));
 			Call(s_mb, "RefreshDetailsPanel");
 		}
@@ -393,8 +542,7 @@ namespace MapUploader.DocsCapture
 		{
 			yield return OpenMapBuilder(lang);
 			Tab(0);
-			var mapPage = Field(s_mb, "m_mapPage") as ScrollView;
-			if (mapPage != null) mapPage.scrollOffset = Vector2.zero;
+			Field<ScrollView>(s_mb, "m_mapPage").scrollOffset = Vector2.zero;
 			yield return Settle(s_mb, 5);
 			ExpandAuthors();
 			yield return Settle(s_mb, 3);
@@ -417,35 +565,29 @@ namespace MapUploader.DocsCapture
 		{
 			Tab(2);
 			Destination(0);
-			yield return WaitUntil(() => !(bool)Field(s_mb, "m_fetching") && !(bool)Call(s_mb, "IsDownloadAnyIcon"), 60, "publication list");
+			yield return WaitUntil(IsMapBuilderIdle, 60, "publication list");
 			yield return Settle(s_mb, 3);
 			if (!global::Editor.MapBuilder.session.IsAuthenticated)
 			{
-				Log("not signed in: publish-modio will show the signed-out state");
+				// Not a failure: the other shots don't depend on the sign-in state. annotate.py stops on publish-modio, whose
+				// callouts describe the signed-in state (docs/_capture/README.md, Sign-in state).
+				if (Wanted("publish-modio")) Log("WARNING: not signed in to mod.io; publish-modio shows the signed-out state, which shots.json doesn't describe");
 				yield break;
 			}
 
-			var items = (System.Collections.IList)Field(s_mb, "m_fetchResultListItems");
-			int index = -1;
-			for (int i = 0; i < items.Count; i++)
-			{
-				if (items[i].GetType().GetProperty("Title")?.GetValue(items[i]) as string == DemoPublicationTitle) index = i;
-			}
-
+			var items = Field<List<ModItem>>(s_mb, "m_fetchResultListItems");
+			int index = items.FindIndex(item => item.Title == DemoPublicationTitle);
 			Log($"publications: {items.Count}, demo index {index}");
 			if (index >= 0) Call(s_mb, "OnItemRowClicked", index);
+			else if (Wanted("publish-modio")) Fail($"the signed-in account has no publication titled {DemoPublicationTitle}");
 			yield return Settle(s_mb, 3);
 		}
 
 		// The account may own other publications (community maps); the published screenshot shows only the demo one.
 		private static void KeepOnlyDemoPublication()
 		{
-			var items = (System.Collections.IList)Field(s_mb, "m_fetchResultListItems");
-			for (int i = items.Count - 1; i >= 0; i--)
-			{
-				if (items[i].GetType().GetProperty("Title")?.GetValue(items[i]) as string != DemoPublicationTitle) items.RemoveAt(i);
-			}
-
+			var items = Field<List<ModItem>>(s_mb, "m_fetchResultListItems");
+			items.RemoveAll(item => item.Title != DemoPublicationTitle);
 			SetField(s_mb, "m_selectItemIndex", items.Count > 0 ? 0 : -1);
 			Call(s_mb, "RefreshItemsList");
 		}
@@ -464,7 +606,7 @@ namespace MapUploader.DocsCapture
 			Shoot(s_mb, "build-tab", lang);
 
 			Details(3);
-			if (Field(s_mb, "m_buildPage") is ScrollView buildPage) buildPage.scrollOffset = Vector2.zero;
+			Field<ScrollView>(s_mb, "m_buildPage").scrollOffset = Vector2.zero;
 			yield return Settle(s_mb, 5);
 			Shoot(s_mb, "build-optimization", lang);
 
@@ -476,7 +618,7 @@ namespace MapUploader.DocsCapture
 			Shoot(s_mb, "export-folder", lang);
 
 			Destination(0);
-			yield return WaitUntil(() => !(bool)Field(s_mb, "m_fetching") && !(bool)Call(s_mb, "IsDownloadAnyIcon"), 60, "publication list");
+			yield return WaitUntil(IsMapBuilderIdle, 60, "publication list");
 			MapManagerConfig.GetPublishData(Config).changelog = lang == "ru" ? "Первый тестовый выпуск." : "First test release.";
 			MapManagerConfig.instance.uploadName = false;
 			MapManagerConfig.instance.uploadDescription = true;
@@ -497,11 +639,13 @@ namespace MapUploader.DocsCapture
 			Log("build started");
 			Call(s_mb, "OnBuildButtonClicked");
 			yield return Wait(10);
-			yield return WaitUntil(() => !global::Editor.MapBuilder.IsBuilding && !(bool)Field(s_mb, "m_buildProcess"), 900, "build");
+			yield return WaitUntil(() => !global::Editor.MapBuilder.IsBuilding && !Field<bool>(s_mb, "m_buildProcess"), 900, "build");
 			global::Editor.Validation.MapValidationWindow.CloseIfOpen();
 			yield return Wait(3);
 			var build = MapManagerConfig.GetBuildOrEmpty(Config);
 			Log($"build finished, buildSuccess = {build.buildSuccess}");
+			// 3 = TempData.Map | TempData.Meta: both parts built. Anything less means the build shots show a failed build.
+			if (build.buildSuccess != (int)(TempData.Map | TempData.Meta)) Fail($"TestMap did not build, buildSuccess = {build.buildSuccess}");
 		}
 
 		// ---------- validation ----------
@@ -512,13 +656,12 @@ namespace MapUploader.DocsCapture
 			yield return Wait(2);
 			MapManagerConfig.instance.targetScene = ScenePath;
 			// Collapse the long Geometry list so the Markers error is visible; the foldout state is a static dictionary.
-			if (typeof(global::Editor.Validation.MapValidationWindow).GetField("s_foldouts", Static)?.GetValue(null) is Dictionary<string, bool> foldouts)
-			{
-				foldouts["Geometry"] = false;
-				foldouts["Format"] = true;
-				foldouts["Markers"] = true;
-				foldouts["Lighting"] = true;
-			}
+			var windowType = typeof(global::Editor.Validation.MapValidationWindow);
+			var foldouts = As<Dictionary<string, bool>>(StaticField(windowType, "s_foldouts"), windowType, "s_foldouts");
+			foldouts["Geometry"] = false;
+			foldouts["Format"] = true;
+			foldouts["Markers"] = true;
+			foldouts["Lighting"] = true;
 
 			var go = new GameObject("DemoRoadWithoutCollider");
 			var marker = go.AddComponent<GameMarkerData>();
@@ -528,7 +671,7 @@ namespace MapUploader.DocsCapture
 			var vw = Resources.FindObjectsOfTypeAll<global::Editor.Validation.MapValidationWindow>().FirstOrDefault();
 			if (vw == null)
 			{
-				Log("validation window not found");
+				Fail("the Map Validation window did not open");
 			}
 			else
 			{
@@ -545,7 +688,7 @@ namespace MapUploader.DocsCapture
 
 		// ---------- inspectors ----------
 
-		private static Type InspectorType => typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.InspectorWindow");
+		private static Type InspectorType => FindType(typeof(UnityEditor.Editor).Assembly, "UnityEditor.InspectorWindow");
 
 		private static IEnumerator OpenInspector(Object target, Func<Component, bool> expand, float height = 980)
 		{
@@ -564,7 +707,7 @@ namespace MapUploader.DocsCapture
 			inspector.position = new Rect(100, 40, 460, height);
 			s_openedWindows.Add(inspector);
 			yield return Wait(2);
-			InspectorType.GetProperty("isLocked", Instance)?.SetValue(inspector, true);
+			FindProperty(InspectorType, "isLocked").SetValue(inspector, true);
 			ActiveEditorTracker.sharedTracker.ForceRebuild();
 			yield return Settle(inspector, 6);
 			s_inspector = inspector;
@@ -576,7 +719,7 @@ namespace MapUploader.DocsCapture
 		{
 			if (s_inspector != null)
 			{
-				InspectorType.GetProperty("isLocked", Instance)?.SetValue(s_inspector, false);
+				FindProperty(InspectorType, "isLocked").SetValue(s_inspector, false);
 				s_inspector.Close();
 			}
 
@@ -604,6 +747,12 @@ namespace MapUploader.DocsCapture
 		{
 			EditorPrefs.SetInt(HdrpLitUiStateKey, (1 << 0) | (1 << 1) | (1 << 6));
 			var material = AssetDatabase.LoadAssetAtPath<Material>(MaterialPath);
+			if (material == null)
+			{
+				Fail("material not found: " + MaterialPath);
+				yield break;
+			}
+
 			yield return OpenInspector(material, _ => true, 1040);
 			yield return Settle(s_inspector, 6);
 			Shoot(s_inspector, "scene-hdrp-lit-material", "shared");
@@ -680,7 +829,7 @@ namespace MapUploader.DocsCapture
 			var go = FindByGlobalId("GlobalObjectId_V1-2-259b9e7bcf9201647b685277124309e3-1414104811014883703-0") ?? FindInScene("Flora/light_tower");
 			if (go == null)
 			{
-				Log("light_tower not found");
+				Fail("Flora/light_tower not found in the TestMap scene");
 				yield break;
 			}
 
@@ -708,7 +857,7 @@ namespace MapUploader.DocsCapture
 			var go = SceneManager.GetActiveScene().GetRootGameObjects().FirstOrDefault(g => g.name == "Minimap");
 			if (go == null)
 			{
-				Log("Minimap not found");
+				Fail("the Minimap root object not found in the TestMap scene");
 				yield break;
 			}
 
@@ -732,7 +881,7 @@ namespace MapUploader.DocsCapture
 			var go = FindInScene("Screen/PreviewScreen");
 			if (go == null)
 			{
-				Log("PreviewScreen not found");
+				Fail("Screen/PreviewScreen not found in the TestMap scene");
 				yield break;
 			}
 
@@ -748,57 +897,69 @@ namespace MapUploader.DocsCapture
 		{
 			var gizmos = GizmoUtility.GetGizmoInfo();
 			var gizmoState = gizmos.Select(g => (g, g.gizmoEnabled, g.iconEnabled)).ToList();
-			foreach (var g in gizmos)
-			{
-				bool keep = g.name == "DrawZoneBehaviour";
-				g.gizmoEnabled = keep;
-				g.iconEnabled = false;
-				GizmoUtility.ApplyGizmoInfo(g);
-			}
-
-			// Sound zones use DrawZoneBehaviour too; hide every zone except the minimap box for the shot.
 			var hiddenZones = new List<GameObject>();
-			foreach (var zone in Object.FindObjectsByType<DrawZoneBehaviour>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+			SceneView sv = null;
+			// The finally block also runs when the run stops on an exception: Tick disposes the suspended routines.
+			try
 			{
-				if (zone.GetComponent<Minimap>() != null) continue;
-				zone.gameObject.SetActive(false);
-				hiddenZones.Add(zone.gameObject);
+				foreach (var g in gizmos)
+				{
+					bool keep = g.name == "DrawZoneBehaviour";
+					g.gizmoEnabled = keep;
+					g.iconEnabled = false;
+					GizmoUtility.ApplyGizmoInfo(g);
+				}
+
+				// Sound zones use DrawZoneBehaviour too; hide every zone except the minimap box for the shot.
+				foreach (var zone in Object.FindObjectsByType<DrawZoneBehaviour>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+				{
+					if (zone.GetComponent<Minimap>() != null) continue;
+					zone.gameObject.SetActive(false);
+					hiddenZones.Add(zone.gameObject);
+				}
+
+				Selection.activeObject = null;
+				sv = ScriptableObject.CreateInstance<SceneView>();
+				sv.Show();
+				sv.position = new Rect(80, 80, 700, 700);
+				s_openedWindows.Add(sv);
+				sv.drawGizmos = true;
+				sv.sceneLighting = false;
+				try { sv.overlayCanvas.overlaysEnabled = false; } catch (Exception e) { Log("overlays: " + e.Message); }
+				sv.LookAt(Vector3.zero, Quaternion.Euler(90f, 0f, 0f), 330f, true, true);
+				yield return Settle(sv, 10);
+				sv.Focus();
+				yield return Settle(sv, 4);
+
+				var minimap = SceneManager.GetActiveScene().GetRootGameObjects().FirstOrDefault(g => g.name == "Minimap");
+				var extra = new Dictionary<string, object>();
+				if (minimap != null)
+				{
+					var cam = sv.camera;
+					var size = minimap.GetComponent<Minimap>() != null ? minimap.transform.localScale : Vector3.one * 600;
+					float y = minimap.transform.position.y;
+					extra["cameraPixelRect"] = cam.pixelRect;
+					extra["corner"] = cam.WorldToScreenPoint(new Vector3(size.x / 2, y, size.z / 2));
+					extra["center"] = cam.WorldToScreenPoint(new Vector3(0, y, 0));
+					extra["topMid"] = cam.WorldToScreenPoint(new Vector3(0, y, size.z / 2));
+				}
+
+				Shoot(sv, "minimap-top-view", "shared", extra);
 			}
-
-			Selection.activeObject = null;
-			var sv = ScriptableObject.CreateInstance<SceneView>();
-			sv.Show();
-			sv.position = new Rect(80, 80, 700, 700);
-			s_openedWindows.Add(sv);
-			sv.drawGizmos = true;
-			sv.sceneLighting = false;
-			try { sv.overlayCanvas.overlaysEnabled = false; } catch (Exception e) { Log("overlays: " + e.Message); }
-			sv.LookAt(Vector3.zero, Quaternion.Euler(90f, 0f, 0f), 330f, true, true);
-			yield return Settle(sv, 10);
-			sv.Focus();
-			yield return Settle(sv, 4);
-
-			var minimap = SceneManager.GetActiveScene().GetRootGameObjects().FirstOrDefault(g => g.name == "Minimap");
-			var extra = new Dictionary<string, object>();
-			if (minimap != null)
+			finally
 			{
-				var cam = sv.camera;
-				var size = minimap.GetComponent<Minimap>() != null ? minimap.transform.localScale : Vector3.one * 600;
-				float y = minimap.transform.position.y;
-				extra["cameraPixelRect"] = cam.pixelRect;
-				extra["corner"] = cam.WorldToScreenPoint(new Vector3(size.x / 2, y, size.z / 2));
-				extra["center"] = cam.WorldToScreenPoint(new Vector3(0, y, 0));
-				extra["topMid"] = cam.WorldToScreenPoint(new Vector3(0, y, size.z / 2));
-			}
+				if (sv != null) sv.Close();
+				foreach (var zone in hiddenZones)
+				{
+					if (zone != null) zone.SetActive(true);
+				}
 
-			Shoot(sv, "minimap-top-view", "shared", extra);
-			sv.Close();
-			foreach (var zone in hiddenZones) zone.SetActive(true);
-			foreach (var (g, gizmo, icon) in gizmoState)
-			{
-				g.gizmoEnabled = gizmo;
-				g.iconEnabled = icon;
-				GizmoUtility.ApplyGizmoInfo(g);
+				foreach (var (g, gizmo, icon) in gizmoState)
+				{
+					g.gizmoEnabled = gizmo;
+					g.iconEnabled = icon;
+					GizmoUtility.ApplyGizmoInfo(g);
+				}
 			}
 
 			yield return Wait(3);
@@ -830,7 +991,7 @@ namespace MapUploader.DocsCapture
 
 		private const string DemoAccount = "MapAuthor";
 
-		// Signed-in shots must not show a personal account: replace only the displayed user name (style guide 11.2).
+		// Signed-in shots must not show a personal account: replace only the displayed user name (docs/CONTRIBUTING.md, Files, names and sizes).
 		private static void AnonymizeAccount(EditorWindow w)
 		{
 			foreach (var label in w.rootVisualElement.Query<Label>(className: "mb-auth-state").ToList())
@@ -845,6 +1006,12 @@ namespace MapUploader.DocsCapture
 			if (!Wanted(id)) return;
 			try
 			{
+				// Delete the raw shot of an earlier run first, so a failed shot never leaves an old one for annotate.py.
+				// File.Delete throws only when the folder is missing, so create it first.
+				var dir = Path.Combine(s_outDir, lang);
+				Directory.CreateDirectory(dir);
+				File.Delete(Path.Combine(dir, id + ".png"));
+				File.Delete(Path.Combine(dir, id + ".json"));
 				if (w.GetType() == MapBuilderWindowType)
 				{
 					AnonymizeAccount(w);
@@ -853,8 +1020,6 @@ namespace MapUploader.DocsCapture
 
 				w.Repaint();
 				var tex = Grab(w, out var viewRect);
-				var dir = Path.Combine(s_outDir, lang);
-				Directory.CreateDirectory(dir);
 				File.WriteAllBytes(Path.Combine(dir, id + ".png"), tex.EncodeToPNG());
 				File.WriteAllText(Path.Combine(dir, id + ".json"), DescribeLayout(w, tex, viewRect, extra));
 				Object.DestroyImmediate(tex);
@@ -862,21 +1027,22 @@ namespace MapUploader.DocsCapture
 			}
 			catch (Exception e)
 			{
-				Log($"shot {lang}/{id} failed: {e}");
+				Fail($"shot {lang}/{id}: {e}");
 			}
 		}
 
 		private static Texture2D Grab(EditorWindow w, out Rect viewRect)
 		{
-			var parent = typeof(EditorWindow).GetField("m_Parent", Instance)!.GetValue(w);
-			var guiView = typeof(EditorWindow).Assembly.GetType("UnityEditor.GUIView");
-			viewRect = (Rect)guiView.GetProperty("position", Instance)!.GetValue(parent);
+			var parent = FindField(typeof(EditorWindow), "m_Parent", Instance).GetValue(w)
+				?? throw new InvalidOperationException($"{w.GetType().Name} has no host view; it isn't shown");
+			var guiView = FindType(typeof(EditorWindow).Assembly, "UnityEditor.GUIView");
+			viewRect = As<Rect>(FindProperty(guiView, "position").GetValue(parent), guiView, "position");
 			float ppp = EditorGUIUtility.pixelsPerPoint;
 			int width = Mathf.RoundToInt(viewRect.width * ppp);
 			int height = Mathf.RoundToInt(viewRect.height * ppp);
 			var rt = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
 			rt.Create();
-			guiView.GetMethod("GrabPixels", Instance)!.Invoke(parent, new object[] { rt, new Rect(0, 0, width, height) });
+			FindMethod(guiView, "GrabPixels").Invoke(parent, new object[] { rt, new Rect(0, 0, width, height) });
 			var previous = RenderTexture.active;
 			RenderTexture.active = rt;
 			var tex = new Texture2D(width, height, TextureFormat.RGBA32, false, true);

@@ -1,5 +1,5 @@
 {
-  "comment": "Capture spec for docs/images. DocsCapture.cs produces <raw>/<en|ru|shared>/<id>.png+.json; annotate.py crops and numbers them. folder 'lang' = one image per language in docs/images/en|ru, 'shared' = docs/images/shared. width = displayed width in the Markdown <img width>. Anchors match the layout JSON: type, class, name, binding, text (string or {en,ru}), textStarts, index; or px [x,y,w,h] in raw pixels. place: left (default), right, top-right, top-left, above, above-left, below, below-left, center; dx/dy in displayed pixels.",
+  "comment": "Capture spec for docs/images; docs/_capture/README.md describes the procedure. DocsCapture.cs writes <raw>/<en|ru|shared>/<id>.png+.json; annotate.py crops and numbers them. folder 'lang' = one image per language in docs/images/en|ru, 'shared' = docs/images/shared. width = displayed width in the Markdown <img width>. Crop edges: 'content', 'full', or left/top/right/bottom as a number in points or {anchor, edge, pad}; pad is in points. Anchors match the layout JSON: type, class, name, binding, text (string or {en,ru}), textStarts, textContains, index; or px [x,y,w,h] / [x,y] in points (annotate.py multiplies them by the layout's ppp, so they hold at any display scale). An anchor can be a list of alternatives; the first one that matches an element is used. hint = text added to the error when no element matches. place: left (default), right, top-right, top-left, above, above-left, below, below-left, center; force keeps left at the image edge; dx/dy in displayed pixels.",
   "shots": [
     {
       "id": "window-overview",
@@ -9,13 +9,22 @@
       "callouts": [
         {
           "n": 1,
-          "anchor": {
-            "type": "Button",
-            "text": {
-              "en": "Sign out",
-              "ru": "Выйти"
+          "anchor": [
+            {
+              "type": "Button",
+              "text": {
+                "en": "Sign out",
+                "ru": "Выйти"
+              }
+            },
+            {
+              "type": "Button",
+              "text": {
+                "en": "Sign in",
+                "ru": "Войти"
+              }
             }
-          },
+          ],
           "place": "right"
         },
         {
@@ -602,7 +611,8 @@
           "anchor": {
             "class": "mb-item-row-selected"
           },
-          "place": "top-right"
+          "place": "top-right",
+          "hint": "The selected publication row exists only when the editor is signed in to mod.io: capture this shot signed in, see \"Sign-in state\" in docs/_capture/README.md."
         },
         {
           "n": 6,
@@ -645,7 +655,7 @@
           "anchor": {
             "px": [
               0,
-              46,
+              26.286,
               0,
               0
             ]
@@ -656,7 +666,7 @@
         "right": {
           "anchor": {
             "px": [
-              1575,
+              900,
               0,
               0,
               0
@@ -669,7 +679,7 @@
           "anchor": {
             "px": [
               0,
-              990,
+              565.714,
               0,
               0
             ]
@@ -683,10 +693,10 @@
           "n": 1,
           "anchor": {
             "px": [
-              759,
-              110,
+              433.714,
+              62.857,
               0,
-              30
+              17.143
             ]
           },
           "place": "right"
@@ -695,10 +705,10 @@
           "n": 2,
           "anchor": {
             "px": [
-              681,
-              165,
+              389.143,
+              94.286,
               0,
-              28
+              16
             ]
           },
           "place": "right"
@@ -707,10 +717,10 @@
           "n": 3,
           "anchor": {
             "px": [
-              1243,
-              162,
-              330,
-              34
+              710.286,
+              92.571,
+              188.571,
+              19.429
             ]
           },
           "place": "left"
@@ -719,10 +729,10 @@
           "n": 4,
           "anchor": {
             "px": [
-              35,
-              459,
-              125,
-              26
+              20,
+              262.286,
+              71.429,
+              14.857
             ]
           },
           "place": "right"
@@ -731,10 +741,10 @@
           "n": 5,
           "anchor": {
             "px": [
-              1461,
-              925,
-              108,
-              30
+              834.857,
+              528.571,
+              61.714,
+              17.143
             ]
           },
           "place": "left"
@@ -751,7 +761,7 @@
           "anchor": {
             "px": [
               0,
-              46,
+              26.286,
               0,
               0
             ]
@@ -762,7 +772,7 @@
         "right": {
           "anchor": {
             "px": [
-              805,
+              460,
               0,
               0,
               0
@@ -775,7 +785,7 @@
           "anchor": {
             "px": [
               0,
-              1422,
+              812.571,
               0,
               0
             ]
@@ -789,10 +799,10 @@
           "n": 1,
           "anchor": {
             "px": [
-              58,
-              152,
-              165,
-              26
+              33.143,
+              86.857,
+              94.286,
+              14.857
             ]
           },
           "place": "right"
@@ -801,10 +811,10 @@
           "n": 2,
           "anchor": {
             "px": [
-              117,
-              626,
-              98,
-              26
+              66.857,
+              357.714,
+              56,
+              14.857
             ]
           },
           "place": "right"
@@ -813,10 +823,10 @@
           "n": 3,
           "anchor": {
             "px": [
-              117,
-              665,
-              102,
-              26
+              66.857,
+              380,
+              58.286,
+              14.857
             ]
           },
           "place": "right"
@@ -825,10 +835,10 @@
           "n": 4,
           "anchor": {
             "px": [
-              117,
-              853,
-              120,
-              26
+              66.857,
+              487.429,
+              68.571,
+              14.857
             ]
           },
           "place": "right"
@@ -837,10 +847,10 @@
           "n": 5,
           "anchor": {
             "px": [
-              117,
-              1203,
-              135,
-              26
+              66.857,
+              687.429,
+              77.143,
+              14.857
             ]
           },
           "place": "right"
@@ -857,7 +867,7 @@
           "anchor": {
             "px": [
               0,
-              46,
+              26.286,
               0,
               0
             ]
@@ -868,7 +878,7 @@
         "right": {
           "anchor": {
             "px": [
-              805,
+              460,
               0,
               0,
               0
@@ -881,7 +891,7 @@
           "anchor": {
             "px": [
               0,
-              744,
+              425.143,
               0,
               0
             ]
@@ -895,10 +905,10 @@
           "n": 1,
           "anchor": {
             "px": [
-              62,
-              340,
-              733,
-              66
+              35.429,
+              194.286,
+              418.857,
+              37.714
             ]
           },
           "place": "left",
@@ -908,10 +918,10 @@
           "n": 2,
           "anchor": {
             "px": [
-              62,
-              413,
-              733,
-              28
+              35.429,
+              236,
+              418.857,
+              16
             ]
           },
           "place": "left",
@@ -921,10 +931,10 @@
           "n": 3,
           "anchor": {
             "px": [
-              40,
-              448,
+              22.857,
+              256,
               0,
-              26
+              14.857
             ]
           },
           "place": "left",
@@ -934,10 +944,10 @@
           "n": 4,
           "anchor": {
             "px": [
-              87,
-              518,
-              190,
-              26
+              49.714,
+              296,
+              108.571,
+              14.857
             ]
           },
           "place": "right"
@@ -946,10 +956,10 @@
           "n": 5,
           "anchor": {
             "px": [
-              87,
-              553,
-              708,
-              28
+              49.714,
+              316,
+              404.571,
+              16
             ]
           },
           "place": "left",
@@ -959,10 +969,10 @@
           "n": 6,
           "anchor": {
             "px": [
-              114,
-              658,
-              92,
-              26
+              65.143,
+              376,
+              52.571,
+              14.857
             ]
           },
           "place": "right"
@@ -979,7 +989,7 @@
           "anchor": {
             "px": [
               0,
-              46,
+              26.286,
               0,
               0
             ]
@@ -990,7 +1000,7 @@
         "right": {
           "anchor": {
             "px": [
-              805,
+              460,
               0,
               0,
               0
@@ -1003,7 +1013,7 @@
           "anchor": {
             "px": [
               0,
-              754,
+              430.857,
               0,
               0
             ]
@@ -1017,10 +1027,10 @@
           "n": 1,
           "anchor": {
             "px": [
-              33,
-              266,
-              60,
-              32
+              18.857,
+              152,
+              34.286,
+              18.286
             ]
           },
           "place": "right"
@@ -1029,10 +1039,10 @@
           "n": 2,
           "anchor": {
             "px": [
-              33,
-              397,
-              146,
-              30
+              18.857,
+              226.857,
+              83.429,
+              17.143
             ]
           },
           "place": "right"
@@ -1041,10 +1051,10 @@
           "n": 3,
           "anchor": {
             "px": [
-              33,
-              433,
-              148,
-              30
+              18.857,
+              247.429,
+              84.571,
+              17.143
             ]
           },
           "place": "right"
@@ -1053,10 +1063,10 @@
           "n": 4,
           "anchor": {
             "px": [
-              33,
-              469,
-              122,
-              30
+              18.857,
+              268,
+              69.714,
+              17.143
             ]
           },
           "place": "right"
@@ -1065,10 +1075,10 @@
           "n": 5,
           "anchor": {
             "px": [
-              111,
-              586,
-              128,
-              30
+              63.429,
+              334.857,
+              73.143,
+              17.143
             ]
           },
           "place": "right"
@@ -1077,10 +1087,10 @@
           "n": 6,
           "anchor": {
             "px": [
-              33,
-              668,
-              95,
-              26
+              18.857,
+              381.714,
+              54.286,
+              14.857
             ]
           },
           "place": "right"
@@ -1097,7 +1107,7 @@
           "anchor": {
             "px": [
               0,
-              46,
+              26.286,
               0,
               0
             ]
@@ -1108,7 +1118,7 @@
         "right": {
           "anchor": {
             "px": [
-              805,
+              460,
               0,
               0,
               0
@@ -1121,7 +1131,7 @@
           "anchor": {
             "px": [
               0,
-              894,
+              510.857,
               0,
               0
             ]
@@ -1135,10 +1145,10 @@
           "n": 1,
           "anchor": {
             "px": [
-              33,
-              388,
-              58,
-              26
+              18.857,
+              221.714,
+              33.143,
+              14.857
             ]
           },
           "place": "right"
@@ -1147,10 +1157,10 @@
           "n": 2,
           "anchor": {
             "px": [
-              33,
-              458,
-              84,
-              26
+              18.857,
+              261.714,
+              48,
+              14.857
             ]
           },
           "place": "right"
@@ -1159,10 +1169,10 @@
           "n": 3,
           "anchor": {
             "px": [
-              33,
-              493,
-              162,
-              26
+              18.857,
+              281.714,
+              92.571,
+              14.857
             ]
           },
           "place": "right"
@@ -1171,10 +1181,10 @@
           "n": 4,
           "anchor": {
             "px": [
-              33,
-              541,
-              763,
-              38
+              18.857,
+              309.143,
+              436,
+              21.714
             ]
           },
           "place": "top-left",
@@ -1193,7 +1203,7 @@
           "anchor": {
             "px": [
               0,
-              46,
+              26.286,
               0,
               0
             ]
@@ -1204,7 +1214,7 @@
         "right": {
           "anchor": {
             "px": [
-              805,
+              460,
               0,
               0,
               0
@@ -1217,7 +1227,7 @@
           "anchor": {
             "px": [
               0,
-              772,
+              441.143,
               0,
               0
             ]
@@ -1231,10 +1241,10 @@
           "n": 1,
           "anchor": {
             "px": [
-              105,
-              195,
-              140,
-              26
+              60,
+              111.429,
+              80,
+              14.857
             ]
           },
           "place": "right"
@@ -1243,10 +1253,10 @@
           "n": 2,
           "anchor": {
             "px": [
-              35,
-              308,
-              135,
-              26
+              20,
+              176,
+              77.143,
+              14.857
             ]
           },
           "place": "right"
@@ -1255,10 +1265,10 @@
           "n": 3,
           "anchor": {
             "px": [
-              62,
-              343,
-              163,
-              26
+              35.429,
+              196,
+              93.143,
+              14.857
             ]
           },
           "place": "right"
@@ -1267,10 +1277,10 @@
           "n": 4,
           "anchor": {
             "px": [
-              63,
-              374,
-              122,
-              26
+              36,
+              213.714,
+              69.714,
+              14.857
             ]
           },
           "place": "right"
@@ -1279,10 +1289,10 @@
           "n": 5,
           "anchor": {
             "px": [
-              59,
-              410,
-              75,
-              26
+              33.714,
+              234.286,
+              42.857,
+              14.857
             ]
           },
           "place": "left",
@@ -1300,7 +1310,7 @@
           "anchor": {
             "px": [
               0,
-              46,
+              26.286,
               0,
               0
             ]
@@ -1311,7 +1321,7 @@
         "right": {
           "anchor": {
             "px": [
-              805,
+              460,
               0,
               0,
               0
@@ -1324,7 +1334,7 @@
           "anchor": {
             "px": [
               0,
-              690,
+              394.286,
               0,
               0
             ]
@@ -1338,10 +1348,10 @@
           "n": 1,
           "anchor": {
             "px": [
-              61,
-              183,
-              122,
-              26
+              34.857,
+              104.571,
+              69.714,
+              14.857
             ]
           },
           "place": "right"
@@ -1350,10 +1360,10 @@
           "n": 2,
           "anchor": {
             "px": [
-              687,
-              182,
-              108,
-              28
+              392.571,
+              104,
+              61.714,
+              16
             ]
           },
           "place": "left"
@@ -1362,10 +1372,10 @@
           "n": 3,
           "anchor": {
             "px": [
-              33,
-              594,
-              242,
-              30
+              18.857,
+              339.429,
+              138.286,
+              17.143
             ]
           },
           "place": "below"
@@ -1374,10 +1384,10 @@
           "n": 4,
           "anchor": {
             "px": [
-              278,
-              594,
-              243,
-              30
+              158.857,
+              339.429,
+              138.857,
+              17.143
             ]
           },
           "place": "below"
@@ -1386,10 +1396,10 @@
           "n": 5,
           "anchor": {
             "px": [
-              525,
-              594,
-              242,
-              30
+              300,
+              339.429,
+              138.286,
+              17.143
             ]
           },
           "place": "below"
@@ -1407,7 +1417,7 @@
           "anchor": {
             "px": [
               0,
-              46,
+              26.286,
               0,
               0
             ]
@@ -1418,7 +1428,7 @@
         "right": {
           "anchor": {
             "px": [
-              1225,
+              700,
               0,
               0,
               0
@@ -1431,7 +1441,7 @@
           "anchor": {
             "px": [
               0,
-              1271,
+              726.286,
               0,
               0
             ]
@@ -1445,8 +1455,8 @@
           "n": 1,
           "anchor": {
             "px": [
-              1171,
-              99,
+              669.143,
+              56.571,
               0,
               0
             ]
@@ -1459,8 +1469,8 @@
           "n": 2,
           "anchor": {
             "px": [
-              612,
-              658,
+              349.714,
+              376,
               0,
               0
             ]
@@ -1471,8 +1481,8 @@
           "n": 3,
           "anchor": {
             "px": [
-              612,
-              99,
+              349.714,
+              56.571,
               0,
               0
             ]

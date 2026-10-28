@@ -3,12 +3,19 @@
 Usage:
     python docs/_capture/annotate.py <raw-dir> [--only id,id] [--debug]
 
+Needs Python 3 with Pillow 9.1 or later: pip install -r docs/_capture/requirements.txt. The procedure is in
+docs/_capture/README.md.
+
 <raw-dir> is the folder written by DocsCapture (Library/DocsCapture by default). For every shot in shots.json and every
 language it lists, the script reads <raw-dir>/<lang>/<id>.png and .json, crops it, scales it, draws the numbered
 callouts and a 1 px border, and writes docs/images/<en|ru|shared>/<id>.png. --debug also writes <id>.debug.png next to
 the raw shot with every anchor rectangle drawn, which helps when a callout lands on the wrong element.
 
-Rules (docs/CONTRIBUTING.md, screenshots): amber #FFB000 badges with a #1A1A1A ring and digit, 22 px at the displayed
+The raw PNG and the element rectangles in the layout JSON are in pixels. Numeric crop edges, pads and px anchors in
+shots.json are in points; the script multiplies them by the layout's ppp (pixels per point), so the same shots.json
+works at any display scale.
+
+Rules (docs/CONTRIBUTING.md, Screenshots): amber #FFB000 badges with a #1A1A1A ring and digit, 22 px at the displayed
 width, placed 6 px left of the anchor or on its top-right corner when there is no room; a 1 px #6E7681 border; PNG,
 palette-quantized; output at most 1.5x the displayed width (never upscaled).
 """
@@ -17,6 +24,9 @@ import os
 import sys
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont
+
+if not hasattr(Image, 'Quantize'):  # Image.Quantize and Image.Dither are new in Pillow 9.1
+    sys.exit('annotate.py needs Pillow 9.1 or later: pip install -r docs/_capture/requirements.txt')
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCS = os.path.dirname(HERE)
@@ -69,9 +79,22 @@ def match(element, anchor, lang):
 
 
 def resolve(anchor, layout, lang):
-    """Return (x, y, w, h) in raw pixels for an anchor spec."""
+    """Return (x, y, w, h) in raw pixels for an anchor spec.
+
+    A list of anchors gives alternatives, for example for the signed-in and the signed-out state: the first one that
+    matches an element wins. A px anchor is [x, y, w, h] or [x, y] in points; it is multiplied by ppp like the numeric
+    crop edges and pads, and rounded to 0.01 px, the precision of the element rectangles in the layout JSON.
+    """
+    if isinstance(anchor, list):
+        for alternative in anchor:
+            try:
+                return resolve(alternative, layout, lang)
+            except LookupError:
+                pass
+        raise LookupError(f'no element for any of the anchors {anchor} ({lang})')
     if 'px' in anchor:
-        px = text_of(anchor['px'], lang)
+        ppp = layout['ppp']
+        px = [round(v * ppp, 2) for v in text_of(anchor['px'], lang)]
         return tuple(px) if len(px) == 4 else (px[0], px[1], 0, 0)
     found = [e for e in layout['elements'] if match(e, anchor, lang)]
     if not found:
@@ -142,8 +165,11 @@ def annotate(shot, raw_dir, lang, debug):
     r = BADGE_DIAMETER * scale / 2
     gap = BADGE_GAP * scale
     for callout in shot.get('callouts', []):
-        anchor = callout['anchor']
-        x, y, w, h = resolve(anchor, layout, lang)
+        try:
+            x, y, w, h = resolve(callout['anchor'], layout, lang)
+        except LookupError as error:
+            hint = callout.get('hint')
+            raise LookupError(f'callout {callout["n"]}: {error}' + (f'. {hint}' if hint else '')) from None
         x, y, w, h = (x - left) * factor, (y - top) * factor, w * factor, h * factor
         place = callout.get('place', 'left')
         if place == 'left' and x - gap - 2 * r < 0 and not callout.get('force'):

@@ -32,6 +32,11 @@ jobs:
           grep -q "$project" README.md \
             || { echo "::error::README.md does not mention $project - update the install instructions"; exit 1; }
 
+      # Links, anchors, image widths and callouts against docs/_capture/shots.json, EN/RU parity, version facts and
+      # <!-- src: path:line --> comments; see "Check the docs" in docs/CONTRIBUTING.md. Python 3 standard library only.
+      - name: The docs pass their checks
+        run: python3 -I -X utf8 docs/_tools/check_docs.py
+
   tests:
     name: Edit mode tests
     runs-on: ubuntu-latest
