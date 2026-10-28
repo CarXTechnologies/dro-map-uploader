@@ -307,7 +307,7 @@ The two vendors disagree in the places listed in the following table. The shared
 
 The mod.io website shows a review status (`Pending` or `Accepted`) and a visibility flag for each mod. Both travel in the API response, but the Unity plugin drops them when it builds its `Mod` object. The raw request builder (`ModioAPIRequest.New`, `ModioAPIRequestOptions.AddQueryParameter`) is `internal`, so an external assembly has no supported way to read either.
 
-So the publications list shows only what can be established honestly: whether a file has been uploaded. The tooltip of the status text links to the mod page, where the real status lives: `Full status and visibility: <Profile Url>/m/<mod id>`. If the plugin later exposes these values on `Mod`, change only `ModIoPublisher.DescribeStatus`. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:246 -->
+So the publications list shows only what can be established honestly: whether a file has been uploaded. The tooltip of the status text links to the mod page, where the real status lives: `Full status and visibility: <Profile Url>/m/<mod id>`. If the plugin later exposes these values on `Mod`, change only `ModIoPublisher.DescribeStatus`. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:247 -->
 
 ### `INVALID_JSON` usually means something else
 

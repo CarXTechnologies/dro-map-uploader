@@ -295,7 +295,7 @@
 
 Уровень: ошибка (блокирует сборку) · Категория: Meta <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:54-56 -->
 
-**Причина.** **Название** (Name) может содержать только буквы, цифры, пробелы и `- _ ' . , : ! ? ( ) & + /`, без пробела в начале и в конце, и не длиннее 50 символов. Слишком длинное название даёт `The track name is <n> characters; this vendor allows 50.` Пустое — `The track has no name. Fill in Workshop Name on the map config.`; это сообщение относится к полю **Название** на вкладке **Карта** (Map). <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:8; Assets/Resources/CarX.Modding/ModIoConfig.asset:28 -->
+**Причина.** **Название** (Name) может содержать только буквы, цифры, пробелы и `- _ ' . , : ! ? ( ) & + /`, без пробела в начале и в конце, и не длиннее 50 символов. Слишком длинное название даёт `The track name is <n> characters; this vendor allows 50.` Пустое — `The track has no name. Fill in Name on the Map tab.` <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:8; Assets/Resources/CarX.Modding/ModIoConfig.asset:28 -->
 
 **Исправление.**
 
@@ -325,7 +325,7 @@
 
 Уровень: ошибка (блокирует сборку) · Категория: Meta <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:103-105 -->
 
-**Причина.** У карты не задана **Иконка** (Icon). Иконка становится логотипом на mod.io и изображением карты в игре, и без неё mod.io не может создать публикацию. Отсутствие **Превью** (Preview) — только предупреждение: `No Preview is assigned. The map will have no large image on the mod page or on the loading screen.`
+**Причина.** У карты не задана **Иконка** (Icon). Иконка становится логотипом на mod.io и изображением карты в игре, и без неё mod.io не может создать публикацию. Отсутствие **Превью** (Preview) — только предупреждение: `No Preview is assigned. The map will have no large image on the loading screen.`
 
 **Исправление.**
 
@@ -372,9 +372,9 @@
 
 Сообщение: `The scene itself was not validated - fix the configuration first, then build again.`
 
-Уровень: заметка (не блокирует сборку) · Категория: Meta <!-- src: Assets/Editor/MapBuilder.cs:90-91 -->
+Уровень: заметка (не блокирует сборку) · Категория: Meta <!-- src: Assets/Editor/MapBuilder.cs:292-293 -->
 
-**Причина.** В настройках карты есть хотя бы одна ошибка. Сборка останавливается на настройках и не проверяет сцену, поэтому после их исправления могут появиться новые ошибки. **Проверить карту** тоже показывает эту заметку, но сцену всё равно проверяет.
+**Причина.** В настройках карты есть хотя бы одна ошибка. Сборка останавливается на настройках и не проверяет сцену, поэтому после их исправления могут появиться новые ошибки.
 
 **Исправление.**
 
@@ -386,13 +386,13 @@
 ### Minimap
 
 <a name="msg-bounds-size"></a>
-#### `'<object>': Bound Size is <size>. Set it to the size of the map in…`
+#### `'<object>': Bounds Size is <size>. Set it to the size of the map in…`
 
-Сообщение: `'<object>': Bound Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.`
+Сообщение: `'<object>': Bounds Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.`
 
 Уровень: ошибка (блокирует сборку) · Категория: Minimap <!-- src: Assets/Editor/Validation/SceneValidator.cs:900-902 -->
 
-**Причина.** Значение X или Y поля **Bounds Size** компонента Minimap равно нулю. Сообщение называет поле `Bound Size`; в окне **Inspector** оно называется **Bounds Size**. Без размера мини-карта в игре сжимается в точку.
+**Причина.** Значение X или Y поля **Bounds Size** компонента Minimap равно нулю. Без размера мини-карта в игре сжимается в точку.
 
 **Исправление.**
 
@@ -444,9 +444,9 @@
 <a name="msg-scene-not-opened"></a>
 #### `'<scene>' was not opened, so only the configuration was checked.`
 
-Уровень: заметка (не блокирует сборку) · Категория: Scene <!-- src: Assets/Editor/MapBuilder.cs:390 -->
+Уровень: заметка (не блокирует сборку) · Категория: Scene <!-- src: Assets/Editor/MapBuilder.cs:391 -->
 
-**Причина.** **Проверить карту** нужно было открыть сцену, выбранную в списке **Сцена**, а вы отменили предложение сохранить открытую сцену. Проверены только настройки карты. Заметка также появляется с пустым именем (`'' was not opened, …`), если в списке **Сцена** не выбрана ни одна сцена; см. [Список «Сцена» пуст](#scene-empty). <!-- src: Assets/Editor/MapBuilder.cs:390,398-403 -->
+**Причина.** **Проверить карту** нужно было открыть сцену, выбранную в списке **Сцена**, а вы отменили предложение сохранить открытую сцену. Проверены только настройки карты. Заметка также появляется с пустым именем (`'' was not opened, …`), если в списке **Сцена** не выбрана ни одна сцена; см. [Список «Сцена» пуст](#scene-empty). <!-- src: Assets/Editor/MapBuilder.cs:391,399-404 -->
 
 **Исправление.**
 
@@ -457,7 +457,7 @@
 <a name="build-errors"></a>
 ## Ошибки сборки в Console
 
-Некоторые проблемы обнаруживаются только во время экспорта карты. Они останавливают сборку с исключением в Console, а не в окне **Map Validation**: строка в Console начинается с типа исключения — обычно `InvalidOperationException`, а для материала Layered Lit — `InvalidDataException`. Вкладка **Сборка** затем показывает `Сборка не завершена полностью. Проверьте результаты проверки и Console.` (`Build incomplete. Check validation results and the Console.`). Чтобы открыть Console, выберите **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:323-327 -->
+Некоторые проблемы обнаруживаются только во время экспорта карты. Они останавливают сборку с исключением в Console, а не в окне **Map Validation**: строка в Console начинается с типа исключения — обычно `InvalidOperationException`, а для материала Layered Lit — `InvalidDataException`. Вкладка **Сборка** затем показывает `Сборка не завершена полностью. Проверьте результаты проверки и Console.` (`Build incomplete. Check validation results and the Console.`). Чтобы открыть Console, выберите **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:324-328 -->
 
 <a name="export-errors"></a>
 ### Ошибки экспорта
@@ -675,7 +675,7 @@
 
 Где видно: сводка сборки на вкладке **Сборка**; в английском интерфейсе — `Build incomplete. Check validation results and the Console.` <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
-**Причина.** После последней сборки собраны не обе части, Map и Meta: её остановила ошибка проверки, исключение во время экспорта или **Отмена**. Перед началом сборка сбрасывает части, которые пересобирает, даже если предыдущие сборки были успешными. Если в неудачной сборке в поле **Что пересобрать** были выбраны и Map, и Meta, как по умолчанию, строка карты в списке **ЛОКАЛЬНЫЕ КАРТЫ** показывает `Не собрана` (`Not built`); если не удалась только одна часть — `Нужна пересборка`. <!-- src: Assets/Editor/MapBuilder.cs:277 -->
+**Причина.** После последней сборки собраны не обе части, Map и Meta: её остановила ошибка проверки, исключение во время экспорта или **Отмена**. Перед началом сборка сбрасывает части, которые пересобирает, даже если предыдущие сборки были успешными. Если в неудачной сборке в поле **Что пересобрать** были выбраны и Map, и Meta, как по умолчанию, строка карты в списке **ЛОКАЛЬНЫЕ КАРТЫ** показывает `Не собрана` (`Not built`); если не удалась только одна часть — `Нужна пересборка`. <!-- src: Assets/Editor/MapBuilder.cs:271 -->
 
 **Исправление.**
 
@@ -976,7 +976,7 @@
 <a name="scene-empty"></a>
 ### Список «Сцена» пуст
 
-**Причина.** Список **Сцена** показывает только сцены, включённые в списке сцен сборки, а в нём их нет. Тогда MapBuilder продолжает проверять и собирать сцену последней сборки или сцену, которая была открыта, когда вы выбрали карту, — и это может оказаться не та сцена, которую вы ожидаете. Если эта сцена ни разу не сохранялась, проверка сообщает `No target scene is selected. Pick one in Build Settings.`; сцену вы выбираете в списке **Сцена** на вкладке **Сборка**. <!-- src: Assets/Editor/MapBuilderEditorWindow.cs:780-786; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:228-229 --> Сцена из `Assets/MapResources` добавляется в список и включается каждый раз, когда загружается редактор или вы сохраняете сцену, а сцена, которую вы выключили в списке, удаляется из него при следующем сохранении. <!-- src: Assets/Editor/MapBuilderProcessor.cs:79 -->
+**Причина.** Список **Сцена** показывает только сцены, включённые в списке сцен сборки, а в нём их нет. Тогда MapBuilder продолжает проверять и собирать сцену последней сборки или сцену, которая была открыта, когда вы выбрали карту, — и это может оказаться не та сцена, которую вы ожидаете. Если эта сцена ни разу не сохранялась, проверка сообщает `No target scene is selected. Pick one in Scene on the Build tab.` <!-- src: Assets/Editor/MapBuilderEditorWindow.cs:780-786; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:228-229 --> Сцена из `Assets/MapResources` добавляется в список и включается каждый раз, когда загружается редактор или вы сохраняете сцену, а сцена, которую вы выключили в списке, удаляется из него при следующем сохранении. <!-- src: Assets/Editor/MapBuilderProcessor.cs:79 -->
 
 **Исправление.**
 

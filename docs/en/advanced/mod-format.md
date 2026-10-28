@@ -102,13 +102,13 @@ File and object names come from asset ids and content hashes rather than from Ga
 | `contentType` | Always `map`. |
 | `id` | The mod.io id of the linked publication when its row is selected while you build; otherwise the id of the map config. The game keys the networked physics of dynamic objects by this id, so build after you link a publication; see [Update a publication](../publish.md#update). |
 | `version` | The data format version, `v1.0`. |
-| `contentVersion` | **Version** from the **Map** tab, or `1.0.0` when it is empty. <!-- src: Assets/Editor/MapBuilder.cs:176 --> |
+| `contentVersion` | **Version** from the **Map** tab, or `1.0.0` when it is empty. <!-- src: Assets/Editor/MapBuilder.cs:170 --> |
 | `name` | **Name**. |
 | `description` | **Description**. The summary isn't stored in the mod; only mod.io receives it. |
 | `icon` | The path of the **Icon · 16:9** image inside the mod, without an extension: `textures/<texture name>`. |
 | `largeIcon` | The path of the **Preview · 16:9** image, in the same form. |
 | `minimap` | `textures`: the paths of the Minimap textures; the game shows only the first one. `boundsCenterX` and `boundsCenterY`: the world X and Z of the image centre. `boundsSizeX` and `boundsSizeY`: the world X and Z extent. See [Add the minimap](../minimap-and-images.md#minimap). |
-| `madeIn` | The tool that built the map: `Mod Map Uploader v3.0`. <!-- src: Assets/Editor/MapBuilder.cs:174 --> |
+| `madeIn` | The tool that built the map: `Mod Map Uploader v3.0`. <!-- src: Assets/Editor/MapBuilder.cs:168 --> |
 | `url` | **URL**. |
 | `authors` | **Authors**. |
 

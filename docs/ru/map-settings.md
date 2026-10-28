@@ -69,7 +69,7 @@
 1. Выберите вкладку **Карта**.
 1. В поле **Название** введите название, которое видят игроки.
 1. Необязательно: в поле **Версия** введите версию выпуска, например `1.0.0`.
-   Если **Версия** пустая, сборка и mod.io используют `1.0.0`. <!-- src: Assets/Editor/MapBuilder.cs:176 -->
+   Если **Версия** пустая, сборка и mod.io используют `1.0.0`. <!-- src: Assets/Editor/MapBuilder.cs:170 -->
 1. Необязательно: в поле **Краткое описание (необязательно)** (Summary (optional)) введите одну строку о карте.
 1. Необязательно: в поле **Описание** (Description) введите полный текст о карте.
 1. Необязательно: перетащите PNG превью из окна **Project** в поле **Превью · 16:9** (Preview · 16:9).
@@ -99,7 +99,7 @@
 
 Местами игра обрезает иконку и превью; какая часть остаётся видна, см. в разделе [Требования к изображениям](minimap-and-images.md#images). Как снять изображения в Unity, см. [Съёмка изображений с помощью CaptureCamera](minimap-and-images.md#capture).
 
-**Проверить карту** сообщает о проблемах с этими полями в категории `Meta` окна **Map Validation**. См. [Проверка карты](validation.md#catalogue). Пустое **Название** даёт сообщение `The track has no name. Fill in Workshop Name on the map config.`; Workshop Name в этом сообщении означает поле **Название**. <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:48 -->
+**Проверить карту** сообщает о проблемах с этими полями в категории `Meta` окна **Map Validation**. См. [Проверка карты](validation.md#catalogue). Пустое **Название** даёт сообщение `The track has no name. Fill in Name on the Map tab.` <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:48 -->
 
 > [!IMPORTANT]
 > **Создать публикацию** отправляет **Описание** на mod.io только один раз. Чтобы позже изменить описание на mod.io, обновите публикацию с включённым **Обновить описание**, как описано в разделе [Обновление публикации](publish.md#update).
@@ -115,7 +115,7 @@
 > [!TIP]
 > Чтобы после изменений на вкладке **Карта** пересобрать у собранной карты только метаданные, на вкладке **Сборка** нажмите **Дополнительные настройки** (Advanced settings), оставьте в поле **Что пересобрать** (Rebuild targets) выбранной только **Meta** и нажмите кнопку **Собрать карту**. Каждый раз, когда вы выбираете карту, **Что пересобрать** возвращается к **Everything**.
 
-Если выбрать настройки карты в окне **Project**, окно **Inspector** показывает сокращённую форму с полями `Mod Name (max 50 characters)`, `Summary (optional, max 250 - first description line when empty)`, `Mod Description` и `Preview, Icon (16:9)`, но без версии, авторов и ссылки, поэтому пользуйтесь вкладкой **Карта**. Пока сборка не содержит текущих значений, **Inspector** также показывает `Meta is changed. Please rebuild meta in "Tool/MapBuilder"`; путь меню в этом сообщении означает **Tools** > **MapBuilder**. <!-- src: Assets/Editor/MapMetaConfigDrawer.cs:70 -->
+Если выбрать настройки карты в окне **Project**, окно **Inspector** показывает сокращённую форму с полями `Mod Name (max 50 characters)`, `Summary (optional, max 250 - first description line when empty)`, `Mod Description` и `Preview, Icon (16:9)`, но без версии, авторов и ссылки, поэтому пользуйтесь вкладкой **Карта**. Пока сборка не содержит текущих значений, **Inspector** также показывает `Meta is changed. Please rebuild meta in "Tools > MapBuilder"`. <!-- src: Assets/Editor/MapMetaConfigDrawer.cs:70 -->
 
 В настройках карты также хранятся настройки оптимизации сборки. См. [Оптимизация](build.md#optimization).
 

@@ -108,13 +108,13 @@ Give the image the same proportions as **Bounds Size** X : Y, because the game s
 ```text
 'Minimap': the map has 0, at least 1 is required.
 'Minimap': the map has <n>, at most 1 is allowed.
-'<name>': Bound Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.
+'<name>': Bounds Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.
 '<name>': no textures assigned. Add at least one entry with a Main Texture.
 '<name>': Textures element <i> has no Main Texture assigned.
 '<name>': Textures element <i> is a <Type>. Only Texture2D can be exported.
 ```
 
-The messages call **Bounds Size** `Bound Size`. For the cause and the fix of each message, see the minimap entries in [Troubleshooting](troubleshooting.md#msg-bounds-size).
+For the cause and the fix of each message, see the minimap entries in [Troubleshooting](troubleshooting.md#msg-bounds-size).
 
 A Minimap under a `Garbage` object isn't counted, so validation reports the minimap as missing. A Minimap on an inactive object passes validation, but the build exports the minimap only from an active object, so keep it active.
 

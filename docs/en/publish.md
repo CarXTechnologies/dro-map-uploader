@@ -28,7 +28,7 @@ On the **Publish** tab of the **MapBuilder** window, you send the current build 
 | 7 | **Create publication** | Creates a new, hidden publication on mod.io and uploads the current build to it. It's unavailable until you are signed in and the build is current. |
 | 8 | **Delete publication** | Deletes the selected publication from mod.io after you confirm. With no publication selected, it asks for the publication's id. |
 
-Before you sign in, the tab shows the `Not signed in to https://mod.io/g/carx-dro2.` box, **Publications** shows `No publications on mod.io yet.` (right after Unity starts, it can read `the vendor` instead of `mod.io`), and **Create publication** and **Update publication** are unavailable. You don't need to sign in to validate, build or export the map. <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoAuthProvider.cs:154 -->
+Before you sign in, the tab shows the `Not signed in to https://mod.io/g/carx-dro2.` box, **Publications** shows `No publications on mod.io yet.`, and **Create publication** and **Update publication** are unavailable. You don't need to sign in to validate, build or export the map. <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoAuthProvider.cs:154 -->
 
 Until a linked publication is selected, an info box under **Build destination** reminds you to create a publication or to select an existing one.
 
@@ -123,7 +123,7 @@ To make the publication public:
 
 Result: other players can find and install the map in game builds that support mod.io. In such a build, a map installed from mod.io appears on the **Mods** tab of **Track Selection**, and its card carries the mod.io badge. <!-- src: DR3PC1:Assets/DR3/Scripts/Services/ModIo/ModIoService.cs:41-51 -->
 
-If you can't find the publication on the website, open its page by its address. In **Publications**, point to the size line of the publication's row: the tooltip ends with `Full status and visibility:` and the address of the publication's page. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:246 -->
+If you can't find the publication on the website, open its page by its address. In **Publications**, point to the size line of the publication's row: the tooltip ends with `Full status and visibility:` and the address of the publication's page. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:247 -->
 
 You can't copy text from the tooltip, so type the address in the browser. It has the form `https://mod.io/g/carx-dro2/m/<id>`, where `<id>` is the publication's numeric id. <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoPublisher.cs:355-363 -->
 
@@ -141,7 +141,7 @@ To update the publication:
    The map's row in **LOCAL MAPS** shows `Rebuild needed`.
 1. On the **Publish** tab, under **Build destination**, select the **Platform** option.
 1. Under **Publications**, check the title, and select the publication's row, unless it is already selected.
-   A row that shows `Select for this map` isn't linked yet: selecting it links the publication to the selected map at once. MapBuilder has no command to remove a link. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:227 -->
+   A row that shows `Select for this map` isn't linked yet: selecting it links the publication to the selected map at once. MapBuilder has no command to remove a link. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:228 -->
 1. On the **Build** tab, select the **Build map** button.
    When the build finishes, the map's row in **LOCAL MAPS** shows `Ready to export`.
 1. On the **Publish** tab, under **Upload settings**, in **Changelog**, enter what changed in this version.
@@ -192,12 +192,12 @@ Each row shows these elements:
 | Row element | Meaning |
 | --- | --- |
 | Logo | The publication's logo on mod.io. |
-| Title | The publication's name on mod.io, or `Blank <n>` when it has none. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:199 --> |
-| `<MB> / 4120 mb · File uploaded` or `<MB> / 4120 mb · No file uploaded` | The size of the publication's current file in megabytes, and whether the publication has a file. 4120 MB is the limit for a map, 4096 MB, plus the limit for its metadata, 24 MB. The tooltip of this line ends with the address of the publication's page. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:205-214 --> |
-| `Select for this map` | The publication isn't linked to any local map. Select the row to link it to the map selected in **LOCAL MAPS**. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:227 --> |
+| Title | The publication's name on mod.io, or `Blank <n>` when it has none. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:200 --> |
+| `<MB> / 4120 mb · File uploaded` or `<MB> / 4120 mb · No file uploaded` | The size of the publication's current file in megabytes, and whether the publication has a file. 4120 MB is the limit for a map, 4096 MB, plus the limit for its metadata, 24 MB. The tooltip of this line ends with the address of the publication's page. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:206-215 --> |
+| `Select for this map` | The publication isn't linked to any local map. Select the row to link it to the map selected in **LOCAL MAPS**. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:228 --> |
 | `Old version!` | An earlier version of the uploader published it: the publication carries that version's `Map` tag. <!-- src: Assets/Editor/MapBuilder.Publishing.cs:17-22 --> |
 
-The selected row is highlighted. When the list is empty, it reads `No publications on mod.io yet.` and `Build the map and click Create publication.` Before you sign in, it reads the same, because nothing is loaded yet; right after Unity starts, the first line can read `the vendor` instead of `mod.io`. After you sign out, the rows loaded earlier stay in the list until you sign in again. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:27-32,157-159 -->
+The selected row is highlighted. When the list is empty, it reads `No publications on mod.io yet.` and `Build the map and click Create publication.` Before you sign in, it reads the same, because nothing is loaded yet. After you sign out, the rows loaded earlier stay in the list until you sign in again. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:27-32,158-160 -->
 
 **Refresh list** reloads the list. The list also reloads when the window opens, when you sign in, after each update, and after each create or delete that succeeds. <!-- src: Assets/Editor/MapBuilderEditorWindow.Publish.cs:188,239-254 --> Each time the list loads with at least one publication, MapBuilder removes the links to publications that no longer exist on your account.
 

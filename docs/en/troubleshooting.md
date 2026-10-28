@@ -295,7 +295,7 @@ Message: `The track name '<name>' contains characters that cannot be published. 
 
 Severity: Error (blocks the build) · Category: Meta <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:54-56 -->
 
-**Cause.** **Name** can contain only letters, digits, spaces and `- _ ' . , : ! ? ( ) & + /`, with no space at the start or the end, and at most 50 characters. A longer name gives `The track name is <n> characters; this vendor allows 50.` An empty one gives `The track has no name. Fill in Workshop Name on the map config.`; that message means the **Name** field on the **Map** tab. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:8; Assets/Resources/CarX.Modding/ModIoConfig.asset:28 -->
+**Cause.** **Name** can contain only letters, digits, spaces and `- _ ' . , : ! ? ( ) & + /`, with no space at the start or the end, and at most 50 characters. A longer name gives `The track name is <n> characters; this vendor allows 50.` An empty one gives `The track has no name. Fill in Name on the Map tab.` <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:8; Assets/Resources/CarX.Modding/ModIoConfig.asset:28 -->
 
 **Fix.**
 
@@ -325,7 +325,7 @@ Message: `No Icon is assigned. It is the image shown for the map in game and on 
 
 Severity: Error (blocks the build) · Category: Meta <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:103-105 -->
 
-**Cause.** The map has no **Icon**. The Icon becomes the mod.io logo and the map's picture in the game, and mod.io can't create a publication without it. A missing **Preview** is only a warning: `No Preview is assigned. The map will have no large image on the mod page or on the loading screen.`
+**Cause.** The map has no **Icon**. The Icon becomes the mod.io logo and the map's picture in the game, and mod.io can't create a publication without it. A missing **Preview** is only a warning: `No Preview is assigned. The map will have no large image on the loading screen.`
 
 **Fix.**
 
@@ -372,9 +372,9 @@ See also: [Image limits](reference.md#limits-images)
 
 Message: `The scene itself was not validated - fix the configuration first, then build again.`
 
-Severity: Note (doesn't block the build) · Category: Meta <!-- src: Assets/Editor/MapBuilder.cs:90-91 -->
+Severity: Note (doesn't block the build) · Category: Meta <!-- src: Assets/Editor/MapBuilder.cs:292-293 -->
 
-**Cause.** The map settings have at least one error. A build stops at the settings and doesn't check the scene, so more errors can appear once you fix them. **Validate map** shows this note too, but it checks the scene anyway.
+**Cause.** The map settings have at least one error. A build stops at the settings and doesn't check the scene, so more errors can appear once you fix them.
 
 **Fix.**
 
@@ -386,13 +386,13 @@ See also: [Run validation](validation.md#run)
 ### Minimap
 
 <a name="msg-bounds-size"></a>
-#### `'<object>': Bound Size is <size>. Set it to the size of the map in…`
+#### `'<object>': Bounds Size is <size>. Set it to the size of the map in…`
 
-Message: `'<object>': Bound Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.`
+Message: `'<object>': Bounds Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.`
 
 Severity: Error (blocks the build) · Category: Minimap <!-- src: Assets/Editor/Validation/SceneValidator.cs:900-902 -->
 
-**Cause.** The X or the Y value of **Bounds Size** on the Minimap component is zero. The message calls the field `Bound Size`; in the **Inspector** it is **Bounds Size**. Without a size, the minimap collapses to a point in the game.
+**Cause.** The X or the Y value of **Bounds Size** on the Minimap component is zero. Without a size, the minimap collapses to a point in the game.
 
 **Fix.**
 
@@ -444,9 +444,9 @@ See also: [Add dynamic objects (Rigidbody)](scene-setup.md#dynamic)
 <a name="msg-scene-not-opened"></a>
 #### `'<scene>' was not opened, so only the configuration was checked.`
 
-Severity: Note (doesn't block the build) · Category: Scene <!-- src: Assets/Editor/MapBuilder.cs:390 -->
+Severity: Note (doesn't block the build) · Category: Scene <!-- src: Assets/Editor/MapBuilder.cs:391 -->
 
-**Cause.** **Validate map** had to open the scene selected in **Scene**, and you cancelled the prompt to save the scene that was open. Only the map settings were checked. The note also appears, with an empty name (`'' was not opened, …`), when no scene is selected in **Scene**; see [The Scene dropdown is empty](#scene-empty). <!-- src: Assets/Editor/MapBuilder.cs:390,398-403 -->
+**Cause.** **Validate map** had to open the scene selected in **Scene**, and you cancelled the prompt to save the scene that was open. Only the map settings were checked. The note also appears, with an empty name (`'' was not opened, …`), when no scene is selected in **Scene**; see [The Scene dropdown is empty](#scene-empty). <!-- src: Assets/Editor/MapBuilder.cs:391,399-404 -->
 
 **Fix.**
 
@@ -457,7 +457,7 @@ See also: [Run validation](validation.md#run)
 <a name="build-errors"></a>
 ## Build errors in the Console
 
-Some problems are found only while the map is exported. They stop the build with an exception in the Console, not in the **Map Validation** window: the Console line starts with the exception type, usually `InvalidOperationException`, or `InvalidDataException` for a Layered Lit material. The **Build** tab then shows `Build incomplete. Check validation results and the Console.` To open the Console, select **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:323-327 -->
+Some problems are found only while the map is exported. They stop the build with an exception in the Console, not in the **Map Validation** window: the Console line starts with the exception type, usually `InvalidOperationException`, or `InvalidDataException` for a Layered Lit material. The **Build** tab then shows `Build incomplete. Check validation results and the Console.` To open the Console, select **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:324-328 -->
 
 <a name="export-errors"></a>
 ### Export errors
@@ -675,7 +675,7 @@ See also: [Where the build goes](build.md#cache) · [Create a publication](publi
 
 Shown in: the build summary on the **Build** tab <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
-**Cause.** After the last build, Map and Meta aren't both built: a validation error, an exception during export or **Cancel** stopped it. A build discards the parts it rebuilds before it starts, even after earlier successful builds. When the failed build had both Map and Meta in **Rebuild targets**, as by default, the map's row in **LOCAL MAPS** shows `Not built`; when only one part failed, it shows `Rebuild needed`. <!-- src: Assets/Editor/MapBuilder.cs:277 -->
+**Cause.** After the last build, Map and Meta aren't both built: a validation error, an exception during export or **Cancel** stopped it. A build discards the parts it rebuilds before it starts, even after earlier successful builds. When the failed build had both Map and Meta in **Rebuild targets**, as by default, the map's row in **LOCAL MAPS** shows `Not built`; when only one part failed, it shows `Rebuild needed`. <!-- src: Assets/Editor/MapBuilder.cs:271 -->
 
 **Fix.**
 
@@ -976,7 +976,7 @@ See also: [Install Unity 6000.3.19f1](getting-started.md#unity)
 <a name="scene-empty"></a>
 ### The Scene dropdown is empty
 
-**Cause.** **Scene** lists only the scenes that are enabled in the build scene list, and the list has none. MapBuilder then keeps checking and building the scene of the last build, or the scene that was open when you selected the map, which may not be the one you expect. If that scene was never saved, validation reports `No target scene is selected. Pick one in Build Settings.`; you choose the scene in **Scene** on the **Build** tab. <!-- src: Assets/Editor/MapBuilderEditorWindow.cs:780-786; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:228-229 --> A scene under `Assets/MapResources` is added and enabled whenever the editor loads or you save the scene, and a scene you disable in the list is dropped from it at the next save. <!-- src: Assets/Editor/MapBuilderProcessor.cs:79 -->
+**Cause.** **Scene** lists only the scenes that are enabled in the build scene list, and the list has none. MapBuilder then keeps checking and building the scene of the last build, or the scene that was open when you selected the map, which may not be the one you expect. If that scene was never saved, validation reports `No target scene is selected. Pick one in Scene on the Build tab.` <!-- src: Assets/Editor/MapBuilderEditorWindow.cs:780-786; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:228-229 --> A scene under `Assets/MapResources` is added and enabled whenever the editor loads or you save the scene, and a scene you disable in the list is dropped from it at the next save. <!-- src: Assets/Editor/MapBuilderProcessor.cs:79 -->
 
 **Fix.**
 

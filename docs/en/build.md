@@ -85,7 +85,7 @@ What else to know about a build:
 - The **Build map** button runs the same checks as **Validate map**, and an error stops the build. The summary line then reads `Build incomplete. Check validation results and the Console.` <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 - After a build, the **Map Validation** window opens when the checks reported anything, even only warnings or notes. When they reported nothing, the window closes.
 - Some problems, such as the Rigidbody rules, aren't checked by validation. The build finds them and stops, and they appear only in the Console. See [Build errors in the Console](troubleshooting.md#build-errors). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:39 -->
-- To stop a build, select **Cancel** in the window footer. The parts that were being built are discarded, and the Console logs `Build cancelled.` <!-- src: Assets/Editor/MapBuilder.cs:320 -->
+- To stop a build, select **Cancel** in the window footer. The parts that were being built are discarded, and the Console logs `Build cancelled.` <!-- src: Assets/Editor/MapBuilder.cs:321 -->
 - The build runs on the Editor's main thread, so the Editor can respond slowly until the build finishes.
 - The date and time, `<dd.MM.yyyy HH:mm> ·`, appear at the start of the summary line the next time you open the **MapBuilder** window. The summary of each map is kept on this computer between sessions. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:248-249,389 -->
 - `Resource cache` is the size of the whole build cache folder of the map, not the size of the finished mod.

@@ -69,7 +69,7 @@ To fill in the map settings:
 1. Select the **Map** tab.
 1. In **Name**, enter the name players see.
 1. Optional: In **Version**, enter the release version, for example `1.0.0`.
-   When **Version** is empty, the build and mod.io use `1.0.0`. <!-- src: Assets/Editor/MapBuilder.cs:176 -->
+   When **Version** is empty, the build and mod.io use `1.0.0`. <!-- src: Assets/Editor/MapBuilder.cs:170 -->
 1. Optional: In **Summary (optional)**, enter one line about the map.
 1. Optional: In **Description**, enter the full text about the map.
 1. Optional: From the **Project** window, drag the preview PNG onto the **Preview · 16:9** box.
@@ -99,7 +99,7 @@ Changing **Name** after you publish doesn't rename the publication until you upd
 
 The game crops the Icon and the Preview in some places; for the part that stays visible, see [Image requirements](minimap-and-images.md#images). To capture the images in Unity, see [Capture images with CaptureCamera](minimap-and-images.md#capture).
 
-**Validate map** reports problems with these fields in the `Meta` category of the **Map Validation** window. See [Fix validation problems](validation.md#catalogue). An empty **Name** gives `The track has no name. Fill in Workshop Name on the map config.`; Workshop Name in this message means **Name**. <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:48 -->
+**Validate map** reports problems with these fields in the `Meta` category of the **Map Validation** window. See [Fix validation problems](validation.md#catalogue). An empty **Name** gives `The track has no name. Fill in Name on the Map tab.` <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:48 -->
 
 > [!IMPORTANT]
 > **Create publication** sends **Description** to mod.io only once. To change the description on mod.io later, update the publication with **Update description** on, as described in [Update a publication](publish.md#update).
@@ -115,7 +115,7 @@ While a build or an upload runs, the fields on the **Map** tab are greyed out an
 > [!TIP]
 > To rebuild only the metadata after you change the **Map** tab of a built map, on the **Build** tab select **Advanced settings**, leave only **Meta** selected in **Rebuild targets**, and select the **Build map** button. **Rebuild targets** returns to **Everything** whenever you select a map.
 
-When you select a map config in the **Project** window, the **Inspector** shows a shorter form, with the boxes `Mod Name (max 50 characters)`, `Summary (optional, max 250 - first description line when empty)`, `Mod Description` and `Preview, Icon (16:9)`, but without Version, Authors or URL, so use the **Map** tab instead. Until a build includes the current values, the **Inspector** also shows `Meta is changed. Please rebuild meta in "Tool/MapBuilder"`; the menu path in this message is **Tools** > **MapBuilder**. <!-- src: Assets/Editor/MapMetaConfigDrawer.cs:70 -->
+When you select a map config in the **Project** window, the **Inspector** shows a shorter form, with the boxes `Mod Name (max 50 characters)`, `Summary (optional, max 250 - first description line when empty)`, `Mod Description` and `Preview, Icon (16:9)`, but without Version, Authors or URL, so use the **Map** tab instead. Until a build includes the current values, the **Inspector** also shows `Meta is changed. Please rebuild meta in "Tools > MapBuilder"`. <!-- src: Assets/Editor/MapMetaConfigDrawer.cs:70 -->
 
 The map config also stores the map's build optimization settings. See [Optimization](build.md#optimization).
 

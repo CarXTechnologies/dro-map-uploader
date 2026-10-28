@@ -244,7 +244,7 @@ namespace MapUploader.Tests
 
 			var report = Validate(FormatBuild.Wavefront, root);
 
-			Assert.IsTrue(Has(report, SceneValidator.CategoryMinimap, "Bound Size is"));
+			Assert.IsTrue(Has(report, SceneValidator.CategoryMinimap, "Bounds Size is"));
 			Assert.IsTrue(Has(report, SceneValidator.CategoryMinimap, "no textures assigned"));
 		}
 

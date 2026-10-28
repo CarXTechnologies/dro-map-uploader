@@ -84,12 +84,6 @@ namespace Editor
 		private static void ValidateMeta()
 		{
 			MapMetaValidator.Validate(m_report, MapManagerConfig.Value, m_targetScene, Limits);
-
-			if (m_report.HasErrors)
-			{
-				m_report.Info(MapMetaValidator.CategoryMeta,
-					"The scene itself was not validated - fix the configuration first, then build again.");
-			}
 		}
 
 		private static bool HasSceneErrors(GameObject[] roots)
@@ -292,7 +286,14 @@ namespace Editor
 				await Task.Delay(1, cancellationToken);
                 fraction?.Invoke(0.02f);
                 ValidateMeta();
-				if (m_report.HasErrors || !EnsureTargetSceneOpen()) return;
+				if (m_report.HasErrors)
+				{
+					// Only a build stops here; Validate map goes on to check the scene.
+					m_report.Info(MapMetaValidator.CategoryMeta,
+						"The scene itself was not validated - fix the configuration first, then build again.");
+					return;
+				}
+				if (!EnsureTargetSceneOpen()) return;
 				if (target.HasFlag(TempData.Map))
 				{
 					ClearDirectory(GetTemporary(TempData.Map));

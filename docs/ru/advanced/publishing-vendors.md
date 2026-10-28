@@ -307,7 +307,7 @@ Assets/Resources/CarX.Modding/                ModIoConfig.asset, SteamWorkshopCo
 
 Сайт mod.io показывает для каждого мода статус проверки (`Pending` или `Accepted`) и признак видимости. Оба значения приходят в ответе API, но плагин для Unity отбрасывает их при построении объекта `Mod`. Низкоуровневый построитель запросов (`ModioAPIRequest.New`, `ModioAPIRequestOptions.AddQueryParameter`) объявлен как `internal`, поэтому у внешней сборки нет поддерживаемого способа прочитать ни то ни другое.
 
-Поэтому список публикаций показывает только то, что можно установить достоверно: загружен ли файл. Подсказка к тексту статуса ссылается на страницу мода, где виден настоящий статус: `Full status and visibility: <Profile Url>/m/<mod id>`. Если плагин позже откроет эти значения в `Mod`, измените только `ModIoPublisher.DescribeStatus`. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:246 -->
+Поэтому список публикаций показывает только то, что можно установить достоверно: загружен ли файл. Подсказка к тексту статуса ссылается на страницу мода, где виден настоящий статус: `Full status and visibility: <Profile Url>/m/<mod id>`. Если плагин позже откроет эти значения в `Mod`, измените только `ModIoPublisher.DescribeStatus`. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:247 -->
 
 ### `INVALID_JSON` обычно означает другое
 

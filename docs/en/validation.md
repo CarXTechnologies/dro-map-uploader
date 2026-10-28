@@ -39,7 +39,7 @@ Map validation - <map name> (<scene>): no problems found.
 The **Build map** button runs the same checks before it builds anything:
 
 - It checks the map settings first, while the footer shows `Checking map settings…`. If the settings have an error, the build stops there, and the scene isn't checked. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:404 -->
-- Like **Validate map**, it then opens **Scene** if it isn't the active scene, even when **Rebuild targets** doesn't include **Map**. If you cancel Unity's prompt to save the open scenes, the build stops without adding a validation issue, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` <!-- src: Assets/Editor/MapBuilder.cs:295 -->
+- Like **Validate map**, it then opens **Scene** if it isn't the active scene, even when **Rebuild targets** doesn't include **Map**. If you cancel Unity's prompt to save the open scenes, the build stops without adding a validation issue, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` <!-- src: Assets/Editor/MapBuilder.cs:296 -->
 - It then checks the scene, while the footer shows `Validating and collecting scene resources…`. This step runs only when **Rebuild targets** under **Advanced settings** includes **Map**. Any error stops the build. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:405 -->
 - Warnings and notes never stop a build.
 
@@ -259,9 +259,9 @@ In the image messages, `<image>` is `icon` or `preview`. In the rows about an as
 
 | Severity | Message | What to do |
 | --- | --- | --- |
-| Error | `No target scene is selected. Pick one in Build Settings.` | On the **Build** tab, in **Scene**, select the map scene. If the list is empty, save the scene and enable it in the build scene list. See [Troubleshooting](troubleshooting.md#scene-empty). |
+| Error | `No target scene is selected. Pick one in Scene on the Build tab.` | On the **Build** tab, in **Scene**, select the map scene. If the list is empty, save the scene and enable it in the build scene list. See [Troubleshooting](troubleshooting.md#scene-empty). |
 | Error | `The scene name '<scene>' cannot be used for a build. Start with a letter and use only letters, digits and underscores.` | Rename the scene file, for example to `MyMap_01.unity`. See [Troubleshooting](troubleshooting.md#msg-scene-name). |
-| Error | `The track has no name. Fill in Workshop Name on the map config.` | On the **Map** tab, enter **Name**. The message calls this field Workshop Name. See [Troubleshooting](troubleshooting.md#msg-track-name). |
+| Error | `The track has no name. Fill in Name on the Map tab.` | On the **Map** tab, enter **Name**. See [Troubleshooting](troubleshooting.md#msg-track-name). |
 | Error | `The track name '<name>' contains characters that cannot be published. Use letters, digits, spaces and -_'.,:!?()&+/, with no leading or trailing spaces.` | Remove other characters, and leading or trailing spaces, from **Name**. See [Troubleshooting](troubleshooting.md#msg-track-name). |
 | Error | `The track name is <n> characters; this vendor allows <limit>.` | Shorten **Name**. See [Troubleshooting](troubleshooting.md#msg-track-name). |
 | Error | `The description is <n> characters; this vendor allows <limit>.` | Shorten **Description**. See [Troubleshooting](troubleshooting.md#msg-summary-length). |
@@ -270,12 +270,12 @@ In the image messages, `<image>` is `icon` or `preview`. In the rows about an as
 | Error | `The summary is <n> characters; this vendor allows <limit>. Shorten the Summary field.` | Shorten the first line of **Summary (optional)**. Only that line is used. See [Troubleshooting](troubleshooting.md#msg-summary-length). |
 | Error | `No Icon is assigned. It is the image shown for the map in game and on the mod page, and both vendors need one before an entry can be created.` | On the **Map** tab, assign an image in **Icon · 16:9**. See [Troubleshooting](troubleshooting.md#msg-no-icon). |
 | Error | `The icon '<texture>' has Read/Write disabled. Enable it in the texture import settings.` | Select the texture. In the **Inspector**, expand **Advanced**, select **Read/Write**, then select **Apply**. See [Troubleshooting](troubleshooting.md#msg-icon-read-write). |
-| Warning | `No Preview is assigned. The map will have no large image on the mod page or on the loading screen.` | Optional: on the **Map** tab, assign an image in **Preview · 16:9**. See [Troubleshooting](troubleshooting.md#msg-no-icon). |
+| Warning | `No Preview is assigned. The map will have no large image on the loading screen.` | Optional: on the **Map** tab, assign an image in **Preview · 16:9**. See [Troubleshooting](troubleshooting.md#msg-no-icon). |
 | Error | `The preview '<texture>' has Read/Write disabled. Enable it in the texture import settings.` | Turn on **Read/Write** for the texture, as for the icon. See [Troubleshooting](troubleshooting.md#msg-icon-read-write). |
 | Warning | `The <image> is a <extension> file. The uploader uploads the source file as is and the documented format is PNG.` | `<extension>` is `.jpg` or `.jpeg`. Save the image as PNG and assign it again. See [Troubleshooting](troubleshooting.md#msg-icon-format). |
 | Error | `The <image> is a <extension> file, which is uploaded as is and is not an image a vendor accepts. Save it as PNG.` | Save the image as PNG and assign it again. See [Troubleshooting](troubleshooting.md#msg-icon-format). |
 | Error | `The <image> is <size> mb; the limit is <limit> mb.` | Make the file smaller than `<limit>`. See [Troubleshooting](troubleshooting.md#msg-icon-format). |
-| Note | `The scene itself was not validated - fix the configuration first, then build again.` | Fix the errors in this category. The note is added whenever the map settings or the build format have errors. A build stops before the scene check, but **Validate map** checks the scene anyway and lists its issues too. See [Troubleshooting](troubleshooting.md#msg-scene-not-validated). |
+| Note | `The scene itself was not validated - fix the configuration first, then build again.` | Fix the errors in this category. A build adds the note when the map settings have errors, and stops before the scene check. To list the problems in the scene too, select **Validate map**. See [Troubleshooting](troubleshooting.md#msg-scene-not-validated). |
 
 </details>
 
@@ -286,7 +286,7 @@ The scene needs exactly one Minimap; the Budget category checks the count. Keep 
 
 | Severity | Message | What to do |
 | --- | --- | --- |
-| Error | `'<object>': Bound Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.` | In the Minimap component, set **Bounds Size** to the map's extent in world units. The message calls this field Bound Size. See [Troubleshooting](troubleshooting.md#msg-bounds-size). |
+| Error | `'<object>': Bounds Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.` | In the Minimap component, set **Bounds Size** to the map's extent in world units. See [Troubleshooting](troubleshooting.md#msg-bounds-size). |
 | Error | `'<object>': no textures assigned. Add at least one entry with a Main Texture.` | Under **Textures**, add an element and assign its **Main Texture**. See [Troubleshooting](troubleshooting.md#msg-no-textures). |
 | Error | `'<object>': Textures element <i> has no Main Texture assigned.` | Assign **Main Texture** in that element, or remove the element. See [Troubleshooting](troubleshooting.md#msg-no-textures). |
 | Error | `'<object>': Textures element <i> is a <type>. Only Texture2D can be exported.` | Assign an imported image (Texture2D), not a Render Texture or another texture type. See [Troubleshooting](troubleshooting.md#msg-no-textures). |
@@ -307,7 +307,7 @@ A Rigidbody that isn't kinematic needs convex mesh colliders. The Rigidbody can 
 <details>
 <summary><b>Scene</b> and <b>Summary</b></summary>
 
-The Scene note comes from **Validate map** itself, and the Summary note from the limit of 25 listed issues per rule. <!-- src: Assets/Editor/MapBuilder.cs:389-390 -->
+The Scene note comes from **Validate map** itself, and the Summary note from the limit of 25 listed issues per rule. <!-- src: Assets/Editor/MapBuilder.cs:390-391 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -339,7 +339,7 @@ Some problems never appear in the **Map Validation** window. Check for them sepa
 
 **Build size.** MapBuilder checks the size of the map and its metadata only immediately before **Create publication** or **Update publication**, and a build that is too large stops the upload with an error in the Console. For the limits, see [Build size](reference.md#limits-size); for the fix, see [Troubleshooting](troubleshooting.md#msg-map-size). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182 -->
 
-**Export errors.** Some problems are found only while the build exports the scene. They stop the build and appear in the Console as an exception, usually `InvalidOperationException`, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` Export can also log warnings that don't stop the build. For every export error and warning with its cause and fix, see [Build errors in the Console](troubleshooting.md#build-errors). <!-- src: Assets/Editor/MapBuilder.cs:323-327 -->
+**Export errors.** Some problems are found only while the build exports the scene. They stop the build and appear in the Console as an exception, usually `InvalidOperationException`, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` Export can also log warnings that don't stop the build. For every export error and warning with its cause and fix, see [Build errors in the Console](troubleshooting.md#build-errors). <!-- src: Assets/Editor/MapBuilder.cs:324-328 -->
 
 **Image size in pixels.** Validation checks the format, Read/Write and file size of the Icon and the Preview, but not their size in pixels or their aspect ratio. See [Image requirements](minimap-and-images.md#images).
 

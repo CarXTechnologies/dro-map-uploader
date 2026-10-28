@@ -148,7 +148,7 @@ With **RU** selected, this text stays in English:
 - the **Map Validation** window, and all validation and Console messages;
 - the lines under **Scene contents** on the **Build** tab; <!-- src: Assets/Scripts/ValidItemData.cs:95-98 -->
 - most tooltips;
-- the size, status, `Old version!` and `Blank <n>` text of publication rows on the **Publish** tab; <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:199-222 -->
+- the size, status, `Old version!` and `Blank <n>` text of publication rows on the **Publish** tab; <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:200-223 -->
 - the `Not signed in to https://mod.io/g/carx-dro2.` box on the **Publish** tab; <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoAuthProvider.cs:154 -->
 - the `External path` folder dialog; <!-- src: Assets/Editor/MapBuilderEditorWindow.Publish.cs:113 -->
 - the mod.io sign-in and delete dialogs.

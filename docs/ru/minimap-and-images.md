@@ -108,13 +108,13 @@ DrawZoneBehaviour не экспортируется, и проверка его 
 ```text
 'Minimap': the map has 0, at least 1 is required.
 'Minimap': the map has <n>, at most 1 is allowed.
-'<name>': Bound Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.
+'<name>': Bounds Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.
 '<name>': no textures assigned. Add at least one entry with a Main Texture.
 '<name>': Textures element <i> has no Main Texture assigned.
 '<name>': Textures element <i> is a <Type>. Only Texture2D can be exported.
 ```
 
-В сообщениях поле **Bounds Size** называется `Bound Size`. Причину и способ исправления каждого сообщения см. в записях о мини-карте в разделе [Решение проблем](troubleshooting.md#msg-bounds-size).
+Причину и способ исправления каждого сообщения см. в записях о мини-карте в разделе [Решение проблем](troubleshooting.md#msg-bounds-size).
 
 Компонент Minimap внутри объекта `Garbage` не учитывается, поэтому проверка сообщает, что мини-карты нет. Компонент Minimap на неактивном объекте проходит проверку, но сборка экспортирует мини-карту только с активного объекта, поэтому оставляйте его активным.
 

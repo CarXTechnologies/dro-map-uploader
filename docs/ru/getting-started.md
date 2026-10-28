@@ -148,7 +148,7 @@ MapBuilder доступен на английском и русском язык
 - окно **Map Validation**, а также все сообщения проверки и окна Console;
 - строки под заголовком **Состав сцены** (Scene contents) на вкладке **Сборка**; <!-- src: Assets/Scripts/ValidItemData.cs:95-98 -->
 - большинство подсказок;
-- размер, статус и тексты `Old version!` и `Blank <n>` в строках публикаций на вкладке **Публикация**; <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:199-222 -->
+- размер, статус и тексты `Old version!` и `Blank <n>` в строках публикаций на вкладке **Публикация**; <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:200-223 -->
 - сообщение `Not signed in to https://mod.io/g/carx-dro2.` на вкладке **Публикация**; <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoAuthProvider.cs:154 -->
 - диалог выбора папки `External path`; <!-- src: Assets/Editor/MapBuilderEditorWindow.Publish.cs:113 -->
 - диалоги входа в mod.io и удаления.

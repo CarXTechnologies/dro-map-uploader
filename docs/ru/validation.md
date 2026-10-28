@@ -39,7 +39,7 @@ Map validation - <map name> (<scene>): no problems found.
 Кнопка **Собрать карту** (Build map) выполняет те же проверки, прежде чем что-либо собрать:
 
 - Сначала она проверяет настройки карты; в это время в нижней панели видна строка `Проверка настроек карты…` (`Checking map settings…`). Если в настройках есть ошибка, сборка на этом останавливается, а сцена не проверяется. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:404 -->
-- Затем, как и **Проверить карту**, она открывает сцену из списка **Сцена**, если та не активна, даже когда **Что пересобрать** не включает **Map**. Если отменить предложение Unity сохранить открытые сцены, сборка останавливается без замечания проверки, а итоговая строка на вкладке **Сборка** — `Сборка не завершена полностью. Проверьте результаты проверки и Console.` (`Build incomplete. Check validation results and the Console.`). <!-- src: Assets/Editor/MapBuilder.cs:295 -->
+- Затем, как и **Проверить карту**, она открывает сцену из списка **Сцена**, если та не активна, даже когда **Что пересобрать** не включает **Map**. Если отменить предложение Unity сохранить открытые сцены, сборка останавливается без замечания проверки, а итоговая строка на вкладке **Сборка** — `Сборка не завершена полностью. Проверьте результаты проверки и Console.` (`Build incomplete. Check validation results and the Console.`). <!-- src: Assets/Editor/MapBuilder.cs:296 -->
 - Затем она проверяет сцену; в это время в нижней панели видна строка `Проверка и сбор ресурсов сцены…` (`Validating and collecting scene resources…`). Этот шаг выполняется, только если **Что пересобрать** в разделе **Дополнительные настройки** включает **Map**. Любая ошибка останавливает сборку. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:405 -->
 - Предупреждения и заметки никогда не останавливают сборку.
 
@@ -259,9 +259,9 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
-| Ошибка | `No target scene is selected. Pick one in Build Settings.` | На вкладке **Сборка** в списке **Сцена** выберите сцену карты. Если список пуст, сохраните сцену и включите её в списке сцен сборки. См. [Решение проблем](troubleshooting.md#scene-empty). |
+| Ошибка | `No target scene is selected. Pick one in Scene on the Build tab.` | На вкладке **Сборка** в списке **Сцена** выберите сцену карты. Если список пуст, сохраните сцену и включите её в списке сцен сборки. См. [Решение проблем](troubleshooting.md#scene-empty). |
 | Ошибка | `The scene name '<scene>' cannot be used for a build. Start with a letter and use only letters, digits and underscores.` | Переименуйте файл сцены, например в `MyMap_01.unity`. См. [Решение проблем](troubleshooting.md#msg-scene-name). |
-| Ошибка | `The track has no name. Fill in Workshop Name on the map config.` | На вкладке **Карта** заполните поле **Название**. В сообщении это поле называется Workshop Name. См. [Решение проблем](troubleshooting.md#msg-track-name). |
+| Ошибка | `The track has no name. Fill in Name on the Map tab.` | На вкладке **Карта** заполните поле **Название**. См. [Решение проблем](troubleshooting.md#msg-track-name). |
 | Ошибка | `The track name '<name>' contains characters that cannot be published. Use letters, digits, spaces and -_'.,:!?()&+/, with no leading or trailing spaces.` | Удалите из поля **Название** другие символы, а также пробелы в начале и в конце. См. [Решение проблем](troubleshooting.md#msg-track-name). |
 | Ошибка | `The track name is <n> characters; this vendor allows <limit>.` | Сократите текст в поле **Название**. См. [Решение проблем](troubleshooting.md#msg-track-name). |
 | Ошибка | `The description is <n> characters; this vendor allows <limit>.` | Сократите текст в поле **Описание**. См. [Решение проблем](troubleshooting.md#msg-summary-length). |
@@ -270,12 +270,12 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 | Ошибка | `The summary is <n> characters; this vendor allows <limit>. Shorten the Summary field.` | Сократите первую строку поля **Краткое описание (необязательно)**. Используется только она. См. [Решение проблем](troubleshooting.md#msg-summary-length). |
 | Ошибка | `No Icon is assigned. It is the image shown for the map in game and on the mod page, and both vendors need one before an entry can be created.` | На вкладке **Карта** назначьте изображение в **Иконка · 16:9** (Icon · 16:9). См. [Решение проблем](troubleshooting.md#msg-no-icon). |
 | Ошибка | `The icon '<texture>' has Read/Write disabled. Enable it in the texture import settings.` | Выберите текстуру. В окне **Inspector** разверните **Advanced**, установите флажок **Read/Write** и нажмите **Apply**. См. [Решение проблем](troubleshooting.md#msg-icon-read-write). |
-| Предупреждение | `No Preview is assigned. The map will have no large image on the mod page or on the loading screen.` | Необязательно: на вкладке **Карта** назначьте изображение в **Превью · 16:9** (Preview · 16:9). См. [Решение проблем](troubleshooting.md#msg-no-icon). |
+| Предупреждение | `No Preview is assigned. The map will have no large image on the loading screen.` | Необязательно: на вкладке **Карта** назначьте изображение в **Превью · 16:9** (Preview · 16:9). См. [Решение проблем](troubleshooting.md#msg-no-icon). |
 | Ошибка | `The preview '<texture>' has Read/Write disabled. Enable it in the texture import settings.` | Включите **Read/Write** для текстуры так же, как для иконки. См. [Решение проблем](troubleshooting.md#msg-icon-read-write). |
 | Предупреждение | `The <image> is a <extension> file. The uploader uploads the source file as is and the documented format is PNG.` | `<extension>` — `.jpg` или `.jpeg`. Сохраните изображение в PNG и назначьте его снова. См. [Решение проблем](troubleshooting.md#msg-icon-format). |
 | Ошибка | `The <image> is a <extension> file, which is uploaded as is and is not an image a vendor accepts. Save it as PNG.` | Сохраните изображение в PNG и назначьте его снова. См. [Решение проблем](troubleshooting.md#msg-icon-format). |
 | Ошибка | `The <image> is <size> mb; the limit is <limit> mb.` | Уменьшите файл, чтобы он не превышал `<limit>`. См. [Решение проблем](troubleshooting.md#msg-icon-format). |
-| Заметка | `The scene itself was not validated - fix the configuration first, then build again.` | Исправьте ошибки этой категории. Заметка добавляется всякий раз, когда в настройках карты или в формате сборки есть ошибки. Сборка останавливается до проверки сцены, а **Проверить карту** всё равно проверяет сцену и тоже перечисляет её замечания. См. [Решение проблем](troubleshooting.md#msg-scene-not-validated). |
+| Заметка | `The scene itself was not validated - fix the configuration first, then build again.` | Исправьте ошибки этой категории. Сборка добавляет заметку, когда в настройках карты есть ошибки, и останавливается до проверки сцены. Чтобы увидеть и проблемы в сцене, нажмите **Проверить карту**. См. [Решение проблем](troubleshooting.md#msg-scene-not-validated). |
 
 </details>
 
@@ -286,7 +286,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
-| Ошибка | `'<object>': Bound Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.` | В компоненте Minimap задайте в **Bounds Size** размер карты в мировых единицах. В сообщении это поле называется Bound Size. См. [Решение проблем](troubleshooting.md#msg-bounds-size). |
+| Ошибка | `'<object>': Bounds Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.` | В компоненте Minimap задайте в **Bounds Size** размер карты в мировых единицах. См. [Решение проблем](troubleshooting.md#msg-bounds-size). |
 | Ошибка | `'<object>': no textures assigned. Add at least one entry with a Main Texture.` | В **Textures** добавьте элемент и назначьте его **Main Texture**. См. [Решение проблем](troubleshooting.md#msg-no-textures). |
 | Ошибка | `'<object>': Textures element <i> has no Main Texture assigned.` | Назначьте **Main Texture** в этом элементе или удалите элемент. См. [Решение проблем](troubleshooting.md#msg-no-textures). |
 | Ошибка | `'<object>': Textures element <i> is a <type>. Only Texture2D can be exported.` | Назначьте импортированное изображение (Texture2D), а не Render Texture или текстуру другого типа. См. [Решение проблем](troubleshooting.md#msg-no-textures). |
@@ -307,7 +307,7 @@ Rigidbody, который не является кинематическим, т
 <details>
 <summary><b>Scene</b> и <b>Summary</b></summary>
 
-Заметку Scene добавляет сама кнопка **Проверить карту**, а заметку Summary — ограничение в 25 перечисленных замечаний на правило. <!-- src: Assets/Editor/MapBuilder.cs:389-390 -->
+Заметку Scene добавляет сама кнопка **Проверить карту**, а заметку Summary — ограничение в 25 перечисленных замечаний на правило. <!-- src: Assets/Editor/MapBuilder.cs:390-391 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -339,7 +339,7 @@ Rigidbody, который не является кинематическим, т
 
 **Размер сборки.** MapBuilder проверяет размер карты и её метаданных только непосредственно перед действием кнопки **Создать публикацию** (Create publication) или **Обновить публикацию** (Update publication), и слишком большая сборка останавливает загрузку с ошибкой в Console. Лимиты см. в разделе [Размер сборки](reference.md#limits-size), а исправление — на странице [Решение проблем](troubleshooting.md#msg-map-size). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182 -->
 
-**Ошибки экспорта.** Некоторые проблемы обнаруживаются только тогда, когда сборка экспортирует сцену. Они останавливают сборку и появляются в Console в виде исключения, обычно `InvalidOperationException`, а итоговая строка на вкладке **Сборка** — `Сборка не завершена полностью. Проверьте результаты проверки и Console.` Экспорт также может выводить предупреждения, которые не останавливают сборку. Все ошибки и предупреждения экспорта с причинами и способами исправления см. в разделе [Ошибки сборки в Console](troubleshooting.md#build-errors). <!-- src: Assets/Editor/MapBuilder.cs:323-327 -->
+**Ошибки экспорта.** Некоторые проблемы обнаруживаются только тогда, когда сборка экспортирует сцену. Они останавливают сборку и появляются в Console в виде исключения, обычно `InvalidOperationException`, а итоговая строка на вкладке **Сборка** — `Сборка не завершена полностью. Проверьте результаты проверки и Console.` Экспорт также может выводить предупреждения, которые не останавливают сборку. Все ошибки и предупреждения экспорта с причинами и способами исправления см. в разделе [Ошибки сборки в Console](troubleshooting.md#build-errors). <!-- src: Assets/Editor/MapBuilder.cs:324-328 -->
 
 **Размер изображений в пикселях.** Проверка контролирует формат, Read/Write и размер файла иконки и превью, но не их размер в пикселях и не соотношение сторон. См. [Требования к изображениям](minimap-and-images.md#images).
 
