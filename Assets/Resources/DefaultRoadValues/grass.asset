@@ -21,3 +21,5 @@ MonoBehaviour:
     bump2Min: 0
     bump2Max: 0
     bump2Scale: 0
+    waterRate: 0
+    surfaceType: 1
