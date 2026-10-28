@@ -28,9 +28,9 @@ Checks (--check selects some of them):
   src       Every <!-- src: path:line --> comment points to an existing file and to lines inside it. When the line
             with the comment has a code-span literal that looks like a message or a code identifier, the literal, or a
             distinctive part of it, must occur within --src-window lines (default 5) of the cited lines; otherwise
-            the script prints a warning that names where the literal is now. A src path with the DR3PC1: prefix
-            points into the game repository, which is private; it is skipped unless the DR3PC1_ROOT environment
-            variable names a checkout of that repository.
+            the script prints a warning that names where the literal is now. A fact that comes from the game's
+            source, which is closed, is marked with the bare reference `game` and is not checked. This repository
+            is public, so a src comment never names a path in the game's source.
 
 Exit code: 0 when there are no errors, 1 when there are errors, 2 for a usage error. Warnings don't change the exit code
 unless you pass --strict. A synced-with marker is a warning, or an error with --release.
@@ -52,8 +52,7 @@ IMAGES = DOCS / 'images'
 SUBMODULE = 'Assets/Plugins/CarX.Modding.Creator'
 SUBMODULE_MARKER = ROOT / SUBMODULE / 'CarX.Modding.Creator.asmdef'
 PROJECT_VERSION = ROOT / 'ProjectSettings' / 'ProjectVersion.txt'
-GAME_PREFIX = 'DR3PC1:'
-GAME_ROOT_VARIABLE = 'DR3PC1_ROOT'
+GAME_REF = 'game'
 MAX_IMAGE_BYTES = 250 * 1024
 CHECKS = ('links', 'markdown', 'parity', 'images', 'versions', 'src')
 
@@ -61,7 +60,7 @@ FENCE = re.compile(r'^\s*(```|~~~)')
 CODE_SPAN = re.compile(r'(`+)(.+?)\1')
 COMMENT = re.compile(r'<!--.*?-->')
 SRC_COMMENT = re.compile(r'<!--\s*src:(.*?)-->')
-SRC_REF = re.compile(r'^(DR3PC1:)?([^:;<>|]+?):(\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*)$')
+SRC_REF = re.compile(r'^([^:;<>|]+?):(\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*)$')
 LINK = re.compile(r'\]\(([^)\s]+)\)')
 IMG = re.compile(r'<img\b[^>]*>', re.I)
 ATTRIBUTE = re.compile(r'([\w-]+)="([^"]*)"')
@@ -484,10 +483,10 @@ def parse_ref(text):
     if not match:
         return None
     ranges = []
-    for item in match.group(3).split(','):
+    for item in match.group(2).split(','):
         first, _, last = item.partition('-')
         ranges.append((int(first), int(last or first)))
-    return bool(match.group(1)), match.group(2), ranges
+    return match.group(1), ranges
 
 
 def window_text(lines, ranges, size):
@@ -499,8 +498,6 @@ def window_text(lines, ranges, size):
 
 
 def check_src(report, size):
-    game_root = os.environ.get(GAME_ROOT_VARIABLE)
-    game_root = Path(game_root) if game_root else None
     populated = SUBMODULE_MARKER.is_file()
     if not populated:
         report.error(ROOT / SUBMODULE, 0, 'the submodule is empty, so src comments that point into it are not checked; '
@@ -518,21 +515,19 @@ def check_src(report, size):
                 checked = []
                 for ref_text in body.split(';'):
                     counts['refs'] += 1
+                    if ref_text.strip() == GAME_REF:
+                        counts['game'] += 1
+                        continue
                     ref = parse_ref(ref_text)
                     if ref is None:
-                        report.error(page, number, f'malformed src reference "{ref_text.strip()}"; write path:line, path:first-last or path:a,b')
+                        report.error(page, number, f'malformed src reference "{ref_text.strip()}"; write path:line, path:first-last, path:a,b, '
+                                                   f'or `{GAME_REF}` for a fact from the game\'s closed source')
                         continue
-                    in_game, path, ranges = ref
-                    if in_game:
-                        if game_root is None:
-                            counts['skipped'] += 1
-                            continue
-                        target = game_root / path
-                    else:
-                        if path.startswith(SUBMODULE + '/') and not populated:
-                            continue
-                        target = ROOT / path
-                    shown = (GAME_PREFIX if in_game else '') + path
+                    path, ranges = ref
+                    if path.startswith(SUBMODULE + '/') and not populated:
+                        continue
+                    target = ROOT / path
+                    shown = path
                     if not target.is_file():
                         report.error(page, number, f'src file does not exist: {shown}')
                         continue
@@ -547,7 +542,7 @@ def check_src(report, size):
                 if checked and literals:
                     check_literals(report, page, number, literals, checked, size)
     report.note(None, 0, f'src: {counts["refs"]} references, {counts["checked"]} checked, '
-                         f'{counts["skipped"]} {GAME_PREFIX} skipped (set {GAME_ROOT_VARIABLE} to check them)')
+                         f'{counts["game"]} `{GAME_REF}` not checked')
 
 
 def check_literals(report, page, number, literals, checked, size):

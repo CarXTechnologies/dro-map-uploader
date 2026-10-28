@@ -27,7 +27,7 @@
 - Windows 10 или 11, 64-разрядная. Оптимизатор сборки поставляется только для редактора под Windows x64; в другой системе снимите флажок **Оптимизировать сборку** (Optimize build) в настройках **Оптимизация** (Optimization) каждой карты на вкладке **Сборка**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:127-130 -->
 - Git — чтобы клонировать проект вместе с сабмодулем.
 - Unity Editor 6000.3.19f1, именно эта версия: другая версия при открытии перезапишет файлы проекта под себя. Дополнительные модули платформ не нужны.
-- ПК-версия CarX Drift Racing Online 2, которая загружает локальные карты из своей папки `Mods`, — чтобы проверить карту локально. См. [Проверка загрузки локальных карт в игре](docs/ru/test-in-game.md#check-game).
+- ПК-версия CarX Drift Racing Online 2 версии 0.21.4 или новее, которая загружает локальные карты из своей папки `Mods`, — чтобы проверить карту локально. См. [Проверка загрузки локальных карт в игре](docs/ru/test-in-game.md#check-game).
 - Аккаунт mod.io — только для публикации.
 
 > [!WARNING]
@@ -48,7 +48,7 @@
 1. В строке меню Unity выберите **Tools** > **MapBuilder**. В разделе **ЛОКАЛЬНЫЕ КАРТЫ** нажмите **+ Новая карта** и сохраните настройки карты в `Assets/MapResources/<MapName>/`. См. [Создание или выбор карты](docs/ru/map-settings.md#new-map).
 1. На вкладке **Карта** в поле **Название** (Name) введите название, которое увидят игроки; оно не обязано совпадать с `<MapName>`. Перетащите иконку в поле **Иконка · 16:9** (Icon · 16:9) и, при желании, превью в поле **Превью · 16:9** (Preview · 16:9). См. [Заполнение вкладки «Карта»](docs/ru/map-settings.md#map-tab).
 1. На вкладке **Сборка** нажмите **Проверить карту** (Validate map) и исправьте все ошибки. Затем нажмите кнопку **Собрать карту** (Build map). Состояние в строке карты сменится на `Готова к экспорту`. См. [Сборка карты](docs/ru/build.md) и [Проверка карты](docs/ru/validation.md). <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:198 -->
-1. На вкладке **Публикация** в разделе **Куда отправить сборку** (Build destination) выберите вариант **Экспорт в папку** (Export to folder). В поле **Папка** (Folder) введите абсолютный путь `<game folder>/Mods/<MapName>`, где `<game folder>` — папка с исполняемым файлом игры. Нажмите кнопку **Экспортировать в папку** (Export to folder), затем загрузите карту в игре. См. [Тест в игре](docs/ru/test-in-game.md). <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
+1. На вкладке **Публикация** в разделе **Куда отправить сборку** (Build destination) выберите вариант **Экспорт в папку** (Export to folder). В поле **Папка** (Folder) введите абсолютный путь `<game folder>/Mods/<MapName>`, где `<game folder>` — папка с исполняемым файлом игры. Нажмите кнопку **Экспортировать в папку** (Export to folder), затем загрузите карту в игре. См. [Тест в игре](docs/ru/test-in-game.md). <!-- src: game -->
 1. В шапке окна **MapBuilder** нажмите **Войти** и завершите вход в mod.io. См. [Вход в mod.io](docs/ru/publish.md#sign-in).
 1. На вкладке **Публикация** в разделе **Куда отправить сборку** выберите вариант **Площадка**. В разделе **Публикации** (Publications) нажмите **Создать публикацию** (Create publication).
 1. Когда в нижней панели появится `Публикация создана.` (`Publication created.`), не снимая выбор с новой публикации, снова нажмите кнопку **Собрать карту** на вкладке **Сборка**, а затем **Обновить публикацию** (Update publication) на вкладке **Публикация**. Первая загрузка содержит временный id вместо mod.io id публикации. См. [Создание публикации](docs/ru/publish.md#create).
@@ -99,7 +99,7 @@ flowchart LR
 | Иконка и превью (Preview) | Иконка обязательна, превью — нет. Формат, размер файла и размер в пикселях см. в разделе [Требования к изображениям](docs/ru/minimap-and-images.md#images). |
 | Имя сцены | Начинается с буквы и содержит только буквы, цифры и `_`. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:32-45 --> |
 | Размер сборки | Карта ≤ 4096 МБ, метаданные ≤ 24 МБ; размер измеряется по папкам кэша сборки `MapTemp` и `MetaTemp`, а не по `mod.cxmod`. Проверяется только при создании или обновлении публикации. <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182; Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26 --> |
-| Состав сцены | Ровно 1 Minimap; не меньше 1 SpawnPoint; ≤ 500 источников света (экспортируются только Point и Spot, а в игре они включаются только ночью); ≤ 1000 Rigidbody; ≤ 8 уровней LOD на LODGroup. <!-- src: Assets/Editor/MapSceneRules.cs:11-24; Assets/Editor/Validation/SceneValidator.cs:278-284,811; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:98-100; DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModLightsDayNightBehaviour.cs:36-53 --> |
+| Состав сцены | Ровно 1 Minimap; не меньше 1 SpawnPoint; ≤ 500 источников света (экспортируются только Point и Spot, а в игре они включаются только ночью); ≤ 1000 Rigidbody; ≤ 8 уровней LOD на LODGroup. <!-- src: Assets/Editor/MapSceneRules.cs:11-24; Assets/Editor/Validation/SceneValidator.cs:278-284,811; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:98-100; game --> |
 
 Далее: [Справочник](docs/ru/reference.md)
 

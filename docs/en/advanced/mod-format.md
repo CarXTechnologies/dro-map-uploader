@@ -220,13 +220,13 @@ The index ends the file, sorted by name. Names use forward slashes and are relat
 
 These rules describe a copy of the game that loads local maps; to find out whether yours does, see [Check that the game loads local maps](../test-in-game.md#check-game). For where to put a map for a local test, see [Where the game looks for local maps](../test-in-game.md#local-maps).
 
-- **Where mods are.** On PC, every folder directly inside `<folder with the game executable>/Mods/` is one local mod, and the folder name is its mod ID. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
-- **mod.io installs.** In game builds that support mod.io, maps downloaded from mod.io are read the same way from their install folders. Such a folder is named `<modIoId>_<modfileId>`, and that name is the mod ID. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModRoomsHelper.cs:123-137 -->
+- **Where mods are.** On PC, every folder directly inside `<folder with the game executable>/Mods/` is one local mod, and the folder name is its mod ID. <!-- src: game -->
+- **mod.io installs.** In game builds that support mod.io, maps downloaded from mod.io are read the same way from their install folders. Such a folder is named `<modIoId>_<modfileId>`, and that name is the mod ID. <!-- src: game -->
 - **Binary or loose files.** If the mod folder contains `mod.cxmod`, every resource is read from it, and loose files next to it are ignored. Otherwise the game reads the loose files. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Providers/DefaultFileProvider.cs:44-57 -->
-- **Which files load.** The game loads every `.json` file in `hierarchies/`, `prefabs/`, `lods/`, `markers/`, `lights/` and `animations/`, every model file (`.obj` or `.cxmesh`) in `models/` and every `.png` file in `textures/`, whatever its name. A `.obj` file is skipped when a `.cxmesh` file of the same name is next to it. Materials and material textures are then loaded by the names that the models and scene documents use. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Config/ModImportResults.cs:9-37 -->
-- **Metadata.** The game reads every `.json` file in the root of the mod folder as metadata and uses the first one. A `contentType` other than `map` is rejected; an empty one is accepted. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Dots/ModContentData.cs:833-851 -->
+- **Which files load.** The game loads every `.json` file in `hierarchies/`, `prefabs/`, `lods/`, `markers/`, `lights/` and `animations/`, every model file (`.obj` or `.cxmesh`) in `models/` and every `.png` file in `textures/`, whatever its name. A `.obj` file is skipped when a `.cxmesh` file of the same name is next to it. Materials and material textures are then loaded by the names that the models and scene documents use. <!-- src: game -->
+- **Metadata.** The game reads every `.json` file in the root of the mod folder as metadata and uses the first one. A `contentType` other than `map` is rejected; an empty one is accepted. <!-- src: game -->
 - **Paths.** A path from the mod data must stay inside the mod folder. A path that leads outside, through `..` or an absolute path, is ignored and logged as an error.
-- **Images.** For an image path without an extension, such as `icon`, the game tries `.cxtex`, then `.png`, then `.jpg`. <!-- src: DR3PC1:Assets/Modules/CarX.Modding.Creator/Runtime/Providers/TexturePngProvider.cs:16 -->
+- **Images.** For an image path without an extension, such as `icon`, the game tries `.cxtex`, then `.png`, then `.jpg`. <!-- src: game -->
 - **Size.** The game checks a load budget while it reads a map, so a very large map may fail to load.
 
 > [!WARNING]
@@ -249,9 +249,9 @@ A mod carries several version numbers. The game checks the ones in this table an
 | Tool | `madeIn` in the metadata | `Mod Map Uploader v3.0` | Not checked |
 | Map version | `contentVersion` in the metadata | **Version** from the **Map** tab | Not checked |
 
-The data format version goes up only for changes that older games can't read. Version 2 binary documents store a name and a length for every field, so a game skips fields it doesn't know, and a newer MapUploader can add fields without breaking older games. <!-- src: DR3PC1:Assets/Modules/CarX.Modding.Creator/Runtime/Meta/ModdingVersion.cs:6-7 -->
+The data format version goes up only for changes that older games can't read. Version 2 binary documents store a name and a length for every field, so a game skips fields it doesn't know, and a newer MapUploader can add fields without breaking older games. <!-- src: game -->
 
-When a game meets a version it doesn't read, it stops loading the map with a message like one of these: <!-- src: DR3PC1:Assets/Modules/CarX.Modding.Creator/Runtime/Meta/MetaProvider.cs:42 -->
+When a game meets a version it doesn't read, it stops loading the map with a message like one of these: <!-- src: game -->
 
 ```text
 Mod data format '<version>' (<document type>) is not supported by this game client. Update the game.

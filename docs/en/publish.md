@@ -121,7 +121,7 @@ To make the publication public:
 1. In a browser, sign in on the mod.io website, and open the publication from your list of mods.
 1. On the publication's page, make the publication public.
 
-Result: other players can find and install the map in game builds that support mod.io. In such a build, a map installed from mod.io appears on the **Mods** tab of **Track Selection**, and its card carries the mod.io badge. <!-- src: DR3PC1:Assets/DR3/Scripts/Services/ModIo/ModIoService.cs:41-51 -->
+Result: other players can find and install the map in game builds that support mod.io. In such a build, a map installed from mod.io appears on the **Mods** tab of **Track Selection**, and its card carries the mod.io badge. <!-- src: game -->
 
 If you can't find the publication on the website, open its page by its address. In **Publications**, point to the size line of the publication's row: the tooltip ends with `Full status and visibility:` and the address of the publication's page. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:247 -->
 
@@ -132,7 +132,7 @@ Delete your local test copy from the game's `Mods` folder now, or the game lists
 <a name="update"></a>
 ## Update a publication
 
-Update the publication each time you release a new version of the map. Every update uploads the whole build again as a new file. The game identifies a map installed from mod.io by the publication id and the file id, `<modIoId>_<modfileId>`. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModRoomsHelper.cs:123-137 -->
+Update the publication each time you release a new version of the map. Every update uploads the whole build again as a new file. The game identifies a map installed from mod.io by the publication id and the file id, `<modIoId>_<modfileId>`. <!-- src: game -->
 
 To update the publication:
 
@@ -246,7 +246,7 @@ A local map that was linked to the deleted publication keeps its link until the 
 
 ## Rename a map
 
-The game shows the name stored in the map metadata, so players see a new name once they have the file that carries it. The mod.io page keeps the old name until an update with **Update title** selected. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModRoomsHelper.cs:57-61 -->
+The game shows the name stored in the map metadata, so players see a new name once they have the file that carries it. The mod.io page keeps the old name until an update with **Update title** selected. <!-- src: game -->
 
 To rename a published map:
 

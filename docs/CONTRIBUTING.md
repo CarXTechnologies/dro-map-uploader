@@ -263,9 +263,9 @@ A hidden source comment lets a reviewer check a fact against the code when that 
 
 - Add `<!-- src: <path>:<line or range> -->` only to limits, defaults, exact messages and storage paths. Use at most one per paragraph, list item or table row.
 - Put the comment at the end of the line that states the fact: the paragraph line, the list item line, or the last cell of the table row. Never put it on a line of its own inside a list.
-- Write paths relative to the repository root. Submodule paths start with `Assets/Plugins/CarX.Modding.Creator/`. The prefix `DR3PC1:` marks a path in the game's source code, which is available only inside CarX.
+- Write paths relative to the repository root. Submodule paths start with `Assets/Plugins/CarX.Modding.Creator/`. The game's source code is closed and this repository is public, so never write a path into it: mark a fact that you checked in the game's code with the bare reference `game`, for example `<!-- src: game -->` or `<!-- src: Assets/Editor/MapBuilder.cs:12; game -->`.
 - Write the lines as `path:12`, `path:12-20` or `path:12,40-42`, and separate several paths with `; `. When the line also quotes a message in a code span, cite the line of the message too, not only the line of the limit it belongs to.
-- When you change code that a comment points at, update the comment in the same PR. `check_docs.py` reports a comment whose file or lines don't exist, and warns when a message or identifier quoted on the same line is no longer near the cited lines. It skips `DR3PC1:` paths unless the environment variable `DR3PC1_ROOT` names a checkout of the game repository.
+- When you change code that a comment points at, update the comment in the same PR. `check_docs.py` reports a comment whose file or lines don't exist, and warns when a message or identifier quoted on the same line is no longer near the cited lines. It doesn't check `game` references, and it reports any path into the game's source as an error.
 - Mark a menu path that you couldn't check in a running editor with `<!-- verify-menu -->` at the end of its line. A capture run writes `unity-menus.txt` with the items of the **Assets** > **Create**, **File**, **GameObject**, **Tools** and **Edit** menus. Check the marked lines against it and remove each marker you confirm. Check Unity Hub and other menus by hand.
 
 ## Two languages

@@ -73,7 +73,7 @@ Validation also gives a Geometry warning for each large static mesh that build o
 | **Version** | None | When empty, `1.0.0` is used. It becomes the version of each file uploaded to mod.io and is stored in the map metadata. <!-- src: Assets/Editor/MapBuilder.cs:170 --> |
 | **Summary (optional)** | At most 250 characters | Only the first line is used, and the limit applies to it. When **Summary (optional)** is empty, the first line of **Description** is used; when both are empty, `<Name> track.` is used. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:47-60 --> |
 | **Description** | At most 50 000 characters | Stored in the map metadata. Sent to mod.io by **Create publication** when it isn't empty, and by **Update publication** with **Update description** on. See [Create a publication](publish.md#create) and [Update a publication](publish.md#update). |
-| **Authors** | None | The game shows up to 5 names joined with `, `, then `...`. With no authors, it shows the name of the mod.io account that created the publication. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModAuthorResolver.cs:10-31 --> |
+| **Authors** | None | The game shows up to 5 names joined with `, `, then `...`. With no authors, it shows the name of the mod.io account that created the publication. <!-- src: game --> |
 | **URL** | None | Stored in the map metadata. |
 
 For what to enter in each field, see [Fill in the Map tab](map-settings.md#map-tab).
@@ -158,14 +158,14 @@ The **Road** submenu of the GameMarkerData type menu offers 26 surfaces, in this
 > [!IMPORTANT]
 > The game has no surface named `default`, `ice_snowy` or `pavement`, so a collider with one of them gets no road surface, with values or without. Use `asphalt` instead of `default`, `road_icy` instead of `ice_snowy` and `paving_slab` instead of `pavement`.
 
-Such a collider behaves like a collider without a Road marker, and the game logs `[ModRoadSurfaceMaterials] Road marker references surface template '<name>', but no matching CARXSurfaceTemplate was found.` In the TestMap sample, `Content/workshop_map_main/wall_coll` has a `Road/default` marker, so it gets no road surface.
+Such a collider behaves like a collider without a Road marker, and the game log, `Player.log`, shows a warning that starts with `Road marker references surface template '<name>'`. In the TestMap sample, `Content/workshop_map_main/wall_coll` has a `Road/default` marker, so it gets no road surface.
 
 A Road marker applies its surface only to the GameObject it is on, so put it on the object with the collider. See [Mark road surfaces](markers.md#road).
 
 <a name="surface-values"></a>
 ### When the physics values apply
 
-For each Road marker, the game loads its own surface of the same name. If the marker exports physics values, they replace all the values of that surface, **Surface Type** and **Water Rate** included. If it exports none, the game uses its surface unchanged. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Dots/ModRoadSurfaceMaterials.cs:44-85 -->
+For each Road marker, the game loads its own surface of the same name. If the marker exports physics values, they replace all the values of that surface, **Surface Type** and **Water Rate** included. If it exports none, the game uses its surface unchanged. <!-- src: game -->
 
 The build resolves the values of each marker from its **Template Config** and its template menu. Selecting markers in the **Inspector**, one at a time or several at once, doesn't change what they export. A marker exports these values: <!-- src: Assets/Scripts/GameMarkerData.cs:10-38 -->
 
@@ -228,7 +228,7 @@ Both formats export lights the same way. <!-- src: Assets/Plugins/CarX.Modding.C
 | Exported properties | Position, rotation and scale; type; color; intensity; range; spot angle and inner spot angle; shadow type; shadow near plane; whether color temperature is used, and the color temperature. |
 | Intensity | Converted to candela, multiplied by 0.1 and capped at 5000. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:71,78-85 --> |
 | Budget | At most 500 Light and 500 HDAdditionalLightData components. Disabled lights and lights on inactive objects count too. |
-| In the game | Exported lights turn on only at night. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModLightsDayNightBehaviour.cs:36-53 --> |
+| In the game | Exported lights turn on only at night. <!-- src: game --> |
 | Preview only | Directional and Area lights, Volume (sky, fog, exposure) and Reflection Probes light only the preview in the editor. The game supplies its own environment lighting. |
 | Validation | One Lighting note for each enabled Directional light, such as a preview sun. One Lighting warning for each enabled light of another type that isn't a Point or Spot light, such as an Area light. One more warning when the scene has two or more Directional lights, disabled ones included. <!-- src: Assets/Editor/Validation/SceneValidator.cs:713-760 --> |
 

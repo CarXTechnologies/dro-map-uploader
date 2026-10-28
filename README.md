@@ -27,7 +27,7 @@ You fill in the map settings, build, export and publish the map in the **MapBuil
 - Windows 10 or 11, 64-bit. The build optimizer ships only for the Windows x64 Editor; on another system, clear **Optimize build** in each map's **Optimization** settings on the **Build** tab. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:127-130 -->
 - Git, to clone the project with its submodule.
 - Unity Editor 6000.3.19f1, exactly this version, because another version upgrades the project in place. No extra platform modules are needed.
-- A PC copy of CarX Drift Racing Online 2 that loads local maps from its `Mods` folder, to test the map locally. See [Check that the game loads local maps](docs/en/test-in-game.md#check-game).
+- A PC copy of CarX Drift Racing Online 2, version 0.21.4 or later, that loads local maps from its `Mods` folder, to test the map locally. See [Check that the game loads local maps](docs/en/test-in-game.md#check-game).
 - A mod.io account, only for publishing.
 
 > [!WARNING]
@@ -48,7 +48,7 @@ To make, test and publish your first map:
 1. In the Unity menu bar, select **Tools** > **MapBuilder**. Under **LOCAL MAPS**, select **+ New map**, and save the map config in `Assets/MapResources/<MapName>/`. See [Create or select a map](docs/en/map-settings.md#new-map).
 1. On the **Map** tab, in **Name**, enter the name that players see; it doesn't have to match `<MapName>`. Drag your icon onto the **Icon · 16:9** box and, optionally, your preview onto the **Preview · 16:9** box. See [Fill in the map settings](docs/en/map-settings.md#map-tab).
 1. On the **Build** tab, select **Validate map** and fix every error. Then select the **Build map** button. The map row changes to `Ready to export`. See [Build the map](docs/en/build.md) and [Fix validation problems](docs/en/validation.md). <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:198 -->
-1. On the **Publish** tab, under **Build destination**, select the **Export to folder** option. In **Folder**, enter the absolute path `<game folder>/Mods/<MapName>`, where `<game folder>` is the folder with the game executable. Select the **Export to folder** button, then load the map in the game. See [Test the map in the game](docs/en/test-in-game.md). <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
+1. On the **Publish** tab, under **Build destination**, select the **Export to folder** option. In **Folder**, enter the absolute path `<game folder>/Mods/<MapName>`, where `<game folder>` is the folder with the game executable. Select the **Export to folder** button, then load the map in the game. See [Test the map in the game](docs/en/test-in-game.md). <!-- src: game -->
 1. In the **MapBuilder** header, select **Sign in** and complete the mod.io sign-in. See [Sign in to mod.io](docs/en/publish.md#sign-in).
 1. On the **Publish** tab, under **Build destination**, select the **Platform** option. Under **Publications**, select **Create publication**.
 1. When the footer shows `Publication created.`, keep the new publication selected, select the **Build map** button on the **Build** tab again, then select **Update publication** on the **Publish** tab. The first upload carries a placeholder id instead of the publication's mod.io id. See [Create a publication](docs/en/publish.md#create).
@@ -99,7 +99,7 @@ The [documentation contents](docs/en/README.md) list the same pages in reading o
 | Icon and Preview | The Icon is required, the Preview is optional. For the format, file size and pixel size, see [Image requirements](docs/en/minimap-and-images.md#images). |
 | Scene name | Starts with a letter and uses only letters, digits and `_`. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:32-45 --> |
 | Build size | Map ≤ 4096 MB, metadata ≤ 24 MB, measured on the build cache folders `MapTemp` and `MetaTemp`, not on `mod.cxmod`. Checked only when you create or update a publication. <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182; Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26 --> |
-| Scene contents | Exactly 1 Minimap; at least 1 SpawnPoint; ≤ 500 lights (only Point and Spot lights are exported, and in the game they turn on only at night); ≤ 1000 Rigidbodies; ≤ 8 LOD levels per LODGroup. <!-- src: Assets/Editor/MapSceneRules.cs:11-24; Assets/Editor/Validation/SceneValidator.cs:278-284,811; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:98-100; DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModLightsDayNightBehaviour.cs:36-53 --> |
+| Scene contents | Exactly 1 Minimap; at least 1 SpawnPoint; ≤ 500 lights (only Point and Spot lights are exported, and in the game they turn on only at night); ≤ 1000 Rigidbodies; ≤ 8 LOD levels per LODGroup. <!-- src: Assets/Editor/MapSceneRules.cs:11-24; Assets/Editor/Validation/SceneValidator.cs:278-284,811; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:98-100; game --> |
 
 Next: [Reference](docs/en/reference.md)
 

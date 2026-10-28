@@ -693,7 +693,7 @@ Local maps load from the `Mods` folder next to the game executable, only on PC a
 <a name="map-missing"></a>
 ### The map doesn't appear in the game
 
-**Cause.** The game lists a local map only when it finds a non-empty folder directly in `<game folder>/Mods/`, where `<game folder>` is the folder with the game executable. Every subfolder is one map, and folders whose names start with `.` are skipped. The **Mods** tab of the **Track Selection** screen appears only when the game finds at least one map. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
+**Cause.** The game lists a local map only when it finds a non-empty folder directly in `<game folder>/Mods/`, where `<game folder>` is the folder with the game executable. Every subfolder is one map, and folders whose names start with `.` are skipped. The **Mods** tab of the **Track Selection** screen appears only when the game finds at least one map. <!-- src: game -->
 
 **Fix.**
 
@@ -707,7 +707,7 @@ See also: [Where the game looks for local maps](test-in-game.md#local-maps) · [
 <a name="map-twice"></a>
 ### The map appears twice after you publish it
 
-**Cause.** The local copy in `<game folder>/Mods/<MapName>/` and the copy installed from mod.io have different mod IDs: the folder name, and `<modIoId>_<modfileId>`. The game lists both. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModeManagerController.cs:184-201 -->
+**Cause.** The local copy in `<game folder>/Mods/<MapName>/` and the copy installed from mod.io have different mod IDs: the folder name, and `<modIoId>_<modfileId>`. The game lists both. <!-- src: game -->
 
 **Fix.**
 
@@ -739,7 +739,7 @@ See also: [Add colliders](scene-setup.md#colliders) · [Unity Terrain isn't expo
 **Cause.** One of these:
 
 - The Road marker and the collider are on different GameObjects. The game applies a Road marker's surface only to a collider on the marker's own object; any other collider gets the default physics material. Validation accepts a collider on a child, so it doesn't report this.
-- The marker's surface is `default`, `ice_snowy` or `pavement`. The game has no surface template with these names, so the collider gets no road surface, with values or without, and behaves like a collider without a Road marker. The game log, `Player.log`, then shows `[ModRoadSurfaceMaterials] Road marker references surface template '<name>', but no matching CARXSurfaceTemplate was found.`
+- The marker's surface is `default`, `ice_snowy` or `pavement`. The game has no surface template with these names, so the collider gets no road surface, with values or without, and behaves like a collider without a Road marker. The game log, `Player.log`, then shows a warning that starts with `Road marker references surface template '<name>'`.
 - The marker has a **Template Config**. Its values, from the named template or from **Custom**, replace the game's surface entirely, **Surface Type** and **Water Rate** included. They start from the MapUploader surface defaults, and these differ from the game's surface on some surfaces, for example **Bump Min** of `grass`. When the marker's template is removed from the config, the marker exports its own **Custom** values. <!-- src: Assets/Scripts/GameMarkerData.cs:14-37 -->
 
 **Fix.**
@@ -770,7 +770,7 @@ See also: [Set up materials](scene-setup.md#materials)
 <a name="lights-off"></a>
 ### Lights stay off in the daytime
 
-**Cause.** This is expected. In the game, exported Point and Spot lights turn on only at night. Directional and Area lights are never exported; the game supplies its own sun and sky. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModLightsDayNightBehaviour.cs:44 -->
+**Cause.** This is expected. In the game, exported Point and Spot lights turn on only at night. Directional and Area lights are never exported; the game supplies its own sun and sky. <!-- src: game -->
 
 **Fix.**
 
@@ -781,7 +781,7 @@ See also: [Set up lighting](scene-setup.md#lighting)
 <a name="spawn-names"></a>
 ### Spawn points show numbers or wrong names on the world map
 
-**Cause.** The world map in the game lists every spawn point as a fast-travel point under its GameObject name. A spawn point with an empty name shows its number instead. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModWorldMapController.cs:351 -->
+**Cause.** The world map in the game lists every spawn point as a fast-travel point under its GameObject name. A spawn point with an empty name shows its number instead. <!-- src: game -->
 
 **Fix.**
 
@@ -810,7 +810,7 @@ See also: [Add the minimap](minimap-and-images.md#minimap)
 <a name="msg-load-failed"></a>
 ### `Failed to load the track mod. Please try again.`
 
-**Cause.** The game found the map folder but couldn't load the map, or loading took too long. Very large maps may fail to load. <!-- src: DR3PC1:Assets/DR3/Localization/LocalesJson/English(en).json:3609 -->
+**Cause.** The game found the map folder but couldn't load the map, or loading took too long. Very large maps may fail to load. <!-- src: game -->
 
 **Fix.**
 
@@ -818,14 +818,14 @@ See also: [Add the minimap](minimap-and-images.md#minimap)
 1. Delete everything in `<game folder>/Mods/<MapName>/`, then export the map into the empty folder again.
 1. In the game, load the map. If you closed the game, start it first.
 
-If loading still fails, open the game log, `%USERPROFILE%\AppData\LocalLow\CarX Technologies\CarX Drift Racing Online 2\Player.log`, and find `Failed to load mod '<MapName>'`. The exception that follows names the reason. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModRoomsHelper.cs:322 -->
+If loading still fails, open the game log, `%USERPROFILE%\AppData\LocalLow\CarX Technologies\CarX Drift Racing Online 2\Player.log`, and find `Failed to load mod '<MapName>'`. The exception that follows names the reason. <!-- src: game -->
 
 See also: [Load the map in the game](test-in-game.md#in-game)
 
 <a name="join-local-map"></a>
 ### Other players can't join a room on your local map
 
-**Cause.** A room on a local map is open only to players who have a map folder with the same name in their own `Mods` folder. Other players don't see the room in their room list, and joining it by code shows `Mod Not Installed` with `Install the track mod to join this room.` A map published on mod.io downloads when a player joins, in game builds that support mod.io. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModRoomsHelper.cs:113-116 -->
+**Cause.** A room on a local map is open only to players who have a map folder with the same name in their own `Mods` folder. Other players don't see the room in their room list, and joining it by code shows `Mod Not Installed` with `Install the track mod to join this room.` A map published on mod.io downloads when a player joins, in game builds that support mod.io. <!-- src: game -->
 
 **Fix.**
 
@@ -839,7 +839,7 @@ See also: [Test the map in the game](test-in-game.md) · [Publish to mod.io](pub
 
 Message: `The room uses a different version of this track mod. Update the mod or choose another room.`
 
-**Cause.** Every **Update publication** uploads a new file, and a room on a mod.io map accepts only players who have the same version installed as the host. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModRoomsHelper.cs:449-455 -->
+**Cause.** Every **Update publication** uploads a new file, and a room on a mod.io map accepts only players who have the same version installed as the host. <!-- src: game -->
 
 **Fix.**
 

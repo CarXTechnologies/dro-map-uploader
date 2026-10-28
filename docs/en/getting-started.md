@@ -11,7 +11,7 @@ Get the MapUploader project, open it in the required Unity version and learn you
 - [Unity Hub](https://unity.com/download), to install the editor and open the project.
 - A Unity account, signed in to Unity Hub, with an active license, such as Unity Personal. The editor doesn't start without a license.
 - Unity Editor 6000.3.19f1, revision `7689f4515d75`, exactly. See [Install Unity 6000.3.19f1](#unity). <!-- src: ProjectSettings/ProjectVersion.txt:1-2 -->
-- A PC copy of CarX Drift Racing Online 2 that loads local maps, to test your map locally. The game reads local maps from the `Mods` folder next to its executable. To find out whether your copy does, see [Check that the game loads local maps](test-in-game.md#check-game). <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
+- A PC copy of CarX Drift Racing Online 2, version 0.21.4 or later, that loads local maps, to test your map locally. The game reads local maps from the `Mods` folder next to its executable. To find out whether your copy does, see [Check that the game loads local maps](test-in-game.md#check-game). <!-- src: game -->
 - A mod.io account, only when you publish. See [Publish to mod.io](publish.md).
 
 <a name="clone"></a>
