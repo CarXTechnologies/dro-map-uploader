@@ -2,8 +2,6 @@
 
 [English](../../en/advanced/publishing-vendors.md) · **Русский**
 
-Относится к: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · скриншоты 26.10.2026
-
 На этой странице описано, как MapUploader публикует карты через SDK площадок: как устроен слой публикации, как подключены SDK и ассеты конфигов площадок, как перенастроить проект на другую игру mod.io и как добавить площадку. Она нужна тем, кто сопровождает MapUploader или использует его слой публикации в другом проекте.
 
 > [!NOTE]
@@ -20,7 +18,7 @@
 
 ## Как устроен слой публикации
 
-MapUploader никогда не вызывает SDK площадки напрямую. Он работает с одним контрактом, не зависящим от площадки, — он находится в сабмодуле [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/3ec9bd8620bf8f1e03ea10715c24ba2be9986acd). Реализация каждой площадки лежит в отдельной сборке с define-ограничением (define constraint), поэтому проект компилирует только те площадки, SDK которых в нём есть, а другой проект может добавить площадку, не меняя контракт.
+MapUploader никогда не вызывает SDK площадки напрямую. Он работает с одним контрактом, не зависящим от площадки, — он находится в сабмодуле [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/9692638e3538922cb3197c9760c186809f36e176). Реализация каждой площадки лежит в отдельной сборке с define-ограничением (define constraint), поэтому проект компилирует только те площадки, SDK которых в нём есть, а другой проект может добавить площадку, не меняя контракт.
 
 ```
 Assets/Plugins/CarX.Modding.Creator/          сабмодуль
@@ -278,7 +276,7 @@ Assets/Resources/CarX.Modding/                ModIoConfig.asset, SteamWorkshopCo
 
 Результат: после перекомпиляции `ModPublisherSession.AvailableVendors` содержит новую площадку, а окно **MapBuilder** предлагает её в той мере, в какой это позволяют ваши изменения этих членов классов.
 
-Интерфейсы находятся в сабмодуле: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/3ec9bd8620bf8f1e03ea10715c24ba2be9986acd/Publishing/Core/IModPublisher.cs) и [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/3ec9bd8620bf8f1e03ea10715c24ba2be9986acd/Publishing/Core/IModAuthProvider.cs).
+Интерфейсы находятся в сабмодуле: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/Publishing/Core/IModPublisher.cs) и [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/Publishing/Core/IModAuthProvider.cs).
 
 <a name="differences"></a>
 ## Известные различия площадок
@@ -329,7 +327,7 @@ MapUploader не создаёт таких модов:
 - Кнопка **Создать публикацию** неактивна, пока не собраны и карта, и её метаданные, потому что публикатор прикрепляет сборку при создании записи, а не создаёт сначала пустую запись.
 - Если mod.io принимает новый мод, но отклоняет его файл, публикатор удаляет новый мод и сообщает `mod.io created mod <id> but refused its content: <reason>. The incomplete mod was deleted.` Если и удаление не удалось, сообщение просит удалить мод на mod.io. <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoPublisher.cs:520 -->
 
-Мод без файла всё же может появиться иначе, например если его создали на сайте mod.io. Если список не загружается, удалите такой мод по ID: **Удалить публикацию** запрашивает ID, когда ни одна публикация не выбрана, и этот путь не требует списка. См. *Удаление публикации, которую не показывает список* в разделе [Публикация на mod.io](../publish.md).
+Мод без файла всё же может появиться иначе, например если его создали на сайте mod.io. Если список не загружается, удалите такой мод по ID: **Удалить публикацию** запрашивает ID, когда ни одна публикация не выбрана, и этот путь не требует списка. См. [Удаление публикации, которую не показывает список](../publish.md#delete-by-id).
 
 ### Список публикаций читается через `SyncUserCreations`
 

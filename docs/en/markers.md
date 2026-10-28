@@ -2,8 +2,6 @@
 
 **English** · [Русский](../ru/markers.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
 Markers tell the game what your scene objects are: where the car appears, which road surface each collider has, which objects play an animation and which materials use render core variants. Add them once the scene has its models and colliders.
 
 ## Before you start
@@ -44,12 +42,10 @@ To use an example prefab:
 | Prefab | What it contains | Use it for |
 | --- | --- | --- |
 | `SpawnPoint` | An empty GameObject with a `SpawnPoint` marker and the Draw Zone Behaviour helper | A spawn point |
-| `Road` | A cube with a Box Collider and a `Road/asphalt` marker | A drivable block |
+| `Road` | A 1 × 1 × 1 m cube with a Box Collider and a `Road/asphalt` marker | A drivable block |
 | `Box` | A cube with a Rigidbody (mass 200) and a child `Road` that has a Box Collider. The child's `Road/asphalt` marker gives no surface, because the object is dynamic. | A dynamic object. See [Add dynamic objects](scene-setup.md#dynamic). |
 
 Don't use `Ambient.prefab`. Its marker type, `Ambient`, is no longer supported; see [Remove unsupported markers](#unsupported).
-
-The marker of `Road.prefab` carries road values that are all `0`. When you drop the prefab into the **Hierarchy**, Unity selects the new instance, so its marker gets the surface defaults right away; see [Values saved by an earlier version](#older-values).
 
 <a name="types"></a>
 ## Choose the marker type
@@ -72,7 +68,7 @@ To give several GameObjects the same type:
 
 Result: every selected marker has the new type.
 
-The button changes only the type. A Road marker keeps the values it had, and gets new ones the next time the **Inspector** shows it on its own, as described in Physics values below.
+The button changes only the type: the **Template Config** and the template of each marker stay as they are. A Road marker without a **Template Config** therefore gets the game's surface of its new type, as described in [Physics values](#values).
 
 <a name="spawn"></a>
 ## Add spawn points
@@ -108,81 +104,42 @@ To mark a road surface:
 1. Add the GameMarkerData component.
 1. In the type menu, select **Road**, then the surface.
 
-Result: the type menu shows `Road/<surface>`, for example `Road/asphalt`, and the **Template Config** field appears.
+Result: the type menu shows `Road/<surface>`, for example `Road/asphalt`, and the **Template Config** field appears, empty. With **Template Config** empty, the game gives the collider its own surface of that name with all its values, **Surface Type** and **Water Rate** included. <!-- src: Assets/Scripts/GameMarkerData.cs:10-19 -->
 
 > [!IMPORTANT]
-> Put the Road marker on the same GameObject as the collider. Validation also accepts a collider on a child object, but the surface applies only to the marker's own GameObject, so the child's collider gets no surface.
+> Put the marker on the collider's own GameObject: a collider on a child object passes validation but gets no surface. A **Template Config** replaces all the values of the game's surface, so with one, set **Surface Type** and **Water Rate** in its template or in **Custom**; see [Reuse road values with templates](#templates).
 
-In the TestMap sample, `Content/workshop_map_main/road` is set up this way: the GameObject has only a Mesh Collider and a `Road/asphalt` marker.
+In the TestMap sample, `Content/workshop_map_main/road` is set up this way: the GameObject has only a Mesh Collider and a `Road/asphalt` marker. Its marker also uses the `AsphaultDef` template, so the game gets the template's values instead of its own `asphalt`; see [Values saved by an earlier version](reference.md#older-values).
 
 - A Road marker with no collider on its GameObject or its children is a validation error: `'<name>' is marked as Road but has no Collider on it or its children, …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:267 -->
 - A collider without a Road marker still collides, but the game gives it a default physics material instead of a road surface.
 - A Road marker on a LODGroup object, or on a renderer that is one of its LOD levels, gives no surface. Put the collider and the marker on a separate GameObject that isn't part of any LOD level.
 - A Road marker on the GameObject with a Rigidbody, or on one of its children, gives no surface. The colliders of a dynamic object use the friction and bounciness of their physics material instead. This also applies to the child of the `Box` example prefab.
-- Unity Terrain isn't exported. A Road marker on a Terrain passes validation, because a Terrain Collider counts as a collider, but the map gets no ground there. Model the ground as a mesh; see [Import models](scene-setup.md#import).
+- A Road marker on a Unity Terrain passes validation, because a Terrain Collider counts as a collider, but Terrain isn't exported, so the map gets no ground there. Model the ground as a mesh; see [Set up the scene](scene-setup.md#before-you-start).
 - Build optimization never merges colliders that carry different Road markers, so every collider keeps its surface.
 
 ### Road surfaces
 
-The **Road** submenu lists `default` first, then 25 surfaces in alphabetical order. A marker stores its type as `Road/<surface>`, and the game picks its own surface template by the part after `Road/`. The following table groups the surfaces to make them easier to find; for the menu order, see [Road surfaces and physics fields](reference.md#surfaces).
+The **Road** submenu lists `default` first, then 25 surfaces in alphabetical order. A marker stores its type as `Road/<surface>`, and the game picks its own surface by the part after `Road/`. The following table groups the surfaces to make them easier to find; for the menu order and the **Surface Type** of each surface in the game, see [Road surfaces and physics fields](reference.md#surfaces).
 
 | Group | Surfaces |
 | --- | --- |
-| Default | `default` |
-| Paved | `asphalt`, `brick`, `concrete`, `kerb_racetrack`, `pavement`, `paving_slab` |
+| Default | `default` (no game surface) |
+| Paved | `asphalt`, `brick`, `concrete`, `kerb_racetrack`, `pavement` (no game surface), `paving_slab` |
 | Cobbles | `cobbles`, `cobbles_big` |
 | Loose ground | `dirt`, `earth`, `grass`, `gravel`, `sand` |
-| Snow and ice | `ice_snowy`, `road_icy`, `snow`, `snow_asphalt`, `snow_cobbles`, `snow_gravel` |
+| Snow and ice | `ice_snowy` (no game surface), `road_icy`, `snow`, `snow_asphalt`, `snow_cobbles`, `snow_gravel` |
 | Water | `liquid_water` |
 | Metal, plastic and wood | `metal`, `metal_grille`, `plastic`, `wood`, `wood_plank` |
+
+The game has no surface named `default`, `ice_snowy` or `pavement`. A collider with one of them gets no road surface in the game, with values or without, and behaves like a collider without a Road marker. Use `asphalt` instead of `default`, `road_icy` instead of `ice_snowy` and `paving_slab` instead of `pavement`.
 
 <a name="values"></a>
 ### Physics values
 
-For each Road marker, the game loads its own surface template of the same name. If the marker carries physics values, they replace the template's values. If it carries none, the game uses the template unchanged.
-
-A marker gets its values from the **Inspector**, which updates the marker each time it shows it: when you select the marker's GameObject on its own and the GameMarkerData component is expanded. Selecting a marker can therefore change what it exports. A marker exports these values: <!-- src: Assets/Editor/MarkerDataDrawer.cs:197-210 -->
-
-| Marker state | Values the marker exports |
-| --- | --- |
-| Never shown in the **Inspector** and saved without values, for example most Road markers in the TestMap sample that you haven't selected | None. The game uses its surface template. |
-| Saved with values and not shown since, for example 5 Road markers in the TestMap sample | The saved values. Values that are `0` in every field count as none, and the game uses its surface template. See [Values saved by an earlier version](#older-values). |
-| Shown, with no **Template Config** | The surface defaults from `Assets/Resources/DefaultRoadValues/<surface>.asset`. The **Inspector** writes them the first time it shows the marker, and again each time its surface changes. |
-| Shown, with a **Template Config** and a named template | The template's values, copied each time the **Inspector** shows the marker |
-| Shown, with a **Template Config** and **Custom** | The marker's own values. They start from the surface defaults and are reset to the new surface's defaults whenever you change the surface. |
-| Type changed with **Select : &lt;type&gt;** and not shown since | The values it had before the change, for example asphalt values on a `Road/grass` marker. To refresh them, select the marker on its own. |
-
-The surface defaults don't set **Water Rate** and **Surface Type**, so a marker filled from them carries **Water Rate** `0` and **Surface Type** `Asphalt` on every surface. For example, a `Road/grass` marker with the defaults gives the game the Surface Type `Asphalt`. To set these two fields, assign a **Template Config** and use a template or **Custom**. <!-- src: Assets/Resources/DefaultRoadValues/grass.asset:15-23 -->
-
-The physics fields are visible on a marker only after you assign a **Template Config**, under the template menu row, as described in Reuse road values with templates. The fields and their ranges are: <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Instances/PhysicMaterialProperties.cs:13-31 -->
-
-| Field | Range or values |
-| --- | --- |
-| **Friction** | 0 to 5 |
-| **Roll Friction** | 0 to 1 |
-| **Bump Min** | −1 to 0.05 |
-| **Bump Max** | −0.2 to 1 |
-| **Bump Scale** | 0 to 100 |
-| **Bump 2 Min** | −1 to 0 |
-| **Bump 2 Max** | 0 to 1 |
-| **Bump 2 Scale** | −1 to 100 |
-| **Water Rate** | Any number |
-| **Surface Type** | `Asphalt`, `Grass`, `Sand`, `Earth`, `Snow`, `Ice` or `Gravel` |
-
-**Surface Type** is one of the values, not the marker's surface: the 26 surfaces of the **Road** submenu are a separate list.
-
-<a name="older-values"></a>
-### Values saved by an earlier version
-
-An earlier version of the project saved road values under another type name. They load in this version like any other values, in your older map scenes too. When you save such a scene or asset, Unity stores the values under the current type name.
-
-These values in the project come from an earlier version:
-
-- the `AsphaultDef` template in `Assets/Resources/GameMarkerTemplateConfig.asset`: **Friction** `1`, **Roll Friction** `0.01`, **Bump Scale** `100` and `0` in every other field, so its **Surface Type** is `Asphalt`; <!-- src: Assets/Resources/GameMarkerTemplateConfig.asset:47-57 -->
-- the `Road` example prefab: `0` in every field;
-- 5 Road markers in the TestMap sample: `road` and `roadside` use the `AsphaultDef` template, and `terrain`, `wall_coll` and `big_bw_strips (1)` carry `0` in every field.
-
-Such a marker exports its saved values, even if the **Inspector** has never shown it. Values that are `0` in every field are not exported, because **Friction** `0` would make the surface as slippery as ice: `terrain`, `wall_coll`, `big_bw_strips (1)` and markers of the `Road` prefab therefore get the game's surface template. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:555-561 --> The first time the **Inspector** shows one of these markers without a **Template Config**, it replaces the values with the surface defaults, as on any new Road marker. A marker that uses the `AsphaultDef` template takes the template's values.
+- Without a **Template Config**, a Road marker exports no physics values, and the game uses its own surface with all its values. <!-- src: Assets/Scripts/GameMarkerData.cs:10-19 -->
+- **Surface Type**, **Water Rate** and the other values are set only through a template or **Custom**, as described in [Reuse road values with templates](#templates). The marker then exports all its values, and they replace the game's surface entirely. They start from the MapUploader defaults of the surface, which can differ from the game's surface, so assign a **Template Config** only to change a surface.
+- For the fields and their ranges, see [Physics fields](reference.md#physics-fields). For what a marker exports in each state, see [When the physics values apply](reference.md#surface-values).
 
 <a name="templates"></a>
 ## Reuse road values with templates
@@ -200,7 +157,7 @@ To create a template:
    While the field is empty, it shows `TEMPLATE NAME`. <!-- src: Assets/Editor/GameMarkerTemplateConfigDrawer.cs:72 -->
    The following screenshot shows a template config with one template, `AsphaultDef`, with the same values as the `AsphaultDef` template in `Assets/Resources/GameMarkerTemplateConfig.asset`.
 
-   <img src="../images/shared/markers-template-config.png" width="460" alt="Screenshot of the GameMarkerTemplateConfig Inspector; markers 1–5 on a template, Remove, the surface menu, the name field and Add Template.">
+   <img src="../images/shared/markers-template-config.png" width="460" alt="Screenshot of the GameMarkerTemplateConfig Inspector; callouts 1–5 on a template, Remove, the surface menu, the name field and Add Template.">
 
    | # | Element | What it does |
    | --- | --- | --- |
@@ -211,8 +168,8 @@ To create a template:
    | 5 | **Add Template** | Adds the template. It is hidden while the name is empty and unavailable when a template with that name exists. |
 
 1. Select **Add Template**.
-   The template appears in the list under its name, with the defaults of its surface as its values.
-1. Expand the template and set its values, including **Water Rate** and **Surface Type**.
+   The template appears in the list under its name. Its values are the MapUploader defaults of its surface: **Surface Type** and **Water Rate** match the game's surface, and the other fields can differ from it.
+1. Expand the template and set its values, including **Surface Type** and **Water Rate**.
 
 Result: the config lists the template with your values.
 
@@ -224,7 +181,7 @@ To apply a template to a Road marker:
 1. In the template menu, select your template.
    The following screenshot uses the template config made for this guide.
 
-   <img src="../images/shared/markers-road-template.png" width="460" alt="Screenshot of a Road marker that uses a template on a Mesh Collider object; markers 1–5 on the collider, type, config, template and values.">
+   <img src="../images/shared/markers-road-template.png" width="460" alt="Screenshot of a Road marker that uses a template on a Mesh Collider object; callouts 1–5 on the collider, type, config, template and values.">
 
    | # | Element | What it does |
    | --- | --- | --- |
@@ -238,12 +195,10 @@ To apply a template to a Road marker:
 
 Result: the template menu shows the template's name, and the marker takes the template's values. To see them, expand the template menu row with the arrow at its start: the values are greyed out. To give one marker its own editable values, select **Custom** in its template menu.
 
-> [!NOTE]
-> A template's values reach a marker only when the **Inspector** shows that marker. After you edit a template, select each marker that uses it before you build.
-
+- Each build exports the current values of the template. After you edit a template, build the map again; you don't need to select the markers that use it. <!-- src: Assets/Scripts/GameMarkerData.cs:26-34 -->
 - The template menu lists every template of the config, whatever its surface. The surface still comes from the marker type; the template supplies only the values.
 - Create only `Road/…` templates. The surface menu of the config also offers **Animation** and **Material**, but only Road markers use templates.
-- When you remove a template, the markers that used it switch to **Custom** the next time the **Inspector** shows them.
+- When you remove a template, the markers that used it export their own **Custom** values, and the **Inspector** shows **Custom** in their template menu. <!-- src: Assets/Scripts/GameMarkerData.cs:36-37 -->
 - **Template Config** and the template are set on each marker separately: **Select : &lt;type&gt;** changes only the type.
 
 <a name="animation"></a>
@@ -280,7 +235,7 @@ Validation checks only that the marker has an Animator with clips: `Animation ma
 - The hierarchy has at least one enabled MeshRenderer or SkinnedMeshRenderer, every such renderer has a mesh, and each mesh has as many materials as submeshes.
 - The baked data stays within its size limit. Otherwise the build reports `VAT for '<name>' is too large …`; reduce the vertices, the clips or **Bake frames per second**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:128 -->
 
-An Animator or SkinnedMeshRenderer without an Animation marker isn't exported, and validation shows a Components note for it. The game plays the baked clips only: Animator transitions, parameters, events, scripts and IK aren't reproduced, and collider shapes don't deform with the animation. For the full scope, see [VertexAnimation.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/3ec9bd8620bf8f1e03ea10715c24ba2be9986acd/VertexAnimation.md) in the SDK.
+An Animator or SkinnedMeshRenderer without an Animation marker isn't exported, and validation shows a Components note for it. The game plays the baked clips only: Animator transitions, parameters, events, scripts and IK aren't reproduced, and collider shapes don't deform with the animation. For the full scope, see [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/VertexAnimation.md#supported-scope) in the SDK's VertexAnimation.md.
 
 <a name="material"></a>
 ## Replace materials with render core variants
@@ -305,7 +260,7 @@ Result: each entry header shows the variant you chose, and the next **Binary** b
 
 The following screenshot shows a Material marker on a LODGroup object, with its first entry expanded.
 
-<img src="../images/shared/markers-material.png" width="460" alt="Screenshot of a Material marker on a LODGroup object with one entry expanded; markers 1–6 on the note, buttons, variant and channels.">
+<img src="../images/shared/markers-material.png" width="460" alt="Screenshot of a Material marker on a LODGroup object with one entry expanded; callouts 1–6 on the note, buttons, variant and channels.">
 
 | # | Element | What it does |
 | --- | --- | --- |
@@ -326,7 +281,7 @@ The following screenshot shows a Material marker on a LODGroup object, with its 
 
 `MAT_LAYERS4` blends four layers by the mesh's vertex colors: RGB is the layer mask and A tints the albedo. A mesh without vertex colors is exported white and shows only the fourth layer. The game keeps the vertex colors of a mesh with `MAT_LAYERS4`, so they also multiply the emission of the mesh's other submeshes. Put emissive parts on a separate GameObject: build optimization merges objects with `MAT_LAYERS4` only with each other, so that object stays a separate mesh. Validation warns about a mesh without vertex colors and about a mesh that mixes `MAT_LAYERS4` and emission.
 
-For the variants, their packed-map channels and the revision rules, see [RenderCoreMaterial.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/3ec9bd8620bf8f1e03ea10715c24ba2be9986acd/RenderCoreMaterial.md) in the SDK. For how Layered Lit materials are exported, see [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/3ec9bd8620bf8f1e03ea10715c24ba2be9986acd/LayeredPbr.md).
+The SDK's RenderCoreMaterial.md describes the alpha-test, `MAT_LAYERS4`, emission and `MAT_INTERIOR` variants in [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/RenderCoreMaterial.md#variant-notes), and when an entry needs **Export from material** again in [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/RenderCoreMaterial.md#revision-policy). For how Layered Lit materials are exported, see [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/LayeredPbr.md).
 
 <a name="unsupported"></a>
 ## Remove unsupported markers
@@ -339,7 +294,7 @@ To remove an unsupported marker:
 
 Result: the warning for that object disappears from the next validation.
 
-If the object should be another marker, select a supported type in the type menu instead. Moving physics objects need no marker: give them a Rigidbody, as described in Add dynamic objects on the Set up the scene page.
+If the object should be another marker, select a supported type in the type menu instead. Moving physics objects need no marker: give them a Rigidbody, as described in [Add dynamic objects (Rigidbody)](scene-setup.md#dynamic).
 
 The TestMap sample still has 8 `Ambient` markers under `AmbientSounds`, so validating TestMap shows 8 such warnings. `Assets/ExamplePrefab/Ambient.prefab` has the same marker, so each instance of it in a scene gives this warning too.
 

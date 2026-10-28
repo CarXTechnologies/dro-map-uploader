@@ -2,8 +2,6 @@
 
 [English](../../en/advanced/mod-format.md) · **Русский**
 
-Относится к: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · скриншоты 26.10.2026
-
 На этой странице описано, как MapUploader хранит собранную карту: кэш сборки, дерево файлов Wavefront, контейнер Binary `mod.cxmod` и то, как игра читает папку мода. Чтобы создать или опубликовать карту, эта страница не нужна. Обращайтесь к ней, когда изучаете экспортированные файлы, разбираетесь, почему карта не загружается, или пишете инструмент, который читает моды.
 
 ## Как карта становится модом
@@ -42,7 +40,7 @@ flowchart LR
 | Сжатие | Deflate, для каждого ресурса отдельно | Нет |
 | Можно прочитать в текстовом редакторе | Нет | Да |
 
-Тестируйте и публикуйте карту в формате Binary: игра читает один файл, текстуры приходят готовыми для GPU, а маркеры Material работают только в Binary. Wavefront нужен, чтобы читать или сравнивать экспортированные данные как текст. Сборки игры с поддержкой модов читают оба формата.
+Тестируйте и публикуйте карту в формате Binary: игра читает один файл, текстуры приходят готовыми для GPU, а маркеры Material работают только в Binary. Wavefront нужен, чтобы читать или сравнивать экспортированные данные как текст. Копия игры, которая загружает локальные карты, читает оба формата.
 
 ## Что попадает в мод
 
@@ -138,8 +136,8 @@ flowchart LR
 | `mass`, `linearDamping`, `angularDamping` | Как задано в Rigidbody. |
 | `isKinematic`, `useGravity`, `detectCollisions` | Как задано в Rigidbody. |
 | `constraints` | Ограничения Rigidbody в виде значения флагов Unity. |
-| `automaticCenterOfMass`, `centerOfMass` | Вычисляет ли Unity центр масс, и центр масс в локальных осях тела. |
-| `automaticInertiaTensor`, `inertiaTensor`, `inertiaRotation` | Вычисляет ли Unity тензор инерции, и его значение и поворот. |
+| `automaticCenterOfMass`, `centerOfMass` | Признак автоматического расчёта центра масс и сам центр масс в локальных осях тела. |
+| `automaticInertiaTensor`, `inertiaTensor`, `inertiaRotation` | Признак автоматического расчёта тензора инерции, сам тензор и его поворот. |
 | `linearVelocity`, `angularVelocity` | Начальные скорости. |
 | `colliders` | По записи на каждый включённый коллайдер, прикреплённый к телу. В каждой есть `transform` (позиция и поворот относительно тела плюс мировой масштаб коллайдера); либо `primitive` (Box, Sphere или Capsule), либо `mesh` с `vertices`, `triangles` и `convex`; флаг `trigger`; а также `friction`, `restitution`, `frictionCombine` и `bounceCombine` из Physic Material коллайдера. Без Physic Material `friction` равно `0.6`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Instances/RigidbodyInstance.cs:27 --> |
 
@@ -197,7 +195,7 @@ flowchart LR
 
 ### Структура файла
 
-Все числа записаны в порядке little-endian. Эталонная реализация чтения — [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/3ec9bd8620bf8f1e03ea10715c24ba2be9986acd/Runtime/Binary/BinaryModArchive.cs) в SDK CarX.Modding.Creator.
+Все числа записаны в порядке little-endian. Эталонная реализация чтения — [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/Runtime/Binary/BinaryModArchive.cs) в SDK CarX.Modding.Creator.
 
 | Часть | Тип | Содержимое |
 | --- | --- | --- |
@@ -214,13 +212,13 @@ flowchart LR
 
 - **Дедупликация.** Ресурсы с одинаковым содержимым, найденные по SHA-256, используют один общий блок, поэтому несколько имён могут указывать на одни и те же байты.
 - **Сжатие.** Каждый ресурс сжимается методом raw Deflate, только если это уменьшает его размер. Ресурсы `.png` и `.cxgeom` не сжимаются никогда. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:304 -->
-- **Контрольные суммы.** При чтении проверяется CRC-32 (полином `0xEDB88320`) каждого считываемого ресурса. При несовпадении чтение завершается ошибкой `Binary resource checksum mismatch: <name>`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:194 -->
+- **Контрольные суммы.** При чтении проверяется CRC-32 (полином `0xEDB88320`) каждого считываемого ресурса. При несовпадении чтение завершается ошибкой `Binary resource checksum mismatch: <name>`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:249 -->
 - **Безопасная замена.** Упаковщик записывает временный файл рядом с `mod.cxmod`, считывает обратно его индекс и только после этого заменяет старый файл. Если упаковка не удалась, прежний `mod.cxmod` остаётся без изменений. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:208-224 -->
 - **Ограничения.** Контейнер содержит не больше 100 000 имён ресурсов, имя — не длиннее 1024 символов, а каждый ресурс — не больше 256 МБ. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:20-21,104 -->
 
 ## Как игра читает папку мода
 
-Эти правила относятся к сборкам игры с поддержкой модов. Куда положить карту для локального теста, см. в разделе [Где игра ищет локальные карты](../test-in-game.md#local-maps).
+Эти правила относятся к копии игры, которая загружает локальные карты; как проверить свою копию, см. в разделе [Проверка загрузки локальных карт в игре](../test-in-game.md#check-game). Куда положить карту для локального теста, см. в разделе [Где игра ищет локальные карты](../test-in-game.md#local-maps).
 
 - **Где находятся моды.** На ПК каждая папка непосредственно внутри `<папка с исполняемым файлом игры>/Mods/` — это один локальный мод, а имя папки — его ID. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
 - **Установки с mod.io.** В сборках игры с поддержкой mod.io карты, скачанные с mod.io, читаются так же из их папок установки. Такая папка называется `<modIoId>_<modfileId>`, и это имя — ID мода. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModRoomsHelper.cs:123-137 -->

@@ -2,14 +2,11 @@
 
 **English** · [Русский](../ru/minimap-and-images.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
 Every map needs a minimap and an Icon, and should have a Preview. Add the Minimap component to the scene, capture the images with CaptureCamera or make them in any image editor, and check them against the image requirements before you build.
 
 ## Before you start
 
 - A map scene in `Assets/MapResources/<MapName>/` with its models and colliders. See [Set up the scene](scene-setup.md).
-- A top-down image of your map for the minimap. To capture one, see [Capture images with CaptureCamera](#capture) and [Set up the minimap camera](#minimap-camera).
 - For capture cameras, a root object tagged `Garbage`. See [Organize the scene](scene-setup.md#garbage).
 
 <a name="minimap"></a>
@@ -19,23 +16,60 @@ The minimap is a top-down picture of your map that the game lays over a rectangl
 
 A map needs exactly one Minimap component, on an active object outside any `Garbage` object. <!-- src: Assets/Editor/MapSceneRules.cs:24 -->
 
-To add the minimap:
+Add the minimap in this order: create the Minimap object and frame the area that the image covers, capture a top-down image of that area, then assign the image to the Minimap component.
+
+<a name="frame-area"></a>
+### Create the Minimap and frame its area
+
+The minimap rectangle is always aligned with the world X and Z axes. A box drawn by DrawZoneBehaviour shows the rectangle in the **Scene** view, and **Lock Size** copies the size of the box into **Bounds Size**. The TestMap sample uses this setup.
+
+To create the Minimap and frame its area:
 
 1. Select **GameObject** > **Create Empty**.
 1. In the **Hierarchy**, rename the new GameObject `Minimap`.
-   Keep it active and outside any `Garbage` object.
+   Keep it active and outside any `Garbage` object, and leave its **Rotation** at 0, 0, 0.
 1. In the **Inspector**, select **Add Component**, type `Minimap`, and select **Minimap**.
-1. In **Bounds Center**, enter the world position of the center of the area that the image covers: world X in **X** and world Z in **Y**.
-1. In **Bounds Size**, enter the size of that area in meters: world X in **X** and world Z in **Y**.
-1. In **Textures**, select **+**.
+1. Select **Add Component**, type `Draw Zone Behaviour`, and select **Draw Zone Behaviour**.
+1. In **Form**, select **Box**.
+1. Select **Is Empty**.
+   The **Scene** view draws a green wire box the size of the object's scale.
+1. On the Minimap component, select **Lock Size**.
+1. In the **Scene** view, looking from the top, scale the object along X and Z until the box frames your map.
+1. On the Minimap component, clear **Lock Size**, then select it again.
+   **Bounds Size** takes the object's new X and Z scale.
+1. In **Bounds Center**, enter the object's **Position** X in **X** and its **Position** Z in **Y**.
+
+Result: the green box shows the area that the minimap image covers, **Bounds Size** matches the box, and **Bounds Center** is its center.
+
+If you know the exact extent of your map, you don't need the box. With **Lock Size** cleared, enter the world X and Z of the center of the area in **Bounds Center**, and its size in meters along world X and Z in **Bounds Size**.
+
+DrawZoneBehaviour isn't exported, and validation ignores it. With **Cast To Floor** selected, it moves the object down onto the first collider below it while the **Scene** view draws gizmos; the minimap ignores height.
+
+### Capture the minimap image
+
+To capture the minimap image:
+
+- Capture a top-down image of the framed area as described in [Capture images with CaptureCamera](#capture), with the camera set up from **Bounds Center** and **Bounds Size** as described in [Set up the minimap camera](#minimap-camera).
+
+Result: the minimap PNG is in your map folder in the **Project** window.
+
+You can also make the image in an image editor. Give it the same proportions as **Bounds Size** X : Y.
+
+<a name="assign-minimap"></a>
+### Assign the minimap image
+
+To assign the minimap image:
+
+1. In the **Hierarchy**, select the `Minimap` object.
+1. On the Minimap component, in **Textures**, select **+**.
    **Element 0** appears.
 1. From the **Project** window, drag your minimap image onto **Element 0** > **Main Texture**.
 
-Result: when you select **Validate map** on the **Build** tab, the **Map Validation** window lists no Minimap errors and no `'Minimap': the map has …` Budget error.
+Result: **Main Texture** shows your image. When you select **Validate map** on the **Build** tab of the **MapBuilder** window, the **Map Validation** window lists no Minimap errors and no `'Minimap': the map has …` Budget error.
 
 The `Minimap` object of the TestMap sample shows a finished setup, with **Bounds Size** taken from the object's scale:
 
-<img src="../images/shared/minimap-component.png" width="460" alt="Screenshot of the TestMap Minimap object in the Inspector; markers 1–6 on Scale, the Minimap fields and Lock Size.">
+<img src="../images/shared/minimap-component.png" width="460" alt="Screenshot of the TestMap Minimap object in the Inspector; callouts 1–6 on Scale, the Minimap fields and Lock Size.">
 
 | # | Element | What it does |
 | --- | --- | --- |
@@ -57,7 +91,7 @@ The game draws the image as a flat rectangle centered on **Bounds Center** and s
 
 A top-down Scene view of TestMap shows this rectangle:
 
-<img src="../images/shared/minimap-top-view.png" width="640" alt="Screenshot of TestMap from the top in the Scene view; markers 1–3 on the minimap box, its center and its +Z edge.">
+<img src="../images/shared/minimap-top-view.png" width="640" alt="Screenshot of TestMap from the top in the Scene view; callouts 1–3 on the minimap box, its center and its +Z edge.">
 
 | # | Element | What it does |
 | --- | --- | --- |
@@ -66,26 +100,6 @@ A top-down Scene view of TestMap shows this rectangle:
 | 3 | Top edge of the box | World +Z: the top edge of the minimap image. |
 
 Give the image the same proportions as **Bounds Size** X : Y, because the game stretches it to fill the rectangle. The map doesn't have to sit at the world origin, because **Bounds Center** places the image. Centering the map at (0, 0), as TestMap does, keeps the numbers simple.
-
-### Frame the area with a box
-
-TestMap marks the minimap area with a visible box and takes **Bounds Size** from the object's scale. This helps when you don't know the exact extent of your map. The minimap rectangle is always aligned with the world X and Z axes, so leave the object's **Rotation** at 0, 0, 0.
-
-To frame the minimap area with a box:
-
-1. On the Minimap object, in the **Inspector**, select **Add Component**, type `Draw Zone Behaviour`, and select **Draw Zone Behaviour**.
-1. In **Form**, select **Box**.
-1. Select **Is Empty**.
-   The **Scene** view draws a green wire box the size of the object's scale.
-1. On the Minimap component, select **Lock Size**.
-1. In the **Scene** view, looking from the top, scale the object along X and Z until the box frames your map.
-1. On the Minimap component, clear **Lock Size**, then select it again.
-   **Bounds Size** takes the object's new X and Z scale.
-1. In **Bounds Center**, enter the object's **Position** X and Z.
-
-Result: the green box shows the area that the minimap image covers, and **Bounds Size** matches it.
-
-DrawZoneBehaviour isn't exported, and validation ignores it. With **Cast To Floor** selected, it moves the object down onto the first collider below it while the **Scene** view draws gizmos; the minimap ignores height.
 
 ### What validation checks
 
@@ -100,7 +114,7 @@ DrawZoneBehaviour isn't exported, and validation ignores it. With **Cast To Floo
 '<name>': Textures element <i> is a <Type>. Only Texture2D can be exported.
 ```
 
-The messages call **Bounds Size** `Bound Size`. For causes and fixes, see [Troubleshooting](troubleshooting.md).
+The messages call **Bounds Size** `Bound Size`. For the cause and the fix of each message, see the minimap entries in [Troubleshooting](troubleshooting.md#msg-bounds-size).
 
 A Minimap under a `Garbage` object isn't counted, so validation reports the minimap as missing. A Minimap on an inactive object passes validation, but the build exports the minimap only from an active object, so keep it active.
 
@@ -125,13 +139,13 @@ To capture an image:
 1. In the dialog, open a folder inside `Assets`, for example `Assets/MapResources/<MapName>/`, enter a file name, and select **Save**.
    If you cancel the dialog, nothing is saved.
 
-Result: the PNG appears in the **Project** window with **Read/Write** already on, so it passes the Read/Write check for the Icon and the Preview, as long as the file stays within the size limits in [Image requirements](#images). With **Clip Background**, **Alpha Is Transparency** is on too. The size settings keep Unity's defaults, so check them for a 16:9 image; see [Set the import settings](#import-settings).
+Result: the PNG appears in the **Project** window with **Read/Write** on and **Non-Power of 2** set to **None**. It passes the Read/Write check for the Icon and the Preview, and Unity doesn't resize it when its sides aren't powers of two, such as 1920 × 1080. With **Clip Background**, **Alpha Is Transparency** is on too. The file must still stay within the size limits in [Image requirements](#images). <!-- src: Assets/Editor/CaptureCameraEditor.cs:111-114 -->
 
-Save inside `Assets` to use the image in the map. Saved anywhere else, the PNG file is written without these import settings, and the Console shows `Capture saved outside the project: <path>. Copy it into Assets to use it as an icon, preview or minimap.` A copy that you put into `Assets` later gets Unity's default import settings, so turn on **Read/Write** for an Icon or a Preview. <!-- src: Assets/Editor/CaptureCameraEditor.cs:118 -->
+Save inside `Assets` to use the image in the map. Saved anywhere else, the PNG file is written without these import settings, and the Console shows `Capture saved outside the project: <path>. Copy it into Assets to use it as an icon, preview or minimap.` A copy that you put into `Assets` later gets Unity's default import settings, so set them as described in [Set the import settings](#import-settings). <!-- src: Assets/Editor/CaptureCameraEditor.cs:120 -->
 
 Each CaptureCamera component has its own **Capture** button, so one camera can produce several images. The TestMap camera `Screen/PreviewScreen` has two components, one for the Preview and one for the Icon:
 
-<img src="../images/shared/minimap-capture-camera.png" width="460" alt="Screenshot of two Capture Camera components in the Inspector; markers 1–4 on Width, Samples, Clip Background and Capture.">
+<img src="../images/shared/minimap-capture-camera.png" width="460" alt="Screenshot of two Capture Camera components in the Inspector; callouts 1–4 on Width, Samples, Clip Background and Capture.">
 
 | # | Element | What it does |
 | --- | --- | --- |
@@ -172,7 +186,7 @@ A top-down orthographic camera gives an image that matches the minimap rectangle
 
 The Transform shows world values only when the camera's parent sits at the origin. Keep your `Garbage` object at position 0, 0, 0, with rotation 0, 0, 0 and scale 1. TestMap's `Screen` object isn't at the origin, so its `MinimapScreen` camera shows local values.
 
-After you capture the image, assign it to **Main Texture** on the Minimap component. See [Add the minimap](#minimap).
+After you capture the image, assign it to **Main Texture** on the Minimap component. See [Assign the minimap image](#assign-minimap).
 
 ### How Capture renders
 
@@ -195,7 +209,8 @@ Validation checks the Icon and the Preview that you assign on the **Map** tab, a
 | Pixel size | Not checked. mod.io needs at least 512 × 288; 16:9 recommended. | Not checked; 16:9 recommended | Not checked; same proportions as **Bounds Size** X : Y |
 | Where it appears | On mod.io: the publication logo. In the game: the map's card on **Track Selection** and in the online room list, and the track picture when you create a room on a map without a Preview. | In the game: the loading screen, and the track picture when you create an online room. | In the game: the on-screen minimap, the pause-menu map and the map previews on **Track Selection**, on the **Mods** screen and in online rooms. |
 
-- MapBuilder checks no pixel size or proportions; `16:9` in the field labels is a recommendation. On **Track Selection** and in online rooms, the game crops the image to the frame instead of stretching it: online rooms keep its center, and the card on **Track Selection**, which is wider than 16:9, keeps the bottom of the Icon and cuts off about the top sixth. Keep the subject in the middle of the image and away from its top edge.
+- MapBuilder checks no pixel size or proportions; `16:9` in the field labels is a recommendation.
+- On **Track Selection** and in online rooms, the game crops the Icon or the Preview to a frame wider than 16:9 instead of stretching it. Online rooms keep a strip through the middle, about 40% of the height of a 16:9 image. The card on **Track Selection** keeps the bottom of the Icon and cuts off about the top sixth. Keep the subject in the middle band of the image, away from its top edge. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/WorldMap/FreeRide/UICreateRTMPRoomContextController.cs:57 -->
 - mod.io receives the Icon file as it is and makes 320 × 180, 640 × 360 and 1280 × 720 thumbnails from it. The game receives each image as Unity imports it, saved again as PNG, so the import settings decide its size.
 - The Preview isn't a mod.io image; it travels only inside the map's files. **Update preview** on the **Publish** tab uploads the Icon. See [Update a publication](publish.md#update).
 - The Icon, the Preview and the minimap image belong to the map metadata, which MapBuilder limits to 24 MB for mod.io (the `MetaTemp` folder of the build cache). The metadata size is checked only right before **Create publication** or **Update publication**. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:26 -->
@@ -204,6 +219,8 @@ Validation checks the Icon and the Preview that you assign on the **Map** tab, a
 <a name="import-settings"></a>
 ### Set the import settings
 
+CaptureCamera sets **Read/Write** and **Non-Power of 2** itself for a capture that you save inside `Assets`. Set them by hand for any other image: one made in an image editor, or a capture that you copied into `Assets` later. <!-- src: Assets/Editor/CaptureCameraEditor.cs:114 -->
+
 **Read/Write** is required only for the Icon and the Preview, but the size settings matter for all three images. By default, Unity resizes an image whose sides aren't powers of two, for example 1920 × 1080 to 2048 × 1024. The minimap is stretched to its rectangle anyway, but a resized Icon or Preview shows in the game with the wrong proportions.
 
 To set an image's import settings:
@@ -211,7 +228,7 @@ To set an image's import settings:
 1. In the **Project** window, select the image.
 1. In the **Inspector**, expand **Advanced**.
 1. For the Icon or the Preview, select **Read/Write**.
-1. For an Icon or a Preview whose sides aren't powers of two, such as 1920 × 1080, set **Non-Power of 2** to **None**.
+1. For the Icon or the Preview, in **Non-Power of 2**, select **None**.
    The TestMap Icon and Preview use this setting.
 1. Optional: To keep an image larger than 2048 pixels at its full size, in **Max Size**, select a value at least as large as its longest side.
 1. Select **Apply**.

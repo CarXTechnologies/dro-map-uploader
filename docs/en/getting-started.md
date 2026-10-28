@@ -2,8 +2,6 @@
 
 **English** · [Русский](../ru/getting-started.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
 Get the MapUploader project, open it in the required Unity version and learn your way around the **MapBuilder** window. You do this once on each computer, before you start your first map.
 
 ## Before you start
@@ -13,7 +11,7 @@ Get the MapUploader project, open it in the required Unity version and learn you
 - [Unity Hub](https://unity.com/download), to install the editor and open the project.
 - A Unity account, signed in to Unity Hub, with an active license, such as Unity Personal. The editor doesn't start without a license.
 - Unity Editor 6000.3.19f1, revision `7689f4515d75`, exactly. See [Install Unity 6000.3.19f1](#unity). <!-- src: ProjectSettings/ProjectVersion.txt:1-2 -->
-- A PC copy of CarX Drift Racing Online 2 in a game build with mod support, to test your map locally. The game reads local maps from the `Mods` folder next to its executable. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
+- A PC copy of CarX Drift Racing Online 2 that loads local maps, to test your map locally. The game reads local maps from the `Mods` folder next to its executable. To find out whether your copy does, see [Check that the game loads local maps](test-in-game.md#check-game). <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
 - A mod.io account, only when you publish. See [Publish to mod.io](publish.md).
 
 <a name="clone"></a>
@@ -30,7 +28,7 @@ To get the project:
    git clone --recurse-submodules -b feature/2.0/3.0 https://github.com/CarXTechnologies/dro-map-uploader
    ```
 
-   The `-b feature/2.0/3.0` option checks out `feature/2.0/3.0`, the branch these docs describe.
+   The `-b feature/2.0/3.0` option checks out `feature/2.0/3.0`, the branch these docs describe. Without it, the clone is on the repository's default branch, `target/2.0`, which uses Unity 2023.2.20f1 and an older MapBuilder.
 
 Result: the new `dro-map-uploader` folder holds the project, and its `Assets/Plugins/CarX.Modding.Creator` folder isn't empty.
 
@@ -114,7 +112,7 @@ Result: the **MapBuilder** window opens with the map you selected last. The firs
 
 The screenshot shows the window with `TestMap` selected on the **Map** tab, before any build.
 
-<img src="../images/en/window-overview.png" width="1000" alt="Screenshot of the MapBuilder window with the TestMap sample selected; markers 1–7 on the main areas.">
+<img src="../images/en/window-overview.png" width="1000" alt="Screenshot of the MapBuilder window with the TestMap sample selected; callouts 1–7 on the main areas.">
 
 | # | Element | What it does |
 | --- | --- | --- |
@@ -171,13 +169,13 @@ To update the project:
    git pull --recurse-submodules
    ```
 
-1. Switch to the branch these docs describe:
+1. Switch to the branch these docs describe, as named in [Get the project](#clone):
 
    ```bash
    git switch feature/2.0/3.0
    ```
 
-   A clone made without the `-b feature/2.0/3.0` option is on the repository's default branch, `target/2.0`, which uses Unity 2023.2.20f1 and an older MapBuilder. This command moves it to `feature/2.0/3.0`. On a clone that is already there, it prints `Already on 'feature/2.0/3.0'`.
+   A clone made without the `-b` option is on the repository's default branch, and this command moves it to the branch of these docs. On a clone that is already there, git reports that it is already on the branch.
 
 1. Check out the submodule commit that the project expects:
 
@@ -187,7 +185,7 @@ To update the project:
 
    If the submodule was never downloaded, this command downloads it.
 
-Result: `git branch --show-current` prints `feature/2.0/3.0`, and `git submodule status` prints the submodule commit with no `-` or `+` prefix. When you open the project again, Unity imports the changes.
+Result: `git branch --show-current` prints the branch from the `git switch` command, and `git submodule status` prints the submodule commit with no `-` or `+` prefix. When you open the project again, Unity imports the changes.
 
 If `git pull` or `git switch` stops with `Your local changes to the following files would be overwritten`, restore the listed files that MapUploader rewrites, then run the command again:
 

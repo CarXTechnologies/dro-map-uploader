@@ -2,8 +2,6 @@
 
 **English** · [Русский](../../ru/advanced/mod-format.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
 This page explains how MapUploader stores a built map: the build cache, the Wavefront file tree, the Binary `mod.cxmod` container and the way the game reads a mod folder. You don't need it to make or publish a map. Read it when you inspect exported files, look into a map that doesn't load, or write a tool that reads mods.
 
 ## How a map becomes a mod
@@ -42,7 +40,7 @@ The format isn't tied to one game. A game needs a compatible loader, plus its ow
 | Compression | Deflate, per resource | None |
 | Readable in a text editor | No | Yes |
 
-Binary is the format to test and publish with: the game reads one file, the textures arrive ready for the GPU, and Material markers work only in Binary. Wavefront is for reading or comparing the exported data as text. Game builds with mod support read both formats.
+Binary is the format to test and publish with: the game reads one file, the textures arrive ready for the GPU, and Material markers work only in Binary. Wavefront is for reading or comparing the exported data as text. A copy of the game that loads local maps reads both formats.
 
 ## What reaches the mod
 
@@ -197,7 +195,7 @@ The PNG files of re-encoded material textures aren't stored. Packing needs both 
 
 ### File layout
 
-All numbers are little-endian. The reference reader is [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/3ec9bd8620bf8f1e03ea10715c24ba2be9986acd/Runtime/Binary/BinaryModArchive.cs) in the CarX.Modding.Creator SDK.
+All numbers are little-endian. The reference reader is [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/Runtime/Binary/BinaryModArchive.cs) in the CarX.Modding.Creator SDK.
 
 | Part | Type | Contents |
 | --- | --- | --- |
@@ -214,13 +212,13 @@ The index ends the file, sorted by name. Names use forward slashes and are relat
 
 - **Deduplication.** Resources with identical contents, found by SHA-256, share one block, so several names can point at the same bytes.
 - **Compression.** Each resource is compressed with raw Deflate only when that makes it smaller. `.png` and `.cxgeom` resources are never compressed. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:304 -->
-- **Checksums.** Readers check the CRC-32 (polynomial `0xEDB88320`) of every resource they read. A mismatch fails the read with `Binary resource checksum mismatch: <name>`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:194 -->
+- **Checksums.** Readers check the CRC-32 (polynomial `0xEDB88320`) of every resource they read. A mismatch fails the read with `Binary resource checksum mismatch: <name>`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:249 -->
 - **Safe replacement.** The packer writes a temporary file next to `mod.cxmod`, reads its index back, and only then replaces the old file. If packing fails, the previous `mod.cxmod` stays as it was. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:208-224 -->
 - **Limits.** A container holds at most 100 000 resource names, a name is at most 1024 characters, and each resource is at most 256 MB. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:20-21,104 -->
 
 ## How the game reads a mod folder
 
-These rules describe game builds with mod support. For where to put a map for a local test, see [Where the game looks for local maps](../test-in-game.md#local-maps).
+These rules describe a copy of the game that loads local maps; to find out whether yours does, see [Check that the game loads local maps](../test-in-game.md#check-game). For where to put a map for a local test, see [Where the game looks for local maps](../test-in-game.md#local-maps).
 
 - **Where mods are.** On PC, every folder directly inside `<folder with the game executable>/Mods/` is one local mod, and the folder name is its mod ID. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
 - **mod.io installs.** In game builds that support mod.io, maps downloaded from mod.io are read the same way from their install folders. Such a folder is named `<modIoId>_<modfileId>`, and that name is the mod ID. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModRoomsHelper.cs:123-137 -->

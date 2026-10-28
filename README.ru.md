@@ -8,7 +8,7 @@
 
 Настройки карты, сборка, экспорт и публикация выполняются в окне **MapBuilder**, которое открывается из меню **Tools** > **MapBuilder**:
 
-<img src="docs/images/ru/window-overview.png" width="1000" alt="Скриншот окна MapBuilder с выбранной картой-примером TestMap; маркеры 1–7 на основных областях.">
+<img src="docs/images/ru/window-overview.png" width="1000" alt="Скриншот окна MapBuilder с выбранной картой-примером TestMap; выноски 1–7 на основных областях.">
 
 | # | Элемент | Назначение |
 | --- | --- | --- |
@@ -27,40 +27,33 @@
 - Windows 10 или 11, 64-разрядная. Оптимизатор сборки поставляется только для редактора под Windows x64; в другой системе снимите флажок **Оптимизировать сборку** (Optimize build) в настройках **Оптимизация** (Optimization) каждой карты на вкладке **Сборка**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:127-130 -->
 - Git — чтобы клонировать проект вместе с сабмодулем.
 - Unity Editor 6000.3.19f1, именно эта версия: другая версия при открытии перезапишет файлы проекта под себя. Дополнительные модули платформ не нужны.
-- ПК-версия CarX Drift Racing Online 2 с поддержкой модов — чтобы проверить карту локально.
+- ПК-версия CarX Drift Racing Online 2, которая загружает локальные карты из своей папки `Mods`, — чтобы проверить карту локально. См. [Проверка загрузки локальных карт в игре](docs/ru/test-in-game.md#check-game).
 - Аккаунт mod.io — только для публикации.
 
 > [!WARNING]
 > **Code** > **Download ZIP** оставляет папку сабмодуля `Assets/Plugins/CarX.Modding.Creator` пустой, и проект не компилируется. Клонируйте репозиторий с помощью git.
 
-Далее: [Начало работы](docs/ru/getting-started.md)
-
 ## Быстрый старт
 
 Чтобы создать, проверить и опубликовать первую карту:
 
-1. В терминале клонируйте репозиторий вместе с сабмодулем. Параметр `-b feature/2.0/3.0` переключает клон на ветку, которую описывает эта документация.
-
-   ```bash
-   git clone --recurse-submodules -b feature/2.0/3.0 https://github.com/CarXTechnologies/dro-map-uploader
-   ```
-
-   Если git останавливается на сабмодуле с ошибкой `Permission denied (publickey)`, загрузите сабмодуль по HTTPS, как описано в разделе [Получение проекта](docs/ru/getting-started.md#clone). <!-- src: .gitmodules:3 -->
-
+1. В терминале клонируйте репозиторий вместе с сабмодулем на ветке, которую описывает эта документация. Команда и решение на случай, если сабмодуль не загрузился, приведены в разделе [Получение проекта](docs/ru/getting-started.md#clone).
 1. Откройте склонированную папку в Unity 6000.3.19f1 и дождитесь окончания первого импорта. См. [Начало работы](docs/ru/getting-started.md).
 1. В окне **Project** создайте папку `Assets/MapResources/<MapName>/`, где `<MapName>` — короткое имя папки, например `MyTrack`, и создайте в ней сцену с тем же именем. Имя сцены должно начинаться с буквы и содержать только буквы, цифры и `_`. См. [Создание папки и сцены карты](docs/ru/scene-setup.md#scene). <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:32-40 -->
 1. В окне **Project** импортируйте модель в ту же папку и перетащите её в окно **Hierarchy**. В окне **Inspector** добавьте коллайдер каждой поверхности, по которой можно ехать. См. [Импорт моделей](docs/ru/scene-setup.md#import) и [Добавление коллайдеров](docs/ru/scene-setup.md#colliders).
 1. В окне **Hierarchy** выберите каждый объект с коллайдером. В окне **Inspector** добавьте компонент GameMarkerData и в его меню типа выберите поверхность в разделе **Road**, например **Road** > **asphalt**. См. [Разметка дорожных поверхностей](docs/ru/markers.md#road).
 1. Создайте пустой GameObject и поместите его туда, где стартует машина. В окне **Inspector** добавьте к нему компонент GameMarkerData; его тип уже `SpawnPoint`. См. [Добавление точек появления](docs/ru/markers.md#spawn).
-1. Создайте ещё один пустой GameObject в корне сцены. В окне **Inspector** добавьте компонент Minimap, задайте его границы и назначьте изображение мини-карты. См. [Добавление мини-карты](docs/ru/minimap-and-images.md#minimap).
+1. Создайте ещё один пустой GameObject в корне сцены. В окне **Inspector** добавьте компонент Minimap и задайте его границы по области карты. См. [Добавление мини-карты](docs/ru/minimap-and-images.md#minimap).
+1. Добавьте компонент CaptureCamera к камере внутри корневого объекта с тегом `Garbage` и снимите мини-карту сверху, иконку и превью. Назначьте изображение мини-карты в поле **Main Texture** компонента Minimap. См. [Съёмка изображений с помощью CaptureCamera](docs/ru/minimap-and-images.md#capture).
 1. В строке меню Unity выберите **Tools** > **MapBuilder**. В разделе **ЛОКАЛЬНЫЕ КАРТЫ** нажмите **+ Новая карта** и сохраните настройки карты в `Assets/MapResources/<MapName>/`. См. [Создание или выбор карты](docs/ru/map-settings.md#new-map).
-1. На вкладке **Карта** в поле **Название** (Name) введите название, которое увидят игроки; оно не обязано совпадать с `<MapName>`. Перетащите иконку в поле **Иконка · 16:9** (Icon · 16:9): это должен быть PNG с включённым параметром Read/Write. См. [Заполнение вкладки «Карта»](docs/ru/map-settings.md#map-tab).
+1. На вкладке **Карта** в поле **Название** (Name) введите название, которое увидят игроки; оно не обязано совпадать с `<MapName>`. Перетащите иконку в поле **Иконка · 16:9** (Icon · 16:9) и, при желании, превью в поле **Превью · 16:9** (Preview · 16:9). См. [Заполнение вкладки «Карта»](docs/ru/map-settings.md#map-tab).
 1. На вкладке **Сборка** нажмите **Проверить карту** (Validate map) и исправьте все ошибки. Затем нажмите кнопку **Собрать карту** (Build map). Состояние в строке карты сменится на `Готова к экспорту`. См. [Сборка карты](docs/ru/build.md) и [Проверка карты](docs/ru/validation.md). <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:198 -->
 1. На вкладке **Публикация** в разделе **Куда отправить сборку** (Build destination) выберите вариант **Экспорт в папку** (Export to folder). В поле **Папка** (Folder) введите абсолютный путь `<game folder>/Mods/<MapName>`, где `<game folder>` — папка с исполняемым файлом игры. Нажмите кнопку **Экспортировать в папку** (Export to folder), затем загрузите карту в игре. См. [Тест в игре](docs/ru/test-in-game.md). <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
 1. В шапке окна **MapBuilder** нажмите **Войти** и завершите вход в mod.io. См. [Вход в mod.io](docs/ru/publish.md#sign-in).
 1. На вкладке **Публикация** в разделе **Куда отправить сборку** выберите вариант **Площадка**. В разделе **Публикации** (Publications) нажмите **Создать публикацию** (Create publication).
+1. Когда в нижней панели появится `Публикация создана.` (`Publication created.`), не снимая выбор с новой публикации, снова нажмите кнопку **Собрать карту** на вкладке **Сборка**, а затем **Обновить публикацию** (Update publication) на вкладке **Публикация**. Первая загрузка содержит временный id вместо mod.io id публикации. См. [Создание публикации](docs/ru/publish.md#create).
 
-Результат: в нижней панели появится `Публикация создана.` (`Publication created.`), а карта окажется на mod.io как скрытая публикация. Чтобы завершить публикацию и сделать её публичной, выполните остальные шаги из раздела [Создание публикации](docs/ru/publish.md#create). <!-- src: Assets/Editor/MapBuilderEditorWindow.Publish.cs:183 -->
+Результат: в нижней панели появится `Публикация обновлена.` (`Publication updated.`), а карта окажется на mod.io как скрытая публикация. Как сделать её публичной, см. в разделе [Открытие публикации для игроков](docs/ru/publish.md#make-public). <!-- src: Assets/Editor/MapBuilderEditorWindow.Publish.cs:105 -->
 
 ## Как это устроено
 
@@ -103,8 +96,7 @@ flowchart LR
 | Название | 50 символов: буквы, цифры, пробелы и `- _ ' . , : ! ? ( ) & + /`, без пробелов в начале и в конце. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:8; Assets/Resources/CarX.Modding/ModIoConfig.asset:28 --> |
 | Краткое описание (Summary) | 250 символов. Используется только первая строка. Если краткое описание пустое, берётся первая строка описания; если пусты оба поля, краткое описание будет `<Name> track.` <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:47-60; Assets/Resources/CarX.Modding/ModIoConfig.asset:29 --> |
 | Описание (Description) | 50 000 символов. На mod.io оно попадает через **Создать публикацию**, если оно не пустое, и через **Обновить публикацию** (Update publication) с установленным флажком **Обновить описание** (Update description). <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:30; Assets/Editor/MapBuilder.Publishing.cs:91,235-237 --> |
-| Иконка | Обязательна. PNG с включённым Read/Write, ≤ 8 МБ. mod.io требует не меньше 512 × 288; рекомендуется 16:9, а размер в пикселях инструмент не проверяет. <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:99-117; Assets/Resources/CarX.Modding/ModIoConfig.asset:27; Assets/Plugins/Modio/Modio/API/Generated/Definitions/RequestObjects/EditModRequest.cs:31 --> |
-| Превью (Preview) | Необязательно. PNG с включённым Read/Write, ≤ 10 МБ. Рекомендуется 16:9; инструмент это не проверяет. <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:14,120-137 --> |
+| Иконка и превью (Preview) | Иконка обязательна, превью — нет. Формат, размер файла и размер в пикселях см. в разделе [Требования к изображениям](docs/ru/minimap-and-images.md#images). |
 | Имя сцены | Начинается с буквы и содержит только буквы, цифры и `_`. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:32-45 --> |
 | Размер сборки | Карта ≤ 4096 МБ, метаданные ≤ 24 МБ; размер измеряется по папкам кэша сборки `MapTemp` и `MetaTemp`, а не по `mod.cxmod`. Проверяется только при создании или обновлении публикации. <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182; Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26 --> |
 | Состав сцены | Ровно 1 Minimap; не меньше 1 SpawnPoint; ≤ 500 источников света (экспортируются только Point и Spot, а в игре они включаются только ночью); ≤ 1000 Rigidbody; ≤ 8 уровней LOD на LODGroup. <!-- src: Assets/Editor/MapSceneRules.cs:11-24; Assets/Editor/Validation/SceneValidator.cs:278-284,811; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:98-100; DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModLightsDayNightBehaviour.cs:36-53 --> |

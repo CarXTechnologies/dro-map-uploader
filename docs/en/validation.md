@@ -2,8 +2,6 @@
 
 **English** · [Русский](../ru/validation.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
 Validation checks the map settings and the scene against the rules of the game and mod.io without building anything. Run it before every build and fix every error it reports; warnings and notes never stop a build.
 
 ## Before you start
@@ -57,7 +55,7 @@ The **Map Validation** window lists every issue from one run, grouped by categor
 
 The following screenshot shows the window for the TestMap sample with one added Road marker object, `DemoRoadWithoutCollider`, that has no collider. The other issues come from TestMap itself and don't stop a build: warnings for its 8 unsupported `Ambient` markers and, in the collapsed **Geometry** category, for 12 LODGroups with no renderers, and notes for the preview sun and each preview-only component.
 
-<img src="../images/shared/validation-window.png" width="900" alt="Screenshot of the Map Validation window with a Markers error; markers 1–5 on the headline, filters, toolbar, category and Select.">
+<img src="../images/shared/validation-window.png" width="900" alt="Screenshot of the Map Validation window with a Markers error; callouts 1–5 on the headline, filters, toolbar, category and Select.">
 
 | # | Element | What it does |
 | --- | --- | --- |
@@ -74,7 +72,7 @@ To work through the results:
 1. In the next error row, select **Select**.
    Unity selects the object and highlights it.
 1. Fix the object as the message says.
-   For the cause and fix of the common messages, see [Troubleshooting](troubleshooting.md).
+   For the cause and fix of the common messages, see [Troubleshooting](troubleshooting.md#validation-messages).
 1. Repeat steps 2 and 3 for each error row, from top to bottom.
    The list doesn't change until you run validation again.
 1. Select **Re-run**.
@@ -136,46 +134,30 @@ Validation checks the map settings first, then the scene. The window sorts the c
 | Scene | Whether **Validate map** could open the selected scene | A note |
 | Summary | Issues beyond the first 25 of one rule | Notes |
 
-The following sections quote every message exactly, in the same order. Text in angle brackets stands for a value from your map, such as `<object>` for a GameObject name.
+The following sections quote every message exactly, in the same order. Text in angle brackets stands for a value from your map, such as `<object>` for a GameObject name. When [Troubleshooting](troubleshooting.md) has an entry for a message, its row links to the entry.
 
 <details>
 <summary><b>Budget</b>: component counts</summary>
 
-The scene must stay within these counts. They include inactive objects, disabled components and lights of every type, and they skip objects tagged `Garbage`. <!-- src: Assets/Editor/MapSceneRules.cs:11-24 -->
+The scene must stay within the component counts in [Supported components and budgets](reference.md#budgets).
 
 | Severity | Message | What to do |
 | --- | --- | --- |
-| Error | `'<type>': the map has <n>, at least <min> is required.` | Add the missing component. It is usually `'Minimap'` or `'GameMarkerData'`. |
-| Error | `'<type>': the map has <n>, at most <max> is allowed.` | Remove components of that type, or tag the objects that the game doesn't need `Garbage`. |
-
-| Component | Minimum | Maximum |
-| --- | --- | --- |
-| Transform (one per GameObject) | 1 | 20 000 |
-| MeshCollider | 0 | 10 000 |
-| BoxCollider | 0 | 10 000 |
-| SphereCollider | 0 | 1000 |
-| CapsuleCollider | 0 | 1000 |
-| Rigidbody | 0 | 1000 |
-| MeshRenderer | 0 | 10 000 |
-| MeshFilter | 0 | 10 000 |
-| Light | 0 | 500 |
-| HDAdditionalLightData | 0 | 500 |
-| LODGroup | 0 | 10 000 |
-| GameMarkerData | 1 | 10 000 |
-| Minimap | 1 | 1 |
+| Error | `'<type>': the map has <n>, at least <min> is required.` | Add the missing component. It is usually `'Minimap'` or `'GameMarkerData'`. See [Troubleshooting](troubleshooting.md#msg-budget-count). |
+| Error | `'<type>': the map has <n>, at most <max> is allowed.` | Remove components of that type, or tag the objects that the game doesn't need `Garbage`. See [Troubleshooting](troubleshooting.md#msg-budget-count). |
 
 </details>
 
 <details>
 <summary><b>Components</b>: components that export skips</summary>
 
-Validation accepts the component types of the Budget table. Animator and SkinnedMeshRenderer are accepted too, but only under the Animator that an Animation marker uses. Validation adds a note for every other component, and export skips it. <!-- src: Assets/Editor/Validation/SceneValidator.cs:136-177 -->
+Validation accepts the component types of the [budget table](reference.md#budgets). Animator and SkinnedMeshRenderer are accepted too, but only under the Animator that an Animation marker uses. Validation adds a note for every other component, and export skips it. <!-- src: Assets/Editor/Validation/SceneValidator.cs:136-177 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
 | Note | `'<object>' has a missing script in component slot <i>. This slot is skipped during export.` | Remove the missing script from the object, or leave it: export skips it. |
-| Note | `'<type>' on '<object>' requires a GameMarkerData Animation marker on the Animator root. This component is skipped; add the marker to export baked vertex animation.` | `<type>` is Animator or SkinnedMeshRenderer. To export the animation, add an Animation marker to the object with the Animator. See [Animate objects with vertex animation](markers.md#animation). |
-| Note | `'<type>' on '<object>' is not a supported component and will not be exported. It is skipped automatically; supported components on this object are still exported.` | No action is needed. Unity Terrain is reported here, as `Terrain` and `TerrainCollider`, and isn't exported: convert it to a mesh with a MeshCollider. To stop the note, tag the object `Garbage` if nothing on it should be exported, or follow [Hide notes for a component type](#skip-types). |
+| Note | `'<type>' on '<object>' requires a GameMarkerData Animation marker on the Animator root. This component is skipped; add the marker to export baked vertex animation.` | `<type>` is Animator or SkinnedMeshRenderer. To export the animation, add an Animation marker to the object with the Animator. See [Animate objects with vertex animation](markers.md#animation). See [Troubleshooting](troubleshooting.md#msg-animator-no-marker). |
+| Note | `'<type>' on '<object>' is not a supported component and will not be exported. It is skipped automatically; supported components on this object are still exported.` | No action is needed. Unity Terrain is reported here, as `Terrain` and `TerrainCollider`, and isn't exported: convert it to a mesh with a MeshCollider. To stop the note, tag the object `Garbage` if nothing on it should be exported, or follow [Hide notes for a component type](#skip-types). See [Troubleshooting](troubleshooting.md#msg-unsupported-component). |
 
 </details>
 
@@ -200,16 +182,14 @@ These checks cover meshes, material slots, mesh colliders, LOD groups and build 
 | --- | --- | --- |
 | Warning | `'<object>' has a MeshRenderer but no MeshFilter, so it has no geometry to export.` | Add a MeshFilter with a mesh, or remove the MeshRenderer. |
 | Warning | `'<object>' has a MeshFilter with no mesh assigned.` | Assign a mesh, or remove the MeshFilter. |
-| Warning | `'<object>' has an empty material slot; it will render as magenta in game.` | Assign a material to every slot of the MeshRenderer. |
+| Warning | `'<object>' has an empty material slot; it will render as magenta in game.` | Assign a material to every slot of the MeshRenderer. See [Troubleshooting](troubleshooting.md#msg-empty-material-slot). |
 | Warning | `'<object>' has a MeshCollider with no mesh assigned, so it collides with nothing.` | Assign a mesh to the MeshCollider, or remove it. |
-| Error | `'<object>' has <n> LOD levels; at most 8 are supported and the whole group is skipped on export. Merge or remove levels.` | Reduce the LODGroup to 8 levels or fewer. |
+| Error | `'<object>' has <n> LOD levels; at most 8 are supported and the whole group is skipped on export. Merge or remove levels.` | Reduce the LODGroup to 8 levels or fewer. See [Troubleshooting](troubleshooting.md#msg-lod-levels). |
 | Warning | `'<object>' has a LODGroup with no renderers assigned to any level.` | Assign renderers to the LOD levels, or remove the LODGroup. |
-| Warning | `Build optimization is off: static meshes and colliders are exported as-is, without sector chunking, collider simplification or LODs. Large maps get more draw calls, heavier physics and longer loading. Enable it in Build > Optimization.` | On the **Build** tab, select **Optimization**, then select **Optimize build**. **Select** in this row selects the map config. |
-| Warning | `'<object>' (<mesh>): static <kind>, <n> triangles, world bounds <x> x <y> x <z> m. Exceeds sector budget (<size> m / <n> triangles). Review Build > Optimization; size alone does not prove a performance issue.` | `<kind>` is `collider` or `render mesh`. The mesh is exported whole, because **Optimize build** is off, or because **Partition static colliders** (for a collider) or **Partition static render meshes** (for a render mesh) is off. Turn the option on, or split the mesh in your 3D tool. Drive the map after you build it to check the result. |
+| Warning | `Build optimization is off: static meshes and colliders are exported as-is, without sector chunking, collider simplification or LODs. Large maps get more draw calls, heavier physics and longer loading. Enable it in Build > Optimization.` | On the **Build** tab, select **Optimization**, then select **Optimize build**. **Select** in this row selects the map config. See [Troubleshooting](troubleshooting.md#msg-optimization-off). |
+| Warning | `'<object>' (<mesh>): static <kind>, <n> triangles, world bounds <x> x <y> x <z> m. Exceeds sector budget (<size> m / <n> triangles). Review Build > Optimization; size alone does not prove a performance issue.` | `<kind>` is `collider` or `render mesh`. The mesh is exported whole, because **Optimize build** is off, or because **Partition static colliders** (for a collider) or **Partition static render meshes** (for a render mesh) is off. Turn the option on, or split the mesh in your 3D tool. Drive the map after you build it to check the result. See [Troubleshooting](troubleshooting.md#msg-sector-budget). |
 
-A sector warning appears for each static mesh that build optimization can process when the mesh has more triangles than **Max triangles per mesh** or is larger than **Sector size (m)** in any world dimension: by default 8192 triangles and 64 m. The warning appears only for meshes that optimization won't cut into sectors: every such mesh while **Optimize build** is off, MeshColliders while **Partition static colliders** is off, and render meshes while **Partition static render meshes** is off. With the default settings there are no sector warnings, and the TestMap sample gets none. The check doesn't list meshes that the optimizer leaves whole for other reasons, such as transparent or lightmapped renderers and objects with more than one MeshCollider; see [Optimization](build.md#optimization). <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:14-19 -->
-
-A mesh counts as static when its object is active, isn't under a Rigidbody, Animator, Animation or LODGroup, isn't tagged `Garbage`, and has no markers other than Road and Material on it or its parents. The check covers enabled MeshRenderers and enabled, non-trigger, non-convex MeshColliders. Colliders are compared with the same two values, although optimization cuts colliders into larger pieces of up to 128 m and 32 768 triangles. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:10-11 -->
+For the meshes that the sector check covers, see [Sector budget](reference.md#sector-budget).
 
 </details>
 
@@ -220,9 +200,9 @@ Only Point and Spot lights are exported. See [Set up lighting](scene-setup.md#li
 
 | Severity | Message | What to do |
 | --- | --- | --- |
-| Note | `'<object>' is a Directional light. It lights the SDK preview only; the game uses its own sun, so it is not exported.` | No action is needed: a preview sun is expected, and the game lights the map itself. The note appears for every enabled Directional light. To clear it, tag the light `Garbage`; it still lights the editor preview. |
-| Warning | `'<object>' is a <type> light. Wavefront/Binary exports Point and Spot lights only, so this one will not reach the mod.` | The warning appears for every enabled light that isn't Point, Spot or Directional, such as an Area light. Change the light to Point or Spot, or tag it `Garbage` if it should light only the editor preview. |
-| Warning | `The map has <n> Directional Lights. These affect the SDK preview only; the game supplies its own environment lighting.` | Keep one Directional Light for the preview, or tag the extra ones `Garbage`. Disabled Directional Lights count too. |
+| Note | `'<object>' is a Directional light. It lights the SDK preview only; the game uses its own sun, so it is not exported.` | No action is needed: a preview sun is expected, and the game lights the map itself. The note appears for every enabled Directional light. To clear it, tag the light `Garbage`; it still lights the editor preview. See [Troubleshooting](troubleshooting.md#msg-directional-light). |
+| Warning | `'<object>' is a <type> light. Wavefront/Binary exports Point and Spot lights only, so this one will not reach the mod.` | The warning appears for every enabled light that isn't Point, Spot or Directional, such as an Area light. Change the light to Point or Spot, or tag it `Garbage` if it should light only the editor preview. See [Troubleshooting](troubleshooting.md#msg-light-type). |
+| Warning | `The map has <n> Directional Lights. These affect the SDK preview only; the game supplies its own environment lighting.` | Keep one Directional Light for the preview, or tag the extra ones `Garbage`. Disabled Directional Lights count too. See [Troubleshooting](troubleshooting.md#msg-directional-light). |
 
 </details>
 
@@ -234,12 +214,12 @@ These checks cover marker types, spawn points, Road markers and Animation marker
 | Severity | Message | What to do |
 | --- | --- | --- |
 | Error | `'<object>' has a GameMarkerData with no type selected.` | In the marker, choose a type, or remove the component. |
-| Warning | `'<object>' uses unsupported marker '<head>'. This marker will be skipped during export. Supported types are SpawnPoint, Road, Animation and Material.` | Remove the component, or choose a supported type. The old types `Ambient`, `TimeObjectActivator` and `NetworkObject` are reported here. |
-| Error | `Animation marker requires an Animator with animation clips.` | In the Animation marker, assign **Animator**, or put the marker on the object with the Animator. The Animator needs a controller with at least one clip. |
-| Error | `'<object>' is marked as Road but has no Collider on it or its children, so its surface type will never be used. Add a Mesh/Box/Sphere/Capsule Collider.` | Add a Mesh, Box, Sphere or Capsule Collider to the same GameObject as the marker. Validation also accepts a collider on a child, but export gives that collider no surface. |
-| Error | `The map has no GameMarkerData at all - at minimum it needs a spawn point.` | Add a SpawnPoint marker. A scene with no markers also gets the next error and a Budget error. |
-| Error | `The map has no SpawnPoint marker, so there is nowhere for a car to appear. Add an empty object with GameMarkerData set to SpawnPoint.` | Create an empty GameObject, add the GameMarkerData component and choose **SpawnPoint**. |
-| Warning | `<n> spawn points are all named '<name>'. Wavefront/Binary exports the object name as the spawn point's identity, so give each one a distinct, meaningful name.` | Rename the spawn point GameObjects. The world map in the game lists each spawn point under its name. |
+| Warning | `'<object>' uses unsupported marker '<head>'. This marker will be skipped during export. Supported types are SpawnPoint, Road, Animation and Material.` | Remove the component, or choose a supported type. The old types `Ambient`, `TimeObjectActivator` and `NetworkObject` are reported here. See [Troubleshooting](troubleshooting.md#msg-unsupported-marker). |
+| Error | `Animation marker requires an Animator with animation clips.` | In the Animation marker, assign **Animator**, or put the marker on the object with the Animator. The Animator needs a controller with at least one clip. See [Troubleshooting](troubleshooting.md#msg-animation-no-animator). |
+| Error | `'<object>' is marked as Road but has no Collider on it or its children, so its surface type will never be used. Add a Mesh/Box/Sphere/Capsule Collider.` | Add a Mesh, Box, Sphere or Capsule Collider to the same GameObject as the marker. Validation also accepts a collider on a child, but export gives that collider no surface. See [Troubleshooting](troubleshooting.md#msg-road-no-collider). |
+| Error | `The map has no GameMarkerData at all - at minimum it needs a spawn point.` | Add a SpawnPoint marker. A scene with no markers also gets the next error and a Budget error. See [Troubleshooting](troubleshooting.md#msg-no-spawn). |
+| Error | `The map has no SpawnPoint marker, so there is nowhere for a car to appear. Add an empty object with GameMarkerData set to SpawnPoint.` | Create an empty GameObject, add the GameMarkerData component and choose **SpawnPoint**. See [Troubleshooting](troubleshooting.md#msg-no-spawn). |
+| Warning | `<n> spawn points are all named '<name>'. Wavefront/Binary exports the object name as the spawn point's identity, so give each one a distinct, meaningful name.` | Rename the spawn point GameObjects. The world map in the game lists each spawn point under its name. See [Troubleshooting](troubleshooting.md#spawn-names). |
 
 </details>
 
@@ -259,8 +239,8 @@ Material markers replace materials with render core variants, and they apply onl
 | Error | `'<object>': material '<material>' uses render core variant <variant>, which is unavailable in mods: <reason>. Choose another variant.` | In the entry, choose another **Render core variant**. |
 | Warning | `'<object>': material '<material>' is not used by the renderer, so its render core override is never applied.` | Remove the entry, or assign the material to the renderer. |
 | Warning | `'<object>': render core material '<material>' (<variant>) stores values that the variant does not have: <names>. They are not exported. Press 'Export from material' or 'Remove' next to 'Unused values' in the marker.` | In the entry, select **Export from material**, or select **Remove** next to **Unused values**. |
-| Warning | `'<object>': render core material '<material>' (<variant>) was exported from material for revision <n>, but this SDK has revision <n> of the variant. The game uses the fallback material until you re-run Export from material on this entry.` | In the entry, select **Export from material**. |
-| Warning | `'<object>': render core material '<material>' (<variant>) has no diffuse texture and will render white. Press 'Export from material' or assign the texture.` | In the entry, select **Export from material**, or assign the diffuse texture. |
+| Warning | `'<object>': render core material '<material>' (<variant>) was exported from material for revision <n>, but this SDK has revision <n> of the variant. The game uses the fallback material until you re-run Export from material on this entry.` | In the entry, select **Export from material**. See [Troubleshooting](troubleshooting.md#msg-render-core-revision). |
+| Warning | `'<object>': render core material '<material>' (<variant>) has no diffuse texture and will render white. Press 'Export from material' or assign the texture.` | In the entry, select **Export from material**, or assign the diffuse texture. See [Troubleshooting](troubleshooting.md#msg-render-core-no-diffuse). |
 | Warning | `'<renderer>': mesh '<mesh>' has no vertex colors, but <variant> blends its layers by them (RGB - layer mask, A - albedo tint). It is exported white, so only the fourth layer shows. Paint vertex colors in the mesh.` | Paint vertex colors on the mesh in your 3D tool, then import it again. |
 | Warning | `'<renderer>': mesh '<mesh>' mixes <variant> and <source> submeshes. The game keeps the layer blend vertex colors for the whole mesh, so the emission is multiplied by them. Move the emissive part to a separate object without layer blend materials: build optimization merges layer blend objects only with each other.` | Move the emissive part to a separate object. `<source>` is an emissive variant or `emissive material '<material>'`. |
 | Note | `'<object>': material '<material>' is double-sided and alpha-tested (vegetation?) and is mapped to <variant>. If it is vegetation, MAT_FOLIAGE_ALPHATEST (with a normal map) or MAT_FOLIAGE_SIMPLE_ALPHATEST (without) gives it foliage lighting; for a fence, grate or cable keep <variant>.` | For vegetation, choose `MAT_FOLIAGE_ALPHATEST` or `MAT_FOLIAGE_SIMPLE_ALPHATEST`. For a fence, grate or cable, keep the variant. Binary only. |
@@ -273,29 +253,29 @@ Material markers replace materials with render core variants, and they apply onl
 
 These checks read the **Map** tab and the **Scene** selected on the **Build** tab. See [Fill in the Map tab](map-settings.md#map-tab). <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:16-25 -->
 
-The limits come from the mod.io configuration that ships with the project: **Name** up to 50 characters, the summary up to 250, **Description** up to 50 000, and the Icon file up to 8 MB. The Preview file can be up to 10 MB. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:27-30 -->
+The limits come from the mod.io configuration that ships with the project; see [Limits](reference.md#limits). <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:27-30 -->
 
 In the image messages, `<image>` is `icon` or `preview`. In the rows about an assigned image, **Select** selects the texture in the **Project** window.
 
 | Severity | Message | What to do |
 | --- | --- | --- |
-| Error | `No target scene is selected. Pick one in Build Settings.` | On the **Build** tab, in **Scene**, select the map scene. If the list is empty, save the scene and enable it in the build scene list. |
-| Error | `The scene name '<scene>' cannot be used for a build. Start with a letter and use only letters, digits and underscores.` | Rename the scene file, for example to `MyMap_01.unity`. |
-| Error | `The track has no name. Fill in Workshop Name on the map config.` | On the **Map** tab, enter **Name**. The message calls this field Workshop Name. |
-| Error | `The track name '<name>' contains characters that cannot be published. Use letters, digits, spaces and -_'.,:!?()&+/, with no leading or trailing spaces.` | Remove other characters, and leading or trailing spaces, from **Name**. |
-| Error | `The track name is <n> characters; this vendor allows <limit>.` | Shorten **Name**. |
-| Error | `The description is <n> characters; this vendor allows <limit>.` | Shorten **Description**. |
+| Error | `No target scene is selected. Pick one in Build Settings.` | On the **Build** tab, in **Scene**, select the map scene. If the list is empty, save the scene and enable it in the build scene list. See [Troubleshooting](troubleshooting.md#scene-empty). |
+| Error | `The scene name '<scene>' cannot be used for a build. Start with a letter and use only letters, digits and underscores.` | Rename the scene file, for example to `MyMap_01.unity`. See [Troubleshooting](troubleshooting.md#msg-scene-name). |
+| Error | `The track has no name. Fill in Workshop Name on the map config.` | On the **Map** tab, enter **Name**. The message calls this field Workshop Name. See [Troubleshooting](troubleshooting.md#msg-track-name). |
+| Error | `The track name '<name>' contains characters that cannot be published. Use letters, digits, spaces and -_'.,:!?()&+/, with no leading or trailing spaces.` | Remove other characters, and leading or trailing spaces, from **Name**. See [Troubleshooting](troubleshooting.md#msg-track-name). |
+| Error | `The track name is <n> characters; this vendor allows <limit>.` | Shorten **Name**. See [Troubleshooting](troubleshooting.md#msg-track-name). |
+| Error | `The description is <n> characters; this vendor allows <limit>.` | Shorten **Description**. See [Troubleshooting](troubleshooting.md#msg-summary-length). |
 | Error | `This vendor requires a summary and there is nothing to build one from. Fill in Summary, or the first line of the description.` | Enter **Name**. This error appears only when **Name**, **Summary (optional)** and **Description** are all empty, because an empty summary falls back to the first line of **Description**, then to `<Name> track.` |
-| Error | `The summary is <n> characters; this vendor allows <limit>. It is taken from the first line of the description - add a shorter Summary instead.` | Enter a short **Summary (optional)**, or shorten the first line of **Description**. |
-| Error | `The summary is <n> characters; this vendor allows <limit>. Shorten the Summary field.` | Shorten the first line of **Summary (optional)**. Only that line is used. |
-| Error | `No Icon is assigned. It is the image shown for the map in game and on the mod page, and both vendors need one before an entry can be created.` | On the **Map** tab, assign an image in **Icon · 16:9**. |
-| Error | `The icon '<texture>' has Read/Write disabled. Enable it in the texture import settings.` | Select the texture. In the **Inspector**, expand **Advanced**, select **Read/Write**, then select **Apply**. |
-| Warning | `No Preview is assigned. The map will have no large image on the mod page or on the loading screen.` | Optional: on the **Map** tab, assign an image in **Preview · 16:9**. |
-| Error | `The preview '<texture>' has Read/Write disabled. Enable it in the texture import settings.` | Turn on **Read/Write** for the texture, as for the icon. |
-| Warning | `The <image> is a <extension> file. The uploader uploads the source file as is and the documented format is PNG.` | `<extension>` is `.jpg` or `.jpeg`. Save the image as PNG and assign it again. |
-| Error | `The <image> is a <extension> file, which is uploaded as is and is not an image a vendor accepts. Save it as PNG.` | Save the image as PNG and assign it again. |
-| Error | `The <image> is <size> mb; the limit is <limit> mb.` | Make the file smaller: up to 8 MB for the Icon, 10 MB for the Preview. <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:14 --> |
-| Note | `The scene itself was not validated - fix the configuration first, then build again.` | Fix the errors in this category. The note is added whenever the map settings or the build format have errors. A build stops before the scene check, but **Validate map** checks the scene anyway and lists its issues too. |
+| Error | `The summary is <n> characters; this vendor allows <limit>. It is taken from the first line of the description - add a shorter Summary instead.` | Enter a short **Summary (optional)**, or shorten the first line of **Description**. See [Troubleshooting](troubleshooting.md#msg-summary-length). |
+| Error | `The summary is <n> characters; this vendor allows <limit>. Shorten the Summary field.` | Shorten the first line of **Summary (optional)**. Only that line is used. See [Troubleshooting](troubleshooting.md#msg-summary-length). |
+| Error | `No Icon is assigned. It is the image shown for the map in game and on the mod page, and both vendors need one before an entry can be created.` | On the **Map** tab, assign an image in **Icon · 16:9**. See [Troubleshooting](troubleshooting.md#msg-no-icon). |
+| Error | `The icon '<texture>' has Read/Write disabled. Enable it in the texture import settings.` | Select the texture. In the **Inspector**, expand **Advanced**, select **Read/Write**, then select **Apply**. See [Troubleshooting](troubleshooting.md#msg-icon-read-write). |
+| Warning | `No Preview is assigned. The map will have no large image on the mod page or on the loading screen.` | Optional: on the **Map** tab, assign an image in **Preview · 16:9**. See [Troubleshooting](troubleshooting.md#msg-no-icon). |
+| Error | `The preview '<texture>' has Read/Write disabled. Enable it in the texture import settings.` | Turn on **Read/Write** for the texture, as for the icon. See [Troubleshooting](troubleshooting.md#msg-icon-read-write). |
+| Warning | `The <image> is a <extension> file. The uploader uploads the source file as is and the documented format is PNG.` | `<extension>` is `.jpg` or `.jpeg`. Save the image as PNG and assign it again. See [Troubleshooting](troubleshooting.md#msg-icon-format). |
+| Error | `The <image> is a <extension> file, which is uploaded as is and is not an image a vendor accepts. Save it as PNG.` | Save the image as PNG and assign it again. See [Troubleshooting](troubleshooting.md#msg-icon-format). |
+| Error | `The <image> is <size> mb; the limit is <limit> mb.` | Make the file smaller than `<limit>`. See [Troubleshooting](troubleshooting.md#msg-icon-format). |
+| Note | `The scene itself was not validated - fix the configuration first, then build again.` | Fix the errors in this category. The note is added whenever the map settings or the build format have errors. A build stops before the scene check, but **Validate map** checks the scene anyway and lists its issues too. See [Troubleshooting](troubleshooting.md#msg-scene-not-validated). |
 
 </details>
 
@@ -306,10 +286,10 @@ The scene needs exactly one Minimap; the Budget category checks the count. Keep 
 
 | Severity | Message | What to do |
 | --- | --- | --- |
-| Error | `'<object>': Bound Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.` | In the Minimap component, set **Bounds Size** to the map's extent in world units. The message calls this field Bound Size. |
-| Error | `'<object>': no textures assigned. Add at least one entry with a Main Texture.` | Under **Textures**, add an element and assign its **Main Texture**. |
-| Error | `'<object>': Textures element <i> has no Main Texture assigned.` | Assign **Main Texture** in that element, or remove the element. |
-| Error | `'<object>': Textures element <i> is a <type>. Only Texture2D can be exported.` | Assign an imported image (Texture2D), not a Render Texture or another texture type. |
+| Error | `'<object>': Bound Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.` | In the Minimap component, set **Bounds Size** to the map's extent in world units. The message calls this field Bound Size. See [Troubleshooting](troubleshooting.md#msg-bounds-size). |
+| Error | `'<object>': no textures assigned. Add at least one entry with a Main Texture.` | Under **Textures**, add an element and assign its **Main Texture**. See [Troubleshooting](troubleshooting.md#msg-no-textures). |
+| Error | `'<object>': Textures element <i> has no Main Texture assigned.` | Assign **Main Texture** in that element, or remove the element. See [Troubleshooting](troubleshooting.md#msg-no-textures). |
+| Error | `'<object>': Textures element <i> is a <type>. Only Texture2D can be exported.` | Assign an imported image (Texture2D), not a Render Texture or another texture type. See [Troubleshooting](troubleshooting.md#msg-no-textures). |
 
 </details>
 
@@ -320,7 +300,7 @@ A Rigidbody that isn't kinematic needs convex mesh colliders. The Rigidbody can 
 
 | Severity | Message | What to do |
 | --- | --- | --- |
-| Error | `'<object>' has a non-convex MeshCollider driven by a non-kinematic Rigidbody, which the physics engine no longer supports. Tick Convex, or make the Rigidbody kinematic.` | On the MeshCollider, select **Convex**, or on the Rigidbody, select **Is Kinematic**. |
+| Error | `'<object>' has a non-convex MeshCollider driven by a non-kinematic Rigidbody, which the physics engine no longer supports. Tick Convex, or make the Rigidbody kinematic.` | On the MeshCollider, select **Convex**, or on the Rigidbody, select **Is Kinematic**. See [Troubleshooting](troubleshooting.md#msg-non-convex-dynamic). |
 
 </details>
 
@@ -331,7 +311,7 @@ The Scene note comes from **Validate map** itself, and the Summary note from the
 
 | Severity | Message | What to do |
 | --- | --- | --- |
-| Note | `'<scene>' was not opened, so only the configuration was checked.` | Appears when you cancel the prompt to save the open scenes, or when no scene is selected; `<scene>` is then empty. Select **Validate map** again, and save or discard the changes when Unity asks. |
+| Note | `'<scene>' was not opened, so only the configuration was checked.` | Appears when you cancel the prompt to save the open scenes, or when no scene is selected; `<scene>` is then empty. Select **Validate map** again, and save or discard the changes when Unity asks. See [Troubleshooting](troubleshooting.md#msg-scene-not-opened). |
 | Note | `<rule>: <n> more of the same, not listed individually.` | Fix the listed issues of that rule, then validate again to see the rest. |
 
 </details>
@@ -349,8 +329,7 @@ To hide the notes for a component type:
 
 Result: the next validation no longer lists `'AudioSource' on '<object>' is not a supported component…` notes. The component is still not exported.
 
-- The list applies to every map in the project. It ships with one entry, `DrawZoneBehaviour`, the gizmo helper on the example spawn point and minimap objects.
-- An entry hides only the "not a supported component" note. The Format notes for preview components, the notes for an Animator without an Animation marker, and missing scripts are still listed.
+- For what an entry hides, and the entry that ships with the project, see [MapSkipComponentConfig](reference.md#skip-components).
 - Edit this asset rather than creating another one. With two MapSkipComponentConfig assets in `Resources` folders, validation stops with `(Singleton) Multiple config for : MapSkipComponentConfig` in the Console. <!-- src: Assets/Scripts/SingletonScriptableObject.cs:26 -->
 
 <a name="elsewhere"></a>
@@ -358,31 +337,11 @@ Result: the next validation no longer lists `'AudioSource' on '<object>' is not 
 
 Some problems never appear in the **Map Validation** window. Check for them separately.
 
-**Build size.** MapBuilder checks the size of the map and its metadata only immediately before **Create publication** or **Update publication**. With mod.io, the map can be up to 4096 MB and the metadata up to 24 MB. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26 -->
+**Build size.** MapBuilder checks the size of the map and its metadata only immediately before **Create publication** or **Update publication**, and a build that is too large stops the upload with an error in the Console. For the limits, see [Build size](reference.md#limits-size); for the fix, see [Troubleshooting](troubleshooting.md#msg-map-size). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182 -->
 
-A build that is too large stops the upload with one of these errors in the Console:
+**Export errors.** Some problems are found only while the build exports the scene. They stop the build and appear in the Console as an exception, usually `InvalidOperationException`, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` Export can also log warnings that don't stop the build. For every export error and warning with its cause and fix, see [Build errors in the Console](troubleshooting.md#build-errors). <!-- src: Assets/Editor/MapBuilder.cs:323-327 -->
 
-```text
-'<scene>': the map is <size> mb and this vendor accepts <limit> mb.
-'<scene>': the meta is <size> mb and this vendor accepts <limit> mb.
-```
-
-Both sizes are measured on the build cache folders `MapTemp` and `MetaTemp`, not on the packed `mod.cxmod`. **Validate map** and the **Export to folder** button don't check them. See [Build size](reference.md#limits-size). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182 -->
-
-**Export errors.** Some problems are found only while the build exports the scene. They stop the build and appear in the Console as `InvalidOperationException`, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` For example: <!-- src: Assets/Editor/MapBuilder.cs:323-327 -->
-
-```text
-Rigidbody '<name>' cannot split an enclosing LODGroup. Put the Rigidbody on the LODGroup root.
-Rigidbody '<name>': collider '<object>' has a sheared transform. Apply scale in the model first.
-Put Rigidbody on the Animator root or above it; a baked animation cannot contain independent moving bodies.
-Animator '<name>' has multiple Animation markers.
-VAT for '<name>' is too large (<width>x<height>). Reduce vertices, clips or sample rate.
-meshoptimizer is unavailable for this Editor platform. Install its native Editor library or disable build optimization.
-```
-
-Export also logs warnings that don't stop the build, for example `Rigidbody '<name>' was skipped: no enabled supported colliders. Geometry and animation will still be exported.` For the causes and fixes, see [Troubleshooting](troubleshooting.md). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:94 -->
-
-**Image size in pixels.** Validation checks the format, Read/Write and file size of the Icon and the Preview, but not their size in pixels or their aspect ratio. mod.io needs an Icon of at least 512 × 288. See [Image requirements](minimap-and-images.md#images). <!-- src: Assets/Plugins/Modio/Modio/API/Generated/Definitions/RequestObjects/EditModRequest.cs:31 -->
+**Image size in pixels.** Validation checks the format, Read/Write and file size of the Icon and the Preview, but not their size in pixels or their aspect ratio. See [Image requirements](minimap-and-images.md#images).
 
 ## Next steps
 

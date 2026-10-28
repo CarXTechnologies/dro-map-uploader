@@ -2,8 +2,6 @@
 
 **English** · [Русский](../../ru/advanced/publishing-vendors.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
 This page explains how MapUploader publishes through vendor SDKs: how the publishing layer is built, how the SDKs and the vendor config assets are set up, how to point the project at another mod.io game and how to add a vendor. Read it if you maintain MapUploader or reuse its publishing layer in another project.
 
 > [!NOTE]
@@ -20,7 +18,7 @@ MapUploader has two vendor implementations. Only mod.io is available in the **Ma
 
 ## How it fits together
 
-MapUploader never calls a vendor SDK directly. It talks to one vendor-neutral contract in the [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/3ec9bd8620bf8f1e03ea10715c24ba2be9986acd) submodule. Each vendor implementation sits in its own assembly behind a define constraint, so a project compiles only the vendors whose SDKs it carries, and another project can add a vendor without changing the contract.
+MapUploader never calls a vendor SDK directly. It talks to one vendor-neutral contract in the [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/9692638e3538922cb3197c9760c186809f36e176) submodule. Each vendor implementation sits in its own assembly behind a define constraint, so a project compiles only the vendors whose SDKs it carries, and another project can add a vendor without changing the contract.
 
 ```
 Assets/Plugins/CarX.Modding.Creator/          submodule
@@ -278,7 +276,7 @@ To add a vendor:
 
 Result: After the recompile, `ModPublisherSession.AvailableVendors` lists the new vendor, and the **MapBuilder** window offers it as far as your changes to those members allow.
 
-The interfaces are in the submodule: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/3ec9bd8620bf8f1e03ea10715c24ba2be9986acd/Publishing/Core/IModPublisher.cs) and [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/3ec9bd8620bf8f1e03ea10715c24ba2be9986acd/Publishing/Core/IModAuthProvider.cs).
+The interfaces are in the submodule: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/Publishing/Core/IModPublisher.cs) and [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/Publishing/Core/IModAuthProvider.cs).
 
 <a name="differences"></a>
 ## Known differences between vendors
@@ -329,7 +327,7 @@ MapUploader avoids creating such a mod:
 - **Create publication** stays disabled until both the map and its metadata are built, because the publisher attaches the build while it creates the entry instead of creating an empty entry first.
 - If mod.io accepts the new mod but refuses its file, the publisher deletes the new mod and reports `mod.io created mod <id> but refused its content: <reason>. The incomplete mod was deleted.` If that delete also fails, the message asks you to delete the mod on mod.io. <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoPublisher.cs:520 -->
 
-A mod without a file can still come from elsewhere, for example from the mod.io website. If the list fails to load, delete that mod by its id: **Delete publication** asks for an id when no publication is selected, and that path doesn't need the list. See *Delete a publication that the list can't show* in [Publish to mod.io](../publish.md).
+A mod without a file can still come from elsewhere, for example from the mod.io website. If the list fails to load, delete that mod by its id: **Delete publication** asks for an id when no publication is selected, and that path doesn't need the list. See [Delete a publication that the list can't show](../publish.md#delete-by-id).
 
 ### The publications list is read with `SyncUserCreations`
 

@@ -2,8 +2,6 @@
 
 [English](../en/validation.md) · **Русский**
 
-Относится к: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · скриншоты 26.10.2026
-
 Проверка сверяет настройки карты и сцену с правилами игры и mod.io, ничего не собирая. Запускайте её перед каждой сборкой и исправляйте все найденные ошибки; предупреждения и заметки никогда не останавливают сборку.
 
 ## Перед началом работы
@@ -57,7 +55,7 @@ Map validation - <map name> (<scene>): no problems found.
 
 На следующем скриншоте показано окно для примера TestMap с одним добавленным объектом с маркером Road, `DemoRoadWithoutCollider`, у которого нет коллайдера. Остальные замечания относятся к самой TestMap и не останавливают сборку: предупреждения о её 8 неподдерживаемых маркерах `Ambient` и, в свёрнутой категории **Geometry**, о 12 LODGroup без рендереров, а также заметки о солнце для предпросмотра и о каждом компоненте только для предпросмотра.
 
-<img src="../images/shared/validation-window.png" width="900" alt="Скриншот окна Map Validation с ошибкой категории Markers; метки 1–5 на заголовке, фильтрах, панели инструментов, категории и Select.">
+<img src="../images/shared/validation-window.png" width="900" alt="Скриншот окна Map Validation с ошибкой категории Markers; выноски 1–5 на заголовке, фильтрах, панели инструментов, категории и Select.">
 
 | # | Элемент | Что делает |
 | --- | --- | --- |
@@ -74,7 +72,7 @@ Map validation - <map name> (<scene>): no problems found.
 1. В строке следующей ошибки нажмите **Select**.
    Unity выделяет объект и подсвечивает его.
 1. Исправьте объект так, как сказано в сообщении.
-   Причины и способы исправления частых сообщений см. в разделе [Решение проблем](troubleshooting.md).
+   Причины и способы исправления частых сообщений см. в разделе [Решение проблем](troubleshooting.md#validation-messages).
 1. Повторите шаги 2 и 3 для каждой строки с ошибкой, сверху вниз.
    Список не меняется, пока вы не запустите проверку снова.
 1. Нажмите **Re-run**.
@@ -136,46 +134,30 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 | Scene | Удалось ли кнопке **Проверить карту** открыть выбранную сцену | Заметка |
 | Summary | Замечания одного правила сверх первых 25 | Заметки |
 
-В следующих разделах каждое сообщение приведено дословно и в том же порядке. Текст в угловых скобках обозначает значение из вашей карты, например `<object>` — имя GameObject.
+В следующих разделах каждое сообщение приведено дословно и в том же порядке. Текст в угловых скобках обозначает значение из вашей карты, например `<object>` — имя GameObject. Если для сообщения есть запись на странице [Решение проблем](troubleshooting.md), строка ссылается на неё.
 
 <details>
 <summary><b>Budget</b>: количество компонентов</summary>
 
-Сцена должна укладываться в эти количества. В них входят неактивные объекты, выключенные компоненты и источники света любого типа, а объекты с тегом `Garbage` не учитываются. <!-- src: Assets/Editor/MapSceneRules.cs:11-24 -->
+Сцена должна укладываться в количества компонентов из раздела [Поддерживаемые компоненты и лимиты](reference.md#budgets).
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
-| Ошибка | `'<type>': the map has <n>, at least <min> is required.` | Добавьте недостающий компонент. Обычно это `'Minimap'` или `'GameMarkerData'`. |
-| Ошибка | `'<type>': the map has <n>, at most <max> is allowed.` | Удалите компоненты этого типа или назначьте тег `Garbage` объектам, которые не нужны игре. |
-
-| Компонент | Минимум | Максимум |
-| --- | --- | --- |
-| Transform (один на каждый GameObject) | 1 | 20 000 |
-| MeshCollider | 0 | 10 000 |
-| BoxCollider | 0 | 10 000 |
-| SphereCollider | 0 | 1000 |
-| CapsuleCollider | 0 | 1000 |
-| Rigidbody | 0 | 1000 |
-| MeshRenderer | 0 | 10 000 |
-| MeshFilter | 0 | 10 000 |
-| Light | 0 | 500 |
-| HDAdditionalLightData | 0 | 500 |
-| LODGroup | 0 | 10 000 |
-| GameMarkerData | 1 | 10 000 |
-| Minimap | 1 | 1 |
+| Ошибка | `'<type>': the map has <n>, at least <min> is required.` | Добавьте недостающий компонент. Обычно это `'Minimap'` или `'GameMarkerData'`. См. [Решение проблем](troubleshooting.md#msg-budget-count). |
+| Ошибка | `'<type>': the map has <n>, at most <max> is allowed.` | Удалите компоненты этого типа или назначьте тег `Garbage` объектам, которые не нужны игре. См. [Решение проблем](troubleshooting.md#msg-budget-count). |
 
 </details>
 
 <details>
 <summary><b>Components</b>: компоненты, которые экспорт пропускает</summary>
 
-Проверка принимает типы компонентов из таблицы Budget. Animator и SkinnedMeshRenderer тоже принимаются, но только под тем Animator, который использует маркер Animation. Для любого другого компонента проверка добавляет заметку, а экспорт его пропускает. <!-- src: Assets/Editor/Validation/SceneValidator.cs:136-177 -->
+Проверка принимает типы компонентов из [таблицы лимитов](reference.md#budgets). Animator и SkinnedMeshRenderer тоже принимаются, но только под тем Animator, который использует маркер Animation. Для любого другого компонента проверка добавляет заметку, а экспорт его пропускает. <!-- src: Assets/Editor/Validation/SceneValidator.cs:136-177 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
 | Заметка | `'<object>' has a missing script in component slot <i>. This slot is skipped during export.` | Удалите отсутствующий скрипт с объекта или оставьте его: экспорт его пропустит. |
-| Заметка | `'<type>' on '<object>' requires a GameMarkerData Animation marker on the Animator root. This component is skipped; add the marker to export baked vertex animation.` | `<type>` — Animator или SkinnedMeshRenderer. Чтобы экспортировать анимацию, добавьте маркер Animation на объект с Animator. См. [Вершинная анимация объектов](markers.md#animation). |
-| Заметка | `'<type>' on '<object>' is not a supported component and will not be exported. It is skipped automatically; supported components on this object are still exported.` | Ничего делать не нужно. Unity Terrain попадает сюда как `Terrain` и `TerrainCollider` и не экспортируется: преобразуйте его в меш с MeshCollider. Чтобы заметка больше не появлялась, назначьте объекту тег `Garbage`, если ничего на нём не должно экспортироваться, или выполните шаги из раздела [Скрытие заметок для типа компонента](#skip-types). |
+| Заметка | `'<type>' on '<object>' requires a GameMarkerData Animation marker on the Animator root. This component is skipped; add the marker to export baked vertex animation.` | `<type>` — Animator или SkinnedMeshRenderer. Чтобы экспортировать анимацию, добавьте маркер Animation на объект с Animator. См. [Вершинная анимация объектов](markers.md#animation). См. [Решение проблем](troubleshooting.md#msg-animator-no-marker). |
+| Заметка | `'<type>' on '<object>' is not a supported component and will not be exported. It is skipped automatically; supported components on this object are still exported.` | Ничего делать не нужно. Unity Terrain попадает сюда как `Terrain` и `TerrainCollider` и не экспортируется: преобразуйте его в меш с MeshCollider. Чтобы заметка больше не появлялась, назначьте объекту тег `Garbage`, если ничего на нём не должно экспортироваться, или выполните шаги из раздела [Скрытие заметок для типа компонента](#skip-types). См. [Решение проблем](troubleshooting.md#msg-unsupported-component). |
 
 </details>
 
@@ -200,16 +182,14 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 | --- | --- | --- |
 | Предупреждение | `'<object>' has a MeshRenderer but no MeshFilter, so it has no geometry to export.` | Добавьте MeshFilter с мешем или удалите MeshRenderer. |
 | Предупреждение | `'<object>' has a MeshFilter with no mesh assigned.` | Назначьте меш или удалите MeshFilter. |
-| Предупреждение | `'<object>' has an empty material slot; it will render as magenta in game.` | Назначьте материал в каждый слот MeshRenderer. |
+| Предупреждение | `'<object>' has an empty material slot; it will render as magenta in game.` | Назначьте материал в каждый слот MeshRenderer. См. [Решение проблем](troubleshooting.md#msg-empty-material-slot). |
 | Предупреждение | `'<object>' has a MeshCollider with no mesh assigned, so it collides with nothing.` | Назначьте меш в MeshCollider или удалите его. |
-| Ошибка | `'<object>' has <n> LOD levels; at most 8 are supported and the whole group is skipped on export. Merge or remove levels.` | Сократите LODGroup до 8 уровней или меньше. |
+| Ошибка | `'<object>' has <n> LOD levels; at most 8 are supported and the whole group is skipped on export. Merge or remove levels.` | Сократите LODGroup до 8 уровней или меньше. См. [Решение проблем](troubleshooting.md#msg-lod-levels). |
 | Предупреждение | `'<object>' has a LODGroup with no renderers assigned to any level.` | Назначьте рендереры уровням LOD или удалите LODGroup. |
-| Предупреждение | `Build optimization is off: static meshes and colliders are exported as-is, without sector chunking, collider simplification or LODs. Large maps get more draw calls, heavier physics and longer loading. Enable it in Build > Optimization.` | На вкладке **Сборка** нажмите **Оптимизация** (Optimization), затем установите флажок **Оптимизировать сборку** (Optimize build). Кнопка **Select** в этой строке выделяет ассет настроек карты. |
-| Предупреждение | `'<object>' (<mesh>): static <kind>, <n> triangles, world bounds <x> x <y> x <z> m. Exceeds sector budget (<size> m / <n> triangles). Review Build > Optimization; size alone does not prove a performance issue.` | `<kind>` — `collider` или `render mesh`. Меш экспортируется целиком, потому что снят флажок **Оптимизировать сборку** либо флажок **Разбивать статические коллайдеры** (Partition static colliders) для коллайдера или **Разбивать статические меши** (Partition static render meshes) для меша рендеринга. Установите флажок или разделите меш в своём 3D-редакторе. После сборки прокатитесь по карте, чтобы проверить результат. |
+| Предупреждение | `Build optimization is off: static meshes and colliders are exported as-is, without sector chunking, collider simplification or LODs. Large maps get more draw calls, heavier physics and longer loading. Enable it in Build > Optimization.` | На вкладке **Сборка** нажмите **Оптимизация** (Optimization), затем установите флажок **Оптимизировать сборку** (Optimize build). Кнопка **Select** в этой строке выделяет ассет настроек карты. См. [Решение проблем](troubleshooting.md#msg-optimization-off). |
+| Предупреждение | `'<object>' (<mesh>): static <kind>, <n> triangles, world bounds <x> x <y> x <z> m. Exceeds sector budget (<size> m / <n> triangles). Review Build > Optimization; size alone does not prove a performance issue.` | `<kind>` — `collider` или `render mesh`. Меш экспортируется целиком, потому что снят флажок **Оптимизировать сборку** либо флажок **Разбивать статические коллайдеры** (Partition static colliders) для коллайдера или **Разбивать статические меши** (Partition static render meshes) для меша рендеринга. Установите флажок или разделите меш в своём 3D-редакторе. После сборки прокатитесь по карте, чтобы проверить результат. См. [Решение проблем](troubleshooting.md#msg-sector-budget). |
 
-Предупреждение о секторе появляется для каждого статического меша, который может обработать оптимизация сборки, если у меша больше треугольников, чем задано в **Треугольников на меш** (Max triangles per mesh), или он больше значения **Размер сектора (м)** (Sector size (m)) по любому измерению в мире: по умолчанию это 8192 треугольника и 64 м. Предупреждение появляется только для мешей, которые оптимизация не разрежет на секторы: для всех таких мешей, пока снят флажок **Оптимизировать сборку**, для MeshCollider, пока снят флажок **Разбивать статические коллайдеры**, и для мешей рендеринга, пока снят флажок **Разбивать статические меши**. При стандартных настройках предупреждений о секторах нет, и пример TestMap их не получает. Проверка не перечисляет меши, которые оптимизатор оставляет целыми по другим причинам, например прозрачные рендереры и рендереры с лайтмапами и объекты с несколькими MeshCollider; см. [Оптимизация](build.md#optimization). <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:14-19 -->
-
-Меш считается статическим, если его объект активен, не находится под Rigidbody, Animator, Animation или LODGroup, не помечен тегом `Garbage` и не имеет других маркеров, кроме Road и Material, ни на себе, ни на родительских объектах. Проверка охватывает включённые MeshRenderer и включённые MeshCollider, которые не являются триггерами и не выпуклые (non-convex). Коллайдеры сравниваются с теми же двумя значениями, хотя оптимизация режет коллайдеры на более крупные части — до 128 м и 32 768 треугольников. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:10-11 -->
+Какие меши охватывает проверка секторов, см. в разделе [Бюджет сектора](reference.md#sector-budget).
 
 </details>
 
@@ -220,9 +200,9 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
-| Заметка | `'<object>' is a Directional light. It lights the SDK preview only; the game uses its own sun, so it is not exported.` | Ничего делать не нужно: солнце для предпросмотра ожидаемо, а игра освещает карту сама. Заметка появляется для каждого включённого источника Directional. Чтобы убрать её, назначьте источнику тег `Garbage`; он по-прежнему будет освещать предпросмотр в редакторе. |
-| Предупреждение | `'<object>' is a <type> light. Wavefront/Binary exports Point and Spot lights only, so this one will not reach the mod.` | Предупреждение появляется для каждого включённого источника света, кроме Point, Spot и Directional, например для Area. Смените тип источника на Point или Spot или назначьте ему тег `Garbage`, если он должен освещать только предпросмотр в редакторе. |
-| Предупреждение | `The map has <n> Directional Lights. These affect the SDK preview only; the game supplies its own environment lighting.` | Оставьте один Directional Light для предпросмотра или назначьте лишним тег `Garbage`. Выключенные Directional Light тоже учитываются. |
+| Заметка | `'<object>' is a Directional light. It lights the SDK preview only; the game uses its own sun, so it is not exported.` | Ничего делать не нужно: солнце для предпросмотра ожидаемо, а игра освещает карту сама. Заметка появляется для каждого включённого источника Directional. Чтобы убрать её, назначьте источнику тег `Garbage`; он по-прежнему будет освещать предпросмотр в редакторе. См. [Решение проблем](troubleshooting.md#msg-directional-light). |
+| Предупреждение | `'<object>' is a <type> light. Wavefront/Binary exports Point and Spot lights only, so this one will not reach the mod.` | Предупреждение появляется для каждого включённого источника света, кроме Point, Spot и Directional, например для Area. Смените тип источника на Point или Spot или назначьте ему тег `Garbage`, если он должен освещать только предпросмотр в редакторе. См. [Решение проблем](troubleshooting.md#msg-light-type). |
+| Предупреждение | `The map has <n> Directional Lights. These affect the SDK preview only; the game supplies its own environment lighting.` | Оставьте один Directional Light для предпросмотра или назначьте лишним тег `Garbage`. Выключенные Directional Light тоже учитываются. См. [Решение проблем](troubleshooting.md#msg-directional-light). |
 
 </details>
 
@@ -234,12 +214,12 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
 | Ошибка | `'<object>' has a GameMarkerData with no type selected.` | Выберите тип в маркере или удалите компонент. |
-| Предупреждение | `'<object>' uses unsupported marker '<head>'. This marker will be skipped during export. Supported types are SpawnPoint, Road, Animation and Material.` | Удалите компонент или выберите поддерживаемый тип. Сюда попадают старые типы `Ambient`, `TimeObjectActivator` и `NetworkObject`. |
-| Ошибка | `Animation marker requires an Animator with animation clips.` | В маркере Animation назначьте **Animator** или поместите маркер на объект с Animator. У Animator должен быть контроллер хотя бы с одним клипом. |
-| Ошибка | `'<object>' is marked as Road but has no Collider on it or its children, so its surface type will never be used. Add a Mesh/Box/Sphere/Capsule Collider.` | Добавьте Mesh, Box, Sphere или Capsule Collider на тот же GameObject, что и маркер. Проверка принимает и коллайдер на дочернем объекте, но экспорт не назначает такому коллайдеру поверхность. |
-| Ошибка | `The map has no GameMarkerData at all - at minimum it needs a spawn point.` | Добавьте маркер SpawnPoint. Сцена без маркеров получает также следующую ошибку и ошибку Budget. |
-| Ошибка | `The map has no SpawnPoint marker, so there is nowhere for a car to appear. Add an empty object with GameMarkerData set to SpawnPoint.` | Создайте пустой GameObject, добавьте компонент GameMarkerData и выберите **SpawnPoint**. |
-| Предупреждение | `<n> spawn points are all named '<name>'. Wavefront/Binary exports the object name as the spawn point's identity, so give each one a distinct, meaningful name.` | Переименуйте объекты точек появления. Карта мира в игре показывает каждую точку появления под её именем. |
+| Предупреждение | `'<object>' uses unsupported marker '<head>'. This marker will be skipped during export. Supported types are SpawnPoint, Road, Animation and Material.` | Удалите компонент или выберите поддерживаемый тип. Сюда попадают старые типы `Ambient`, `TimeObjectActivator` и `NetworkObject`. См. [Решение проблем](troubleshooting.md#msg-unsupported-marker). |
+| Ошибка | `Animation marker requires an Animator with animation clips.` | В маркере Animation назначьте **Animator** или поместите маркер на объект с Animator. У Animator должен быть контроллер хотя бы с одним клипом. См. [Решение проблем](troubleshooting.md#msg-animation-no-animator). |
+| Ошибка | `'<object>' is marked as Road but has no Collider on it or its children, so its surface type will never be used. Add a Mesh/Box/Sphere/Capsule Collider.` | Добавьте Mesh, Box, Sphere или Capsule Collider на тот же GameObject, что и маркер. Проверка принимает и коллайдер на дочернем объекте, но экспорт не назначает такому коллайдеру поверхность. См. [Решение проблем](troubleshooting.md#msg-road-no-collider). |
+| Ошибка | `The map has no GameMarkerData at all - at minimum it needs a spawn point.` | Добавьте маркер SpawnPoint. Сцена без маркеров получает также следующую ошибку и ошибку Budget. См. [Решение проблем](troubleshooting.md#msg-no-spawn). |
+| Ошибка | `The map has no SpawnPoint marker, so there is nowhere for a car to appear. Add an empty object with GameMarkerData set to SpawnPoint.` | Создайте пустой GameObject, добавьте компонент GameMarkerData и выберите **SpawnPoint**. См. [Решение проблем](troubleshooting.md#msg-no-spawn). |
+| Предупреждение | `<n> spawn points are all named '<name>'. Wavefront/Binary exports the object name as the spawn point's identity, so give each one a distinct, meaningful name.` | Переименуйте объекты точек появления. Карта мира в игре показывает каждую точку появления под её именем. См. [Решение проблем](troubleshooting.md#spawn-names). |
 
 </details>
 
@@ -259,8 +239,8 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 | Ошибка | `'<object>': material '<material>' uses render core variant <variant>, which is unavailable in mods: <reason>. Choose another variant.` | В записи выберите другой **Render core variant**. |
 | Предупреждение | `'<object>': material '<material>' is not used by the renderer, so its render core override is never applied.` | Удалите запись или назначьте материал рендереру. |
 | Предупреждение | `'<object>': render core material '<material>' (<variant>) stores values that the variant does not have: <names>. They are not exported. Press 'Export from material' or 'Remove' next to 'Unused values' in the marker.` | В записи нажмите **Export from material** или нажмите **Remove** рядом с **Unused values**. |
-| Предупреждение | `'<object>': render core material '<material>' (<variant>) was exported from material for revision <n>, but this SDK has revision <n> of the variant. The game uses the fallback material until you re-run Export from material on this entry.` | В записи нажмите **Export from material**. |
-| Предупреждение | `'<object>': render core material '<material>' (<variant>) has no diffuse texture and will render white. Press 'Export from material' or assign the texture.` | В записи нажмите **Export from material** или назначьте диффузную текстуру. |
+| Предупреждение | `'<object>': render core material '<material>' (<variant>) was exported from material for revision <n>, but this SDK has revision <n> of the variant. The game uses the fallback material until you re-run Export from material on this entry.` | В записи нажмите **Export from material**. См. [Решение проблем](troubleshooting.md#msg-render-core-revision). |
+| Предупреждение | `'<object>': render core material '<material>' (<variant>) has no diffuse texture and will render white. Press 'Export from material' or assign the texture.` | В записи нажмите **Export from material** или назначьте диффузную текстуру. См. [Решение проблем](troubleshooting.md#msg-render-core-no-diffuse). |
 | Предупреждение | `'<renderer>': mesh '<mesh>' has no vertex colors, but <variant> blends its layers by them (RGB - layer mask, A - albedo tint). It is exported white, so only the fourth layer shows. Paint vertex colors in the mesh.` | Раскрасьте цвета вершин меша в своём 3D-редакторе, затем импортируйте его снова. |
 | Предупреждение | `'<renderer>': mesh '<mesh>' mixes <variant> and <source> submeshes. The game keeps the layer blend vertex colors for the whole mesh, so the emission is multiplied by them. Move the emissive part to a separate object without layer blend materials: build optimization merges layer blend objects only with each other.` | Перенесите эмиссивную часть на отдельный объект. `<source>` — эмиссивный вариант или `emissive material '<material>'`. |
 | Заметка | `'<object>': material '<material>' is double-sided and alpha-tested (vegetation?) and is mapped to <variant>. If it is vegetation, MAT_FOLIAGE_ALPHATEST (with a normal map) or MAT_FOLIAGE_SIMPLE_ALPHATEST (without) gives it foliage lighting; for a fence, grate or cable keep <variant>.` | Для растительности выберите `MAT_FOLIAGE_ALPHATEST` или `MAT_FOLIAGE_SIMPLE_ALPHATEST`. Для забора, решётки или кабеля оставьте вариант. Только Binary. |
@@ -273,29 +253,29 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 
 Эти проверки читают вкладку **Карта** (Map) и значение **Сцена** на вкладке **Сборка**. См. [Заполнение вкладки «Карта»](map-settings.md#map-tab). <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:16-25 -->
 
-Лимиты берутся из конфигурации mod.io, которая поставляется с проектом: **Название** — до 50 символов, краткое описание — до 250, **Описание** — до 50 000, файл иконки — до 8 МБ. Файл превью может весить до 10 МБ. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:27-30 -->
+Лимиты берутся из конфигурации mod.io, которая поставляется с проектом; см. [Ограничения](reference.md#limits). <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:27-30 -->
 
 В сообщениях об изображениях `<image>` — это `icon` или `preview`. В строках о назначенном изображении кнопка **Select** выделяет текстуру в окне **Project**.
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
-| Ошибка | `No target scene is selected. Pick one in Build Settings.` | На вкладке **Сборка** в списке **Сцена** выберите сцену карты. Если список пуст, сохраните сцену и включите её в списке сцен сборки. |
-| Ошибка | `The scene name '<scene>' cannot be used for a build. Start with a letter and use only letters, digits and underscores.` | Переименуйте файл сцены, например в `MyMap_01.unity`. |
-| Ошибка | `The track has no name. Fill in Workshop Name on the map config.` | На вкладке **Карта** заполните поле **Название**. В сообщении это поле называется Workshop Name. |
-| Ошибка | `The track name '<name>' contains characters that cannot be published. Use letters, digits, spaces and -_'.,:!?()&+/, with no leading or trailing spaces.` | Удалите из поля **Название** другие символы, а также пробелы в начале и в конце. |
-| Ошибка | `The track name is <n> characters; this vendor allows <limit>.` | Сократите текст в поле **Название**. |
-| Ошибка | `The description is <n> characters; this vendor allows <limit>.` | Сократите текст в поле **Описание**. |
+| Ошибка | `No target scene is selected. Pick one in Build Settings.` | На вкладке **Сборка** в списке **Сцена** выберите сцену карты. Если список пуст, сохраните сцену и включите её в списке сцен сборки. См. [Решение проблем](troubleshooting.md#scene-empty). |
+| Ошибка | `The scene name '<scene>' cannot be used for a build. Start with a letter and use only letters, digits and underscores.` | Переименуйте файл сцены, например в `MyMap_01.unity`. См. [Решение проблем](troubleshooting.md#msg-scene-name). |
+| Ошибка | `The track has no name. Fill in Workshop Name on the map config.` | На вкладке **Карта** заполните поле **Название**. В сообщении это поле называется Workshop Name. См. [Решение проблем](troubleshooting.md#msg-track-name). |
+| Ошибка | `The track name '<name>' contains characters that cannot be published. Use letters, digits, spaces and -_'.,:!?()&+/, with no leading or trailing spaces.` | Удалите из поля **Название** другие символы, а также пробелы в начале и в конце. См. [Решение проблем](troubleshooting.md#msg-track-name). |
+| Ошибка | `The track name is <n> characters; this vendor allows <limit>.` | Сократите текст в поле **Название**. См. [Решение проблем](troubleshooting.md#msg-track-name). |
+| Ошибка | `The description is <n> characters; this vendor allows <limit>.` | Сократите текст в поле **Описание**. См. [Решение проблем](troubleshooting.md#msg-summary-length). |
 | Ошибка | `This vendor requires a summary and there is nothing to build one from. Fill in Summary, or the first line of the description.` | Заполните поле **Название**. Эта ошибка появляется, только если поля **Название**, **Краткое описание (необязательно)** (Summary (optional)) и **Описание** все пусты: вместо пустого краткого описания берётся первая строка поля **Описание**, а затем текст `<Name> track.` |
-| Ошибка | `The summary is <n> characters; this vendor allows <limit>. It is taken from the first line of the description - add a shorter Summary instead.` | Заполните поле **Краткое описание (необязательно)** коротким текстом или сократите первую строку поля **Описание**. |
-| Ошибка | `The summary is <n> characters; this vendor allows <limit>. Shorten the Summary field.` | Сократите первую строку поля **Краткое описание (необязательно)**. Используется только она. |
-| Ошибка | `No Icon is assigned. It is the image shown for the map in game and on the mod page, and both vendors need one before an entry can be created.` | На вкладке **Карта** назначьте изображение в **Иконка · 16:9** (Icon · 16:9). |
-| Ошибка | `The icon '<texture>' has Read/Write disabled. Enable it in the texture import settings.` | Выберите текстуру. В окне **Inspector** разверните **Advanced**, установите флажок **Read/Write** и нажмите **Apply**. |
-| Предупреждение | `No Preview is assigned. The map will have no large image on the mod page or on the loading screen.` | Необязательно: на вкладке **Карта** назначьте изображение в **Превью · 16:9** (Preview · 16:9). |
-| Ошибка | `The preview '<texture>' has Read/Write disabled. Enable it in the texture import settings.` | Включите **Read/Write** для текстуры так же, как для иконки. |
-| Предупреждение | `The <image> is a <extension> file. The uploader uploads the source file as is and the documented format is PNG.` | `<extension>` — `.jpg` или `.jpeg`. Сохраните изображение в PNG и назначьте его снова. |
-| Ошибка | `The <image> is a <extension> file, which is uploaded as is and is not an image a vendor accepts. Save it as PNG.` | Сохраните изображение в PNG и назначьте его снова. |
-| Ошибка | `The <image> is <size> mb; the limit is <limit> mb.` | Уменьшите файл: до 8 МБ для иконки и до 10 МБ для превью. <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:14 --> |
-| Заметка | `The scene itself was not validated - fix the configuration first, then build again.` | Исправьте ошибки этой категории. Заметка добавляется всякий раз, когда в настройках карты или в формате сборки есть ошибки. Сборка останавливается до проверки сцены, а **Проверить карту** всё равно проверяет сцену и тоже перечисляет её замечания. |
+| Ошибка | `The summary is <n> characters; this vendor allows <limit>. It is taken from the first line of the description - add a shorter Summary instead.` | Заполните поле **Краткое описание (необязательно)** коротким текстом или сократите первую строку поля **Описание**. См. [Решение проблем](troubleshooting.md#msg-summary-length). |
+| Ошибка | `The summary is <n> characters; this vendor allows <limit>. Shorten the Summary field.` | Сократите первую строку поля **Краткое описание (необязательно)**. Используется только она. См. [Решение проблем](troubleshooting.md#msg-summary-length). |
+| Ошибка | `No Icon is assigned. It is the image shown for the map in game and on the mod page, and both vendors need one before an entry can be created.` | На вкладке **Карта** назначьте изображение в **Иконка · 16:9** (Icon · 16:9). См. [Решение проблем](troubleshooting.md#msg-no-icon). |
+| Ошибка | `The icon '<texture>' has Read/Write disabled. Enable it in the texture import settings.` | Выберите текстуру. В окне **Inspector** разверните **Advanced**, установите флажок **Read/Write** и нажмите **Apply**. См. [Решение проблем](troubleshooting.md#msg-icon-read-write). |
+| Предупреждение | `No Preview is assigned. The map will have no large image on the mod page or on the loading screen.` | Необязательно: на вкладке **Карта** назначьте изображение в **Превью · 16:9** (Preview · 16:9). См. [Решение проблем](troubleshooting.md#msg-no-icon). |
+| Ошибка | `The preview '<texture>' has Read/Write disabled. Enable it in the texture import settings.` | Включите **Read/Write** для текстуры так же, как для иконки. См. [Решение проблем](troubleshooting.md#msg-icon-read-write). |
+| Предупреждение | `The <image> is a <extension> file. The uploader uploads the source file as is and the documented format is PNG.` | `<extension>` — `.jpg` или `.jpeg`. Сохраните изображение в PNG и назначьте его снова. См. [Решение проблем](troubleshooting.md#msg-icon-format). |
+| Ошибка | `The <image> is a <extension> file, which is uploaded as is and is not an image a vendor accepts. Save it as PNG.` | Сохраните изображение в PNG и назначьте его снова. См. [Решение проблем](troubleshooting.md#msg-icon-format). |
+| Ошибка | `The <image> is <size> mb; the limit is <limit> mb.` | Уменьшите файл, чтобы он не превышал `<limit>`. См. [Решение проблем](troubleshooting.md#msg-icon-format). |
+| Заметка | `The scene itself was not validated - fix the configuration first, then build again.` | Исправьте ошибки этой категории. Заметка добавляется всякий раз, когда в настройках карты или в формате сборки есть ошибки. Сборка останавливается до проверки сцены, а **Проверить карту** всё равно проверяет сцену и тоже перечисляет её замечания. См. [Решение проблем](troubleshooting.md#msg-scene-not-validated). |
 
 </details>
 
@@ -306,10 +286,10 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
-| Ошибка | `'<object>': Bound Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.` | В компоненте Minimap задайте в **Bounds Size** размер карты в мировых единицах. В сообщении это поле называется Bound Size. |
-| Ошибка | `'<object>': no textures assigned. Add at least one entry with a Main Texture.` | В **Textures** добавьте элемент и назначьте его **Main Texture**. |
-| Ошибка | `'<object>': Textures element <i> has no Main Texture assigned.` | Назначьте **Main Texture** в этом элементе или удалите элемент. |
-| Ошибка | `'<object>': Textures element <i> is a <type>. Only Texture2D can be exported.` | Назначьте импортированное изображение (Texture2D), а не Render Texture или текстуру другого типа. |
+| Ошибка | `'<object>': Bound Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.` | В компоненте Minimap задайте в **Bounds Size** размер карты в мировых единицах. В сообщении это поле называется Bound Size. См. [Решение проблем](troubleshooting.md#msg-bounds-size). |
+| Ошибка | `'<object>': no textures assigned. Add at least one entry with a Main Texture.` | В **Textures** добавьте элемент и назначьте его **Main Texture**. См. [Решение проблем](troubleshooting.md#msg-no-textures). |
+| Ошибка | `'<object>': Textures element <i> has no Main Texture assigned.` | Назначьте **Main Texture** в этом элементе или удалите элемент. См. [Решение проблем](troubleshooting.md#msg-no-textures). |
+| Ошибка | `'<object>': Textures element <i> is a <type>. Only Texture2D can be exported.` | Назначьте импортированное изображение (Texture2D), а не Render Texture или текстуру другого типа. См. [Решение проблем](troubleshooting.md#msg-no-textures). |
 
 </details>
 
@@ -320,7 +300,7 @@ Rigidbody, который не является кинематическим, т
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
-| Ошибка | `'<object>' has a non-convex MeshCollider driven by a non-kinematic Rigidbody, which the physics engine no longer supports. Tick Convex, or make the Rigidbody kinematic.` | На MeshCollider установите флажок **Convex** или на Rigidbody установите флажок **Is Kinematic**. |
+| Ошибка | `'<object>' has a non-convex MeshCollider driven by a non-kinematic Rigidbody, which the physics engine no longer supports. Tick Convex, or make the Rigidbody kinematic.` | На MeshCollider установите флажок **Convex** или на Rigidbody установите флажок **Is Kinematic**. См. [Решение проблем](troubleshooting.md#msg-non-convex-dynamic). |
 
 </details>
 
@@ -331,7 +311,7 @@ Rigidbody, который не является кинематическим, т
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
-| Заметка | `'<scene>' was not opened, so only the configuration was checked.` | Появляется, если вы отменили предложение сохранить открытые сцены или если сцена не выбрана; во втором случае `<scene>` пусто. Нажмите **Проверить карту** ещё раз и, когда Unity спросит, сохраните или отмените изменения. |
+| Заметка | `'<scene>' was not opened, so only the configuration was checked.` | Появляется, если вы отменили предложение сохранить открытые сцены или если сцена не выбрана; во втором случае `<scene>` пусто. Нажмите **Проверить карту** ещё раз и, когда Unity спросит, сохраните или отмените изменения. См. [Решение проблем](troubleshooting.md#msg-scene-not-opened). |
 | Заметка | `<rule>: <n> more of the same, not listed individually.` | Исправьте перечисленные замечания этого правила, затем запустите проверку снова, чтобы увидеть остальные. |
 
 </details>
@@ -349,8 +329,7 @@ Rigidbody, который не является кинематическим, т
 
 Результат: следующая проверка больше не выводит заметки `'AudioSource' on '<object>' is not a supported component…`. Компонент по-прежнему не экспортируется.
 
-- Список действует для всех карт проекта. Изначально в нём одна запись — `DrawZoneBehaviour`, вспомогательный компонент для гизмо на примерах объектов точки появления и мини-карты.
-- Запись скрывает только заметку «not a supported component». Заметки Format о компонентах предпросмотра, заметки об Animator без маркера Animation и об отсутствующих скриптах по-прежнему выводятся.
+- Что скрывает запись и какая запись есть в списке изначально, см. в разделе [MapSkipComponentConfig](reference.md#skip-components).
 - Редактируйте этот ассет, а не создавайте новый. Если в папках `Resources` есть два ассета MapSkipComponentConfig, проверка останавливается с сообщением `(Singleton) Multiple config for : MapSkipComponentConfig` в Console. <!-- src: Assets/Scripts/SingletonScriptableObject.cs:26 -->
 
 <a name="elsewhere"></a>
@@ -358,31 +337,11 @@ Rigidbody, который не является кинематическим, т
 
 Некоторые проблемы никогда не появляются в окне **Map Validation**. Проверяйте их отдельно.
 
-**Размер сборки.** MapBuilder проверяет размер карты и её метаданных только непосредственно перед действием кнопки **Создать публикацию** (Create publication) или **Обновить публикацию** (Update publication). Для mod.io карта может занимать до 4096 МБ, а метаданные — до 24 МБ. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26 -->
+**Размер сборки.** MapBuilder проверяет размер карты и её метаданных только непосредственно перед действием кнопки **Создать публикацию** (Create publication) или **Обновить публикацию** (Update publication), и слишком большая сборка останавливает загрузку с ошибкой в Console. Лимиты см. в разделе [Размер сборки](reference.md#limits-size), а исправление — на странице [Решение проблем](troubleshooting.md#msg-map-size). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182 -->
 
-Если сборка слишком большая, загрузка останавливается с одной из этих ошибок в Console:
+**Ошибки экспорта.** Некоторые проблемы обнаруживаются только тогда, когда сборка экспортирует сцену. Они останавливают сборку и появляются в Console в виде исключения, обычно `InvalidOperationException`, а итоговая строка на вкладке **Сборка** — `Сборка не завершена полностью. Проверьте результаты проверки и Console.` Экспорт также может выводить предупреждения, которые не останавливают сборку. Все ошибки и предупреждения экспорта с причинами и способами исправления см. в разделе [Ошибки сборки в Console](troubleshooting.md#build-errors). <!-- src: Assets/Editor/MapBuilder.cs:323-327 -->
 
-```text
-'<scene>': the map is <size> mb and this vendor accepts <limit> mb.
-'<scene>': the meta is <size> mb and this vendor accepts <limit> mb.
-```
-
-Оба размера измеряются по папкам кэша сборки `MapTemp` и `MetaTemp`, а не по упакованному `mod.cxmod`. Кнопки **Проверить карту** и **Экспортировать в папку** (Export to folder) их не проверяют. См. [Размер сборки](reference.md#limits-size). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182 -->
-
-**Ошибки экспорта.** Некоторые проблемы обнаруживаются только тогда, когда сборка экспортирует сцену. Они останавливают сборку и появляются в Console как `InvalidOperationException`, а итоговая строка на вкладке **Сборка** — `Сборка не завершена полностью. Проверьте результаты проверки и Console.` Например: <!-- src: Assets/Editor/MapBuilder.cs:323-327 -->
-
-```text
-Rigidbody '<name>' cannot split an enclosing LODGroup. Put the Rigidbody on the LODGroup root.
-Rigidbody '<name>': collider '<object>' has a sheared transform. Apply scale in the model first.
-Put Rigidbody on the Animator root or above it; a baked animation cannot contain independent moving bodies.
-Animator '<name>' has multiple Animation markers.
-VAT for '<name>' is too large (<width>x<height>). Reduce vertices, clips or sample rate.
-meshoptimizer is unavailable for this Editor platform. Install its native Editor library or disable build optimization.
-```
-
-Экспорт также выводит предупреждения, которые не останавливают сборку, например `Rigidbody '<name>' was skipped: no enabled supported colliders. Geometry and animation will still be exported.` Причины и способы исправления см. в разделе [Решение проблем](troubleshooting.md). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:94 -->
-
-**Размер изображений в пикселях.** Проверка контролирует формат, Read/Write и размер файла иконки и превью, но не их размер в пикселях и не соотношение сторон. mod.io требует иконку размером не меньше 512 × 288. См. [Требования к изображениям](minimap-and-images.md#images). <!-- src: Assets/Plugins/Modio/Modio/API/Generated/Definitions/RequestObjects/EditModRequest.cs:31 -->
+**Размер изображений в пикселях.** Проверка контролирует формат, Read/Write и размер файла иконки и превью, но не их размер в пикселях и не соотношение сторон. См. [Требования к изображениям](minimap-and-images.md#images).
 
 ## Дальнейшие шаги
 

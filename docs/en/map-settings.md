@@ -2,8 +2,6 @@
 
 **English** · [Русский](../ru/map-settings.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
 Each map has a map config: an asset that holds the map's name, texts, images and credits. Create it with **+ New map** and fill it in on the **Map** tab before you build, because the build copies these values into the map metadata and publishing sends some of them to mod.io.
 
 You don't need to sign in to mod.io for anything on this page.
@@ -11,7 +9,7 @@ You don't need to sign in to mod.io for anything on this page.
 ## Before you start
 
 - The map scene, saved in `Assets/MapResources/<MapName>/`, where `<MapName>` is the name of your map. See [Set up the scene](scene-setup.md#scene).
-- An icon image and, optionally, a preview image: PNG files with Read/Write on. See [Image requirements](minimap-and-images.md#images).
+- An icon image and, optionally, a preview image that meet the [image requirements](minimap-and-images.md#images).
 - The **MapBuilder** window, opened from **Tools** > **MapBuilder**. See [Open MapBuilder](getting-started.md#window).
 
 <a name="new-map"></a>
@@ -27,7 +25,7 @@ To create a map config:
 1. In the file name box, enter the map name, for example `MyMap`, and select **Save**.
    MapBuilder creates `MyMap.asset`, selects the new map and opens the **Map** tab.
 
-Result: the map appears under **LOCAL MAPS** with the status `Not built` and the line `mod.io: not linked`, and **Name** holds the file name, `MyMap`. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:238 -->
+Result: the map appears under **LOCAL MAPS** with the status `Not built` and the line `mod.io: not linked`, and **Name** holds the file name, `MyMap`. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:198,209,238 -->
 
 Only the first value of **Name** comes from the file name. Renaming the asset later doesn't change **Name**, and changing **Name** doesn't rename the asset.
 
@@ -46,7 +44,7 @@ The build status tells you whether the map has a current build. A build has two 
 
 | Build status | What it means |
 | --- | --- |
-| `Ready to export` | Map and Meta are both built and match the map: the **Map** tab values and the optimization settings haven't changed since the build, and the build cache folders still exist. You can export or publish the map. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:179-183 --> |
+| `Ready to export` | Map and Meta are both built and match the map: the **Map** tab values and the optimization settings haven't changed since the build, and the build cache folders still exist. You can export or publish the map. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:179-183,198 --> |
 | `Not built` | No part of the map has a usable build: you haven't built it yet, or the last build of both parts stopped with an error. Build the map on the **Build** tab. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:198 --> |
 | `Rebuild needed` | The build is out of date or incomplete: you changed the **Map** tab or the optimization settings, only one part is built, the build cache was deleted, or you created a publication from this build. Build the map again. <!-- src: Assets/Editor/MapBuilderEditorWindow.Publish.cs:210-230 --> |
 
@@ -84,7 +82,7 @@ Result: the map's row under **LOCAL MAPS** shows the new name and the icon.
 
 The following screenshot shows the **Map** tab of the `TestMap` sample. The numbers match the table after it.
 
-<img src="../images/en/map-settings.png" width="720" alt="Screenshot of the MapBuilder Map tab for the TestMap sample; markers 1–8 on the fields from Name to URL.">
+<img src="../images/en/map-settings.png" width="720" alt="Screenshot of the MapBuilder Map tab for the TestMap sample; callouts 1–8 on the fields from Name to URL.">
 
 | # | Field | What to enter | Limit | Where it appears |
 | --- | --- | --- | --- | --- |
@@ -92,14 +90,14 @@ The following screenshot shows the **Map** tab of the `TestMap` sample. The numb
 | 2 | **Version** | Your release label, for example `1.0.0`. It isn't the mod format version. Raise it before you [update a publication](publish.md#update). | None. Empty means `1.0.0`. | On mod.io: the version of each file you upload, which the map's mod.io line then shows. In the map metadata; the game doesn't show it. <!-- src: Assets/Editor/MapBuilder.Publishing.cs:298-301 --> |
 | 3 | **Summary (optional)** | One line about the map. When it is empty, MapBuilder uses the first line of **Description**, or `<Name> track.` when **Description** is empty too. | Up to 250 characters, also when the text comes from **Description**. Only the first line is used. | On mod.io: the publication summary, sent by **Create publication**, and by **Update publication** with **Update description** on. It isn't stored in the map metadata. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:29 --> |
 | 4 | **Description** | The full text about the map. | Up to 50 000 characters. | On mod.io: the publication description, sent by **Create publication** when it isn't empty, and by **Update publication** with **Update description** on. In the map metadata; the game doesn't show it. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:30 --> |
-| 5 | **Preview · 16:9** | A large 16:9 picture of the map, for example 1920 × 1080. | Optional; a warning when missing. PNG with Read/Write on, up to 10 MB. | In the game: the loading screen, and the map picture when you create an online room. It isn't sent to mod.io. <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:14 --> |
-| 6 | **Icon · 16:9** | The map's icon, a 16:9 picture, for example 636 × 358. | Required. PNG with Read/Write on, up to 8 MB. mod.io needs at least 512 × 288; MapBuilder doesn't check pixel sizes. | On mod.io: the publication logo, sent by **Create publication**, and by **Update publication** with **Update preview** on. In the game: the map's card on **Track Selection** and in the online room list. When you create a room, it stands in for a missing Preview. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:27 --> |
+| 5 | **Preview · 16:9** | A large 16:9 picture of the map, for example 1920 × 1080. | Optional. See [Image requirements](minimap-and-images.md#images). | In the game: the loading screen, and the map picture when you create an online room. It isn't sent to mod.io. |
+| 6 | **Icon · 16:9** | The map's icon, a 16:9 picture, for example 636 × 358. | Required. See [Image requirements](minimap-and-images.md#images). | On mod.io: the publication logo, sent by **Create publication**, and by **Update publication** with **Update preview** on. In the game: the map's card on **Track Selection** and in the online room list. When you create a room, it stands in for a missing Preview. |
 | 7 | **Authors** | One entry for each author. Empty entries are ignored. | None. | In the game: `by <authors>` under the map name on the **Mods** screen, with up to 5 names separated by `, ` and then `...` when there are more. With no authors, a map installed from mod.io shows its mod.io creator. It isn't sent to mod.io. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/Mods/ModAuthorResolver.cs:10-12 --> |
 | 8 | **URL** | A link to the map's page, for example a forum thread. | None. | Only in the map metadata. The game doesn't show it, and it isn't sent to mod.io. |
 
 Changing **Name** after you publish doesn't rename the publication until you update it with **Update title** on. See [Publish to mod.io](publish.md).
 
-Where the game shows the Icon or the Preview in a wide frame, it crops the image to the frame without stretching it. On the online room screens it keeps a strip through the middle, about 40% of the height of a 16:9 image. On the **Track Selection** card it cuts off the top of a 16:9 image. Keep the subject of both images in the middle band. To capture the images in Unity, see [Capture images with CaptureCamera](minimap-and-images.md#capture). <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/WorldMap/FreeRide/UICreateRTMPRoomContextController.cs:57 -->
+The game crops the Icon and the Preview in some places; for the part that stays visible, see [Image requirements](minimap-and-images.md#images). To capture the images in Unity, see [Capture images with CaptureCamera](minimap-and-images.md#capture).
 
 **Validate map** reports problems with these fields in the `Meta` category of the **Map Validation** window. See [Fix validation problems](validation.md#catalogue). An empty **Name** gives `The track has no name. Fill in Workshop Name on the map config.`; Workshop Name in this message means **Name**. <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:48 -->
 

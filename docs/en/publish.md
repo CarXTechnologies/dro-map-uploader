@@ -2,8 +2,6 @@
 
 **English** · [Русский](../ru/publish.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
 Publish your map on mod.io so that other players can install it in CarX Drift Racing Online 2. Create the publication once, for the first release, and update it for every later version of the map.
 
 ## Before you start
@@ -17,7 +15,7 @@ Publish your map on mod.io so that other players can install it in CarX Drift Ra
 
 On the **Publish** tab of the **MapBuilder** window, you send the current build to mod.io or export it to a folder. The following screenshot shows the tab while you are signed in, with the **Platform** option selected under **Build destination** and a linked publication selected in **Publications**.
 
-<img src="../images/en/publish-modio.png" width="892" alt="Screenshot of the MapBuilder Publish tab while signed in, with Platform selected and a linked publication selected; markers 1–8 on the publishing controls.">
+<img src="../images/en/publish-modio.png" width="892" alt="Screenshot of the MapBuilder Publish tab while signed in, with Platform selected and a linked publication selected; callouts 1–8 on the publishing controls.">
 
 | # | Element | What it does |
 | --- | --- | --- |
@@ -77,17 +75,26 @@ To sign out:
 
 Create the publication once, for the first release of the map. The build must be current, because mod.io creates the publication together with its file.
 
+The first file is built before the publication exists, so its metadata carries a placeholder id instead of the publication's mod.io id. After **Create publication**, the map shows `Rebuild needed` and the **Build** tab shows `Map metadata has not been built yet.`, so the procedure goes on with a second build and an update. <!-- src: Assets/Editor/MapBuilderEditorWindow.cs:832 -->
+
 To create the publication:
 
 1. In the **MapBuilder** window, in **LOCAL MAPS**, select the map.
 1. On the **Publish** tab, under **Build destination**, select the **Platform** option.
 1. Optional: Under **Upload settings**, in **Changelog**, enter a note for players, for example `First release.`
 1. Under **Publications**, select **Create publication**.
-   The footer shows the progress, from `Creating publication…` to the upload itself. For a Binary build, the `Packing the map` progress bar also appears while MapBuilder packs the build. See [Upload progress](#upload-progress).
+   The footer shows the progress; see [Upload progress](#upload-progress). When it shows `Publication created.`, the new publication appears in **Publications**, selected and linked to the map, and the map's row in **LOCAL MAPS** shows `Rebuild needed`. <!-- src: Assets/Editor/MapBuilderEditorWindow.Publish.cs:182-184 -->
+1. Optional: To build faster, on the **Build** tab, select **Advanced settings** and set **Rebuild targets** to **Meta**.
+   Only the metadata needs to be built again.
+1. On the **Publish** tab, check that you are still signed in and that the new publication's row is selected in **Publications**.
+   Only then does the next build carry the publication's mod.io id.
+1. On the **Build** tab, select the **Build map** button.
+   When the build finishes, the map's row in **LOCAL MAPS** shows `Ready to export`.
+1. On the **Publish** tab, select **Update publication**.
 
-Result: the footer shows `Publication created.` The new publication appears in **Publications**, selected and linked to the map, and the map's row in **LOCAL MAPS** shows `Rebuild needed`. <!-- src: Assets/Editor/MapBuilderEditorWindow.Publish.cs:182-184 -->
+Result: the footer shows `Publication updated.`, and the list reloads. The publication's file on mod.io now carries the publication's mod.io id. The publication stays hidden until you [make it public](#make-public). <!-- src: Assets/Editor/MapBuilderEditorWindow.Publish.cs:105 -->
 
-If the footer shows `Publication did not complete. See the Console.`, the Console says why. When mod.io creates the publication but refuses its file, MapBuilder deletes the incomplete publication again.
+If the footer shows `Publication did not complete. See the Console.` after **Create publication**, the Console says why. When mod.io creates the publication but refuses its file, MapBuilder deletes the incomplete publication again.
 
 If the map or its metadata isn't built, **Publications** shows `Build the map and its metadata first. A publication is created together with its files.` <!-- src: Assets/Editor/MapBuilderEditorWindow.Publish.cs:281 -->
 
@@ -104,35 +111,21 @@ mod.io creates the publication hidden. **Description**, **Preview**, **Authors**
 > [!IMPORTANT]
 > Each **Create publication** makes another, separate publication on mod.io, even for a map that already has one. To release a new version, [update the publication](#update) instead.
 
-### Finish the publication
-
-The build that **Create publication** uploads was made before the publication existed, so its metadata carries a placeholder id instead of the publication's mod.io id. That is why the map shows `Rebuild needed` and the **Build** tab shows `Map metadata has not been built yet.` Build the map again and update the publication. <!-- src: Assets/Editor/MapBuilderEditorWindow.cs:832 -->
-
-To finish the publication:
-
-1. Optional: To build faster, on the **Build** tab, select **Advanced settings** and set **Rebuild targets** to **Meta**.
-   Only the metadata needs to be built again.
-1. On the **Publish** tab, check that you are still signed in and that the new publication's row is selected in **Publications**.
-   Only then does the next build carry the publication's mod.io id.
-1. On the **Build** tab, select the **Build map** button.
-   When the build finishes, the map's row in **LOCAL MAPS** shows `Ready to export`.
-1. On the **Publish** tab, select **Update publication**.
-
-Result: the footer shows `Publication updated.`, and the list reloads. The publication's file on mod.io now carries the publication's mod.io id. <!-- src: Assets/Editor/MapBuilderEditorWindow.Publish.cs:105 -->
-
+<a name="make-public"></a>
 ### Make the publication public
 
 MapBuilder never changes the visibility of a publication, so it stays hidden until you change it on mod.io. The mod.io page also shows the review status, which MapBuilder can't read.
 
 To make the publication public:
 
-1. In **Publications**, point to the size line of the publication's row.
-   The tooltip ends with `Full status and visibility:` and the address of the publication's page. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:246 -->
-1. In a browser, open that address.
-   You can't copy text from the tooltip, so type the address. It has the form `https://mod.io/g/carx-dro2/m/<id>`, where `<id>` is the publication's numeric id. You can also sign in on the mod.io website and open the publication from your list of mods. <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoPublisher.cs:355-363 -->
+1. In a browser, sign in on the mod.io website, and open the publication from your list of mods.
 1. On the publication's page, make the publication public.
 
-Result: other players can find and install the map in game builds that support mod.io. <!-- src: DR3PC1:Assets/DR3/Scripts/Services/ModIo/ModIoService.cs:41-51 -->
+Result: other players can find and install the map in game builds that support mod.io. In such a build, a map installed from mod.io appears on the **Mods** tab of **Track Selection**, and its card carries the mod.io badge. <!-- src: DR3PC1:Assets/DR3/Scripts/Services/ModIo/ModIoService.cs:41-51 -->
+
+If you can't find the publication on the website, open its page by its address. In **Publications**, point to the size line of the publication's row: the tooltip ends with `Full status and visibility:` and the address of the publication's page. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:246 -->
+
+You can't copy text from the tooltip, so type the address in the browser. It has the form `https://mod.io/g/carx-dro2/m/<id>`, where `<id>` is the publication's numeric id. <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoPublisher.cs:355-363 -->
 
 Delete your local test copy from the game's `Mods` folder now, or the game lists the map twice. See [Remove the local copy after you publish](test-in-game.md#after-publish).
 
@@ -223,13 +216,14 @@ To delete a publication:
 
 1. On the **Publish** tab, under **Build destination**, select the **Platform** option.
 1. Under **Publications**, select the publication's row.
-   If the row shows `Select for this map`, selecting it links the publication to the selected map. A successful deletion removes that link again; if you cancel the deletion or it fails, the publication stays linked to the selected map. To delete an unlinked publication without linking it, delete it by its id, as described in **Delete a publication that the list can't show** below.
+   If the row shows `Select for this map`, selecting it links the publication to the selected map. A successful deletion removes that link again; if you cancel the deletion or it fails, the publication stays linked to the selected map. To delete an unlinked publication without linking it, delete it by its id, as described in [Delete a publication that the list can't show](#delete-by-id).
 1. Select **Delete publication**.
    The `Delete from mod.io` dialog opens with the name and the id of the publication. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/Publishing/ModPublisherSession.cs:167-168 -->
 1. Check the name and the id, and select **Delete**.
 
 Result: the Console shows `Deleted mod <id>.`, the list reloads without the publication, and the map's mod.io line in **LOCAL MAPS** shows `mod.io: not linked`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoPublisher.cs:352 -->
 
+<a name="delete-by-id"></a>
 <details>
 <summary>Delete a publication that the list can't show</summary>
 

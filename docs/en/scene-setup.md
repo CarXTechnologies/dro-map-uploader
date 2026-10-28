@@ -2,19 +2,18 @@
 
 **English** · [Русский](../ru/scene-setup.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
 Build the Unity scene that MapBuilder turns into a map: the map folder and scene, your models, materials, colliders, dynamic objects, LOD groups and lights. Do this before you add markers, and come back here whenever validation points to the scene.
 
+<a name="before-you-start"></a>
 ## Before you start
 
 - The MapUploader project open in Unity 6000.3.19f1. See [Get started](getting-started.md).
-- A 3D model of the map in a format that Unity imports, such as FBX.
+- A 3D model of the map in a format that Unity imports, such as FBX, with the ground modelled as a mesh. Unity Terrain isn't exported: validation lists Terrain and TerrainCollider only as Components notes, the build skips them, and a Road marker on a Terrain passes validation but gives no collision in the game. The ground of the TestMap sample is a mesh named `terrain`.
 
 <a name="scene"></a>
 ## Create the map folder and scene
 
-Keep everything for one map in its own folder under `Assets/MapResources/`: the scene, the models, the materials and, later, the map config. MapBuilder adds the scenes in this folder to Unity's build scene list for you.
+Keep everything for one map in its own folder under `Assets/MapResources/`: the scene, the models, the materials and, later, the map config. Scenes in this folder appear in **Scene** on the MapBuilder **Build** tab automatically; see [Choose the scene and format](build.md#format).
 
 To create the map folder and scene:
 
@@ -39,17 +38,6 @@ Assets/MapResources/TestMap/
 └─ TestMapConfig.asset   the map config, created later with + New map
 ```
 
-### How the build scene list works
-
-The **Scene** dropdown on the MapBuilder **Build** tab lists only the scenes that are enabled in Unity's build scene list. MapBuilder maintains that list:
-
-- It adds every scene under `Assets/MapResources` to the list, enabled, each time the editor loads or recompiles scripts, and each time such a scene is created or saved.
-- Each time Unity saves or creates an asset, MapBuilder removes every disabled scene from the list. Each time an asset is moved or deleted, it removes disabled scenes outside `Assets/MapResources` and turns disabled scenes inside it back on. A disabled scene under `Assets/MapResources` also comes back, enabled, the next time the editor loads or that scene is saved.
-- To remove a scene from **Scene** for good, move it out of `Assets/MapResources`, then disable it in the list.
-- A scene outside `Assets/MapResources` isn't added for you. Add it under **File** > **Build Profiles** > **Scene List** and keep it enabled.
-
-For each map, **Scene** starts on the scene of the map's last build. Before the first build, it starts on the scene that was active when you selected the map. If that scene isn't in the list, **Scene** starts on the first scene in the list.
-
 <a name="import"></a>
 ## Import models
 
@@ -63,6 +51,8 @@ To import a model:
 
 Result: the model shows in the **Scene** view.
 
+Unity measures in meters: 1 unit is 1 m, and the build exports sizes as they are. To check the scale, drag `Assets/ExamplePrefab/Road.prefab`, a 1 × 1 × 1 m cube, next to the model, then delete it. If the model is too large or too small, select it in the **Project** window and, in the **Inspector**, on the **Model** tab, set **Scale Factor**, or select or clear **Convert Units**, then select **Apply**.
+
 What the build takes from your models and textures:
 
 - Each mesh with its positions, normals, vertex colors and one UV set, UV0. Other UV sets, such as lightmap UVs, aren't exported.
@@ -71,7 +61,7 @@ What the build takes from your models and textures:
 
 You don't need to turn on **Read/Write** for models or material textures. The build turns it on while it runs and then restores your import settings. The Icon and Preview are different; see [Image requirements](minimap-and-images.md#images).
 
-**Unity Terrain isn't exported.** Terrain and TerrainCollider aren't supported components: validation lists each one as a Components note, and the build skips it. A Road marker on a Terrain passes validation, but the terrain gets no collision in the game. Model the ground as a mesh with a MeshCollider instead; the ground of the TestMap sample is a mesh named `terrain`.
+Unity Terrain isn't exported, so model the ground as a mesh with a MeshCollider; see [Before you start](#before-you-start).
 
 > [!TIP]
 > Keep your 3D tool's work files, such as `.blend` or `.max`, outside `Assets/`, and put only the exported model in the project. Unity imports every file under `Assets/`, and it can import a `.blend` file only when Blender is installed.
@@ -96,7 +86,7 @@ Result: the object shows the material in the **Scene** view.
 
 The following screenshot shows `Assets/MapResources/TestMap/Art/0x4F368125.mat`, an HDRP/Lit material from the TestMap sample, with the settings that the build reads.
 
-<img src="../images/shared/scene-hdrp-lit-material.png" width="460" alt="Screenshot of an HDRP/Lit material in the Inspector; markers 1–5 on Surface Options, Base Map, Mask Map, Normal Map and Emissive Map.">
+<img src="../images/shared/scene-hdrp-lit-material.png" width="460" alt="Screenshot of an HDRP/Lit material in the Inspector; callouts 1–5 on Surface Options, Base Map, Mask Map, Normal Map and Emissive Map.">
 
 | # | Element | What it does |
 | --- | --- | --- |
@@ -125,7 +115,7 @@ HDRP/LayeredLit materials are exported with all their layers, 2 to 4. Each layer
 
 **Validate map** doesn't check Layered Lit settings. The build stops with an error in the Console when a Layered Lit material uses one of these:
 
-- **Use Height Based Blend** or **Main Layer Influence**: `Layered Lit '<material>': '<option>' is not supported by the mod material format.`, where `<option>` is the shader property `_UseHeightBasedBlend` or `_UseMainLayerInfluence`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/LayeredPbrWriter.cs:10-25 -->
+- **Use Height Based Blend**, **Main Layer Influence**, or **Use Opacity map as Density map** on a layer: `Layered Lit '<material>': '<option>' is not supported by the mod material format.`, where `<option>` is the shader property `_UseHeightBasedBlend`, `_UseMainLayerInfluence` or `_UseDensityMode`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/LayeredPbrWriter.cs:10-25 -->
 - **BlendMask UV Mapping** other than **UV0**: the same message, naming `_UVBlendMask`.
 - A layer's **Base UV mapping** other than **UV0**: `Layered Lit '<material>': layer <n> requires UV0 mapping for mod export.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/LayeredPbrWriter.cs:65-68 -->
 

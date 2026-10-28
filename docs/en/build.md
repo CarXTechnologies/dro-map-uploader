@@ -2,8 +2,6 @@
 
 **English** · [Русский](../ru/build.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
 On the **Build** tab, MapBuilder checks the map and turns its scene and map settings into the files that the game loads. Build the map again after every change to the scene or the map settings, before you export or publish it.
 
 You don't need to sign in to mod.io to validate or build a map.
@@ -23,7 +21,7 @@ To open the Build tab:
 
 The tab holds the **Build map** box with the build controls. Outside the box, the tab shows the summary of the last build, messages about the build state and **Open build folder**. The following screenshot shows the tab for the `TestMap` sample after a successful Binary build.
 
-<img src="../images/en/build-tab.png" width="728" alt="Screenshot of the MapBuilder Build tab after a build; markers 1–7 on the build controls.">
+<img src="../images/en/build-tab.png" width="728" alt="Screenshot of the MapBuilder Build tab after a build; callouts 1–7 on the build controls.">
 
 | # | Element | What it does |
 | --- | --- | --- |
@@ -48,6 +46,13 @@ How **Scene** works:
 - It lists the scenes that are enabled in Unity's build scene list, by file name. If **Scene** is empty, no scene is enabled in that list.
 - For a map that was never built, **Scene** starts on the scene that was active when you selected the map. After a build, it starts on the scene of that build. If that scene isn't in the list, the first scene in the list is selected.
 - **Validate map** and the **Build map** button open the selected scene when another scene is active. If your open scenes have unsaved changes, Unity first asks whether to save them. If you cancel, the build stops, and validation checks only the map settings.
+
+MapBuilder maintains Unity's build scene list, so the scenes under `Assets/MapResources` appear in **Scene** without any setup: <!-- src: Assets/Editor/MapBuilderProcessor.cs:11-79 -->
+
+- It adds every scene under `Assets/MapResources` to the list, enabled, each time the editor loads or recompiles scripts, and each time such a scene is created or saved.
+- Each time Unity saves or creates an asset, MapBuilder removes every disabled scene from the list. Each time an asset is moved or deleted, it removes disabled scenes outside `Assets/MapResources` and turns disabled scenes inside it back on. A disabled scene under `Assets/MapResources` also comes back, enabled, the next time the editor loads or that scene is saved.
+- To remove a scene from **Scene** for good, move it out of `Assets/MapResources`, then disable it in the list.
+- A scene outside `Assets/MapResources` isn't added for you. Add it under **File** > **Build Profiles** > **Scene List** and keep it enabled.
 
 The two formats differ in what the game receives when you export or publish the map:
 
@@ -79,7 +84,7 @@ What else to know about a build:
 
 - The **Build map** button runs the same checks as **Validate map**, and an error stops the build. The summary line then reads `Build incomplete. Check validation results and the Console.` <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 - After a build, the **Map Validation** window opens when the checks reported anything, even only warnings or notes. When they reported nothing, the window closes.
-- Some problems, such as the Rigidbody rules, aren't checked by validation. The build finds them and stops, and they appear only in the Console. See [Troubleshooting](troubleshooting.md). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:39 -->
+- Some problems, such as the Rigidbody rules, aren't checked by validation. The build finds them and stops, and they appear only in the Console. See [Build errors in the Console](troubleshooting.md#build-errors). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:39 -->
 - To stop a build, select **Cancel** in the window footer. The parts that were being built are discarded, and the Console logs `Build cancelled.` <!-- src: Assets/Editor/MapBuilder.cs:320 -->
 - The build runs on the Editor's main thread, so the Editor can respond slowly until the build finishes.
 - The date and time, `<dd.MM.yyyy HH:mm> ·`, appear at the start of the summary line the next time you open the **MapBuilder** window. The summary of each map is kept on this computer between sessions. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:248-249,389 -->
@@ -133,7 +138,7 @@ To open the optimization settings:
 
 The following screenshot shows the panel with the default settings.
 
-<img src="../images/en/build-optimization.png" width="700" alt="Screenshot of the Optimization panel on the Build tab with default settings; markers 1–6 on its options.">
+<img src="../images/en/build-optimization.png" width="700" alt="Screenshot of the Optimization panel on the Build tab with default settings; callouts 1–6 on its options.">
 
 | # | Element | What it does |
 | --- | --- | --- |
@@ -144,7 +149,7 @@ The following screenshot shows the panel with the default settings.
 | 5 | **Generate sector LODs** | Generates LODs for the sector render meshes. **Additional LOD levels**, **Triangle ratio per LOD level** and **LOD error tolerance (m)** control them. |
 | 6 | **Mesh Optimizer documentation ↗** | Opens the meshoptimizer documentation in your browser. |
 
-The panel has these options, in this order. Keep the defaults unless profiling the map in the game shows a reason to change them: cutting meshes into sectors can raise the total count of triangles and draw calls. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:9-32 -->
+The panel has these options, in this order. The last two rows describe settings that only the map config's **Inspector** shows, under **Optimization**. Keep the defaults unless profiling the map in the game shows a reason to change them: cutting meshes into sectors can raise the total count of triangles and draw calls. A value outside its range is clamped to the range. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:9-47 -->
 
 | Option | Default | What it does | When to change |
 | --- | --- | --- | --- |
@@ -152,7 +157,7 @@ The panel has these options, in this order. Keep the defaults unless profiling t
 | **Sector size (m)** | 64 m | Edge length of the cubic grid cells that static render meshes are cut into, from 1 m to 1024 m. Triangles that cross a cell border are split. Colliders use a grid of their own. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:37 --> | Keep the default unless profiling shows a reason. |
 | **Max triangles per mesh** | 8192 | Most triangles in one sector render mesh, from 128 to 65 536. A sector with more triangles becomes several meshes. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:38 --> | Keep the default unless profiling shows a reason. |
 | **Partition static colliders** | On | Cuts static MeshColliders into collider sectors. A MeshCollider is cut only when it is the only MeshCollider on its object, is enabled, isn't a trigger, isn't convex and has a mesh. Box, Sphere and Capsule Colliders are exported as they are. | Clear it to export MeshColliders unchanged. |
-| **Partition static render meshes** | On | Cuts static render meshes into sectors. A renderer keeps its own mesh when it is disabled, uses a transparent material (render queue 3000 or higher), has an empty material slot, has a MaterialPropertyBlock or a baked lightmap, or has a material count that differs from its submesh count. A mesh that isn't readable or isn't made of triangles also keeps its own mesh, and so does such a MeshCollider; the Console then logs `Optimization skipped '<name>': …`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:158-162,188-195 --> | Clear it to export render meshes unchanged. Sector LODs then stop as well. |
+| **Partition static render meshes** | On | Cuts static render meshes into sectors. A renderer keeps its own mesh when it is disabled, uses a transparent material (render queue 3000 or higher) or a transparent render core variant of a Material marker, has an empty material slot, has a MaterialPropertyBlock or a baked lightmap, or has a material count that differs from its submesh count. A mesh that isn't readable or isn't made of triangles also keeps its own mesh, and so does such a MeshCollider; the Console then logs `Optimization skipped '<name>': …`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:215-231,273-281 --> | Clear it to export render meshes unchanged. Sector LODs then stop as well. |
 | **Merge compatible meshes in each sector** | On | Merges the pieces in a sector into one mesh, with one submesh per material. Render pieces merge when their layer and renderer settings match. Collider pieces merge when their layer, physic material and cooking options match. The pieces of an object with a Road marker merge only with each other, so they keep their surface. | Clear it to keep the pieces of each object separate. |
 | **Simplify colliders** | Off | Reduces the triangles of the collider sectors with meshoptimizer. Works only together with **Partition static colliders**. | It is off by default because simplified collision drifts from the visible surface and can leave bumps and gaps at road seams. Select it only for heavy collision meshes, then drive the whole map. |
 | **Collider triangle ratio** | 0.5 | Share of collider triangles to keep, from 0.1 to 1. | Lower it for lighter collision. Drive the map after each change. |
@@ -161,10 +166,10 @@ The panel has these options, in this order. Keep the defaults unless profiling t
 | **Additional LOD levels** | 2 | Number of levels after the full-detail level, from 1 to 3. | Lower it for fewer meshes. |
 | **Triangle ratio per LOD level** | 0.5 | Level *n* aims at this ratio to the power *n* of the full-detail triangles: with the default, 50% for level 1 and 25% for level 2. From 0.1 to 0.9. | A lower value makes distant levels coarser. |
 | **LOD error tolerance (m)** | 0.05 m | Allowed simplification error of level 1. Level *n* allows *n* times this value. From 0 m to 10 m. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:46 --> | A higher value allows coarser levels. |
-| Collider grid (not in the panel) | 128 m cells, 32 768 triangles | Cell size and triangle limit of the collider sectors. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:10-11 --> | Not available in the panel. |
-| Small-piece merge (not in the panel) | 128 triangles | A piece of one material smaller than this moves into a neighbouring sector, so that it doesn't become a submesh or mesh of its own. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:12 --> | Not available in the panel. |
+| Collider grid (not in the panel) | 128 m cells, 32 768 triangles | Cell size of the collider sectors, from 1 m to 1024 m, and most triangles in one collider sector, from 128 to 262 144. | Keep the default. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:39-40 --> |
+| Small-piece merge (not in the panel) | 128 triangles | A piece of one material smaller than this moves into a neighbouring sector, so that it doesn't become a submesh or mesh of its own. `0` turns it off; the maximum is 4096. | Keep the default. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:41 --> |
 
-**What optimization leaves as it is.** These objects keep their original meshes and colliders: <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:101-112 -->
+**What optimization leaves as it is.** These objects keep their original meshes and colliders: <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:120-141 -->
 
 - inactive objects;
 - objects with a Rigidbody, Animator, Animation or LODGroup on themselves or on a parent: dynamic objects, animated objects and your own LOD groups;
@@ -178,11 +183,11 @@ Objects tagged `Garbage` and their children aren't exported at all. See [Organiz
 
 **After you change a setting.** While **Optimize build** is on, changing any option clears the Map part of the build. Selecting or clearing **Optimize build** clears it too. The **Build** tab then shows `Map geometry has not been built yet.`, and the map's row shows `Rebuild needed`. Build the map again. <!-- src: Assets/Editor/BuildOptimizationPanel.cs:63-81 -->
 
-**Check the result.** After a build with optimization, the Console has a line that starts with `Build optimization:`. It counts the source renderers and colliders and the sector meshes and colliders made from them. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:175-178 -->
+**Check the result.** After a build with optimization, the Console has a line that starts with `Build optimization:`. It counts the source renderers and colliders and the sector meshes and colliders made from them. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:256-259 -->
 
-**Sector-budget warnings.** Validation warns about each static render mesh and MeshCollider on objects that optimization can process when it is larger than **Sector size (m)** or has more triangles than **Max triangles per mesh**, and optimization won't cut it into sectors: `'<object>' (<mesh>): static <kind>, … Exceeds sector budget (<size> m / <n> triangles). …` That is the case for every such mesh while **Optimize build** is off, for MeshColliders while **Partition static colliders** is off, and for render meshes while **Partition static render meshes** is off. With the default settings, validation gives no sector warnings. Colliders are measured against the same two values, not against the collider grid. The check doesn't list a renderer or collider that optimization leaves whole for another reason (see **Partition static colliders** and **Partition static render meshes**); it keeps its size. <!-- src: Assets/Editor/Validation/SceneValidator.cs:853-883 -->
+**Sector-budget warnings.** Validation warns about large static meshes that optimization won't cut into sectors, which with the default settings never happens. For what it checks, see [Sector budget](reference.md#sector-budget).
 
-**Windows x64 Unity Editor only.** Optimization uses meshoptimizer v1.2. Its native library ships only for the Windows x64 Unity Editor and runs only in the Editor, during a build. In any other Editor, the build stops with `meshoptimizer is unavailable for this Editor platform. Install its native Editor library or disable build optimization.` To build there, clear **Optimize build**. The source and license of the library are in `Assets/Plugins/CarX.Modding.Creator/ThirdParty~/meshoptimizer`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:128-130 -->
+**Windows x64 Unity Editor only.** Optimization uses meshoptimizer v1.2. Its native library ships only for the Windows x64 Unity Editor and runs only in the Editor, during a build. In any other Editor, the build stops with `meshoptimizer is unavailable for this Editor platform. Install its native Editor library or disable build optimization.` To build there, clear **Optimize build**. The source and license of the library are in `Assets/Plugins/CarX.Modding.Creator/ThirdParty~/meshoptimizer`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:171-178 -->
 
 ## Scene contents
 
@@ -229,7 +234,7 @@ A build writes to the build cache, a staging folder for each map outside the pro
 - To open the folder, select **Open build folder**.
 - A build empties and rewrites only the parts that it builds.
 - The build cache holds staging files, not a game package. A Binary build gets its `mod.cxmod` only when you export or publish the map. See [Export the map to the game folder](test-in-game.md#export) and [Publish to mod.io](publish.md).
-- The mod.io size limits apply to these two folders and are checked only when you select **Create publication** or **Update publication**: `MapTemp` up to 4096 MB and `MetaTemp` up to 24 MB. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26 -->
+- The mod.io size limits apply to these two folders, and MapBuilder checks them only before an upload. See [Build size](reference.md#limits-size).
 - If Windows cleans its temp folder, the map's row shows `Rebuild needed`. Build the map again.
 
 ## Next steps

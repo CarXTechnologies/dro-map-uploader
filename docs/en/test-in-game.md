@@ -2,14 +2,12 @@
 
 **English** · [Русский](../ru/test-in-game.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
 Copy your map into the game's `Mods` folder and drive it before you publish it. Local testing needs no mod.io account and no sign-in.
 
 ## Before you start
 
 - A current build of the map: its row in **LOCAL MAPS** shows `Ready to export`, and **Scene** and **Format** on the **Build** tab still match that build. See [Build the map](build.md). <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:198 -->
-- CarX Drift Racing Online 2 on a Windows PC, in a game build with mod support.
+- CarX Drift Racing Online 2 on a Windows PC, in a copy that loads local maps. To find out whether yours does, see [Check that the game loads local maps](#check-game).
 
 <a name="export"></a>
 ## Export the map to the game folder
@@ -25,12 +23,12 @@ To export the map:
 1. In **Folder**, enter the absolute path `<game folder>/Mods/<MapName>`, for example `C:/Games/CarX Drift Racing Online 2/Mods/TestMap`.
    The folders don't have to exist: the export creates them.
 
-   <img src="../images/en/export-folder.png" width="680" alt="Screenshot of the MapBuilder Publish tab in export mode; markers 1–4 on the export option, Folder, the browse button and the export button.">
+   <img src="../images/en/export-folder.png" width="680" alt="Screenshot of the MapBuilder Publish tab in export mode; callouts 1–4 on the export option, Folder, the browse button and the export button.">
 
    | # | Element | What it does |
    | --- | --- | --- |
    | 1 | **Export to folder** option under **Build destination** | Switches the tab to export mode. The publication controls and the **Publications** column are hidden. |
-   | 2 | **Folder** | The absolute path of the map folder. The window keeps the same path for every map, so change it before you export a different map. |
+   | 2 | **Folder** | The absolute path of the map folder. |
    | 3 | **…** | Opens the `External path` folder dialog, where you can choose or create the map folder. The dialog doesn't open in the game folder, so go to `<game folder>/Mods` first. |
    | 4 | **Export to folder** button | Copies the current build into **Folder**. It's unavailable until the build is current and **Folder** holds an absolute path. |
 
@@ -51,12 +49,12 @@ If the tab shows `Nothing to export — see the Console.`, the Console names the
 The export doesn't need a mod.io sign-in, so ignore the `Not signed in to https://mod.io/g/carx-dro2.` box when it shows. In this mode the tab also keeps the **Upload settings** heading; only **Folder**, **…** and the **Export to folder** button apply to an export. <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoAuthProvider.cs:154 -->
 
 > [!WARNING]
-> Use a folder that holds only this map. The export doesn't clear **Folder** first, so empty the folder before a Wavefront export: the game can read an old metadata file that an earlier export left there.
+> **Folder** keeps the same path for every map, so change it before you export another map: exporting a second map into the first map's folder overwrites its `mod.cxmod` or mixes the files of both maps. The export doesn't clear **Folder** first, so empty the folder before a Wavefront export, or the game can read an old metadata file that an earlier export left there. <!-- src: Assets/Editor/MapBuilderEditorWindow.cs:47 -->
 
 <a name="local-maps"></a>
 ## Where the game looks for local maps
 
-On PC, in game builds with mod support, the game loads local maps from the `Mods` folder next to its executable. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
+On PC, the game loads local maps from the `Mods` folder next to its executable. If your copy never lists them, see [Check that the game loads local maps](#check-game). <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28 -->
 
 ```text
 <game folder>/            the folder with the game's executable
@@ -98,9 +96,30 @@ To drive the map:
 
 Result: the game loads the map and places your car at the first spawn point. See [Add spawn points](markers.md#spawn).
 
-If the **Mods** tab or your map's card is missing, check the folder against [Where the game looks for local maps](#local-maps). If the map fails to load, the game shows `Failed to load the track mod. Please try again.` and returns to **Track Selection**. Very large maps may fail to load. See [Troubleshooting](troubleshooting.md). <!-- src: DR3PC1:Assets/DR3/Localization/LocalesJson/English(en).json:3609 -->
+If the **Mods** tab or your map's card is missing, check the folder against [Where the game looks for local maps](#local-maps). If the folder is right, [check that the game loads local maps](#check-game). If the map fails to load, the game shows `Failed to load the track mod. Please try again.` and returns to **Track Selection**. Very large maps may fail to load. See [`Failed to load the track mod.` in Troubleshooting](troubleshooting.md#msg-load-failed). <!-- src: DR3PC1:Assets/DR3/Localization/LocalesJson/English(en).json:3609 -->
 
 To test a change, leave the drive from the pause menu, build and export the map again, and select the map's card again. You don't need to close or restart the game: it reads the map from disk each time the map starts, and it doesn't keep the map files open after loading. To see a new Icon or minimap on the card, or a newly exported map, leave **Track Selection** and open it again. <!-- src: DR3PC1:Assets/DR3/Scripts/States/Controllers/GlobalMap/UIGlobalMapNavigationController.cs:140-157 -->
+
+<a name="check-game"></a>
+## Check that the game loads local maps
+
+Not every copy of CarX Drift Racing Online 2 reads the `Mods` folder. To find out whether yours does, load the TestMap sample, which ships with the project and passes validation. If TestMap loads and your own map doesn't, the problem is in your map.
+
+To check the game:
+
+1. In the **MapBuilder** window, in **LOCAL MAPS**, select `TestMap`.
+1. On the **Build** tab, in **Scene**, select `TestMap`.
+1. Select the **Build map** button.
+   When the build finishes, the `TestMap` row shows `Ready to export`.
+1. Export the build to `<game folder>/Mods/TestMap`, as described in [Export the map to the game folder](#export).
+1. In the game, in the main menu, select **Play**, then **Freeride**.
+   The **Track Selection** screen opens.
+
+Result: **Track Selection** has a **Mods** tab, and the tab shows the `TestMap` card. Your copy of the game loads local maps.
+
+If the **Mods** tab or the `TestMap` card is missing, check the folder against [Where the game looks for local maps](#local-maps). If the TestMap files sit directly in `<game folder>/Mods/TestMap` and the card is still missing, this copy of the game doesn't load local maps.
+
+When you finish, delete the folder `<game folder>/Mods/TestMap`, so that the **Mods** tab lists only your own maps.
 
 ## Play with others
 

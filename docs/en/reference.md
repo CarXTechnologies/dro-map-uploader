@@ -2,9 +2,7 @@
 
 **English** · [Русский](../ru/reference.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
-Look up the budgets, limits, road surfaces, optimization defaults, export rules, menus and saved state of MapUploader in one place. The task pages explain how to use each of them, and the [glossary](#glossary) gives every term in English and Russian.
+Look up the budgets, limits, road surfaces, export rules, menus and saved state of MapUploader in one place. The task pages explain how to use each of them, and the [glossary](#glossary) gives every term in English and Russian.
 
 <a name="budgets"></a>
 ## Supported components and budgets
@@ -50,6 +48,16 @@ After a build that includes **Map**, the **Scene contents** panel on the **Build
 <Type> : <n> count (<min> min - <max> max)
 ```
 
+<a name="sector-budget"></a>
+### Sector budget
+
+Validation also gives a Geometry warning for each large static mesh that build optimization won't cut into sectors. These warnings never stop the build. <!-- src: Assets/Editor/Validation/SceneValidator.cs:853-883 -->
+
+- **What is checked.** Each enabled MeshRenderer that has a MeshFilter, and each enabled MeshCollider that isn't a trigger and isn't convex, on an object that optimization processes: an active object that isn't tagged `Garbage` and has no Rigidbody, Animator, Animation, LODGroup or marker other than Road and Material on itself or on a parent. <!-- src: Assets/Editor/Validation/SceneValidator.cs:879-881 -->
+- **The budget.** A mesh exceeds it when it is larger than **Sector size (m)** in any world dimension, `64` m by default, or has more triangles than **Max triangles per mesh**, `8192` by default. Colliders are measured against the same two values, not against the collider grid.
+- **When the warning appears.** Only for meshes that optimization won't cut into sectors: every such mesh while **Optimize build** is off, MeshColliders while **Partition static colliders** is off, and render meshes while **Partition static render meshes** is off. With the default settings, there are no sector-budget warnings, and the TestMap sample gets none.
+- **What isn't listed.** A renderer or MeshCollider that optimization leaves whole for another reason, for example a transparent renderer or an object with more than one MeshCollider, keeps its size and gets no warning. See [Optimization](build.md#optimization).
+
 <a name="limits"></a>
 ## Limits
 
@@ -92,7 +100,7 @@ The Icon is both the mod.io logo and the image of the map in the game. The Previ
 > [!IMPORTANT]
 > The build size is checked only immediately before **Create publication** or **Update publication**, and the result appears only in the Console. **Validate map**, the **Build map** button and the **Export to folder** button don't check it.
 
-The Console message has the form `'<scene>': the map is <X> mb and this vendor accepts <L> mb.`, or `the meta is` for the metadata. On the **Publish** tab, a publication's size is shown against the sum of both limits: `<MB> / 4120 mb`.
+Both sizes are measured on the build cache folders, not on the packed `mod.cxmod`. When a part is too large, nothing is uploaded, and the Console shows `'<scene>': the map is <X> mb and this vendor accepts <L> mb.`, or `the meta is` for the metadata. On the **Publish** tab, a publication's size is shown against the sum of both limits: `<MB> / 4120 mb`. <!-- src: Assets/Editor/MapBuilder.Publishing.cs:75-78 -->
 
 The game has load limits of its own, so a very large map may fail to load even within the mod.io limit. Load a large map in the game before you publish it; see [Test the map in the game](test-in-game.md).
 
@@ -116,54 +124,72 @@ The project already contains the mod.io settings for CarX Drift Racing Online 2 
 <a name="surfaces"></a>
 ## Road surfaces and physics fields
 
-The **Road** submenu of the GameMarkerData type menu offers 26 surfaces, in this order. A marker stores its type as `Road/<surface>`, and the game loads its own surface template by the part after `Road/`. <!-- src: Assets/Scripts/MarkerData.cs:12-37 -->
+The **Road** submenu of the GameMarkerData type menu offers 26 surfaces, in this order. A marker stores its type as `Road/<surface>`, and the game loads its own surface by the part after `Road/`. The last column gives the **Surface Type** of each surface in the game. <!-- src: Assets/Scripts/MarkerData.cs:12-37 -->
 
-| # | Menu entry | Stored type |
-| --- | --- | --- |
-| 1 | **Road** > **default** | `Road/default` |
-| 2 | **Road** > **asphalt** | `Road/asphalt` |
-| 3 | **Road** > **brick** | `Road/brick` |
-| 4 | **Road** > **cobbles** | `Road/cobbles` |
-| 5 | **Road** > **cobbles_big** | `Road/cobbles_big` |
-| 6 | **Road** > **concrete** | `Road/concrete` |
-| 7 | **Road** > **dirt** | `Road/dirt` |
-| 8 | **Road** > **earth** | `Road/earth` |
-| 9 | **Road** > **grass** | `Road/grass` |
-| 10 | **Road** > **gravel** | `Road/gravel` |
-| 11 | **Road** > **ice_snowy** | `Road/ice_snowy` |
-| 12 | **Road** > **kerb_racetrack** | `Road/kerb_racetrack` |
-| 13 | **Road** > **liquid_water** | `Road/liquid_water` |
-| 14 | **Road** > **metal** | `Road/metal` |
-| 15 | **Road** > **metal_grille** | `Road/metal_grille` |
-| 16 | **Road** > **pavement** | `Road/pavement` |
-| 17 | **Road** > **paving_slab** | `Road/paving_slab` |
-| 18 | **Road** > **plastic** | `Road/plastic` |
-| 19 | **Road** > **road_icy** | `Road/road_icy` |
-| 20 | **Road** > **sand** | `Road/sand` |
-| 21 | **Road** > **snow** | `Road/snow` |
-| 22 | **Road** > **snow_asphalt** | `Road/snow_asphalt` |
-| 23 | **Road** > **snow_cobbles** | `Road/snow_cobbles` |
-| 24 | **Road** > **snow_gravel** | `Road/snow_gravel` |
-| 25 | **Road** > **wood** | `Road/wood` |
-| 26 | **Road** > **wood_plank** | `Road/wood_plank` |
+| # | Menu entry | Stored type | **Surface Type** in the game |
+| --- | --- | --- | --- |
+| 1 | **Road** > **default** | `Road/default` | No game surface |
+| 2 | **Road** > **asphalt** | `Road/asphalt` | `Asphalt` |
+| 3 | **Road** > **brick** | `Road/brick` | `Asphalt` |
+| 4 | **Road** > **cobbles** | `Road/cobbles` | `Asphalt` |
+| 5 | **Road** > **cobbles_big** | `Road/cobbles_big` | `Asphalt` |
+| 6 | **Road** > **concrete** | `Road/concrete` | `Asphalt` |
+| 7 | **Road** > **dirt** | `Road/dirt` | `Earth` |
+| 8 | **Road** > **earth** | `Road/earth` | `Earth` |
+| 9 | **Road** > **grass** | `Road/grass` | `Grass` |
+| 10 | **Road** > **gravel** | `Road/gravel` | `Earth` |
+| 11 | **Road** > **ice_snowy** | `Road/ice_snowy` | No game surface |
+| 12 | **Road** > **kerb_racetrack** | `Road/kerb_racetrack` | `Asphalt` |
+| 13 | **Road** > **liquid_water** | `Road/liquid_water` | `Snow` |
+| 14 | **Road** > **metal** | `Road/metal` | `Earth` |
+| 15 | **Road** > **metal_grille** | `Road/metal_grille` | `Earth` |
+| 16 | **Road** > **pavement** | `Road/pavement` | No game surface |
+| 17 | **Road** > **paving_slab** | `Road/paving_slab` | `Asphalt` |
+| 18 | **Road** > **plastic** | `Road/plastic` | `Asphalt` |
+| 19 | **Road** > **road_icy** | `Road/road_icy` | `Ice` |
+| 20 | **Road** > **sand** | `Road/sand` | `Sand` |
+| 21 | **Road** > **snow** | `Road/snow` | `Asphalt` |
+| 22 | **Road** > **snow_asphalt** | `Road/snow_asphalt` | `Ice` |
+| 23 | **Road** > **snow_cobbles** | `Road/snow_cobbles` | `Ice` |
+| 24 | **Road** > **snow_gravel** | `Road/snow_gravel` | `Earth` |
+| 25 | **Road** > **wood** | `Road/wood` | `Earth` |
+| 26 | **Road** > **wood_plank** | `Road/wood_plank` | `Earth` |
+
+> [!IMPORTANT]
+> The game has no surface named `default`, `ice_snowy` or `pavement`, so a collider with one of them gets no road surface, with values or without. Use `asphalt` instead of `default`, `road_icy` instead of `ice_snowy` and `paving_slab` instead of `pavement`.
+
+Such a collider behaves like a collider without a Road marker, and the game logs `[ModRoadSurfaceMaterials] Road marker references surface template '<name>', but no matching CARXSurfaceTemplate was found.` In the TestMap sample, `Content/workshop_map_main/wall_coll` has a `Road/default` marker, so it gets no road surface.
 
 A Road marker applies its surface only to the GameObject it is on, so put it on the object with the collider. See [Mark road surfaces](markers.md#road).
 
 <a name="surface-values"></a>
 ### When the physics values apply
 
-A Road marker can carry physics values of its own. What the game uses depends on what the marker stores:
+For each Road marker, the game loads its own surface of the same name. If the marker exports physics values, they replace all the values of that surface, **Surface Type** and **Water Rate** included. If it exports none, the game uses its surface unchanged. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Dots/ModRoadSurfaceMaterials.cs:44-85 -->
 
-- **The marker stores no values.** The game uses its own template for that surface. A marker that the **Inspector** has never displayed stores no values. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Dots/ModRoadSurfaceMaterials.cs:44-85 -->
-- **The marker stores values.** They replace all the template values of that surface, **Surface Type** and **Water Rate** included.
-- **First display.** The first time the **Inspector** displays a Road marker, and each time its surface changes, the marker is filled with the defaults from `Assets/Resources/DefaultRoadValues/<surface>.asset`. <!-- src: Assets/Editor/MarkerDataDrawer.cs:197-210 -->
-- **The defaults set no Surface Type or Water Rate.** A marker filled from them carries **Surface Type** `Asphalt` and **Water Rate** `0` on every surface. To set these two fields, use a template or **Custom** values.
-- **Seeing and editing the values.** The fields appear only after you assign a **Template Config** to the marker. A named template shows its values read-only, and **Custom** gives the marker its own editable values. See [Reuse road values with templates](markers.md#templates). <!-- src: Assets/Editor/MarkerDataDrawer.cs:141-190,212-225 -->
+The build resolves the values of each marker from its **Template Config** and its template menu. Selecting markers in the **Inspector**, one at a time or several at once, doesn't change what they export. A marker exports these values: <!-- src: Assets/Scripts/GameMarkerData.cs:10-38 -->
 
-For every marker state and the values it exports, see [Mark road surfaces](markers.md#road).
+| Marker state | Values the marker exports |
+| --- | --- |
+| No **Template Config** | None: the game uses its own surface. This also applies to a marker whose type you changed with **Select : &lt;type&gt;**, and to values that the **Inspector** or an earlier version saved on the marker. |
+| **Template Config** with a named template | The template's values at the time of the build. After you edit a template, build the map again; its markers don't need to be selected. |
+| **Template Config** with **Custom** | The marker's own values. They start from the surface defaults. When the surface changes, the **Inspector** resets them to the defaults of the new surface the next time it shows the marker, so after **Select : &lt;type&gt;** they keep the old surface's values until then. <!-- src: Assets/Editor/MarkerDataDrawer.cs:197-210 --> |
+| **Template Config** whose template was removed | The marker's own **Custom** values. The **Inspector** shows **Custom** in its template menu. |
+| Values that are `0` in every field | None: the game uses its own surface. **Friction** `0` would make the surface as slippery as ice. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:555-560 --> |
 
-> [!IMPORTANT]
-> A template's values are copied into a marker only while the **Inspector** displays that marker. After you edit a template, select each marker that uses it before you build.
+The surface defaults are the MapUploader values in `Assets/Resources/DefaultRoadValues/<surface>.asset`, and a new template and a **Custom** marker start from them. Their **Surface Type** matches the game's type for that surface (`Asphalt` for `default` and `pavement`, `Ice` for `ice_snowy`), and their **Water Rate** is `0`, as on every game surface. Their other fields can differ from the game's surface: for example, `grass` has **Bump Min** `0.05`, against `-0.03` in the game, and `wood` has **Friction** `0.85`, against `1`. To keep the game's surface, don't assign a **Template Config**. <!-- src: Assets/Resources/DefaultRoadValues/grass.asset:15-25 -->
+
+The fields appear only after you assign a **Template Config** to the marker. A named template shows its values read-only, and **Custom** gives the marker its own editable values. See [Reuse road values with templates](markers.md#templates). <!-- src: Assets/Editor/MarkerDataDrawer.cs:141-190,212-225 -->
+
+<a name="older-values"></a>
+### Values saved by an earlier version
+
+An earlier version of the project saved road values under another type name. They load in this version, in your older map scenes and template configs too, and follow the rules above. When you save such a scene or asset, Unity stores the values under the current type name. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Instances/PhysicMaterialProperties.cs:7-10 -->
+
+These values in the project come from an earlier version:
+
+- The `AsphaultDef` template in `Assets/Resources/GameMarkerTemplateConfig.asset`: **Friction** `1`, **Roll Friction** `0.01`, **Bump Scale** `100` and `0` in every other field, so its **Surface Type** is `Asphalt`. The TestMap markers `road` and `roadside` use it, so they export these values instead of the game's `asphalt`. <!-- src: Assets/Resources/GameMarkerTemplateConfig.asset:46-58 -->
+- `0` in every field on the `Road` example prefab and on the TestMap markers `terrain`, `wall_coll` and `big_bw_strips (1)`. These markers have no **Template Config**, so they export no values.
 
 <a name="physics-fields"></a>
 ### Physics fields
@@ -188,37 +214,7 @@ The fields appear in this order on a Road marker with a **Template Config**, and
 <a name="optimization-defaults"></a>
 ## Build optimization settings
 
-The settings are in the **Optimization** panel of the **Build** tab, in this order. Each map stores its own settings in its map config. Changing a setting that takes effect clears the Map part of the build, so the map's row shows `Rebuild needed`. For how optimization works, see [Optimization](build.md#optimization). <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:9-32 -->
-
-| Option | Default | What it does | When to change |
-| --- | --- | --- | --- |
-| **Optimize build** | On | Turns optimization on for this map. When it is off, static meshes and colliders are exported as they are, the other options are greyed out, and the panel and validation show a warning. | Clear it only in a Unity Editor that isn't Windows x64. There the build stops with `meshoptimizer is unavailable for this Editor platform…`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:127-130 --> |
-| **Sector size (m)** | `64` | Edge length of the grid cells that static render meshes are cut into. A value outside 1–1024 is clamped. | Keep the default unless profiling shows a reason. |
-| **Max triangles per mesh** | `8192` | Most triangles in one sector render mesh; a fuller sector becomes several meshes. A value outside 128–65 536 is clamped. | Keep the default unless profiling shows a reason. |
-| **Partition static colliders** | On | Cuts a MeshCollider into collider sectors when it is the only MeshCollider on its object, is enabled, isn't a trigger, isn't convex and has a mesh. | Clear it to export MeshColliders unchanged. |
-| **Partition static render meshes** | On | Cuts static render meshes into sectors. A renderer keeps its own mesh when it has a transparent material, an empty material slot, a material count that differs from the submesh count, a MaterialPropertyBlock or a baked lightmap. | Clear it to export render meshes unchanged. Sector LODs then stop as well. |
-| **Merge compatible meshes in each sector** | On | Merges the pieces in a sector that share a layer and renderer settings into one mesh, with one submesh per material. Collider pieces also need the same physics material and cooking options. The pieces of each Road marker merge only with each other, so every marker keeps its surface. | Clear it to keep the pieces of each object separate. |
-| **Simplify colliders** | Off | Simplifies collider sectors. Its two options appear only when **Partition static colliders** is also on. | Select it only for heavy collision, then drive the whole map: simplified collision can drift from the visible road. |
-| **Collider triangle ratio** | `0.5` | Share of collider triangles to keep, from 0.1 to 1. | Lower it for lighter collision. |
-| **Collider error tolerance (m)** | `0.01` | Largest deviation the simplifier may add, from 0 to 1. It is the algorithm's estimate, not a guaranteed distance. | Raise it for more reduction. |
-| **Generate sector LODs** | On | Adds simplified levels of detail to each sector render mesh. Its three options appear only when **Partition static render meshes** is also on. | Clear it to export sector meshes without LODs. |
-| **Additional LOD levels** | `2` | Number of levels after LOD0, from 1 to 3. A level that saves no triangles is left out. | Lower it for a smaller build. |
-| **Triangle ratio per LOD level** | `0.5` | Level *n* aims at this ratio to the power *n* of the LOD0 triangles, from 0.1 to 0.9. With the default, level 1 aims at 50% and level 2 at 25%. | Lower it for coarser distant levels. |
-| **LOD error tolerance (m)** | `0.05` | Allowed simplification error of LOD1, from 0 to 10. Level *n* allows *n* times this value. | Raise it for coarser levels. |
-| Collider sector size (not in the panel) | `128` m | Edge length of the grid cells that colliders are cut into, from 1 to 1024. | Keep the default. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:10 --> |
-| Collider max triangles (not in the panel) | `32768` | Most triangles in one collider sector, from 128 to 262 144. | Keep the default. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:11 --> |
-| Min sector triangles (not in the panel) | `128` | A piece of one material smaller than this moves into a neighbouring sector, so it doesn't become a submesh or mesh of its own. `0` turns this off; the maximum is 4096. | Keep the default. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:12 --> |
-
-The three settings marked *not in the panel* are stored in the map config with the others. Only the map config's **Inspector** shows them, under **Optimization**.
-
-Optimization never changes the source scene; it works on a copy in memory. It leaves these objects as they are: <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:101-112 -->
-
-- inactive objects;
-- objects with a Rigidbody, Animator, Animation or LODGroup on themselves or on a parent;
-- objects with a marker other than Road or Material on themselves or on a parent;
-- objects tagged `Garbage` and their children, which aren't exported at all.
-
-Validation gives a sector-budget warning for each enabled static render mesh and each enabled MeshCollider that isn't a trigger or convex, on an object that optimization doesn't leave as it is (see the list above), when the mesh is larger than **Sector size (m)** or has more triangles than **Max triangles per mesh**. It warns only about meshes that optimization won't cut into sectors: every such mesh while **Optimize build** is off, MeshColliders while **Partition static colliders** is off, and render meshes while **Partition static render meshes** is off. With the default settings, it gives no sector-budget warnings. It measures colliders against the same two values, not the collider settings. The build also leaves whole a renderer that keeps its own mesh (see **Partition static render meshes**) and the MeshColliders of an object that has more than one; those keep their size, and validation doesn't warn about them. <!-- src: Assets/Editor/Validation/SceneValidator.cs:853-883; Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:139-159 -->
+Each map stores its build optimization settings in its map config. The **Optimization** panel on the **Build** tab shows most of them; the collider sector size, the collider triangle limit and the minimum sector triangles appear only in the **Inspector** of the map config, under **Optimization**. For every setting with its default and range, and for what optimization changes and what it leaves as it is, see [Optimization](build.md#optimization). For the warnings about large meshes, see [Sector budget](#sector-budget). <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/BuildOptimizationSettings.cs:9-32 -->
 
 <a name="lights"></a>
 ## Light export rules
@@ -284,7 +280,7 @@ The project also adds these entries to **Assets** > **Create**:
 | **Assets** > **Create** > **Map** > **GameMarkerTemplateConfig** | A config of road templates | A ready one ships as `Assets/Resources/GameMarkerTemplateConfig.asset`. See [Reuse road values with templates](markers.md#templates). <!-- src: Assets/Scripts/GameMarkerTemplateConfig.cs:4 --> |
 | **Assets** > **Create** > **Map** > **MapMetaConfig** | A map config | Use **+ New map** in MapBuilder instead: it also fills in **Name** and selects the map. See [Create or select a map](map-settings.md#new-map). |
 | **Assets** > **Create** > **Map** > **MapManagerConfig** | The MapBuilder state asset | Don't create a second one. A second copy in any `Resources` folder makes MapBuilder fail with `(Singleton) Multiple config for : MapManagerConfig`. <!-- src: Assets/Scripts/SingletonScriptableObject.cs:16-28 --> |
-| **Assets** > **Create** > **Map** > **MapSkipComponentConfig** | The list of silenced component notes | Don't create a second one; edit the shipped asset. A second copy in a `Resources` folder fails in the same way. |
+| **Assets** > **Create** > **Map** > **MapSkipComponentConfig** | The list of silenced component notes | Don't create a second one; edit the shipped asset. See [MapSkipComponentConfig](#skip-components). |
 | **Assets** > **Create** > **CarX** > **Modding** > **mod.io Config**, **Steam Workshop Config** | Vendor settings assets | Both already ship in `Assets/Resources/CarX.Modding`. See [Publishing vendors](advanced/publishing-vendors.md). |
 | **Assets** > **Create** > **Modio** > **v3** > **config**, **Modio** > **UI** > **ThemeSheet** | Assets of the mod.io plugin | Not needed for map work. |
 
@@ -294,16 +290,17 @@ The project also adds these entries to **Assets** > **Create**:
 `Assets/Resources/MapSkipComponentConfig.asset` lists component type names that validation doesn't report as unsupported. It ships with one entry, `DrawZoneBehaviour`: the gizmo helper on the `SpawnPoint` and `Ambient` example prefabs and on the spawn point and minimap of `TestMap`. <!-- src: Assets/Resources/MapSkipComponentConfig.asset:15-16 -->
 
 - An entry only silences the Components note `'<Type>' on '<object>' is not a supported component and will not be exported. …` The component is still not exported. <!-- src: Assets/Editor/Validation/SceneValidator.cs:169-177 -->
-- An entry doesn't silence the Format note of preview components, or the note about an Animator or SkinnedMeshRenderer without an Animation marker.
+- An entry doesn't silence the Format note of preview components, the note about an Animator or SkinnedMeshRenderer without an Animation marker, or the note about a missing script.
 - An entry is a class name without its namespace, for example `AudioSource`. It must match exactly, including case.
 - The list applies to every map in the project.
+- Edit the shipped asset rather than creating another one. With two MapSkipComponentConfig assets in `Resources` folders, validation stops with `(Singleton) Multiple config for : MapSkipComponentConfig` in the Console. <!-- src: Assets/Scripts/SingletonScriptableObject.cs:24-27 -->
 
 To add an entry, see [Hide notes for a component type](validation.md#skip-types).
 
 <a name="window-states"></a>
 ## MapBuilder window states
 
-The texts in this section are those of the English interface. The Russian version of this page lists the Russian texts. To find out why a control is greyed out, see [Troubleshooting](troubleshooting.md).
+The texts in this section are those of the English interface. The Russian version of this page lists the Russian texts. To find out why a control is greyed out, see [Greyed-out controls](troubleshooting.md#greyed-out).
 
 ### Header
 
@@ -433,7 +430,7 @@ Use these terms in both languages. The **Meaning** column says where each term i
 | mod | мод | Content that the game loads from a mod folder or from mod.io. A map is one kind of mod. |
 | mod ID (the mod folder name) | ID мода (имя папки мода) | How the game tells mods apart: a local mod by its folder name, a mod.io install as `<modIoId>_<modfileId>`. |
 | `mod.cxmod` | `mod.cxmod` | The single file that a Binary build is packed into on export or upload. |
-| optimization (build optimization) | оптимизация сборки | The build stage that cuts static geometry into sectors, merges it and adds LODs. See [Build optimization settings](#optimization-defaults). |
+| optimization (build optimization) | оптимизация сборки | The build stage that cuts static geometry into sectors, merges it and adds LODs. See [Optimization](build.md#optimization). |
 | preview | превью | The **Preview · 16:9** image, a large picture stored in the map metadata. See [Image requirements](minimap-and-images.md#images). |
 | publication | публикация | A mod entry on mod.io, listed in **Publications**. See [Publish to mod.io](publish.md). |
 | render core variant | вариант render core | One of the game's material types that a Material marker can assign. |

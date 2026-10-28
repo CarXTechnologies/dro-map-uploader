@@ -2,8 +2,6 @@
 
 **English** · [Русский](../ru/README.md)
 
-Applies to: MapUploader `feature/2.0/3.0` · Unity 6000.3.19f1 · screenshots 2026-10-26
-
 These pages take you from an empty Unity scene to a map that you test in CarX Drift Racing Online 2 and publish to mod.io.
 
 For a short overview, the quick start and the limits at a glance, see the [MapUploader README](../../README.md).
@@ -19,8 +17,8 @@ Read the pages in this order the first time. Each page ends with links to the ne
 1. [Fill in the map settings](map-settings.md): Create a map config with **+ New map** and fill in the **Map** tab: name, version, summary, description, images, authors and URL.
 1. [Build the map](build.md): Choose the scene and the Binary or Wavefront format, build the map, tune build optimization and find the build cache.
 1. [Fix validation problems](validation.md): Run **Validate map**, read the results in the **Map Validation** window and see what each check covers.
-1. [Test the map in the game](test-in-game.md): Export the build to a map folder inside the `Mods` folder next to the game executable on PC, drive the map in free ride or in an online room, and go through the checklist before you publish. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28; DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/ModCatalogScanner.cs:16-27 -->
-1. [Publish to mod.io](publish.md): Sign in to mod.io, create a publication, finish it and make it public, update it after you change the map and delete it when you no longer need it.
+1. [Test the map in the game](test-in-game.md): Export the build to a map folder inside the `Mods` folder next to the game executable on PC, drive the map in free ride or in an online room, check that your copy of the game loads local maps, and go through the checklist before you publish. <!-- src: DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/DefaultCollectionProvider.cs:28; DR3PC1:Assets/Modules/CarX.Modding/Runtime/Providers/ModCatalogScanner.cs:16-27 -->
+1. [Publish to mod.io](publish.md): Sign in to mod.io, create a publication and make it public, update it after you change the map and delete it when you no longer need it.
 1. [Troubleshooting](troubleshooting.md): Find the cause and the fix for validation messages, build errors in the Console, greyed-out controls, problems in the game, upload and setup problems, and read answers to common questions.
 1. [Reference](reference.md): Look up limits, supported components, road surfaces, optimization defaults, the menus the project adds, where settings are stored and the English–Russian glossary.
 
