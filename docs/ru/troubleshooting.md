@@ -77,7 +77,7 @@
 <a name="msg-empty-material-slot"></a>
 #### `'<object>' has an empty material slot; it will render as magenta in game.`
 
-Уровень: предупреждение (не блокирует сборку) · Категория: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:784-785 -->
+Уровень: предупреждение (не блокирует сборку) · Категория: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:800-801 -->
 
 **Причина.** В элементе списка **Materials** у MeshRenderer не назначен материал.
 
@@ -93,7 +93,7 @@
 
 Сообщение: `'<object>' has <n> LOD levels; at most 8 are supported and the whole group is skipped on export. Merge or remove levels.`
 
-Уровень: ошибка (блокирует сборку) · Категория: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:813-816 -->
+Уровень: ошибка (блокирует сборку) · Категория: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:829-832 -->
 
 **Причина.** У LODGroup больше 8 уровней. Экспорт пропустил бы всю группу.
 
@@ -109,7 +109,7 @@
 
 Сообщение: `Build optimization is off: static meshes and colliders are exported as-is, without sector chunking, collider simplification or LODs. Large maps get more draw calls, heavier physics and longer loading. Enable it in Build > Optimization.`
 
-Уровень: предупреждение (не блокирует сборку) · Категория: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:858-860 -->
+Уровень: предупреждение (не блокирует сборку) · Категория: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:874-876 -->
 
 **Причина.** Для этой карты снят флажок **Оптимизировать сборку** (Optimize build). Статические меши и коллайдеры экспортируются как есть, без секторов и LOD, поэтому большая карта в игре рисуется и загружается медленнее.
 
@@ -128,9 +128,9 @@
 
 Сообщение: `'<object>' (<mesh>): static <kind>, <n> triangles, world bounds <x> x <y> x <z> m. Exceeds sector budget (<size> m / <n> triangles). Review Build > Optimization; size alone does not prove a performance issue.`
 
-Уровень: предупреждение (не блокирует сборку) · Категория: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:874-876 -->
+Уровень: предупреждение (не блокирует сборку) · Категория: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:890-892 -->
 
-**Причина.** Статический меш для рендера или включённый MeshCollider, который не является триггером и не выпуклый, больше, чем **Размер сектора (м)** (Sector size (m)), или содержит больше треугольников, чем **Треугольников на меш** (Max triangles per mesh), а сборка экспортирует его целиком: снят флажок **Оптимизировать сборку** или флажок разбиения для этого вида мешей. При стандартных настройках это предупреждение не появляется. Какие меши охватывает проверка, см. в разделе [Бюджет сектора](reference.md#sector-budget). <!-- src: Assets/Editor/Validation/SceneValidator.cs:879 -->
+**Причина.** Статический меш для рендера или включённый MeshCollider, который не является триггером и не выпуклый, больше, чем **Размер сектора (м)** (Sector size (m)), или содержит больше треугольников, чем **Треугольников на меш** (Max triangles per mesh), а сборка экспортирует его целиком: снят флажок **Оптимизировать сборку** или флажок разбиения для этого вида мешей. При стандартных настройках это предупреждение не появляется. Какие меши охватывает проверка, см. в разделе [Бюджет сектора](reference.md#sector-budget). <!-- src: Assets/Editor/Validation/SceneValidator.cs:895 -->
 
 **Исправление.** На вкладке **Сборка**, в разделе **Оптимизация**, установите флажок **Оптимизировать сборку** и флажок разбиения для этого вида мешей, затем соберите карту и прокатитесь по ней, чтобы проверить результат. Если флажок должен остаться снятым, разделите меш в своём 3D-редакторе.
 
@@ -143,7 +143,7 @@
 
 Сообщение: `'<object>' is a Directional light. It lights the SDK preview only; the game uses its own sun, so it is not exported.`
 
-Уровень: заметка (не блокирует сборку) · Категория: Lighting <!-- src: Assets/Editor/Validation/SceneValidator.cs:739-742 -->
+Уровень: заметка (не блокирует сборку) · Категория: Lighting <!-- src: Assets/Editor/Validation/SceneValidator.cs:755-758 -->
 
 **Причина.** В сцене есть включённый источник Directional, обычно солнце для предпросмотра, например `sunlight` из пресета окружения. Он освещает сцену только в редакторе, а солнце и небо в игре свои. Если источников Directional два или больше, включённых или нет, окно также показывает предупреждение `The map has <n> Directional Lights. These affect the SDK preview only; the game supplies its own environment lighting.`
 
@@ -156,7 +156,7 @@
 
 Сообщение: `'<object>' is a <type> light. Wavefront/Binary exports Point and Spot lights only, so this one will not reach the mod.`
 
-Уровень: предупреждение (не блокирует сборку) · Категория: Lighting <!-- src: Assets/Editor/Validation/SceneValidator.cs:746-749 -->
+Уровень: предупреждение (не блокирует сборку) · Категория: Lighting <!-- src: Assets/Editor/Validation/SceneValidator.cs:762-765 -->
 
 **Причина.** Включённый источник света не относится ни к Point, ни к Spot, ни к Directional, например это источник Area. Экспортируются только источники Point и Spot, поэтому этот источник освещает сцену только в редакторе.
 
@@ -199,12 +199,30 @@
 
 См. также: [Вершинная анимация объектов](markers.md#animation)
 
+<a name="msg-road-unavailable-surface"></a>
+#### `'<object>' uses the surface '<surface>', which the game doesn't have…`
+
+Сообщение: `'<object>' uses the surface '<surface>', which the game doesn't have, so its collider gets no surface in the game. Use '<replacement>' instead.`
+
+Уровень: предупреждение (не блокирует сборку) · Категория: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:264-270,722-727 -->
+
+**Причина.** Маркер Road использует `Road/default`, `Road/ice_snowy` или `Road/pavement`. Меню типа всё ещё предлагает эти поверхности, но в игре нет шаблонов поверхности с такими именами, поэтому коллайдер не получает дорожной поверхности — ни со значениями, ни без них — и ведёт себя как коллайдер без маркера Road. В примере TestMap `Content/workshop_map_main/wall_coll` использует `Road/default`. <!-- src: game -->
+
+**Исправление.**
+
+1. В окне **Map Validation** нажмите **Select** рядом с сообщением.
+1. В меню типа компонента GameMarkerData выберите поверхность, которую называет сообщение: **Road** > **asphalt** вместо `default`, **Road** > **road_icy** вместо `ice_snowy` или **Road** > **paving_slab** вместо `pavement`.
+
+Если маркер использует значения **Custom**, новая поверхность сбрасывает их к своим значениям по умолчанию.
+
+См. также: [Разметка дорожных поверхностей](markers.md#road) · [Дорожные поверхности и физические поля](reference.md#surfaces)
+
 <a name="msg-road-no-collider"></a>
 #### `'<object>' is marked as Road but has no Collider on it or its children…`
 
 Сообщение: `'<object>' is marked as Road but has no Collider on it or its children, so its surface type will never be used. Add a Mesh/Box/Sphere/Capsule Collider.`
 
-Уровень: ошибка (блокирует сборку) · Категория: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:266-268 -->
+Уровень: ошибка (блокирует сборку) · Категория: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:274-276 -->
 
 **Причина.** GameMarkerData с поверхностью **Road** находится на объекте, у которого нет коллайдера — ни на самом объекте, ни на дочернем. Одного меша для рендера мало: машине не по чему ехать.
 
@@ -223,7 +241,7 @@
 
 Сообщение: `The map has no SpawnPoint marker, so there is nowhere for a car to appear. Add an empty object with GameMarkerData set to SpawnPoint.`
 
-Уровень: ошибка (блокирует сборку) · Категория: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:281-283 -->
+Уровень: ошибка (блокирует сборку) · Категория: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:289-291 -->
 
 **Причина.** Ни у одного компонента GameMarkerData в сцене не выбран тип **SpawnPoint**. Маркеры внутри объекта с тегом `Garbage` не учитываются. Если в сцене вообще нет GameMarkerData, окно также показывает `The map has no GameMarkerData at all - at minimum it needs a spawn point.` и `'GameMarkerData': the map has 0, at least 1 is required.`
 
@@ -240,7 +258,7 @@
 
 Сообщение: `'<object>': render core material '<material>' (<variant>) was exported from material for revision <n>, but this SDK has revision <n> of the variant. The game uses the fallback material until you re-run Export from material on this entry.`
 
-Уровень: предупреждение (не блокирует сборку) · Категория: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:442-445 -->
+Уровень: предупреждение (не блокирует сборку) · Категория: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:450-453 -->
 
 **Причина.** Запись маркера Material хранит значения, экспортированные для более старой ревизии её варианта render core, чем та, что есть в SDK этого проекта. Пока вы не экспортируете запись заново, игра использует вместо варианта render core запасной материал.
 
@@ -257,7 +275,7 @@
 
 Сообщение: `'<object>': render core material '<material>' (<variant>) has no diffuse texture and will render white. Press 'Export from material' or assign the texture.`
 
-Уровень: предупреждение (не блокирует сборку) · Категория: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:375-377 -->
+Уровень: предупреждение (не блокирует сборку) · Категория: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:383-385 -->
 
 **Причина.** У записи маркера Material нет диффузной текстуры, поэтому игра рисует поверхность белой.
 
@@ -295,7 +313,7 @@
 
 Уровень: ошибка (блокирует сборку) · Категория: Meta <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:54-56 -->
 
-**Причина.** **Название** (Name) может содержать только буквы, цифры, пробелы и `- _ ' . , : ! ? ( ) & + /`, без пробела в начале и в конце, и не длиннее 50 символов. Слишком длинное название даёт `The track name is <n> characters; this vendor allows 50.` Пустое — `The track has no name. Fill in Name on the Map tab.` <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:8; Assets/Resources/CarX.Modding/ModIoConfig.asset:28 -->
+**Причина.** **Название** (Name) может содержать только буквы, цифры, пробелы и `- _ ' . , : ! ? ( ) & + /`, без пробела в начале и в конце, и не длиннее 50 символов. Слишком длинное название даёт `The track name is <n> characters; this vendor allows 50.` Пустое — `The track has no name. Fill in Name on the Map tab.` <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:8; Assets/Resources/CarX.Modding/ModIoConfig.asset:28; Assets/Editor/Validation/MapMetaValidator.cs:48,62 -->
 
 **Исправление.**
 
@@ -310,7 +328,7 @@
 
 Уровень: ошибка (блокирует сборку) · Категория: Meta <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:91-95 -->
 
-**Причина.** Краткое описание длиннее 250 символов. MapBuilder берёт только первую строку поля **Краткое описание (необязательно)** (Summary (optional)); если поле пустое — первую строку поля **Описание** (Description), и тогда сообщение заканчивается на `It is taken from the first line of the description - add a shorter Summary instead.` **Описание** длиннее 50 000 символов даёт похожую ошибку: `The description is <n> characters; this vendor allows 50000.` <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:29-30 -->
+**Причина.** Краткое описание длиннее 250 символов. MapBuilder берёт только первую строку поля **Краткое описание (необязательно)** (Summary (optional)); если поле пустое — первую строку поля **Описание** (Description), и тогда сообщение заканчивается на `It is taken from the first line of the description - add a shorter Summary instead.` **Описание** длиннее 50 000 символов даёт похожую ошибку: `The description is <n> characters; this vendor allows 50000.` <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:29-30; Assets/Editor/Validation/MapMetaValidator.cs:73,94 -->
 
 **Исправление.**
 
@@ -390,7 +408,7 @@
 
 Сообщение: `'<object>': Bounds Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.`
 
-Уровень: ошибка (блокирует сборку) · Категория: Minimap <!-- src: Assets/Editor/Validation/SceneValidator.cs:900-902 -->
+Уровень: ошибка (блокирует сборку) · Категория: Minimap <!-- src: Assets/Editor/Validation/SceneValidator.cs:916-918 -->
 
 **Причина.** Значение X или Y поля **Bounds Size** компонента Minimap равно нулю. Без размера мини-карта в игре сжимается в точку.
 
@@ -408,7 +426,7 @@
 
 Сообщение: `'<object>': no textures assigned. Add at least one entry with a Main Texture.`
 
-Уровень: ошибка (блокирует сборку) · Категория: Minimap <!-- src: Assets/Editor/Validation/SceneValidator.cs:908-909 -->
+Уровень: ошибка (блокирует сборку) · Категория: Minimap <!-- src: Assets/Editor/Validation/SceneValidator.cs:924-925 -->
 
 **Причина.** Список **Textures** компонента Minimap пуст. Две связанные ошибки исправляются так же: `'<object>': Textures element <i> has no Main Texture assigned.` и `'<object>': Textures element <i> is a <type>. Only Texture2D can be exported.`
 
@@ -426,7 +444,7 @@
 
 Сообщение: `'<object>' has a non-convex MeshCollider driven by a non-kinematic Rigidbody, which the physics engine no longer supports. Tick Convex, or make the Rigidbody kinematic.`
 
-Уровень: ошибка (блокирует сборку) · Категория: Physics <!-- src: Assets/Editor/Validation/SceneValidator.cs:845-847 -->
+Уровень: ошибка (блокирует сборку) · Категория: Physics <!-- src: Assets/Editor/Validation/SceneValidator.cs:861-863 -->
 
 **Причина.** MeshCollider со снятым флажком **Convex** находится на объекте Rigidbody или внутри него, а у Rigidbody снят флажок **Is Kinematic**. Физика игры не может двигать невыпуклый меш-коллайдер.
 
@@ -457,12 +475,12 @@
 <a name="build-errors"></a>
 ## Ошибки сборки в Console
 
-Некоторые проблемы обнаруживаются только во время экспорта карты. Они останавливают сборку с исключением в Console, а не в окне **Map Validation**: строка в Console начинается с типа исключения — обычно `InvalidOperationException`, а для материала Layered Lit — `InvalidDataException`. Вкладка **Сборка** затем показывает `Сборка не завершена полностью. Проверьте результаты проверки и Console.` (`Build incomplete. Check validation results and the Console.`). Чтобы открыть Console, выберите **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:324-328 -->
+Некоторые проблемы обнаруживаются только во время экспорта карты. Они останавливают сборку с исключением в Console, а не в окне **Map Validation**: строка в Console начинается с типа исключения — обычно `InvalidOperationException`, а для материала Layered Lit — `InvalidDataException`. Вкладка **Сборка** затем показывает `Сборка не завершена полностью. Проверьте результаты проверки и Console.` (`Build incomplete. Check validation results and the Console.`). Чтобы открыть Console, выберите **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:324-328; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
 <a name="export-errors"></a>
 ### Ошибки экспорта
 
-В следующей таблице перечислены все ошибки, которые останавливают сборку во время экспорта. Записи после таблицы подробно описывают частые из них.
+В следующей таблице перечислены все ошибки, которые останавливают сборку во время экспорта, а также экспорт или публикацию во время упаковки карты. Записи после таблиц подробно описывают частые из них.
 
 | Сообщение | Причина | Исправление |
 | --- | --- | --- |
@@ -491,9 +509,25 @@
 | `meshoptimizer is unavailable for this Editor platform. Install its native Editor library or disable build optimization.` | Флажок **Оптимизировать сборку** установлен в Unity Editor не под Windows x64. | Снимите флажок **Оптимизировать сборку**. [Подробнее](#msg-meshoptimizer) |
 | `Invalid or extreme vertex coordinates in '<mesh>'.` | При установленном флажке **Оптимизировать сборку** у статического меша есть вершина дальше 10 000 км от начала координат мира или вершина, координаты которой не являются конечными числами. `<mesh>` — имя меша, а не объекта. | Найдите объекты, которые используют этот меш, и исправьте их положение или масштаб либо сам меш в своём 3D-редакторе. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:301-303 --> |
 | `A triangle spans too many sectors. Increase the optimization sector size or fix the source mesh.` | При установленном флажке **Оптимизировать сборку** у статического меша есть настолько большой треугольник, что при разрезании на секторы получилось бы больше 100 000 частей. | Разделите большие треугольники в своём 3D-редакторе. Для меша рендера также поможет больший **Размер сектора (м)**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SectorMeshGeometry.cs:167-169 --> |
-| `Shader 'Hidden/ConvertingEx' is not found.` или `VAT normal export shader is missing.` | Не хватает шейдера SDK из `Assets/Plugins/CarX.Modding.Creator`. | Обновите сабмодуль, как описано в разделе [Папка сабмодуля пуста](#submodule-empty). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ExportTextureUtility.cs:166-170 --> |
+| `Binary mesh block exceeds 256 MiB. Split the source mesh.` | В сборке Binary один экспортируемый меш до сжатия занимает больше 256 МиБ, например это один меш с миллионами вершин. | Разделите меш на несколько мешей в своём 3D-редакторе, затем нажмите кнопку **Собрать карту**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModModelCodecV2.cs:15,206-208; Assets/Plugins/CarX.Modding.Creator/Editor/UnityGoObjExporter.cs:189 --> |
+| `Shader 'Hidden/ConvertingEx' is not found.` или `VAT normal export shader is missing.` | Не хватает шейдера SDK из `Assets/Plugins/CarX.Modding.Creator`. | Обновите сабмодуль, как описано в разделе [Папка сабмодуля пуста](#submodule-empty). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ExportTextureUtility.cs:166-170; Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:274 --> |
+| `Invalid binary texture <width>x<height> (<encoding>): sides must be within 1..8192.` | При экспорте или публикации карты Binary текстура материала после импорта в Unity шире или выше 8192 пикселей. Упаковка оставляет каждую текстуру в размере после импорта и не уменьшает её, поэтому пересборка с `Everything` не помогает. | В настройках импорта текстуры на вкладке **Default** задайте **Max Size** не больше 8192 и нажмите **Apply**. Затем нажмите кнопку **Собрать карту** и снова экспортируйте или опубликуйте карту. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryTexture.cs:17,55-60; Assets/Plugins/CarX.Modding.Creator/Editor/BinaryTextureBaker.cs:32; Assets/Plugins/CarX.Modding.Creator/Editor/BinaryTexturePreparation.cs:228 --> |
 | `Binary map requires both Meta and Binary Map staging data. Rebuild Map and Meta.` или другое сообщение упаковки, например `Missing map texture: <path>` | При экспорте или публикации карты Binary упаковка обнаруживает, что кэш сборки неполный. | Выберите в поле **Что пересобрать** (Rebuild targets) значение `Everything`, нажмите кнопку **Собрать карту**, затем снова экспортируйте или опубликуйте карту. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/BinaryMapPacker.cs:60-62 --> |
 | Любое другое исключение во время сборки | Внутренняя ошибка экспортёра. | Снова нажмите кнопку **Собрать карту**. Если ошибка повторяется, создайте issue в [трекере задач](https://github.com/CarXTechnologies/dro-map-uploader/issues) и приложите полный текст из Console. |
+
+Кроме того, экспорт выводит в Console следующие предупреждения. Они не останавливают сборку, но карта в игре отличается от сцены. Предупреждение, которое повторяет ошибку проверки, например `LODGroup has more than 8 LOD - Not supported`, не появляется: ошибка останавливает сборку до экспорта. <!-- src: Assets/Editor/MapBuilder.cs:138; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:137-141 -->
+
+| Сообщение | Причина | Исправление |
+| --- | --- | --- |
+| `Rigidbody '<name>' was skipped: no enabled supported colliders. Geometry and animation will still be exported.` | У Rigidbody нет собственного включённого коллайдера Box, Sphere, Capsule или Mesh на активном объекте. | Добавьте включённый коллайдер на объект Rigidbody. [Подробнее](#msg-rigidbody-skipped) |
+| `Rigidbody '<name>': the client uses Unity Physics discrete collision detection; PhysX CCD modes are not exported.` | У Rigidbody в **Collision Detection** выбран непрерывный режим. | Выберите для **Collision Detection** значение **Discrete**. [Подробнее](#msg-rigidbody-discrete) |
+| `Rigidbody '<name>': Multiply material combine uses the Unity Physics geometric mean approximation.` | У коллайдера динамического объекта физический материал с **Multiply** в **Friction Combine** или **Bounce Combine**. Игра вместо этого использует среднее геометрическое. | Выберите другой режим комбинирования или проедьте по карте и проверьте, как ведёт себя объект. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:85-86 --> |
+| `[ObjExporter] Material '<material>' property '<property>' holds a <type>, only Texture2D can be exported. Skipped.` | В слоте текстуры материала кубическая карта, Render Texture или другая текстура, которая не является Texture2D. Экспорт оставляет слот пустым. | Назначьте в слот импортированное изображение (Texture2D) или очистите слот. [Подробнее](#materials-wrong) <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MtlTextureMapWriter.cs:391 --> |
+| `Layered Lit '<material>': transparent blending mode <mode> is not supported by the mod material format, exported as Alpha.` | Прозрачный материал Layered Lit использует **Blending Mode** **Additive** или **Premultiply**; `<mode>` — `1` или `4`. Игра смешивает его по альфе. | В окне **Inspector** материала выберите для **Blending Mode** значение **Alpha**, чтобы редактор показывал материал так же, как игра. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/LayeredPbrWriter.cs:105-118 --> |
+| `Optimization skipped '<name>': mesh must be readable and use triangle topology. Original export is retained.` | При установленном флажке **Оптимизировать сборку** меш статического рендерера или MeshCollider недоступен для чтения или содержит подмеш не из треугольников. Для импортированных моделей сборка сама включает **Read/Write**, поэтому речь о меше, сохранённом как ассет Unity, или о меше из четырёхугольников, линий или точек. Объект сохраняет собственный меш и не разрезается на секторы. | Ничего делать не нужно. Чтобы объект оптимизировался, экспортируйте меш с треугольниками из своего 3D-редактора и импортируйте его как модель. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:273-281; Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:11-33 --> |
+| `Light '<name>' of type <type> is not supported - only Point and Spot lights are exported` | Включённый источник света не является Point или Spot, например это Directional light из освещения для предпросмотра. Проверка сообщает о том же источнике заметкой или предупреждением. | Для Directional light ничего делать не нужно: игра использует своё солнце. Источник другого типа замените на Point или Spot. См. [Настройка освещения](scene-setup.md#lighting). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:90-101 --> |
+| `Material '<material>': its render core values were exported from material for revision <n> of <variant>, the current revision is <n>. The game uses the fallback material until you re-run Export from material on its Material marker.` | Запись маркера Material хранит значения, экспортированные для более старой ревизии её варианта render core. Проверка показывает ту же проблему предупреждением категории Markers. | В маркере Material нажмите для этой записи **Export from material**, затем снова соберите карту. [Подробнее](#msg-render-core-revision) <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RenderCoreMaterialWriter.cs:36-41 --> |
+| `[ModExport] Previous export did not restore import settings of <n> textures and <n> models; they will be restored at the end of this export.` | Предыдущая сборка завершилась, не вернув изменённые ею настройки импорта, например потому что Unity закрылся во время сборки. Сборка включает **Read/Write** и отключает сжатие у экспортируемых текстур и моделей и в конце возвращает прежние настройки. | Ничего делать не нужно: эта сборка вернёт их. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ExportImporterSettings.cs:186-199 --> |
 
 <a name="msg-rigidbody-lodgroup"></a>
 ### `Rigidbody '<name>' cannot split an enclosing LODGroup. Put the…`
@@ -739,7 +773,7 @@
 **Причина.** Одно из следующего:
 
 - Маркер Road и коллайдер находятся на разных GameObject. Игра применяет поверхность маркера Road только к коллайдеру на собственном объекте маркера; любой другой коллайдер получает физический материал по умолчанию. Проверка принимает коллайдер на дочернем объекте, поэтому об этом не сообщает.
-- У маркера поверхность `default`, `ice_snowy` или `pavement`. В игре нет шаблонов поверхности с такими именами, поэтому коллайдер не получает дорожной поверхности — ни со значениями, ни без них — и ведёт себя как коллайдер без маркера Road. В журнале игры `Player.log` при этом появляется предупреждение, которое начинается с `Road marker references surface template '<name>'`.
+- У маркера поверхность `default`, `ice_snowy` или `pavement`. В игре нет шаблонов поверхности с такими именами, поэтому коллайдер не получает дорожной поверхности — ни со значениями, ни без них — и ведёт себя как коллайдер без маркера Road. В журнале игры `Player.log` при этом появляется предупреждение, которое начинается с `Road marker references surface template '<name>'`. Проверка предупреждает о таком маркере; см. [её сообщение](#msg-road-unavailable-surface).
 - У маркера назначен **Template Config**. Его значения — из именованного шаблона или **Custom** — полностью заменяют поверхность игры, включая **Surface Type** и **Water Rate**. Начальные значения берутся из значений поверхностей по умолчанию в MapUploader, а для некоторых поверхностей они отличаются от поверхности игры, например **Bump Min** у `grass`. Если шаблон маркера удалён из конфига, маркер экспортирует собственные значения **Custom**. <!-- src: Assets/Scripts/GameMarkerData.cs:14-37 -->
 
 **Исправление.**
@@ -976,7 +1010,7 @@
 <a name="scene-empty"></a>
 ### Список «Сцена» пуст
 
-**Причина.** Список **Сцена** показывает только сцены, включённые в списке сцен сборки, а в нём их нет. Тогда MapBuilder продолжает проверять и собирать сцену последней сборки или сцену, которая была открыта, когда вы выбрали карту, — и это может оказаться не та сцена, которую вы ожидаете. Если эта сцена ни разу не сохранялась, проверка сообщает `No target scene is selected. Pick one in Scene on the Build tab.` <!-- src: Assets/Editor/MapBuilderEditorWindow.cs:780-786; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:228-229 --> Сцена из `Assets/MapResources` добавляется в список и включается каждый раз, когда загружается редактор или вы сохраняете сцену, а сцена, которую вы выключили в списке, удаляется из него при следующем сохранении. <!-- src: Assets/Editor/MapBuilderProcessor.cs:79 -->
+**Причина.** Список **Сцена** показывает только сцены, включённые в списке сцен сборки, а в нём их нет. Тогда MapBuilder продолжает проверять и собирать сцену последней сборки или сцену, которая была открыта, когда вы выбрали карту, — и это может оказаться не та сцена, которую вы ожидаете. Если эта сцена ни разу не сохранялась, проверка сообщает `No target scene is selected. Pick one in Scene on the Build tab.` Сцена из `Assets/MapResources` добавляется в список и включается каждый раз, когда загружается редактор или вы сохраняете сцену, а сцена, которую вы выключили в списке, удаляется из него при следующем сохранении. <!-- src: Assets/Editor/MapBuilderEditorWindow.cs:780-786; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:228-229; Assets/Editor/Validation/MapMetaValidator.cs:33; Assets/Editor/MapBuilderProcessor.cs:79 -->
 
 **Исправление.**
 

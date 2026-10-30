@@ -154,7 +154,7 @@ Entries appear only in `troubleshooting.md`, and the page opens with the triage 
 - **Full message.** When the heading shortens the message, the first line of the entry is `Message:`, RU `Сообщение:`, followed by the full text. So every message entry starts with the full message.
 - **Placeholders.** Write a value from the reader's map in the notation of `validation.md`: `<object>`, `<type>`, `<material>`, `<variant>`, `<size>`, `<extension>`, `<texture>`, `<width>x<height>`, `<property>`.
 - **Sections.** *Validation messages* has an H3 heading for each category, in the order of the **Map Validation** window, with an H4 entry for each message under it. In the other sections, entries are H3 headings.
-- **Export errors.** *Build errors in the Console* starts with the table under the anchor `export-errors`, with the columns `| Message | Cause | Fix |`. When an exporter gets a new `throw`, add a row for its message there.
+- **Export errors.** *Build errors in the Console* starts with the table of export errors under the anchor `export-errors`, followed by the table of export warnings, both with the columns `| Message | Cause | Fix |`. When an exporter gets a new `throw` or `Debug.LogWarning`, add a row for its message to the matching table.
 
 ```markdown
 <a name="msg-road-no-collider"></a>
@@ -244,7 +244,7 @@ Use the GitHub alert syntax, `> [!NOTE]` and so on.
 ## Links
 
 - Link inside this repository with relative links, so that they follow the branch being viewed and work in clones.
-- Link into the `Assets/Plugins/CarX.Modding.Creator` submodule with absolute URLs to the CarX.Modding.Creator repository at the pinned commit, because GitHub can't resolve submodule paths from this repository: `https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/<commit>/<path>`. `git submodule status` prints the pinned commit, and `check_docs.py` reports a link pinned to another commit.
+- Link into the `Assets/Plugins/CarX.Modding.Creator` submodule with absolute URLs to the CarX.Modding.Creator repository at the pinned commit, because GitHub can't resolve submodule paths from this repository: `https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/<commit>/<path>`. `git submodule status` prints the pinned commit, and `check_docs.py` reports a link to another commit or to a branch such as `main`.
 - Make the link text describe the target. Never write "here".
 - Keep a task page to about 15 links or fewer. `reference.md`, the *See also* lines in `troubleshooting.md`, the message catalogue in `validation.md`, whose rows link to their troubleshooting entries, and the *Documentation* table in the READMEs are exempt.
 - To link to a section from another page, give the section an ASCII anchor: put `<a name="road"></a>` on its own line directly before the heading, at the same place in EN and RU. Never link to an auto-generated Cyrillic heading anchor; custom anchors survive renames and translation.
@@ -265,7 +265,7 @@ A hidden source comment lets a reviewer check a fact against the code when that 
 - Put the comment at the end of the line that states the fact: the paragraph line, the list item line, or the last cell of the table row. Never put it on a line of its own inside a list.
 - Write paths relative to the repository root. Submodule paths start with `Assets/Plugins/CarX.Modding.Creator/`. The game's source code is closed and this repository is public, so never write a path into it: mark a fact that you checked in the game's code with the bare reference `game`, for example `<!-- src: game -->` or `<!-- src: Assets/Editor/MapBuilder.cs:12; game -->`.
 - Write the lines as `path:12`, `path:12-20` or `path:12,40-42`, and separate several paths with `; `. When the line also quotes a message in a code span, cite the line of the message too, not only the line of the limit it belongs to.
-- When you change code that a comment points at, update the comment in the same PR. `check_docs.py` reports a comment whose file or lines don't exist, and warns when a message or identifier quoted on the same line is no longer near the cited lines. It doesn't check `game` references, and it reports any path into the game's source as an error.
+- When you change code that a comment points at, update the comment in the same PR. `check_docs.py` reports a comment whose file or lines don't exist. It warns when a message or identifier quoted on the same line is no longer near the cited lines, and when a quoted message occurs in none of the cited files. It doesn't check `game` references, and it reports any path into the game's source as an error.
 - Mark a menu path that you couldn't check in a running editor with `<!-- verify-menu -->` at the end of its line. A capture run writes `unity-menus.txt` with the items of the **Assets** > **Create**, **File**, **GameObject**, **Tools** and **Edit** menus. Check the marked lines against it and remove each marker you confirm. Check Unity Hub and other menus by hand.
 
 ## Two languages
@@ -403,8 +403,8 @@ It needs Python 3 and nothing else. It prints each problem as `<file>:<line>: er
 | `markdown` | The patterns in [Markdown that GitHub renders differently](#markdown-that-github-renders-differently): `style` widths, alerts in lists, unclosed anchors, a missing blank line before `Result:` or `Next:`, an HTML comment right after a block, two alerts in a row; legacy `Image/` paths; `synced-with` markers, as warnings |
 | `parity` | A page that exists in one language only; a page pair, or the README pair, with a different number of H2 and H3 headings or images, different anchors or different `<!-- src -->` comments |
 | `images` | An image whose `width` or callout table doesn't match `shots.json`, an image from the folder of the other language, a PNG that no page references or that is over 250 KB, and a shot without its PNG files |
-| `versions` | A README or `getting-started.md` page that doesn't name the project's Unity version, or revision; an `Applies to` line on a page other than the READMEs, or one that doesn't match the other README; a clone or `git switch` command in `getting-started.md` with another branch; a link into the CarX.Modding.Creator repository that isn't pinned to the submodule commit or points to a missing file |
-| `src` | A `<!-- src -->` comment whose file or lines don't exist; as a warning, a line whose quoted messages and identifiers don't occur within 5 lines of the cited lines, with the line where the text is now |
+| `versions` | A README or `getting-started.md` page that doesn't name the project's Unity version, or revision; an `Applies to` line on a page other than the READMEs, or one that doesn't match the other README; a clone or `git switch` command in `getting-started.md` with another branch; a link into the CarX.Modding.Creator repository that points to a branch or to a commit other than the submodule commit, or to a missing file |
+| `src` | A `<!-- src -->` comment whose file or lines don't exist; as a warning, a line whose quoted messages and identifiers don't occur within 5 lines of the cited lines, with the line where the text is now, and a quoted message that occurs in none of the cited files |
 
 To run some of the checks, pass them with `--check`, for example `--check links,parity`. `--strict` turns warnings into errors, and `--release` turns `synced-with` markers into errors.
 

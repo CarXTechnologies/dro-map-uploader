@@ -38,7 +38,9 @@ Result: the new `dro-map-uploader` folder holds the project, and its `Assets/Plu
 <details>
 <summary>The submodule fails with Permission denied (publickey) or Host key verification failed</summary>
 
-The project registers its submodule with an SSH address, `git@github.com:CarXTechnologies/CarX.Modding.Creator.git`. Without a GitHub SSH key, the clone downloads the main project but stops at the submodule with `Permission denied (publickey)`. If this computer has never connected to GitHub over SSH and you don't confirm the `github.com` host when SSH asks, the clone stops with `Host key verification failed.` instead. <!-- src: .gitmodules:3 -->
+The project registers its submodule with an SSH address, `git@github.com:CarXTechnologies/CarX.Modding.Creator.git`. <!-- src: .gitmodules:3 -->
+
+Without a GitHub SSH key, the clone downloads the main project but stops at the submodule with `Permission denied (publickey)`. If this computer has never connected to GitHub over SSH and you don't confirm the `github.com` host when SSH asks, the clone stops with `Host key verification failed.` instead.
 
 To fetch the submodule over HTTPS:
 

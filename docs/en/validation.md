@@ -39,7 +39,7 @@ Map validation - <map name> (<scene>): no problems found.
 The **Build map** button runs the same checks before it builds anything:
 
 - It checks the map settings first, while the footer shows `Checking map settings…`. If the settings have an error, the build stops there, and the scene isn't checked. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:404 -->
-- Like **Validate map**, it then opens **Scene** if it isn't the active scene, even when **Rebuild targets** doesn't include **Map**. If you cancel Unity's prompt to save the open scenes, the build stops without adding a validation issue, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` <!-- src: Assets/Editor/MapBuilder.cs:296 -->
+- Like **Validate map**, it then opens **Scene** if it isn't the active scene, even when **Rebuild targets** doesn't include **Map**. If you cancel Unity's prompt to save the open scenes, the build stops without adding a validation issue, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` <!-- src: Assets/Editor/MapBuilder.cs:296; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 - It then checks the scene, while the footer shows `Validating and collecting scene resources…`. This step runs only when **Rebuild targets** under **Advanced settings** includes **Map**. Any error stops the build. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:405 -->
 - Warnings and notes never stop a build.
 
@@ -53,7 +53,7 @@ After a build, the **Map Validation** window opens only when the report has at l
 
 The **Map Validation** window lists every issue from one run, grouped by category. Its first line names the map, the scene and the format as `<map name>  -  <scene>  (<format>)`. The window and its messages are in English in both interface languages. <!-- src: Assets/Editor/Validation/MapValidationWindow.cs:63 -->
 
-The following screenshot shows the window for the TestMap sample with one added Road marker object, `DemoRoadWithoutCollider`, that has no collider. The other issues come from TestMap itself and don't stop a build: warnings for its 8 unsupported `Ambient` markers and, in the collapsed **Geometry** category, for 12 LODGroups with no renderers, and notes for the preview sun and each preview-only component.
+The following screenshot shows the window for the TestMap sample with one added Road marker object, `DemoRoadWithoutCollider`, that has no collider. The other issues come from TestMap itself and don't stop a build: a warning for `wall_coll`, whose Road marker uses `Road/default`, a surface the game doesn't have, warnings for its 8 unsupported `Ambient` markers and, in the collapsed **Geometry** category, for 12 LODGroups with no renderers, and notes for the preview sun and each preview-only component.
 
 <img src="../images/shared/validation-window.png" width="900" alt="Screenshot of the Map Validation window with a Markers error; callouts 1–5 on the headline, filters, toolbar, category and Select.">
 
@@ -176,7 +176,7 @@ These issues come from components that only the editor preview uses, and from th
 <details>
 <summary><b>Geometry</b>: meshes, LOD groups and the sector budget</summary>
 
-These checks cover meshes, material slots, mesh colliders, LOD groups and build optimization. See [Optimization](build.md#optimization). <!-- src: Assets/Editor/Validation/SceneValidator.cs:762-828,853-883 -->
+These checks cover meshes, material slots, mesh colliders, LOD groups and build optimization. See [Optimization](build.md#optimization). <!-- src: Assets/Editor/Validation/SceneValidator.cs:778-844,869-899 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -196,7 +196,7 @@ For the meshes that the sector check covers, see [Sector budget](reference.md#se
 <details>
 <summary><b>Lighting</b>: lights that don't reach the game</summary>
 
-Only Point and Spot lights are exported. See [Set up lighting](scene-setup.md#lighting). <!-- src: Assets/Editor/Validation/SceneValidator.cs:713-760 -->
+Only Point and Spot lights are exported. See [Set up lighting](scene-setup.md#lighting). <!-- src: Assets/Editor/Validation/SceneValidator.cs:729-776 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -209,13 +209,14 @@ Only Point and Spot lights are exported. See [Set up lighting](scene-setup.md#li
 <details>
 <summary><b>Markers</b>: GameMarkerData</summary>
 
-These checks cover marker types, spawn points, Road markers and Animation markers. See [Add markers](markers.md). <!-- src: Assets/Editor/Validation/SceneValidator.cs:213-294 -->
+These checks cover marker types, spawn points, Road markers and Animation markers. See [Add markers](markers.md). <!-- src: Assets/Editor/Validation/SceneValidator.cs:213-302 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
 | Error | `'<object>' has a GameMarkerData with no type selected.` | In the marker, choose a type, or remove the component. |
 | Warning | `'<object>' uses unsupported marker '<head>'. This marker will be skipped during export. Supported types are SpawnPoint, Road, Animation and Material.` | Remove the component, or choose a supported type. The old types `Ambient`, `TimeObjectActivator` and `NetworkObject` are reported here. See [Troubleshooting](troubleshooting.md#msg-unsupported-marker). |
 | Error | `Animation marker requires an Animator with animation clips.` | In the Animation marker, assign **Animator**, or put the marker on the object with the Animator. The Animator needs a controller with at least one clip. See [Troubleshooting](troubleshooting.md#msg-animation-no-animator). |
+| Warning | `'<object>' uses the surface '<surface>', which the game doesn't have, so its collider gets no surface in the game. Use '<replacement>' instead.` | In the marker's type menu, select the surface that the message names: `Road/asphalt` instead of `Road/default`, `Road/road_icy` instead of `Road/ice_snowy`, `Road/paving_slab` instead of `Road/pavement`. See [Troubleshooting](troubleshooting.md#msg-road-unavailable-surface). |
 | Error | `'<object>' is marked as Road but has no Collider on it or its children, so its surface type will never be used. Add a Mesh/Box/Sphere/Capsule Collider.` | Add a Mesh, Box, Sphere or Capsule Collider to the same GameObject as the marker. Validation also accepts a collider on a child, but export gives that collider no surface. See [Troubleshooting](troubleshooting.md#msg-road-no-collider). |
 | Error | `The map has no GameMarkerData at all - at minimum it needs a spawn point.` | Add a SpawnPoint marker. A scene with no markers also gets the next error and a Budget error. See [Troubleshooting](troubleshooting.md#msg-no-spawn). |
 | Error | `The map has no SpawnPoint marker, so there is nowhere for a car to appear. Add an empty object with GameMarkerData set to SpawnPoint.` | Create an empty GameObject, add the GameMarkerData component and choose **SpawnPoint**. See [Troubleshooting](troubleshooting.md#msg-no-spawn). |
@@ -226,7 +227,7 @@ These checks cover marker types, spawn points, Road markers and Animation marker
 <details>
 <summary><b>Markers</b>: Material markers</summary>
 
-Material markers replace materials with render core variants, and they apply only to Binary builds. Their issues appear in the Markers category. The last two rows are checked only when **Format** is **Binary**. See [Replace materials with render core variants](markers.md#material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:300-524,592-663 -->
+Material markers replace materials with render core variants, and they apply only to Binary builds. Their issues appear in the Markers category. The last two rows are checked only when **Format** is **Binary**. See [Replace materials with render core variants](markers.md#material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:308-532,600-671 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -282,7 +283,7 @@ In the image messages, `<image>` is `icon` or `preview`. In the rows about an as
 <details>
 <summary><b>Minimap</b>: size and textures</summary>
 
-The scene needs exactly one Minimap; the Budget category checks the count. Keep the Minimap object active: validation also counts an inactive Minimap, but the build exports only an active one. See [Add the minimap](minimap-and-images.md#minimap). <!-- src: Assets/Editor/Validation/SceneValidator.cs:885-934 -->
+The scene needs exactly one Minimap; the Budget category checks the count. Keep the Minimap object active: validation also counts an inactive Minimap, but the build exports only an active one. See [Add the minimap](minimap-and-images.md#minimap). <!-- src: Assets/Editor/Validation/SceneValidator.cs:901-950 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -296,7 +297,7 @@ The scene needs exactly one Minimap; the Budget category checks the count. Keep 
 <details>
 <summary><b>Physics</b>: mesh colliders on moving Rigidbodies</summary>
 
-A Rigidbody that isn't kinematic needs convex mesh colliders. The Rigidbody can be on the collider's object or on a parent. <!-- src: Assets/Editor/Validation/SceneValidator.cs:830-851 -->
+A Rigidbody that isn't kinematic needs convex mesh colliders. The Rigidbody can be on the collider's object or on a parent. <!-- src: Assets/Editor/Validation/SceneValidator.cs:846-867 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -329,8 +330,7 @@ To hide the notes for a component type:
 
 Result: the next validation no longer lists `'AudioSource' on '<object>' is not a supported component…` notes. The component is still not exported.
 
-- For what an entry hides, and the entry that ships with the project, see [MapSkipComponentConfig](reference.md#skip-components).
-- Edit this asset rather than creating another one. With two MapSkipComponentConfig assets in `Resources` folders, validation stops with `(Singleton) Multiple config for : MapSkipComponentConfig` in the Console. <!-- src: Assets/Scripts/SingletonScriptableObject.cs:26 -->
+- Edit this asset rather than creating another one. For what an entry hides, the entry that ships with the project and what a second copy of the asset does, see [MapSkipComponentConfig](reference.md#skip-components).
 
 <a name="elsewhere"></a>
 ## Checked elsewhere
@@ -339,7 +339,7 @@ Some problems never appear in the **Map Validation** window. Check for them sepa
 
 **Build size.** MapBuilder checks the size of the map and its metadata only immediately before **Create publication** or **Update publication**, and a build that is too large stops the upload with an error in the Console. For the limits, see [Build size](reference.md#limits-size); for the fix, see [Troubleshooting](troubleshooting.md#msg-map-size). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182 -->
 
-**Export errors.** Some problems are found only while the build exports the scene. They stop the build and appear in the Console as an exception, usually `InvalidOperationException`, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` Export can also log warnings that don't stop the build. For every export error and warning with its cause and fix, see [Build errors in the Console](troubleshooting.md#build-errors). <!-- src: Assets/Editor/MapBuilder.cs:324-328 -->
+**Export errors.** Some problems are found only while the build exports the scene. They stop the build and appear in the Console as an exception, usually `InvalidOperationException`, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` Export can also log warnings that don't stop the build. For every export error and warning with its cause and fix, see [Build errors in the Console](troubleshooting.md#build-errors). <!-- src: Assets/Editor/MapBuilder.cs:324-328; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
 **Image size in pixels.** Validation checks the format, Read/Write and file size of the Icon and the Preview, but not their size in pixels or their aspect ratio. See [Image requirements](minimap-and-images.md#images).
 

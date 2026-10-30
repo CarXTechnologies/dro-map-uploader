@@ -38,7 +38,9 @@
 <details>
 <summary>Сабмодуль не загружается: Permission denied (publickey) или Host key verification failed</summary>
 
-Сабмодуль зарегистрирован в проекте по SSH-адресу `git@github.com:CarXTechnologies/CarX.Modding.Creator.git`. Без SSH-ключа GitHub клонирование загружает основной проект, но останавливается на сабмодуле с ошибкой `Permission denied (publickey)`. Если этот компьютер ещё ни разу не подключался к GitHub по SSH и вы не подтвердили хост `github.com`, когда SSH об этом спросил, клонирование вместо этого останавливается с ошибкой `Host key verification failed.` <!-- src: .gitmodules:3 -->
+Сабмодуль зарегистрирован в проекте по SSH-адресу `git@github.com:CarXTechnologies/CarX.Modding.Creator.git`. <!-- src: .gitmodules:3 -->
+
+Без SSH-ключа GitHub клонирование загружает основной проект, но останавливается на сабмодуле с ошибкой `Permission denied (publickey)`. Если этот компьютер ещё ни разу не подключался к GitHub по SSH и вы не подтвердили хост `github.com`, когда SSH об этом спросил, клонирование вместо этого останавливается с ошибкой `Host key verification failed.`
 
 Чтобы загрузить сабмодуль по HTTPS:
 

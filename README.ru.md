@@ -99,7 +99,7 @@ flowchart LR
 | Иконка и превью (Preview) | Иконка обязательна, превью — нет. Формат, размер файла и размер в пикселях см. в разделе [Требования к изображениям](docs/ru/minimap-and-images.md#images). |
 | Имя сцены | Начинается с буквы и содержит только буквы, цифры и `_`. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:32-45 --> |
 | Размер сборки | Карта ≤ 4096 МБ, метаданные ≤ 24 МБ; размер измеряется по папкам кэша сборки `MapTemp` и `MetaTemp`, а не по `mod.cxmod`. Проверяется только при создании или обновлении публикации. <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182; Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26 --> |
-| Состав сцены | Ровно 1 Minimap; не меньше 1 SpawnPoint; ≤ 500 источников света (экспортируются только Point и Spot, а в игре они включаются только ночью); ≤ 1000 Rigidbody; ≤ 8 уровней LOD на LODGroup. <!-- src: Assets/Editor/MapSceneRules.cs:11-24; Assets/Editor/Validation/SceneValidator.cs:278-284,811; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:98-100; game --> |
+| Состав сцены | Ровно 1 Minimap; не меньше 1 SpawnPoint; ≤ 500 источников света (экспортируются только Point и Spot, а в игре они включаются только ночью); ≤ 1000 Rigidbody; ≤ 8 уровней LOD на LODGroup. <!-- src: Assets/Editor/MapSceneRules.cs:11-24; Assets/Editor/Validation/SceneValidator.cs:286-292,827; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:98-100; game --> |
 
 Далее: [Справочник](docs/ru/reference.md)
 

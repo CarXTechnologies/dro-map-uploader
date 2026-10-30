@@ -36,7 +36,7 @@ Other limits on scene content:
 
 | Rule | Limit | What happens otherwise |
 | --- | --- | --- |
-| Levels in one LOD group | 8 | A Geometry error in validation, which stops the build. <!-- src: Assets/Editor/Validation/SceneValidator.cs:811-819 --> |
+| Levels in one LOD group | 8 | A Geometry error in validation, which stops the build. <!-- src: Assets/Editor/Validation/SceneValidator.cs:827-835 --> |
 | **Bake frames per second** of an Animation marker | 1–60, default 30 | The **Inspector** slider doesn't go outside the range. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Meta/AnimationMeta.cs:12 --> |
 | Animation markers per Animator | 1 | The build stops with `Animator '<name>' has multiple Animation markers.` in the Console. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:34-35 --> |
 | Marked Animators inside each other | Not allowed | The build stops with `Animation marker hierarchies must not overlap.` in the Console. |
@@ -51,9 +51,9 @@ After a build that includes **Map**, the **Scene contents** panel on the **Build
 <a name="sector-budget"></a>
 ### Sector budget
 
-Validation also gives a Geometry warning for each large static mesh that build optimization won't cut into sectors. These warnings never stop the build. <!-- src: Assets/Editor/Validation/SceneValidator.cs:853-883 -->
+Validation also gives a Geometry warning for each large static mesh that build optimization won't cut into sectors. These warnings never stop the build. <!-- src: Assets/Editor/Validation/SceneValidator.cs:869-899 -->
 
-- **What is checked.** Each enabled MeshRenderer that has a MeshFilter, and each enabled MeshCollider that isn't a trigger and isn't convex, on an object that optimization processes: an active object that isn't tagged `Garbage` and has no Rigidbody, Animator, Animation, LODGroup or marker other than Road and Material on itself or on a parent. <!-- src: Assets/Editor/Validation/SceneValidator.cs:879-881 -->
+- **What is checked.** Each enabled MeshRenderer that has a MeshFilter, and each enabled MeshCollider that isn't a trigger and isn't convex, on an object that optimization processes: an active object that isn't tagged `Garbage` and has no Rigidbody, Animator, Animation, LODGroup or marker other than Road and Material on itself or on a parent. <!-- src: Assets/Editor/Validation/SceneValidator.cs:895-897 -->
 - **The budget.** A mesh exceeds it when it is larger than **Sector size (m)** in any world dimension, `64` m by default, or has more triangles than **Max triangles per mesh**, `8192` by default. Colliders are measured against the same two values, not against the collider grid.
 - **When the warning appears.** Only for meshes that optimization won't cut into sectors: every such mesh while **Optimize build** is off, MeshColliders while **Partition static colliders** is off, and render meshes while **Partition static render meshes** is off. With the default settings, there are no sector-budget warnings, and the TestMap sample gets none.
 - **What isn't listed.** A renderer or MeshCollider that optimization leaves whole for another reason, for example a transparent renderer or an object with more than one MeshCollider, keeps its size and gets no warning. See [Optimization](build.md#optimization).
@@ -81,26 +81,27 @@ For what to enter in each field, see [Fill in the Map tab](map-settings.md#map-t
 <a name="limits-images"></a>
 ### Images
 
-| Image | Required | Format | Read/Write | File size | Pixel size |
-| --- | --- | --- | --- | --- | --- |
-| **Icon · 16:9** | Yes: an error when missing | PNG. JPG gives a warning, any other format an error. | Must be on | At most 8 MB | mod.io needs at least 512 × 288 and recommends 16:9. MapUploader doesn't check it. <!-- src: Assets/Plugins/Modio/Modio/API/Generated/Definitions/RequestObjects/EditModRequest.cs:31 --> |
-| **Preview · 16:9** | No: a warning when missing | PNG. JPG gives a warning, any other format an error. | Must be on | At most 10 MB | Not checked; 16:9 is recommended. <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:14 --> |
-| Minimap texture | Yes: at least one **Textures** element, each with a **Main Texture** | Texture2D; any other texture type is an error | Not needed | Counts toward the metadata size | Not checked. The game uses only **Element 0**. |
-
-The Icon is both the mod.io logo and the image of the map in the game. The Preview isn't uploaded as the logo; it travels inside the map metadata. See [Image requirements](minimap-and-images.md#images).
+For the Icon, the Preview and the minimap image, with whether each is required, its format, **Read/Write**, file size and pixel size, and where it appears, see [Image requirements](minimap-and-images.md#images).
 
 <a name="limits-size"></a>
 ### Build size
 
 | Part | Limit | Measured on |
 | --- | --- | --- |
-| Map: geometry, collision, markers, lights, dynamic objects and animation | 4096 MB | The `MapTemp` folder of the [build cache](build.md#cache). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182 --> |
-| Metadata: map settings, Icon, Preview and minimap textures | 24 MB | The `MetaTemp` folder of the build cache. |
+| Map: geometry, materials, textures, collision, markers, lights, dynamic objects and animation | 4096 MB | The `MapTemp` folder of the [build cache](build.md#cache). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182; Assets/Editor/MapBuilder.cs:134-157 --> |
+| Metadata: map settings, Icon, Preview and minimap images | 24 MB | The `MetaTemp` folder of the build cache. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26; Assets/Editor/MapBuilder.cs:159-202 --> |
 
 > [!IMPORTANT]
 > The build size is checked only immediately before **Create publication** or **Update publication**, and the result appears only in the Console. **Validate map**, the **Build map** button and the **Export to folder** button don't check it.
 
-Both sizes are measured on the build cache folders, not on the packed `mod.cxmod`. When a part is too large, nothing is uploaded, and the Console shows `'<scene>': the map is <X> mb and this vendor accepts <L> mb.`, or `the meta is` for the metadata. On the **Publish** tab, a publication's size is shown against the sum of both limits: `<MB> / 4120 mb`. <!-- src: Assets/Editor/MapBuilder.Publishing.cs:75-78 -->
+Both sizes are measured on the build cache folders, not on the packed `mod.cxmod`. When a part is too large, MapBuilder uploads nothing, the footer shows `Publication did not complete. See the Console.` or `Update did not complete. See the Console.`, and the Console shows one of these errors, where `<scene>` is the scene name: <!-- src: Assets/Editor/MapBuilder.Storage.cs:167-178; Assets/Editor/MapBuilderEditorWindow.Publish.cs:102,184 -->
+
+```text
+'<scene>': the map is <X> mb and this vendor accepts 4096 mb.
+'<scene>': the meta is <X> mb and this vendor accepts 24 mb.
+```
+
+To bring the metadata under its limit, use smaller images for the Icon, the Preview and the minimap. For the map part, see [Troubleshooting](troubleshooting.md#msg-map-size). On the **Publish** tab, a publication's size is shown against the sum of both limits: `<MB> / 4120 mb`. <!-- src: Assets/Editor/MapBuilder.Publishing.cs:75-78 -->
 
 The game has load limits of its own, so a very large map may fail to load even within the mod.io limit. Load a large map in the game before you publish it; see [Test the map in the game](test-in-game.md).
 
@@ -124,7 +125,7 @@ The project already contains the mod.io settings for CarX Drift Racing Online 2 
 <a name="surfaces"></a>
 ## Road surfaces and physics fields
 
-The **Road** submenu of the GameMarkerData type menu offers 26 surfaces, in this order. A marker stores its type as `Road/<surface>`, and the game loads its own surface by the part after `Road/`. The last column gives the **Surface Type** of each surface in the game. <!-- src: Assets/Scripts/MarkerData.cs:12-37 -->
+The **Road** submenu of the GameMarkerData type menu offers 27 surfaces, in this order. A marker stores its type as `Road/<surface>`, and the game loads its own surface by the part after `Road/`. The last column gives the **Surface Type** of each surface in the game. <!-- src: Assets/Scripts/MarkerData.cs:12-38 -->
 
 | # | Menu entry | Stored type | **Surface Type** in the game |
 | --- | --- | --- | --- |
@@ -150,13 +151,13 @@ The **Road** submenu of the GameMarkerData type menu offers 26 surfaces, in this
 | 20 | **Road** > **sand** | `Road/sand` | `Sand` |
 | 21 | **Road** > **snow** | `Road/snow` | `Asphalt` |
 | 22 | **Road** > **snow_asphalt** | `Road/snow_asphalt` | `Ice` |
-| 23 | **Road** > **snow_cobbles** | `Road/snow_cobbles` | `Ice` |
-| 24 | **Road** > **snow_gravel** | `Road/snow_gravel` | `Earth` |
-| 25 | **Road** > **wood** | `Road/wood` | `Earth` |
-| 26 | **Road** > **wood_plank** | `Road/wood_plank` | `Earth` |
+| 23 | **Road** > **snow_deep** | `Road/snow_deep` | `Snow` |
+| 24 | **Road** > **snow_cobbles** | `Road/snow_cobbles` | `Ice` |
+| 25 | **Road** > **snow_gravel** | `Road/snow_gravel` | `Earth` |
+| 26 | **Road** > **wood** | `Road/wood` | `Earth` |
+| 27 | **Road** > **wood_plank** | `Road/wood_plank` | `Earth` |
 
-> [!IMPORTANT]
-> The game has no surface named `default`, `ice_snowy` or `pavement`, so a collider with one of them gets no road surface, with values or without. Use `asphalt` instead of `default`, `road_icy` instead of `ice_snowy` and `paving_slab` instead of `pavement`.
+The game has no surface named `default`, `ice_snowy` or `pavement`, so a collider with one of them gets no road surface, with values or without. Use `asphalt` instead of `default`, `road_icy` instead of `ice_snowy` and `paving_slab` instead of `pavement`. Validation warns about a marker with one of them; see [Troubleshooting](troubleshooting.md#msg-road-unavailable-surface). <!-- src: Assets/Editor/Validation/SceneValidator.cs:264-270,722-727 -->
 
 Such a collider behaves like a collider without a Road marker, and the game log, `Player.log`, shows a warning that starts with `Road marker references surface template '<name>'`. In the TestMap sample, `Content/workshop_map_main/wall_coll` has a `Road/default` marker, so it gets no road surface.
 
@@ -167,19 +168,19 @@ A Road marker applies its surface only to the GameObject it is on, so put it on 
 
 For each Road marker, the game loads its own surface of the same name. If the marker exports physics values, they replace all the values of that surface, **Surface Type** and **Water Rate** included. If it exports none, the game uses its surface unchanged. <!-- src: game -->
 
-The build resolves the values of each marker from its **Template Config** and its template menu. Selecting markers in the **Inspector**, one at a time or several at once, doesn't change what they export. A marker exports these values: <!-- src: Assets/Scripts/GameMarkerData.cs:10-38 -->
+The build resolves the values of each marker from its **Template Config** and its template menu. Showing markers in the **Inspector**, one at a time or several at once, doesn't change what they export; changing their surface resets their **Custom** values, as the following table describes. A marker exports these values: <!-- src: Assets/Scripts/GameMarkerData.cs:10-38 -->
 
 | Marker state | Values the marker exports |
 | --- | --- |
 | No **Template Config** | None: the game uses its own surface. This also applies to a marker whose type you changed with **Select : &lt;type&gt;**, and to values that the **Inspector** or an earlier version saved on the marker. |
 | **Template Config** with a named template | The template's values at the time of the build. After you edit a template, build the map again; its markers don't need to be selected. |
-| **Template Config** with **Custom** | The marker's own values. They start from the surface defaults. When the surface changes, the **Inspector** resets them to the defaults of the new surface the next time it shows the marker, so after **Select : &lt;type&gt;** they keep the old surface's values until then. <!-- src: Assets/Editor/MarkerDataDrawer.cs:197-210 --> |
+| **Template Config** with **Custom** | The marker's own values. They start from the surface defaults. When the surface changes, in the type menu of one marker or with **Select : &lt;type&gt;** for several, they reset to the defaults of the new surface. **Select : &lt;type&gt;** keeps them when every selected marker already has that surface. <!-- src: Assets/Editor/MarkerDataDrawer.cs:59-75,208-221 --> |
 | **Template Config** whose template was removed | The marker's own **Custom** values. The **Inspector** shows **Custom** in its template menu. |
 | Values that are `0` in every field | None: the game uses its own surface. **Friction** `0` would make the surface as slippery as ice. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:555-560 --> |
 
 The surface defaults are the MapUploader values in `Assets/Resources/DefaultRoadValues/<surface>.asset`, and a new template and a **Custom** marker start from them. Their **Surface Type** matches the game's type for that surface (`Asphalt` for `default` and `pavement`, `Ice` for `ice_snowy`), and their **Water Rate** is `0`, as on every game surface. Their other fields can differ from the game's surface: for example, `grass` has **Bump Min** `0.05`, against `-0.03` in the game, and `wood` has **Friction** `0.85`, against `1`. To keep the game's surface, don't assign a **Template Config**. <!-- src: Assets/Resources/DefaultRoadValues/grass.asset:15-25 -->
 
-The fields appear only after you assign a **Template Config** to the marker. A named template shows its values read-only, and **Custom** gives the marker its own editable values. See [Reuse road values with templates](markers.md#templates). <!-- src: Assets/Editor/MarkerDataDrawer.cs:141-190,212-225 -->
+The fields appear only after you assign a **Template Config** to the marker. A named template shows its values read-only, and **Custom** gives the marker its own editable values. See [Reuse road values with templates](markers.md#templates). <!-- src: Assets/Editor/MarkerDataDrawer.cs:152-201,223-236 -->
 
 <a name="older-values"></a>
 ### Values saved by an earlier version
@@ -209,7 +210,7 @@ The fields appear in this order on a Road marker with a **Template Config**, and
 | **Water Rate** | Any number |
 | **Surface Type** | `Asphalt`, `Grass`, `Sand`, `Earth`, `Snow`, `Ice` or `Gravel` <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Instances/SurfaceType.cs:5-11 --> |
 
-**Surface Type** is a field inside the values, with 7 options. It isn't the same list as the 26 surfaces of the **Road** submenu.
+**Surface Type** is a field inside the values, with 7 options. It isn't the same list as the 27 surfaces of the **Road** submenu.
 
 <a name="optimization-defaults"></a>
 ## Build optimization settings
@@ -230,7 +231,7 @@ Both formats export lights the same way. <!-- src: Assets/Plugins/CarX.Modding.C
 | Budget | At most 500 Light and 500 HDAdditionalLightData components. Disabled lights and lights on inactive objects count too. |
 | In the game | Exported lights turn on only at night. <!-- src: game --> |
 | Preview only | Directional and Area lights, Volume (sky, fog, exposure) and Reflection Probes light only the preview in the editor. The game supplies its own environment lighting. |
-| Validation | One Lighting note for each enabled Directional light, such as a preview sun. One Lighting warning for each enabled light of another type that isn't a Point or Spot light, such as an Area light. One more warning when the scene has two or more Directional lights, disabled ones included. <!-- src: Assets/Editor/Validation/SceneValidator.cs:713-760 --> |
+| Validation | One Lighting note for each enabled Directional light, such as a preview sun. One Lighting warning for each enabled light of another type that isn't a Point or Spot light, such as an Area light. One more warning when the scene has two or more Directional lights, disabled ones included. <!-- src: Assets/Editor/Validation/SceneValidator.cs:729-776 --> |
 
 For how to set up lights, see [Set up lighting](scene-setup.md#lighting).
 
@@ -434,10 +435,10 @@ Use these terms in both languages. The **Meaning** column says where each term i
 | preview | превью | The **Preview · 16:9** image, a large picture stored in the map metadata. See [Image requirements](minimap-and-images.md#images). |
 | publication | публикация | A mod entry on mod.io, listed in **Publications**. See [Publish to mod.io](publish.md). |
 | render core variant | вариант render core | One of the game's material types that a Material marker can assign. |
-| Road marker | маркер Road | A marker that gives an object one of 26 road surfaces. See [Road surfaces and physics fields](#surfaces). |
+| Road marker | маркер Road | A marker that gives an object one of 27 road surfaces. See [Road surfaces and physics fields](#surfaces). |
 | sector | сектор | A grid cell that optimization cuts static geometry into. |
 | spawn point / fast-travel point | точка появления / точка быстрого перемещения | A SpawnPoint marker. By default, the car starts at the first one, and every one is a fast-travel point on the in-game world map. See [Add spawn points](markers.md#spawn). |
-| surface | поверхность | One of the 26 Road presets, such as `Road/asphalt`. Not the same as the **Surface Type** field. |
+| surface | поверхность | One of the 27 Road presets, such as `Road/asphalt`. Not the same as the **Surface Type** field. |
 | template | шаблон | A named set of road physics values in a GameMarkerTemplateConfig. See [Reuse road values with templates](markers.md#templates). |
 | validation | проверка | Checking the map against every rule, with **Validate map** or as the first step of a build. See [Fix validation problems](validation.md). |
 | vertex animation | вершинная анимация | Animation baked from an Animator's clips, which the game plays without the Animator. See [Animate objects with vertex animation](markers.md#animation). |

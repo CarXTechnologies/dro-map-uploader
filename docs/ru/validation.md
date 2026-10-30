@@ -39,7 +39,7 @@ Map validation - <map name> (<scene>): no problems found.
 Кнопка **Собрать карту** (Build map) выполняет те же проверки, прежде чем что-либо собрать:
 
 - Сначала она проверяет настройки карты; в это время в нижней панели видна строка `Проверка настроек карты…` (`Checking map settings…`). Если в настройках есть ошибка, сборка на этом останавливается, а сцена не проверяется. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:404 -->
-- Затем, как и **Проверить карту**, она открывает сцену из списка **Сцена**, если та не активна, даже когда **Что пересобрать** не включает **Map**. Если отменить предложение Unity сохранить открытые сцены, сборка останавливается без замечания проверки, а итоговая строка на вкладке **Сборка** — `Сборка не завершена полностью. Проверьте результаты проверки и Console.` (`Build incomplete. Check validation results and the Console.`). <!-- src: Assets/Editor/MapBuilder.cs:296 -->
+- Затем, как и **Проверить карту**, она открывает сцену из списка **Сцена**, если та не активна, даже когда **Что пересобрать** не включает **Map**. Если отменить предложение Unity сохранить открытые сцены, сборка останавливается без замечания проверки, а итоговая строка на вкладке **Сборка** — `Сборка не завершена полностью. Проверьте результаты проверки и Console.` (`Build incomplete. Check validation results and the Console.`). <!-- src: Assets/Editor/MapBuilder.cs:296; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 - Затем она проверяет сцену; в это время в нижней панели видна строка `Проверка и сбор ресурсов сцены…` (`Validating and collecting scene resources…`). Этот шаг выполняется, только если **Что пересобрать** в разделе **Дополнительные настройки** включает **Map**. Любая ошибка останавливает сборку. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:405 -->
 - Предупреждения и заметки никогда не останавливают сборку.
 
@@ -53,7 +53,7 @@ Map validation - <map name> (<scene>): no problems found.
 
 Окно **Map Validation** перечисляет все замечания одного запуска, сгруппированные по категориям. В первой строке указаны карта, сцена и формат в виде `<map name>  -  <scene>  (<format>)`. Окно и его сообщения на английском при любом языке интерфейса. <!-- src: Assets/Editor/Validation/MapValidationWindow.cs:63 -->
 
-На следующем скриншоте показано окно для примера TestMap с одним добавленным объектом с маркером Road, `DemoRoadWithoutCollider`, у которого нет коллайдера. Остальные замечания относятся к самой TestMap и не останавливают сборку: предупреждения о её 8 неподдерживаемых маркерах `Ambient` и, в свёрнутой категории **Geometry**, о 12 LODGroup без рендереров, а также заметки о солнце для предпросмотра и о каждом компоненте только для предпросмотра.
+На следующем скриншоте показано окно для примера TestMap с одним добавленным объектом с маркером Road, `DemoRoadWithoutCollider`, у которого нет коллайдера. Остальные замечания относятся к самой TestMap и не останавливают сборку: предупреждение о `wall_coll`, маркер Road которого использует `Road/default` — поверхность, которой нет в игре, предупреждения о её 8 неподдерживаемых маркерах `Ambient` и, в свёрнутой категории **Geometry**, о 12 LODGroup без рендереров, а также заметки о солнце для предпросмотра и о каждом компоненте только для предпросмотра.
 
 <img src="../images/shared/validation-window.png" width="900" alt="Скриншот окна Map Validation с ошибкой категории Markers; выноски 1–5 на заголовке, фильтрах, панели инструментов, категории и Select.">
 
@@ -176,7 +176,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Geometry</b>: меши, группы LOD и бюджет сектора</summary>
 
-Эти проверки охватывают меши, слоты материалов, коллайдеры MeshCollider, группы LOD и оптимизацию сборки. См. [Оптимизация](build.md#optimization). <!-- src: Assets/Editor/Validation/SceneValidator.cs:762-828,853-883 -->
+Эти проверки охватывают меши, слоты материалов, коллайдеры MeshCollider, группы LOD и оптимизацию сборки. См. [Оптимизация](build.md#optimization). <!-- src: Assets/Editor/Validation/SceneValidator.cs:778-844,869-899 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -196,7 +196,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Lighting</b>: источники света, которые не попадают в игру</summary>
 
-Экспортируются только источники света Point и Spot. См. [Настройка освещения](scene-setup.md#lighting). <!-- src: Assets/Editor/Validation/SceneValidator.cs:713-760 -->
+Экспортируются только источники света Point и Spot. См. [Настройка освещения](scene-setup.md#lighting). <!-- src: Assets/Editor/Validation/SceneValidator.cs:729-776 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -209,13 +209,14 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Markers</b>: GameMarkerData</summary>
 
-Эти проверки охватывают типы маркеров, точки появления, маркеры Road и маркеры Animation. См. [Маркеры GameMarkerData](markers.md). <!-- src: Assets/Editor/Validation/SceneValidator.cs:213-294 -->
+Эти проверки охватывают типы маркеров, точки появления, маркеры Road и маркеры Animation. См. [Маркеры GameMarkerData](markers.md). <!-- src: Assets/Editor/Validation/SceneValidator.cs:213-302 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
 | Ошибка | `'<object>' has a GameMarkerData with no type selected.` | Выберите тип в маркере или удалите компонент. |
 | Предупреждение | `'<object>' uses unsupported marker '<head>'. This marker will be skipped during export. Supported types are SpawnPoint, Road, Animation and Material.` | Удалите компонент или выберите поддерживаемый тип. Сюда попадают старые типы `Ambient`, `TimeObjectActivator` и `NetworkObject`. См. [Решение проблем](troubleshooting.md#msg-unsupported-marker). |
 | Ошибка | `Animation marker requires an Animator with animation clips.` | В маркере Animation назначьте **Animator** или поместите маркер на объект с Animator. У Animator должен быть контроллер хотя бы с одним клипом. См. [Решение проблем](troubleshooting.md#msg-animation-no-animator). |
+| Предупреждение | `'<object>' uses the surface '<surface>', which the game doesn't have, so its collider gets no surface in the game. Use '<replacement>' instead.` | В меню типа маркера выберите поверхность, которую называет сообщение: `Road/asphalt` вместо `Road/default`, `Road/road_icy` вместо `Road/ice_snowy`, `Road/paving_slab` вместо `Road/pavement`. См. [Решение проблем](troubleshooting.md#msg-road-unavailable-surface). |
 | Ошибка | `'<object>' is marked as Road but has no Collider on it or its children, so its surface type will never be used. Add a Mesh/Box/Sphere/Capsule Collider.` | Добавьте Mesh, Box, Sphere или Capsule Collider на тот же GameObject, что и маркер. Проверка принимает и коллайдер на дочернем объекте, но экспорт не назначает такому коллайдеру поверхность. См. [Решение проблем](troubleshooting.md#msg-road-no-collider). |
 | Ошибка | `The map has no GameMarkerData at all - at minimum it needs a spawn point.` | Добавьте маркер SpawnPoint. Сцена без маркеров получает также следующую ошибку и ошибку Budget. См. [Решение проблем](troubleshooting.md#msg-no-spawn). |
 | Ошибка | `The map has no SpawnPoint marker, so there is nowhere for a car to appear. Add an empty object with GameMarkerData set to SpawnPoint.` | Создайте пустой GameObject, добавьте компонент GameMarkerData и выберите **SpawnPoint**. См. [Решение проблем](troubleshooting.md#msg-no-spawn). |
@@ -226,7 +227,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Markers</b>: маркеры Material</summary>
 
-Маркеры Material заменяют материалы вариантами render core и действуют только в сборках Binary. Их замечания появляются в категории Markers. Две последние строки проверяются, только если в списке **Формат** выбрано **Binary**. См. [Замена материалов вариантами render core](markers.md#material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:300-524,592-663 -->
+Маркеры Material заменяют материалы вариантами render core и действуют только в сборках Binary. Их замечания появляются в категории Markers. Две последние строки проверяются, только если в списке **Формат** выбрано **Binary**. См. [Замена материалов вариантами render core](markers.md#material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:308-532,600-671 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -282,7 +283,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Minimap</b>: размер и текстуры</summary>
 
-В сцене должен быть ровно один Minimap; их количество проверяет категория Budget. Держите объект Minimap активным: проверка учитывает и неактивный Minimap, но сборка экспортирует только активный. См. [Добавление мини-карты](minimap-and-images.md#minimap). <!-- src: Assets/Editor/Validation/SceneValidator.cs:885-934 -->
+В сцене должен быть ровно один Minimap; их количество проверяет категория Budget. Держите объект Minimap активным: проверка учитывает и неактивный Minimap, но сборка экспортирует только активный. См. [Добавление мини-карты](minimap-and-images.md#minimap). <!-- src: Assets/Editor/Validation/SceneValidator.cs:901-950 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -296,7 +297,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Physics</b>: MeshCollider на движущихся Rigidbody</summary>
 
-Rigidbody, который не является кинематическим, требует выпуклых (convex) коллайдеров MeshCollider. Rigidbody может находиться на объекте коллайдера или на родительском объекте. <!-- src: Assets/Editor/Validation/SceneValidator.cs:830-851 -->
+Rigidbody, который не является кинематическим, требует выпуклых (convex) коллайдеров MeshCollider. Rigidbody может находиться на объекте коллайдера или на родительском объекте. <!-- src: Assets/Editor/Validation/SceneValidator.cs:846-867 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -329,8 +330,7 @@ Rigidbody, который не является кинематическим, т
 
 Результат: следующая проверка больше не выводит заметки `'AudioSource' on '<object>' is not a supported component…`. Компонент по-прежнему не экспортируется.
 
-- Что скрывает запись и какая запись есть в списке изначально, см. в разделе [MapSkipComponentConfig](reference.md#skip-components).
-- Редактируйте этот ассет, а не создавайте новый. Если в папках `Resources` есть два ассета MapSkipComponentConfig, проверка останавливается с сообщением `(Singleton) Multiple config for : MapSkipComponentConfig` в Console. <!-- src: Assets/Scripts/SingletonScriptableObject.cs:26 -->
+- Редактируйте этот ассет, а не создавайте новый. Что скрывает запись, какая запись есть в списке изначально и к чему приводит второй такой ассет, см. в разделе [MapSkipComponentConfig](reference.md#skip-components).
 
 <a name="elsewhere"></a>
 ## Что проверяется в других местах
@@ -339,7 +339,7 @@ Rigidbody, который не является кинематическим, т
 
 **Размер сборки.** MapBuilder проверяет размер карты и её метаданных только непосредственно перед действием кнопки **Создать публикацию** (Create publication) или **Обновить публикацию** (Update publication), и слишком большая сборка останавливает загрузку с ошибкой в Console. Лимиты см. в разделе [Размер сборки](reference.md#limits-size), а исправление — на странице [Решение проблем](troubleshooting.md#msg-map-size). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182 -->
 
-**Ошибки экспорта.** Некоторые проблемы обнаруживаются только тогда, когда сборка экспортирует сцену. Они останавливают сборку и появляются в Console в виде исключения, обычно `InvalidOperationException`, а итоговая строка на вкладке **Сборка** — `Сборка не завершена полностью. Проверьте результаты проверки и Console.` Экспорт также может выводить предупреждения, которые не останавливают сборку. Все ошибки и предупреждения экспорта с причинами и способами исправления см. в разделе [Ошибки сборки в Console](troubleshooting.md#build-errors). <!-- src: Assets/Editor/MapBuilder.cs:324-328 -->
+**Ошибки экспорта.** Некоторые проблемы обнаруживаются только тогда, когда сборка экспортирует сцену. Они останавливают сборку и появляются в Console в виде исключения, обычно `InvalidOperationException`, а итоговая строка на вкладке **Сборка** — `Сборка не завершена полностью. Проверьте результаты проверки и Console.` Экспорт также может выводить предупреждения, которые не останавливают сборку. Все ошибки и предупреждения экспорта с причинами и способами исправления см. в разделе [Ошибки сборки в Console](troubleshooting.md#build-errors). <!-- src: Assets/Editor/MapBuilder.cs:324-328; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
 **Размер изображений в пикселях.** Проверка контролирует формат, Read/Write и размер файла иконки и превью, но не их размер в пикселях и не соотношение сторон. См. [Требования к изображениям](minimap-and-images.md#images).
 

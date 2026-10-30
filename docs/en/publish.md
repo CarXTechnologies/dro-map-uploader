@@ -28,7 +28,7 @@ On the **Publish** tab of the **MapBuilder** window, you send the current build 
 | 7 | **Create publication** | Creates a new, hidden publication on mod.io and uploads the current build to it. It's unavailable until you are signed in and the build is current. |
 | 8 | **Delete publication** | Deletes the selected publication from mod.io after you confirm. With no publication selected, it asks for the publication's id. |
 
-Before you sign in, the tab shows the `Not signed in to https://mod.io/g/carx-dro2.` box, **Publications** shows `No publications on mod.io yet.`, and **Create publication** and **Update publication** are unavailable. You don't need to sign in to validate, build or export the map. <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoAuthProvider.cs:154 -->
+Before you sign in, the tab shows the `Not signed in to https://mod.io/g/carx-dro2.` box, **Publications** shows `No publications on mod.io yet.`, and **Create publication** and **Update publication** are unavailable. You don't need to sign in to validate, build or export the map. <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoAuthProvider.cs:154; Assets/Editor/MapBuilderEditorWindow.Items.cs:159 -->
 
 Until a linked publication is selected, an info box under **Build destination** reminds you to create a publication or to select an existing one.
 
@@ -193,7 +193,7 @@ Each row shows these elements:
 | --- | --- |
 | Logo | The publication's logo on mod.io. |
 | Title | The publication's name on mod.io, or `Blank <n>` when it has none. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:200 --> |
-| `<MB> / 4120 mb · File uploaded` or `<MB> / 4120 mb · No file uploaded` | The size of the publication's current file in megabytes, and whether the publication has a file. 4120 MB is the limit for a map, 4096 MB, plus the limit for its metadata, 24 MB. The tooltip of this line ends with the address of the publication's page. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:206-215 --> |
+| `<MB> / 4120 mb · File uploaded` or `<MB> / 4120 mb · No file uploaded` | The size of the publication's current file in megabytes, and whether the publication has a file. 4120 MB is the limit for a map, 4096 MB, plus the limit for its metadata, 24 MB. The tooltip of this line ends with the address of the publication's page. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:206-215; Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoPublisher.cs:433 --> |
 | `Select for this map` | The publication isn't linked to any local map. Select the row to link it to the map selected in **LOCAL MAPS**. <!-- src: Assets/Editor/MapBuilderEditorWindow.Items.cs:228 --> |
 | `Old version!` | An earlier version of the uploader published it: the publication carries that version's `Map` tag. <!-- src: Assets/Editor/MapBuilder.Publishing.cs:17-22 --> |
 
@@ -240,7 +240,7 @@ To delete a publication by its id:
 
 Result: the Console shows `Deleted mod <id>.`
 
-A local map that was linked to the deleted publication keeps its link until the list next loads with at least one publication on your account. Until then, the map's mod.io line shows `mod.io: version not loaded`. <!-- src: Assets/Editor/MapManagerConfig.cs:139-142 -->
+A local map that was linked to the deleted publication keeps its link until the list next loads with at least one publication on your account. Until then, the map's mod.io line shows `mod.io: version not loaded`. <!-- src: Assets/Editor/MapManagerConfig.cs:139-142; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:211 -->
 
 </details>
 
@@ -259,21 +259,7 @@ Result: the publication on mod.io shows the new name, and players see it in the 
 <a name="size-limits"></a>
 ## Size limits at upload
 
-MapBuilder checks the size of the build only when you select **Create publication** or **Update publication**. **Validate map** and the **Export to folder** button don't check it. The check measures the folders of the [build cache](build.md#cache), not the packed `mod.cxmod`:
-
-| Build cache folder | Holds | Limit |
-| --- | --- | --- |
-| `MapTemp` | The map: geometry, materials and textures | 4096 MB |
-| `MetaTemp` | The map metadata, including the icon, the preview and the minimap images | 24 MB <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26 --> |
-
-If a folder is over its limit, MapBuilder uploads nothing, the footer shows `Publication did not complete. See the Console.` or `Update did not complete. See the Console.`, and the Console shows one of these errors, where `<scene>` is the scene name: <!-- src: Assets/Editor/MapBuilder.Storage.cs:167-178 -->
-
-```text
-'<scene>': the map is <X> mb and this vendor accepts 4096 mb.
-'<scene>': the meta is <X> mb and this vendor accepts 24 mb.
-```
-
-To bring the metadata under its limit, use smaller images for the **Icon**, the **Preview** and the minimap. These are upload limits only: a very large map may still fail to load in the game.
+MapBuilder checks the size of the build only when you select **Create publication** or **Update publication**, and uploads nothing when the map or its metadata is over its limit; for the limits, the messages and what to do, see [Build size](reference.md#limits-size).
 
 ## Next steps
 

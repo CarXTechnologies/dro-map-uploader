@@ -103,7 +103,7 @@ Give the image the same proportions as **Bounds Size** X : Y, because the game s
 
 ### What validation checks
 
-**Validate map** reports these errors for the minimap. The first two are in the Budget category, the rest in the Minimap category. <!-- src: Assets/Editor/Validation/SceneValidator.cs:885-934 -->
+**Validate map** reports these errors for the minimap. The first two are in the Budget category, the rest in the Minimap category. <!-- src: Assets/Editor/Validation/SceneValidator.cs:901-950 -->
 
 ```text
 'Minimap': the map has 0, at least 1 is required.
@@ -206,7 +206,7 @@ Validation checks the Icon and the Preview that you assign on the **Map** tab, a
 | File format | PNG. JPG gives a warning, any other format an error. | PNG. JPG gives a warning, any other format an error. | Any image that Unity imports as a Texture2D |
 | **Read/Write** | Must be on | Must be on | Not needed |
 | File size | At most 8 MB | At most 10 MB | No limit of its own <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:27; Assets/Editor/Validation/MapMetaValidator.cs:14 --> |
-| Pixel size | Not checked. mod.io needs at least 512 × 288; 16:9 recommended. | Not checked; 16:9 recommended | Not checked; same proportions as **Bounds Size** X : Y |
+| Pixel size | Not checked. mod.io needs at least 512 × 288; 16:9 recommended. | Not checked; 16:9 recommended | Not checked; same proportions as **Bounds Size** X : Y <!-- src: Assets/Plugins/Modio/Modio/API/Generated/Definitions/RequestObjects/EditModRequest.cs:31 --> |
 | Where it appears | On mod.io: the publication logo. In the game: the map's card on **Track Selection** and in the online room list, and the track picture when you create a room on a map without a Preview. | In the game: the loading screen, and the track picture when you create an online room. | In the game: the on-screen minimap, the pause-menu map and the map previews on **Track Selection**, on the **Mods** screen and in online rooms. |
 
 - MapBuilder checks no pixel size or proportions; `16:9` in the field labels is a recommendation.

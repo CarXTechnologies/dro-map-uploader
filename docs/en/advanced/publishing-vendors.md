@@ -18,7 +18,7 @@ MapUploader has two vendor implementations. Only mod.io is available in the **Ma
 
 ## How it fits together
 
-MapUploader never calls a vendor SDK directly. It talks to one vendor-neutral contract in the [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/9692638e3538922cb3197c9760c186809f36e176) submodule. Each vendor implementation sits in its own assembly behind a define constraint, so a project compiles only the vendors whose SDKs it carries, and another project can add a vendor without changing the contract.
+MapUploader never calls a vendor SDK directly. It talks to one vendor-neutral contract in the [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95) submodule. Each vendor implementation sits in its own assembly behind a define constraint, so a project compiles only the vendors whose SDKs it carries, and another project can add a vendor without changing the contract.
 
 ```
 Assets/Plugins/CarX.Modding.Creator/          submodule
@@ -238,7 +238,7 @@ To point the project at another mod.io game:
 1. Select **Tools** > **MapBuilder**.
    The window connects to mod.io with the new settings.
 
-Result: The header no longer shows `Unavailable`. While you are signed out, the **Publish** tab shows `Not signed in to <Profile Url>.` If a value is missing, the header shows `Unavailable`, and the box at the top of the **Publish** tab names the missing value, for example `The selected game on 'ModIoConfig' has no api key. Copy it from https://mod.io/me/access.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/Core/ModIoConfig.cs:277 -->
+Result: The header no longer shows `Unavailable`. While you are signed out, the **Publish** tab shows `Not signed in to <Profile Url>.` If a value is missing, the header shows `Unavailable`, and the box at the top of the **Publish** tab names the missing value, for example `The selected game on 'ModIoConfig' has no api key. Copy it from https://mod.io/me/access.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/Core/ModIoConfig.cs:277; Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoAuthProvider.cs:154 -->
 
 > [!WARNING]
 > Copy **Game Id** and **Api Key** from the same row. An account with access to several games lists them all, and a wrong **Game Id** sends maps to another game.
@@ -276,7 +276,7 @@ To add a vendor:
 
 Result: After the recompile, `ModPublisherSession.AvailableVendors` lists the new vendor, and the **MapBuilder** window offers it as far as your changes to those members allow.
 
-The interfaces are in the submodule: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/Publishing/Core/IModPublisher.cs) and [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/Publishing/Core/IModAuthProvider.cs).
+The interfaces are in the submodule: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/Publishing/Core/IModPublisher.cs) and [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/Publishing/Core/IModAuthProvider.cs).
 
 <a name="differences"></a>
 ## Known differences between vendors
@@ -311,7 +311,7 @@ So the publications list shows only what can be established honestly: whether a 
 
 ### `INVALID_JSON` usually means something else
 
-`ModioAPIUnityClient` turns any response that it can't parse into `ErrorCode.INVALID_JSON`. The message that comes with it, `You have used the input_json parameter with semantically incorrect JSON.`, describes a request problem that is almost never the cause. In MapBuilder, it typically shows in the Console as `Could not read your mod.io creations: You have used the input_json parameter with semantically incorrect JSON.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoPublisher.cs:125-126 -->
+`ModioAPIUnityClient` turns any response that it can't parse into `ErrorCode.INVALID_JSON`. The message that comes with it, `You have used the input_json parameter with semantically incorrect JSON.`, describes a request problem that is almost never the cause. In MapBuilder, it typically shows in the Console as `Could not read your mod.io creations: You have used the input_json parameter with semantically incorrect JSON.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoPublisher.cs:125-126; Assets/Plugins/Modio/Modio/Errors/Generated/ErrorCode.cs:499 -->
 
 Before you look for a cause, read the lines that the Console or the Editor log shows right before it:
 

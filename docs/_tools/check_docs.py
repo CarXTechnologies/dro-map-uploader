@@ -23,12 +23,13 @@ Checks (--check selects some of them):
   versions  README.md, README.ru.md and both getting-started.md pages name the project's Unity version, the
             getting-started pages name its revision; only the two READMEs carry an Applies to / Относится к line, and
             both lines agree with each other and with the project; the getting-started clone commands use the branch
-            from that line; links into the CarX.Modding.Creator repository are pinned to the submodule commit and
-            point to files that exist in it.
+            from that line; links into the CarX.Modding.Creator repository use the pinned submodule commit, not a
+            branch such as main or another commit, and point to files that exist in it.
   src       Every <!-- src: path:line --> comment points to an existing file and to lines inside it. When the line
             with the comment has a code-span literal that looks like a message or a code identifier, the literal, or a
             distinctive part of it, must occur within --src-window lines (default 5) of the cited lines; otherwise
-            the script prints a warning that names where the literal is now. A fact that comes from the game's
+            the script prints a warning that names where the literal is now. A quoted message that occurs in none
+            of the cited files is a warning too: the quote is stale, or its file isn't cited. A fact that comes from the game's
             source, which is closed, is marked with the bare reference `game` and is not checked. This repository
             is public, so a src comment never names a path in the game's source.
 
@@ -66,7 +67,7 @@ IMG = re.compile(r'<img\b[^>]*>', re.I)
 ATTRIBUTE = re.compile(r'([\w-]+)="([^"]*)"')
 ANCHOR = re.compile(r'<a name="([^"]+)"></a>')
 HEADING = re.compile(r'^ {0,3}(#{1,6})\s+(.*?)\s*#*\s*$')
-SDK_LINK = re.compile(r'https://github\.com/CarXTechnologies/CarX\.Modding\.Creator/(?:blob|tree)/([0-9a-f]{7,40})/([^)\s"#?]*)')
+SDK_LINK = re.compile(r'https://github\.com/CarXTechnologies/CarX\.Modding\.Creator/(?:blob|tree)/([^/\s)"#?<>]+)/?([^)\s"#?<>]*)')
 PLACEHOLDER = re.compile(r'<[^<>]*>|\{[^{}]*\}|…|\.\.\.')
 WORD = re.compile(r'[A-Za-zА-Яа-яЁё]{2,}')
 
@@ -433,9 +434,11 @@ def check_versions(report):
     populated = SUBMODULE_MARKER.is_file()
     for page in pages():
         for number, line in prose(page):
-            for commit, path in SDK_LINK.findall(line):
-                if pinned and not pinned.startswith(commit):
-                    report.error(page, number, f'SDK link pinned to {commit[:12]}, the submodule is at {pinned[:12]}')
+            for ref, path in SDK_LINK.findall(line):
+                # Ссылка на ветку (main) или на чужой коммит молча уезжает от закреплённого сабмодуля.
+                if pinned and not (re.fullmatch(r'[0-9a-f]{7,40}', ref) and pinned.startswith(ref)):
+                    report.error(page, number, f'SDK link points to {ref[:40]}, not to the submodule commit {pinned[:12]}; '
+                                               'link to blob/<commit>/ or tree/<commit>/ with the pinned commit')
                 if path and populated and not (ROOT / SUBMODULE / unquote(path)).exists():
                     report.error(page, number, f'SDK link points to {path}, which is not in {SUBMODULE}')
     if pinned is None:
@@ -449,6 +452,10 @@ def literal_kind(literal):
     camel-case identifier, None for values, paths and file names, which are not distinctive."""
     core = ' '.join(PLACEHOLDER.sub(' ', literal).split())
     if len(core) < 6:
+        return None
+    # A path with placeholders, such as <temp>/StandaloneTemporary<map id>/MapTemp, is a path, not a message.
+    filled = PLACEHOLDER.sub('x', literal)
+    if ('/' in filled or '\\' in filled) and not re.search(r'\s', filled):
         return None
     if ' ' in core:
         words = WORD.findall(core)
@@ -473,6 +480,10 @@ def normalize(text):
 def fragments(literal, segments=False):
     parts = [' '.join(p.split()).strip(' \'"`.,;:()[]') for p in PLACEHOLDER.split(literal)]
     result = [normalize(p) for p in parts if len(p) >= 6 and WORD.search(p)]
+    # A part of three words or more is distinctive; a lone word such as 'Rigidbody' would match a stale quote too.
+    long_parts = [p for p in result if len(WORD.findall(p)) >= 3]
+    if long_parts:
+        result = long_parts
     if segments and re.fullmatch(r'[\w.]+', literal):
         result += [s.lower() for s in literal.split('.') if len(s) >= 8 and re.search(r'[a-z][A-Z]', s)]
     return result
@@ -545,6 +556,70 @@ def check_src(report, size):
                          f'{counts["game"]} `{GAME_REF}` not checked')
 
 
+_word_cache = {}
+
+
+def file_words(target):
+    """The words of a file as one lowercase string, with string concatenations and interpolation holes removed, so that
+    a message split over several lines or built with {…} still reads as one run of words."""
+    if target not in _word_cache:
+        text = '\n'.join(read_lines(target))
+        text = re.sub(r'"\s*\+\s*\$?@?"', '', text)
+        text = re.sub(r'\{[^{}"\n]*\}', ' ', text)
+        _word_cache[target] = ' ' + ' '.join(re.findall(r'\w+', text.lower())) + ' '
+    return _word_cache[target]
+
+
+def word_runs(literal):
+    """Runs of three consecutive words from each part of the literal between placeholders; a part of one or two
+    words of at least 6 characters is a run of its own."""
+    runs, short = [], []
+    for part in PLACEHOLDER.split(literal):
+        words = re.findall(r'\w+', part.lower())
+        if len(words) >= 3:
+            runs += [' '.join(words[i:i + 3]) for i in range(len(words) - 2)]
+        elif words and len(' '.join(words)) >= 6:
+            short.append(' '.join(words))
+    # Short parts count only when the literal has no part of three words.
+    return runs or short
+
+
+_piece_cache = {}
+CS_STRING = re.compile(r'\$?@?"((?:[^"\\\n]|\\.)*)"')
+
+
+def string_pieces(target):
+    """The constant pieces of the C# string literals in a file, split at {…} holes, that have two words or more and
+    8 characters or more. A message that the code builds from a piece and a value, such as "Local map: " + name, is
+    quoted in the docs with the value filled in, and such a quote contains the piece."""
+    if target not in _piece_cache:
+        pieces = set()
+        if Path(target).suffix == '.cs':
+            for line in read_lines(target):
+                for body in CS_STRING.findall(line):
+                    for piece in re.split(r'\{[^{}]*\}', body):
+                        piece = normalize(piece).strip(' \'"`.,;:()[]')
+                        if len(piece) >= 8 and len(re.findall(r'\w+', piece)) >= 2:
+                            pieces.add(piece)
+        _piece_cache[target] = pieces
+    return _piece_cache[target]
+
+
+def is_message(literal):
+    """True for a literal of words separated by spaces, false for an identifier, a path or a sample value. Only a
+    message is reported when no cited file has it: an identifier such as Application.temporaryCachePath often names
+    an API that no file of this repository defines."""
+    return ' ' in ' '.join(PLACEHOLDER.sub(' ', literal).split())
+
+
+def occurs_in_file(literal, target):
+    words = file_words(target)
+    if any(f' {run} ' in words for run in word_runs(literal)):
+        return True
+    text = normalize(literal)
+    return any(piece in text for piece in string_pieces(target))
+
+
 def check_literals(report, page, number, literals, checked, size):
     for target, shown, ranges, lines in checked:
         window = window_text(lines, ranges, size)
@@ -552,20 +627,31 @@ def check_literals(report, page, number, literals, checked, size):
             if any(f in window for f in fragments(literal, segments=True)):
                 return
     moved = []
+    missing = []
     for literal, kind in literals:
         if kind != 'strong':
             continue
+        wanted = fragments(literal)
+        found_in_any = False
         for target, shown, ranges, lines in checked:
-            wanted = fragments(literal)
             found = [i for i, text in enumerate(lines, 1) if any(f in normalize(text) for f in wanted)]
             if found:
+                found_in_any = True
                 moved.append(f'`{literal}` is at {shown}:{",".join(map(str, found[:3]))}')
+        if not found_in_any and is_message(literal) and word_runs(literal) \
+                and not any(occurs_in_file(literal, target) for target, _, _, _ in checked):
+            missing.append(f'`{literal}`')
     cited = '; '.join(shown + ':' + ','.join(f'{a}-{b}' if a != b else str(a) for a, b in ranges)
                       for _, shown, ranges, _ in checked)
     if moved:
         report.warning(page, number, f'no code-span literal of this line is within {size} lines of {cited}, but '
                        + '; '.join(moved[:2]) + '. If the code moved, fix the line numbers; if the src lines cite '
                        'another fact of this line, add the line of the literal to the comment.')
+    elif missing:
+        # Сильный литерал-сообщение (3+ слова) не найден ни в одном цитируемом файле:
+        # либо цитата устарела, либо комментарий указывает не на тот файл.
+        report.warning(page, number, f'no cited file has {" or ".join(missing[:2])}: {cited}. If the code changed the text, '
+                       'quote the current text; if the literal comes from another file, cite that file too.')
     else:
         report.note(page, number, f'no code-span literal of this line occurs in {cited}')
 

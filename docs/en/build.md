@@ -181,7 +181,7 @@ Objects tagged `Garbage` and their children aren't exported at all. See [Organiz
 
 **Your scene stays unchanged.** The optimizer works on copies in an in-memory preview scene. It never edits or saves your scene.
 
-**After you change a setting.** While **Optimize build** is on, changing any option clears the Map part of the build. Selecting or clearing **Optimize build** clears it too. The **Build** tab then shows `Map geometry has not been built yet.`, and the map's row shows `Rebuild needed`. Build the map again. <!-- src: Assets/Editor/BuildOptimizationPanel.cs:63-81 -->
+**After you change a setting.** While **Optimize build** is on, changing any option clears the Map part of the build. Selecting or clearing **Optimize build** clears it too. The **Build** tab then shows `Map geometry has not been built yet.`, and the map's row shows `Rebuild needed`. Build the map again. <!-- src: Assets/Editor/BuildOptimizationPanel.cs:63-81; Assets/Editor/MapBuilderEditorWindow.cs:831 -->
 
 **Check the result.** After a build with optimization, the Console has a line that starts with `Build optimization:`. It counts the source renderers and colliders and the sector meshes and colliders made from them. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:256-259 -->
 
@@ -225,7 +225,8 @@ A build writes to the build cache, a staging folder for each map outside the pro
 
 ```
 <temp>/DefaultCompany/ModeMap/StandaloneTemporary<id>/
-  MapTemp/     the Map part: geometry, collision, materials, markers, lights
+  MapTemp/     the Map part: geometry, materials, textures, collision, markers, lights,
+               dynamic objects and animation
   MetaTemp/    the Meta part: metadata, icon, preview, minimap
 ```
 

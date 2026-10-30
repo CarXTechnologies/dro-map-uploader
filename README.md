@@ -99,7 +99,7 @@ The [documentation contents](docs/en/README.md) list the same pages in reading o
 | Icon and Preview | The Icon is required, the Preview is optional. For the format, file size and pixel size, see [Image requirements](docs/en/minimap-and-images.md#images). |
 | Scene name | Starts with a letter and uses only letters, digits and `_`. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:32-45 --> |
 | Build size | Map ≤ 4096 MB, metadata ≤ 24 MB, measured on the build cache folders `MapTemp` and `MetaTemp`, not on `mod.cxmod`. Checked only when you create or update a publication. <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182; Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26 --> |
-| Scene contents | Exactly 1 Minimap; at least 1 SpawnPoint; ≤ 500 lights (only Point and Spot lights are exported, and in the game they turn on only at night); ≤ 1000 Rigidbodies; ≤ 8 LOD levels per LODGroup. <!-- src: Assets/Editor/MapSceneRules.cs:11-24; Assets/Editor/Validation/SceneValidator.cs:278-284,811; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:98-100; game --> |
+| Scene contents | Exactly 1 Minimap; at least 1 SpawnPoint; ≤ 500 lights (only Point and Spot lights are exported, and in the game they turn on only at night); ≤ 1000 Rigidbodies; ≤ 8 LOD levels per LODGroup. <!-- src: Assets/Editor/MapSceneRules.cs:11-24; Assets/Editor/Validation/SceneValidator.cs:286-292,827; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:98-100; game --> |
 
 Next: [Reference](docs/en/reference.md)
 

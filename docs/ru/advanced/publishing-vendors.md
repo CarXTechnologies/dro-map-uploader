@@ -18,7 +18,7 @@
 
 ## Как устроен слой публикации
 
-MapUploader никогда не вызывает SDK площадки напрямую. Он работает с одним контрактом, не зависящим от площадки, — он находится в сабмодуле [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/9692638e3538922cb3197c9760c186809f36e176). Реализация каждой площадки лежит в отдельной сборке с define-ограничением (define constraint), поэтому проект компилирует только те площадки, SDK которых в нём есть, а другой проект может добавить площадку, не меняя контракт.
+MapUploader никогда не вызывает SDK площадки напрямую. Он работает с одним контрактом, не зависящим от площадки, — он находится в сабмодуле [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95). Реализация каждой площадки лежит в отдельной сборке с define-ограничением (define constraint), поэтому проект компилирует только те площадки, SDK которых в нём есть, а другой проект может добавить площадку, не меняя контракт.
 
 ```
 Assets/Plugins/CarX.Modding.Creator/          сабмодуль
@@ -238,7 +238,7 @@ Assets/Resources/CarX.Modding/                ModIoConfig.asset, SteamWorkshopCo
 1. Выберите **Tools** > **MapBuilder**.
    Окно подключается к mod.io с новыми настройками.
 
-Результат: шапка больше не показывает `Недоступно`. Пока вход не выполнен, вкладка **Публикация** показывает `Not signed in to <Profile Url>.` Если какого-то значения не хватает, шапка показывает `Недоступно`, а блок вверху вкладки **Публикация** называет недостающее значение, например `The selected game on 'ModIoConfig' has no api key. Copy it from https://mod.io/me/access.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/Core/ModIoConfig.cs:277 -->
+Результат: шапка больше не показывает `Недоступно`. Пока вход не выполнен, вкладка **Публикация** показывает `Not signed in to <Profile Url>.` Если какого-то значения не хватает, шапка показывает `Недоступно`, а блок вверху вкладки **Публикация** называет недостающее значение, например `The selected game on 'ModIoConfig' has no api key. Copy it from https://mod.io/me/access.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/Core/ModIoConfig.cs:277; Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoAuthProvider.cs:154 -->
 
 > [!WARNING]
 > Копируйте **Game Id** и **Api Key** из одной строки. Аккаунт с доступом к нескольким играм показывает их все, а неверный **Game Id** отправляет карты в другую игру.
@@ -276,7 +276,7 @@ Assets/Resources/CarX.Modding/                ModIoConfig.asset, SteamWorkshopCo
 
 Результат: после перекомпиляции `ModPublisherSession.AvailableVendors` содержит новую площадку, а окно **MapBuilder** предлагает её в той мере, в какой это позволяют ваши изменения этих членов классов.
 
-Интерфейсы находятся в сабмодуле: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/Publishing/Core/IModPublisher.cs) и [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/9692638e3538922cb3197c9760c186809f36e176/Publishing/Core/IModAuthProvider.cs).
+Интерфейсы находятся в сабмодуле: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/Publishing/Core/IModPublisher.cs) и [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/Publishing/Core/IModAuthProvider.cs).
 
 <a name="differences"></a>
 ## Известные различия площадок
@@ -311,7 +311,7 @@ Assets/Resources/CarX.Modding/                ModIoConfig.asset, SteamWorkshopCo
 
 ### `INVALID_JSON` обычно означает другое
 
-`ModioAPIUnityClient` превращает любой ответ, который не удалось разобрать, в `ErrorCode.INVALID_JSON`. Сопровождающее его сообщение `You have used the input_json parameter with semantically incorrect JSON.` описывает ошибку запроса, которая почти никогда не бывает настоящей причиной. В MapBuilder оно обычно появляется в Console как `Could not read your mod.io creations: You have used the input_json parameter with semantically incorrect JSON.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoPublisher.cs:125-126 -->
+`ModioAPIUnityClient` превращает любой ответ, который не удалось разобрать, в `ErrorCode.INVALID_JSON`. Сопровождающее его сообщение `You have used the input_json parameter with semantically incorrect JSON.` описывает ошибку запроса, которая почти никогда не бывает настоящей причиной. В MapBuilder оно обычно появляется в Console как `Could not read your mod.io creations: You have used the input_json parameter with semantically incorrect JSON.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Publishing/ModIo/ModIoPublisher.cs:125-126; Assets/Plugins/Modio/Modio/Errors/Generated/ErrorCode.cs:499 -->
 
 Прежде чем искать причину, прочитайте строки, которые Console или лог редактора (Editor log) показывает прямо перед ним:
 

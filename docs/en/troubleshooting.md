@@ -77,7 +77,7 @@ See also: [Unity Terrain isn't exported](scene-setup.md#before-you-start) · [Ma
 <a name="msg-empty-material-slot"></a>
 #### `'<object>' has an empty material slot; it will render as magenta in game.`
 
-Severity: Warning (doesn't block the build) · Category: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:784-785 -->
+Severity: Warning (doesn't block the build) · Category: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:800-801 -->
 
 **Cause.** An element of **Materials** on a MeshRenderer has no material assigned.
 
@@ -93,7 +93,7 @@ See also: [Set up materials](scene-setup.md#materials)
 
 Message: `'<object>' has <n> LOD levels; at most 8 are supported and the whole group is skipped on export. Merge or remove levels.`
 
-Severity: Error (blocks the build) · Category: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:813-816 -->
+Severity: Error (blocks the build) · Category: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:829-832 -->
 
 **Cause.** A LODGroup has more than 8 levels. Export would skip the whole group.
 
@@ -109,7 +109,7 @@ See also: [LOD groups](scene-setup.md#lod)
 
 Message: `Build optimization is off: static meshes and colliders are exported as-is, without sector chunking, collider simplification or LODs. Large maps get more draw calls, heavier physics and longer loading. Enable it in Build > Optimization.`
 
-Severity: Warning (doesn't block the build) · Category: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:858-860 -->
+Severity: Warning (doesn't block the build) · Category: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:874-876 -->
 
 **Cause.** **Optimize build** is turned off for this map. Static meshes and colliders are exported as they are, without sectors or LODs, so a large map draws and loads more slowly in the game.
 
@@ -128,9 +128,9 @@ See also: [Optimization](build.md#optimization)
 
 Message: `'<object>' (<mesh>): static <kind>, <n> triangles, world bounds <x> x <y> x <z> m. Exceeds sector budget (<size> m / <n> triangles). Review Build > Optimization; size alone does not prove a performance issue.`
 
-Severity: Warning (doesn't block the build) · Category: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:874-876 -->
+Severity: Warning (doesn't block the build) · Category: Geometry <!-- src: Assets/Editor/Validation/SceneValidator.cs:890-892 -->
 
-**Cause.** A static render mesh, or an enabled MeshCollider that isn't a trigger or convex, is larger than **Sector size (m)** or has more triangles than **Max triangles per mesh**, and the build exports it whole: **Optimize build** is off, or the Partition option for this kind of mesh is off. With the default settings, this warning doesn't appear. For which meshes the check covers, see [Sector budget](reference.md#sector-budget). <!-- src: Assets/Editor/Validation/SceneValidator.cs:879 -->
+**Cause.** A static render mesh, or an enabled MeshCollider that isn't a trigger or convex, is larger than **Sector size (m)** or has more triangles than **Max triangles per mesh**, and the build exports it whole: **Optimize build** is off, or the Partition option for this kind of mesh is off. With the default settings, this warning doesn't appear. For which meshes the check covers, see [Sector budget](reference.md#sector-budget). <!-- src: Assets/Editor/Validation/SceneValidator.cs:895 -->
 
 **Fix.** On the **Build** tab, under **Optimization**, turn on **Optimize build** and the Partition option for this kind of mesh, then build the map and drive it to check the result. If you keep the option off, split the mesh in your 3D tool.
 
@@ -143,7 +143,7 @@ See also: [Optimization](build.md#optimization)
 
 Message: `'<object>' is a Directional light. It lights the SDK preview only; the game uses its own sun, so it is not exported.`
 
-Severity: Note (doesn't block the build) · Category: Lighting <!-- src: Assets/Editor/Validation/SceneValidator.cs:739-742 -->
+Severity: Note (doesn't block the build) · Category: Lighting <!-- src: Assets/Editor/Validation/SceneValidator.cs:755-758 -->
 
 **Cause.** The scene has an enabled Directional light, usually a preview sun such as `sunlight` from an environment preset. It lights only the scene in the editor, and the game supplies its own sun and sky. With two or more Directional lights, enabled or not, the window also shows the warning `The map has <n> Directional Lights. These affect the SDK preview only; the game supplies its own environment lighting.`
 
@@ -156,7 +156,7 @@ See also: [Set up lighting](scene-setup.md#lighting)
 
 Message: `'<object>' is a <type> light. Wavefront/Binary exports Point and Spot lights only, so this one will not reach the mod.`
 
-Severity: Warning (doesn't block the build) · Category: Lighting <!-- src: Assets/Editor/Validation/SceneValidator.cs:746-749 -->
+Severity: Warning (doesn't block the build) · Category: Lighting <!-- src: Assets/Editor/Validation/SceneValidator.cs:762-765 -->
 
 **Cause.** An enabled light is neither a Point, a Spot nor a Directional light, for example an Area light. Only Point and Spot lights are exported, so this light lights only the scene in the editor.
 
@@ -199,12 +199,30 @@ Severity: Error (blocks the build) · Category: Markers <!-- src: Assets/Editor/
 
 See also: [Animate objects with vertex animation](markers.md#animation)
 
+<a name="msg-road-unavailable-surface"></a>
+#### `'<object>' uses the surface '<surface>', which the game doesn't have…`
+
+Message: `'<object>' uses the surface '<surface>', which the game doesn't have, so its collider gets no surface in the game. Use '<replacement>' instead.`
+
+Severity: Warning (doesn't block the build) · Category: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:264-270,722-727 -->
+
+**Cause.** The Road marker uses `Road/default`, `Road/ice_snowy` or `Road/pavement`. The type menu still offers these surfaces, but the game has no surface template with these names, so the collider gets no road surface, with values or without, and behaves like a collider without a Road marker. In the TestMap sample, `Content/workshop_map_main/wall_coll` uses `Road/default`. <!-- src: game -->
+
+**Fix.**
+
+1. In the **Map Validation** window, select **Select** next to the message.
+1. In the type menu of the GameMarkerData component, select the surface that the message names: **Road** > **asphalt** instead of `default`, **Road** > **road_icy** instead of `ice_snowy`, or **Road** > **paving_slab** instead of `pavement`.
+
+If the marker uses **Custom** values, the new surface resets them to its defaults.
+
+See also: [Mark road surfaces](markers.md#road) · [Road surfaces and physics fields](reference.md#surfaces)
+
 <a name="msg-road-no-collider"></a>
 #### `'<object>' is marked as Road but has no Collider on it or its children…`
 
 Message: `'<object>' is marked as Road but has no Collider on it or its children, so its surface type will never be used. Add a Mesh/Box/Sphere/Capsule Collider.`
 
-Severity: Error (blocks the build) · Category: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:266-268 -->
+Severity: Error (blocks the build) · Category: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:274-276 -->
 
 **Cause.** A GameMarkerData set to a **Road** surface is on an object that has no collider, neither on the object itself nor on a child. A render mesh alone gives the car nothing to drive on.
 
@@ -223,7 +241,7 @@ See also: [Mark road surfaces](markers.md#road)
 
 Message: `The map has no SpawnPoint marker, so there is nowhere for a car to appear. Add an empty object with GameMarkerData set to SpawnPoint.`
 
-Severity: Error (blocks the build) · Category: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:281-283 -->
+Severity: Error (blocks the build) · Category: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:289-291 -->
 
 **Cause.** No GameMarkerData component in the scene is set to **SpawnPoint**. Markers inside an object tagged `Garbage` don't count. When the scene has no GameMarkerData at all, the window also shows `The map has no GameMarkerData at all - at minimum it needs a spawn point.` and `'GameMarkerData': the map has 0, at least 1 is required.`
 
@@ -240,7 +258,7 @@ See also: [Add spawn points](markers.md#spawn)
 
 Message: `'<object>': render core material '<material>' (<variant>) was exported from material for revision <n>, but this SDK has revision <n> of the variant. The game uses the fallback material until you re-run Export from material on this entry.`
 
-Severity: Warning (doesn't block the build) · Category: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:442-445 -->
+Severity: Warning (doesn't block the build) · Category: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:450-453 -->
 
 **Cause.** A Material marker entry holds values exported for an older revision of its render core variant than the SDK in this project has. Until you export the entry again, the game uses a fallback material instead of the render core variant.
 
@@ -257,7 +275,7 @@ See also: [Replace materials with render core variants](markers.md#material)
 
 Message: `'<object>': render core material '<material>' (<variant>) has no diffuse texture and will render white. Press 'Export from material' or assign the texture.`
 
-Severity: Warning (doesn't block the build) · Category: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:375-377 -->
+Severity: Warning (doesn't block the build) · Category: Markers <!-- src: Assets/Editor/Validation/SceneValidator.cs:383-385 -->
 
 **Cause.** A Material marker entry has no diffuse texture, so the game draws the surface white.
 
@@ -295,7 +313,7 @@ Message: `The track name '<name>' contains characters that cannot be published. 
 
 Severity: Error (blocks the build) · Category: Meta <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:54-56 -->
 
-**Cause.** **Name** can contain only letters, digits, spaces and `- _ ' . , : ! ? ( ) & + /`, with no space at the start or the end, and at most 50 characters. A longer name gives `The track name is <n> characters; this vendor allows 50.` An empty one gives `The track has no name. Fill in Name on the Map tab.` <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:8; Assets/Resources/CarX.Modding/ModIoConfig.asset:28 -->
+**Cause.** **Name** can contain only letters, digits, spaces and `- _ ' . , : ! ? ( ) & + /`, with no space at the start or the end, and at most 50 characters. A longer name gives `The track name is <n> characters; this vendor allows 50.` An empty one gives `The track has no name. Fill in Name on the Map tab.` <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:8; Assets/Resources/CarX.Modding/ModIoConfig.asset:28; Assets/Editor/Validation/MapMetaValidator.cs:48,62 -->
 
 **Fix.**
 
@@ -310,7 +328,7 @@ Message: `The summary is <n> characters; this vendor allows 250. Shorten the Sum
 
 Severity: Error (blocks the build) · Category: Meta <!-- src: Assets/Editor/Validation/MapMetaValidator.cs:91-95 -->
 
-**Cause.** The summary is longer than 250 characters. MapBuilder uses only the first line of **Summary (optional)**; when that field is empty, it uses the first line of **Description**, and the message ends with `It is taken from the first line of the description - add a shorter Summary instead.` A **Description** over 50 000 characters gives a similar error: `The description is <n> characters; this vendor allows 50000.` <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:29-30 -->
+**Cause.** The summary is longer than 250 characters. MapBuilder uses only the first line of **Summary (optional)**; when that field is empty, it uses the first line of **Description**, and the message ends with `It is taken from the first line of the description - add a shorter Summary instead.` A **Description** over 50 000 characters gives a similar error: `The description is <n> characters; this vendor allows 50000.` <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:29-30; Assets/Editor/Validation/MapMetaValidator.cs:73,94 -->
 
 **Fix.**
 
@@ -390,7 +408,7 @@ See also: [Run validation](validation.md#run)
 
 Message: `'<object>': Bounds Size is <size>. Set it to the size of the map in world units, or the minimap collapses to a point in game.`
 
-Severity: Error (blocks the build) · Category: Minimap <!-- src: Assets/Editor/Validation/SceneValidator.cs:900-902 -->
+Severity: Error (blocks the build) · Category: Minimap <!-- src: Assets/Editor/Validation/SceneValidator.cs:916-918 -->
 
 **Cause.** The X or the Y value of **Bounds Size** on the Minimap component is zero. Without a size, the minimap collapses to a point in the game.
 
@@ -408,7 +426,7 @@ See also: [Create the Minimap and frame its area](minimap-and-images.md#frame-ar
 
 Message: `'<object>': no textures assigned. Add at least one entry with a Main Texture.`
 
-Severity: Error (blocks the build) · Category: Minimap <!-- src: Assets/Editor/Validation/SceneValidator.cs:908-909 -->
+Severity: Error (blocks the build) · Category: Minimap <!-- src: Assets/Editor/Validation/SceneValidator.cs:924-925 -->
 
 **Cause.** The **Textures** list of the Minimap component is empty. Two related errors have the same fix: `'<object>': Textures element <i> has no Main Texture assigned.` and `'<object>': Textures element <i> is a <type>. Only Texture2D can be exported.`
 
@@ -426,7 +444,7 @@ See also: [Assign the minimap image](minimap-and-images.md#assign-minimap) · [C
 
 Message: `'<object>' has a non-convex MeshCollider driven by a non-kinematic Rigidbody, which the physics engine no longer supports. Tick Convex, or make the Rigidbody kinematic.`
 
-Severity: Error (blocks the build) · Category: Physics <!-- src: Assets/Editor/Validation/SceneValidator.cs:845-847 -->
+Severity: Error (blocks the build) · Category: Physics <!-- src: Assets/Editor/Validation/SceneValidator.cs:861-863 -->
 
 **Cause.** A MeshCollider with **Convex** cleared is on a Rigidbody's object or inside it, and the Rigidbody has **Is Kinematic** cleared. The game's physics can't move a non-convex mesh collider.
 
@@ -457,12 +475,12 @@ See also: [Run validation](validation.md#run)
 <a name="build-errors"></a>
 ## Build errors in the Console
 
-Some problems are found only while the map is exported. They stop the build with an exception in the Console, not in the **Map Validation** window: the Console line starts with the exception type, usually `InvalidOperationException`, or `InvalidDataException` for a Layered Lit material. The **Build** tab then shows `Build incomplete. Check validation results and the Console.` To open the Console, select **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:324-328 -->
+Some problems are found only while the map is exported. They stop the build with an exception in the Console, not in the **Map Validation** window: the Console line starts with the exception type, usually `InvalidOperationException`, or `InvalidDataException` for a Layered Lit material. The **Build** tab then shows `Build incomplete. Check validation results and the Console.` To open the Console, select **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:324-328; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
 <a name="export-errors"></a>
 ### Export errors
 
-The following table lists every error that stops a build during export. The entries after the table describe the common ones in detail.
+The following table lists every error that stops a build during export, or an export or publication while the map is packed. The entries after the tables describe the common ones in detail.
 
 | Message | Cause | Fix |
 | --- | --- | --- |
@@ -491,9 +509,25 @@ The following table lists every error that stops a build during export. The entr
 | `meshoptimizer is unavailable for this Editor platform. Install its native Editor library or disable build optimization.` | **Optimize build** is on in a Unity Editor that isn't Windows x64. | Clear **Optimize build**. [Details](#msg-meshoptimizer) |
 | `Invalid or extreme vertex coordinates in '<mesh>'.` | With **Optimize build** on, a static mesh has a vertex more than 10 000 km from the world origin, or one whose position isn't a finite number. `<mesh>` is the name of the mesh, not of the object. | Find the objects that use the mesh, and correct their position or scale, or the mesh in your 3D tool. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:301-303 --> |
 | `A triangle spans too many sectors. Increase the optimization sector size or fix the source mesh.` | With **Optimize build** on, a static mesh has a triangle so large that cutting it into sectors would make more than 100 000 pieces. | Split the large triangles in your 3D tool. For a render mesh, a larger **Sector size (m)** also helps. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SectorMeshGeometry.cs:167-169 --> |
-| `Shader 'Hidden/ConvertingEx' is not found.` or `VAT normal export shader is missing.` | A shader of the SDK in `Assets/Plugins/CarX.Modding.Creator` is missing. | Update the submodule, as in [The submodule folder is empty](#submodule-empty). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ExportTextureUtility.cs:166-170 --> |
+| `Binary mesh block exceeds 256 MiB. Split the source mesh.` | In a Binary build, one exported mesh takes more than 256 MiB before compression, for example a single mesh with millions of vertices. | Split the mesh into several meshes in your 3D tool, then select the **Build map** button. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModModelCodecV2.cs:15,206-208; Assets/Plugins/CarX.Modding.Creator/Editor/UnityGoObjExporter.cs:189 --> |
+| `Shader 'Hidden/ConvertingEx' is not found.` or `VAT normal export shader is missing.` | A shader of the SDK in `Assets/Plugins/CarX.Modding.Creator` is missing. | Update the submodule, as in [The submodule folder is empty](#submodule-empty). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ExportTextureUtility.cs:166-170; Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:274 --> |
+| `Invalid binary texture <width>x<height> (<encoding>): sides must be within 1..8192.` | When you export or publish a Binary map, a material texture is wider or taller than 8192 pixels as Unity imports it. Packing keeps each texture at its imported size and doesn't scale it down, so rebuilding with `Everything` doesn't help. | In the texture's import settings, on the **Default** tab, set **Max Size** to 8192 or less and select **Apply**. Then select the **Build map** button, and export or publish again. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryTexture.cs:17,55-60; Assets/Plugins/CarX.Modding.Creator/Editor/BinaryTextureBaker.cs:32; Assets/Plugins/CarX.Modding.Creator/Editor/BinaryTexturePreparation.cs:228 --> |
 | `Binary map requires both Meta and Binary Map staging data. Rebuild Map and Meta.`, or another message from packing, such as `Missing map texture: <path>` | When you export or publish a Binary map, packing finds the build cache incomplete. | Set **Rebuild targets** to `Everything`, select the **Build map** button, then export or publish again. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/BinaryMapPacker.cs:60-62 --> |
 | Any other exception during a build | An internal error of the exporter. | Select the **Build map** button again. If the error repeats, open an issue in the [issue tracker](https://github.com/CarXTechnologies/dro-map-uploader/issues) with the full Console text. |
+
+Export also logs the following warnings in the Console. They don't stop the build, but the map in the game differs from the scene. A warning that repeats a validation error, such as `LODGroup has more than 8 LOD - Not supported`, doesn't appear, because the error stops the build before export. <!-- src: Assets/Editor/MapBuilder.cs:138; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:137-141 -->
+
+| Message | Cause | Fix |
+| --- | --- | --- |
+| `Rigidbody '<name>' was skipped: no enabled supported colliders. Geometry and animation will still be exported.` | A Rigidbody has no enabled Box, Sphere, Capsule or Mesh collider of its own on an active object. | Add an enabled collider to the Rigidbody's object. [Details](#msg-rigidbody-skipped) |
+| `Rigidbody '<name>': the client uses Unity Physics discrete collision detection; PhysX CCD modes are not exported.` | **Collision Detection** on the Rigidbody is set to a continuous mode. | Set **Collision Detection** to **Discrete**. [Details](#msg-rigidbody-discrete) |
+| `Rigidbody '<name>': Multiply material combine uses the Unity Physics geometric mean approximation.` | A collider of a dynamic object has a physics material with **Multiply** for **Friction Combine** or **Bounce Combine**. The game uses a geometric mean instead. | Choose another combine mode, or drive the map to check how the object behaves. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:85-86 --> |
+| `[ObjExporter] Material '<material>' property '<property>' holds a <type>, only Texture2D can be exported. Skipped.` | A texture slot of a material holds a cubemap, a Render Texture or another texture that isn't a Texture2D. Export leaves the slot empty. | Assign an imported image (Texture2D) to the slot, or clear it. [Details](#materials-wrong) <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MtlTextureMapWriter.cs:391 --> |
+| `Layered Lit '<material>': transparent blending mode <mode> is not supported by the mod material format, exported as Alpha.` | A transparent Layered Lit material uses the **Additive** or **Premultiply** **Blending Mode**; `<mode>` is `1` or `4`. The game blends it by alpha. | In the material's **Inspector**, set **Blending Mode** to **Alpha**, so that the editor shows the material as the game does. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/LayeredPbrWriter.cs:105-118 --> |
+| `Optimization skipped '<name>': mesh must be readable and use triangle topology. Original export is retained.` | With **Optimize build** on, the mesh of a static renderer or MeshCollider isn't readable or has a submesh that isn't made of triangles. The build turns on **Read/Write** for imported models itself, so this concerns a mesh saved as a Unity asset, or a mesh of quads, lines or points. The object keeps its own mesh and isn't cut into sectors. | Nothing is required. To have the object optimized, export the mesh with triangles from your 3D tool and import it as a model. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:273-281; Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:11-33 --> |
+| `Light '<name>' of type <type> is not supported - only Point and Spot lights are exported` | An enabled light isn't a Point or Spot light, for example the Directional light of the preview lighting. Validation reports the same light as a note or a warning. | Nothing for a Directional light: the game uses its own sun. Replace a light of another type with a Point or Spot light. See [Set up lighting](scene-setup.md#lighting). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:90-101 --> |
+| `Material '<material>': its render core values were exported from material for revision <n> of <variant>, the current revision is <n>. The game uses the fallback material until you re-run Export from material on its Material marker.` | A Material marker entry holds values exported for an older revision of its render core variant. Validation shows the same problem as a Markers warning. | In the Material marker, select **Export from material** for that entry, then build the map again. [Details](#msg-render-core-revision) <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RenderCoreMaterialWriter.cs:36-41 --> |
+| `[ModExport] Previous export did not restore import settings of <n> textures and <n> models; they will be restored at the end of this export.` | The previous build ended before it restored the import settings it had changed, for example because Unity closed during the build. A build turns on **Read/Write** and turns off compression for the textures and models it exports, and restores them at the end. | Nothing: this build restores them. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ExportImporterSettings.cs:186-199 --> |
 
 <a name="msg-rigidbody-lodgroup"></a>
 ### `Rigidbody '<name>' cannot split an enclosing LODGroup. Put the…`
@@ -739,7 +773,7 @@ See also: [Add colliders](scene-setup.md#colliders) · [Unity Terrain isn't expo
 **Cause.** One of these:
 
 - The Road marker and the collider are on different GameObjects. The game applies a Road marker's surface only to a collider on the marker's own object; any other collider gets the default physics material. Validation accepts a collider on a child, so it doesn't report this.
-- The marker's surface is `default`, `ice_snowy` or `pavement`. The game has no surface template with these names, so the collider gets no road surface, with values or without, and behaves like a collider without a Road marker. The game log, `Player.log`, then shows a warning that starts with `Road marker references surface template '<name>'`.
+- The marker's surface is `default`, `ice_snowy` or `pavement`. The game has no surface template with these names, so the collider gets no road surface, with values or without, and behaves like a collider without a Road marker. The game log, `Player.log`, then shows a warning that starts with `Road marker references surface template '<name>'`. Validation warns about such a marker; see [its message](#msg-road-unavailable-surface).
 - The marker has a **Template Config**. Its values, from the named template or from **Custom**, replace the game's surface entirely, **Surface Type** and **Water Rate** included. They start from the MapUploader surface defaults, and these differ from the game's surface on some surfaces, for example **Bump Min** of `grass`. When the marker's template is removed from the config, the marker exports its own **Custom** values. <!-- src: Assets/Scripts/GameMarkerData.cs:14-37 -->
 
 **Fix.**
@@ -976,7 +1010,7 @@ See also: [Install Unity 6000.3.19f1](getting-started.md#unity)
 <a name="scene-empty"></a>
 ### The Scene dropdown is empty
 
-**Cause.** **Scene** lists only the scenes that are enabled in the build scene list, and the list has none. MapBuilder then keeps checking and building the scene of the last build, or the scene that was open when you selected the map, which may not be the one you expect. If that scene was never saved, validation reports `No target scene is selected. Pick one in Scene on the Build tab.` <!-- src: Assets/Editor/MapBuilderEditorWindow.cs:780-786; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:228-229 --> A scene under `Assets/MapResources` is added and enabled whenever the editor loads or you save the scene, and a scene you disable in the list is dropped from it at the next save. <!-- src: Assets/Editor/MapBuilderProcessor.cs:79 -->
+**Cause.** **Scene** lists only the scenes that are enabled in the build scene list, and the list has none. MapBuilder then keeps checking and building the scene of the last build, or the scene that was open when you selected the map, which may not be the one you expect. If that scene was never saved, validation reports `No target scene is selected. Pick one in Scene on the Build tab.` A scene under `Assets/MapResources` is added and enabled whenever the editor loads or you save the scene, and a scene you disable in the list is dropped from it at the next save. <!-- src: Assets/Editor/MapBuilderEditorWindow.cs:780-786; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:228-229; Assets/Editor/Validation/MapMetaValidator.cs:33; Assets/Editor/MapBuilderProcessor.cs:79 -->
 
 **Fix.**
 
