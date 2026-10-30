@@ -261,6 +261,14 @@ namespace Editor.Validation
 					CheckMaterialMarker(report, marker);
 				}
 
+				if (head == "road" && UnavailableRoadSurfaces.TryGetValue(marker.markerData.param ?? string.Empty, out var replacement))
+				{
+					report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "road-unavailable-surface",
+						$"'{transform.name}' uses the surface '{marker.markerData.param}', which the game doesn't have, so its collider " +
+						$"gets no surface in the game. Use '{replacement}' instead.",
+						marker);
+				}
+
 				if (head == "road" && marker.GetComponentInChildren<Collider>(true) == null)
 				{
 					report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "road-no-collider",
@@ -709,6 +717,14 @@ namespace Editor.Validation
 				}
 			}
 		}
+
+		// Road surfaces the tool still offers for old scenes, but the game has no template for, with the closest one it has.
+		private static readonly Dictionary<string, string> UnavailableRoadSurfaces = new()
+		{
+			{ "Road/default", "Road/asphalt" },
+			{ "Road/ice_snowy", "Road/road_icy" },
+			{ "Road/pavement", "Road/paving_slab" },
+		};
 
 		private static void CheckLighting(MapValidationReport report, List<Transform> transforms)
 		{

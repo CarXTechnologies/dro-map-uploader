@@ -31,6 +31,7 @@ public class MarkerData
 		"Road/sand",
 		"Road/snow",
 		"Road/snow_asphalt",
+		"Road/snow_deep",
 		"Road/snow_cobbles",
 		"Road/snow_gravel",
 		"Road/wood",
