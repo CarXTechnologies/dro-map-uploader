@@ -67,7 +67,7 @@ namespace Editor
 			if (!build.lastMeta.Equals(m_target.mapMetaConfigValue))
 			{
 				rectInfo.y += m_height;
-				EditorGUI.HelpBox(rectInfo, "Meta is changed. Please rebuild meta in \"Tool/MapBuilder\"", MessageType.Warning);
+				EditorGUI.HelpBox(rectInfo, "Meta is changed. Please rebuild meta in \"Tools > MapBuilder\"", MessageType.Warning);
 				m_height += 54;
 			}
 

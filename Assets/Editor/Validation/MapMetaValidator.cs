@@ -30,7 +30,7 @@ namespace Editor.Validation
 
 			if (string.IsNullOrEmpty(sceneName))
 			{
-				report.Error(CategoryMeta, "No target scene is selected. Pick one in Build Settings.");
+				report.Error(CategoryMeta, "No target scene is selected. Pick one in Scene on the Build tab.");
 				return;
 			}
 
@@ -45,7 +45,7 @@ namespace Editor.Validation
 		{
 			if (string.IsNullOrWhiteSpace(meta.mapName))
 			{
-				report.Error(CategoryMeta, "The track has no name. Fill in Workshop Name on the map config.");
+				report.Error(CategoryMeta, "The track has no name. Fill in Name on the Map tab.");
 				return;
 			}
 
@@ -122,7 +122,7 @@ namespace Editor.Validation
 			if (meta.largeIcon == null)
 			{
 				report.Warning(CategoryMeta,
-					"No Preview is assigned. The map will have no large image on the mod page or on the loading screen.");
+					"No Preview is assigned. The map will have no large image on the loading screen.");
 				return;
 			}
 

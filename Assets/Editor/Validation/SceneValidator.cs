@@ -898,7 +898,7 @@ namespace Editor.Validation
 				if (Mathf.Approximately(size.x, 0f) || Mathf.Approximately(size.y, 0f))
 				{
 					report.Error(CategoryMinimap,
-						$"'{transform.name}': Bound Size is {size}. Set it to the size of the map in world units, " +
+						$"'{transform.name}': Bounds Size is {size}. Set it to the size of the map in world units, " +
 						"or the minimap collapses to a point in game.",
 						minimap);
 				}

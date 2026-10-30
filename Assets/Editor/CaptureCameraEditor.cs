@@ -110,6 +110,8 @@ namespace Editor
 					{
 						importer.isReadable = true;
 						importer.alphaIsTransparency = capture.ClipBackground;
+						// Icon 636x358 and Preview 1920x1080 aren't powers of two: by default Unity scales them and the game shows them distorted.
+						importer.npotScale = TextureImporterNPOTScale.None;
 						importer.SaveAndReimport();
 					}
 				}

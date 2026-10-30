@@ -154,7 +154,8 @@ namespace Editor
 			if (m_fetchResultListItems.Count == 0)
 			{
 				// An empty scroll area reads as "still loading" or "something broke"; say which it is.
-				var vendorName = MapBuilder.session.Publisher?.DisplayName ?? "the vendor";
+				// No publisher until the first fetch brings the session up, and that fetch always selects mod.io.
+				var vendorName = MapBuilder.session.Publisher?.DisplayName ?? "mod.io";
 				var hint = new Label(string.Format(L("В {0} пока нет публикаций.\n", "No publications on {0} yet.\n"), vendorName) +
 				                     L("Соберите карту и нажмите «Создать публикацию».", "Build the map and click Create publication."));
 				hint.AddToClassList("mb-empty-hint");
