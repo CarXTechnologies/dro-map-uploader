@@ -68,7 +68,7 @@ To give several GameObjects the same type:
 
 Result: every selected marker has the new type.
 
-The button keeps the **Template Config** and the template of each marker. For a **Road** type, it also resets the marker's own values, which **Custom** uses, to the defaults of the new surface, as changing the surface of one marker does, even when the marker already had that surface. After the button, a marker without a **Template Config** gets the game's surface of its new type, a marker with a named template exports the template's values, and a **Custom** marker exports the defaults of the new surface; see [Physics values](#values). <!-- src: Assets/Editor/MarkerDataDrawer.cs:59-75 -->
+The button keeps the **Template Config** and the template of each marker. For a **Road** type, it also resets the marker's own values, which **Custom** uses, to the defaults of the new surface, as changing the surface of one marker does. When the selected markers have different surfaces, it resets those that already had the new surface too; when every selected marker already has it, their **Custom** values stay. After the button, a marker without a **Template Config** gets the game's surface of its new type, a marker with a named template exports the template's values, and a **Custom** marker exports the defaults of the new surface; see [Physics values](#values). <!-- src: Assets/Editor/MarkerDataDrawer.cs:59-75 -->
 
 <a name="spawn"></a>
 ## Add spawn points
