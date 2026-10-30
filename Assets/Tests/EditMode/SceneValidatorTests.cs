@@ -94,6 +94,35 @@ namespace MapUploader.Tests
 			Assert.IsTrue(Has(report, SceneValidator.CategoryMarkers, "marked as Road but has no Collider"));
 		}
 
+		[TestCase("Road/default", "Road/asphalt")]
+		[TestCase("Road/ice_snowy", "Road/road_icy")]
+		[TestCase("Road/pavement", "Road/paving_slab")]
+		public void WarnsAboutARoadSurfaceTheGameDoesNotHave(string surface, string replacement)
+		{
+			var root = NewObject("Track");
+			var road = NewMarker("Surface", "Road", root);
+			road.markerData.param = surface;
+			NewObject("Collider", road.gameObject, typeof(BoxCollider));
+
+			var report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Warning, $"Use '{replacement}' instead."));
+		}
+
+		[Test]
+		public void AcceptsARoadSurfaceTheGameHas()
+		{
+			var root = NewObject("Track");
+			var road = NewMarker("Surface", "Road", root);
+			road.markerData.param = "Road/snow_deep";
+			NewObject("Collider", road.gameObject, typeof(BoxCollider));
+
+			var report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, "which the game doesn't have"));
+			Assert.IsTrue(Array.IndexOf(MarkerData.paramEditor, "Road/snow_deep") >= 0);
+		}
+
 		[Test]
 		public void AcceptsARoadMarkerWithAColliderOnAChild()
 		{

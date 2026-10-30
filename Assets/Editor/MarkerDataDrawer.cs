@@ -58,9 +58,20 @@ namespace Editor
 
 				if (GUI.Button(selectPopup, "Select : " + m_msPropParam))
 				{
+					bool surfaceChanges = propParam.hasMultipleDifferentValues || propParam.stringValue != m_msPropParam;
 					propIndex.intValue = m_msPropIndex;
 					propParam.stringValue = m_msPropParam;
 					propHead.stringValue = m_msPropHead;
+
+					// As when one marker changes its surface: the values of the new surface, so a Custom marker doesn't
+					// keep exporting the old surface's values until it is shown in the Inspector on its own. When every
+					// selected marker already has this surface, its Custom values stay.
+					if (surfaceChanges && m_msPropHead == "Road" && MarkerData.paramObjectsEditor.TryGetValue(m_msPropHead, out var getValue))
+					{
+						propValue.managedReferenceValue = getValue(m_msPropParam);
+						propCustomValue.managedReferenceValue = getValue(m_msPropParam);
+						propLastHead.stringValue = m_msPropParam;
+					}
 				}
 
 				Space();
