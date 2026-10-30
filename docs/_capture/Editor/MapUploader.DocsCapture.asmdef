@@ -1,0 +1,22 @@
+{
+    "name": "MapUploader.DocsCapture",
+    "rootNamespace": "MapUploader.DocsCapture",
+    "references": [
+        "MapUploader.Editor",
+        "MapUploader.Runtime",
+        "CarX.Modding.Creator",
+        "CarX.Modding.Creator.Editor",
+        "CarX.Modding.Creator.Publishing"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
