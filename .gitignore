@@ -48,3 +48,6 @@ Assets/Prefabs/GitInfo/GitInfoAsset.asset
 #dr2 importer
 Assets/Editor/Resources/DB/Customization DR2
 AssetBundles
+
+# Python bytecode from the docs tools
+__pycache__/
