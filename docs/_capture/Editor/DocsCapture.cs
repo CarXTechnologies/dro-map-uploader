@@ -11,7 +11,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
-using ModItem = Plugins.CarX.Modding.Creator.Runtime.Publishing.ModItem;
+using ModItem = CarX.Modding.Creator.Publishing.ModItem;
 using Object = UnityEngine.Object;
 
 namespace MapUploader.DocsCapture
