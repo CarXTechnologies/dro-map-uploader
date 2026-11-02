@@ -3,9 +3,9 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using MapUploader.Rules;
-using Plugins.CarX.Modding.Creator.Editor.Publishing;
-using Plugins.CarX.Modding.Creator.Runtime;
-using Plugins.CarX.Modding.Creator.Runtime.Publishing;
+using CarX.Modding.Creator.Editor.Publishing;
+using CarX.Modding.Creator.Runtime;
+using CarX.Modding.Creator.Publishing;
 using UnityEditor;
 using UnityEngine;
 

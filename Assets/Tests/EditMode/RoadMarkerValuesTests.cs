@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using Plugins.CarX.Modding.Creator.Runtime;
+using CarX.Modding.Creator.Runtime;
 using UnityEngine;
 
 namespace MapUploader.Tests

@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
-using Plugins.CarX.Modding.Creator.Editor;
-using Plugins.CarX.Modding.Creator.Runtime;
+using CarX.Modding.Creator.Editor;
+using CarX.Modding.Creator.Runtime;
 using UnityEngine;
 using Object = UnityEngine.Object;
 

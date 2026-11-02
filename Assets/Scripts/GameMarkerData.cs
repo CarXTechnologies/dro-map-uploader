@@ -1,4 +1,4 @@
-using Plugins.CarX.Modding.Creator.Runtime;
+using CarX.Modding.Creator.Runtime;
 using UnityEngine;
 
 public class GameMarkerData : MonoBehaviour, IMarkerDataSource

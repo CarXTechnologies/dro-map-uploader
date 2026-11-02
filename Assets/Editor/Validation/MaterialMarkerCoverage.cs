@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using Plugins.CarX.Modding.Creator.Editor;
-using Plugins.CarX.Modding.Creator.Runtime;
+using CarX.Modding.Creator.Editor;
+using CarX.Modding.Creator.Runtime;
 using UnityEngine;
 
 namespace Editor.Validation

@@ -1,5 +1,5 @@
 using System.IO;
-using Plugins.CarX.Modding.Creator.Runtime.Publishing;
+using CarX.Modding.Creator.Publishing;
 using UnityEditor;
 using UnityEngine;
 

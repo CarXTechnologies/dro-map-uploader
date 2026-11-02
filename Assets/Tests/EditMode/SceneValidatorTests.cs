@@ -4,7 +4,7 @@ using System.Linq;
 using Editor;
 using Editor.Validation;
 using NUnit.Framework;
-using Plugins.CarX.Modding.Creator.Runtime;
+using CarX.Modding.Creator.Runtime;
 using UnityEngine;
 
 namespace MapUploader.Tests

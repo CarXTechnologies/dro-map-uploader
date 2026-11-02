@@ -6,8 +6,8 @@ using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using Plugins.CarX.Modding.Creator.Runtime;
-using Plugins.CarX.Modding.Creator.Editor;
+using CarX.Modding.Creator.Runtime;
+using CarX.Modding.Creator.Editor;
 public class RigidbodyExportIntegrationTests {
  [NUnit.Framework.TestCase(false)]
  [NUnit.Framework.TestCase(true)] public void ExportsCompoundLodAndVatBindings(bool separateRoots){

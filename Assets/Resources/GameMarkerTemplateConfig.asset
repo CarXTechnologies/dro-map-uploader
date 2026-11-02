@@ -44,7 +44,7 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 0
-      type: {class: PhysicMaterialProperties, ns: Plugins.CarX.Modding.Creator.Runtime, asm: CarX.Modding.Creator}
+      type: {class: PhysicMaterialProperties, ns: CarX.Modding.Creator.Runtime, asm: CarX.Modding.Creator}
       data:
         friction: 1
         rollFriction: 0.01

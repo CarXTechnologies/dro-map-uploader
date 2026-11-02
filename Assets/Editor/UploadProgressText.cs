@@ -1,6 +1,6 @@
 using System;
 using System.Globalization;
-using Plugins.CarX.Modding.Creator.Runtime.Publishing;
+using CarX.Modding.Creator.Publishing;
 
 namespace Editor
 {

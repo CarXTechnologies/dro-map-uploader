@@ -1,7 +1,7 @@
 using System.Linq;
 using NUnit.Framework;
-using Plugins.CarX.Modding.Creator.Editor;
-using Plugins.CarX.Modding.Creator.Runtime;
+using CarX.Modding.Creator.Editor;
+using CarX.Modding.Creator.Runtime;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;

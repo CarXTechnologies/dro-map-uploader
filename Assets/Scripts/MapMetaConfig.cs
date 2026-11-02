@@ -6,7 +6,7 @@ public class MapMetaConfig : ScriptableObject
 {
 	[Lock] public string id;
 	public MapMetaConfigValue mapMetaConfigValue;
-	public Plugins.CarX.Modding.Creator.Runtime.BuildOptimizationSettings optimization = new();
+	public CarX.Modding.Creator.Runtime.BuildOptimizationSettings optimization = new();
 
 	public string OptimizationKey => optimization != null && optimization.enabled ? JsonUtility.ToJson(optimization.Snapshot()) : string.Empty;
 	public event Action<MapMetaConfigValue> updateValue;

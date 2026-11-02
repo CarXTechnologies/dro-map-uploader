@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Plugins.CarX.Modding.Creator.Runtime.Publishing;
+using CarX.Modding.Creator.Publishing;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using ModPublisherSession = Plugins.CarX.Modding.Creator.Editor.Publishing.ModPublisherSession;
+using ModPublisherSession = CarX.Modding.Creator.Editor.Publishing.ModPublisherSession;
 
 namespace Editor
 {

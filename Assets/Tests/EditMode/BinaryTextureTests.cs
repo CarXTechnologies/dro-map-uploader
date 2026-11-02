@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using Plugins.CarX.Modding.Creator.Runtime;
-using Plugins.CarX.Modding.Creator.Editor;
+using CarX.Modding.Creator.Runtime;
+using CarX.Modding.Creator.Editor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 

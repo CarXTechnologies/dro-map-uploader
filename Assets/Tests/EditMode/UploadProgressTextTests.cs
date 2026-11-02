@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Threading;
 using Editor;
 using NUnit.Framework;
-using Plugins.CarX.Modding.Creator.Runtime.Publishing;
+using CarX.Modding.Creator.Publishing;
 
 namespace MapUploader.Tests
 {

@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Plugins.CarX.Modding.Creator.Runtime.Publishing;
+using CarX.Modding.Creator.Publishing;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using ModPublisherSession = Plugins.CarX.Modding.Creator.Editor.Publishing.ModPublisherSession;
+using ModPublisherSession = CarX.Modding.Creator.Editor.Publishing.ModPublisherSession;
 
 namespace Editor
 {
@@ -317,12 +317,12 @@ namespace Editor
 			m_formatBlockBox.style.display = DisplayStyle.None;
 			m_buildSection.Add(m_formatBlockBox);
 
-            m_binaryTexturesField = new EnumField(L("Текстуры Binary", "Binary textures"), Plugins.CarX.Modding.Creator.Editor.BinaryMapPacker.TextureEncoding)
+            m_binaryTexturesField = new EnumField(L("Текстуры Binary", "Binary textures"), CarX.Modding.Creator.Editor.BinaryMapPacker.TextureEncoding)
             {
                 tooltip = "BC7: smaller GPU textures with high-quality lossy compression. RGBA32: lossless, larger. Both include mipmaps prepared during export."
             };
             m_binaryTexturesField.AddToClassList("mb-field");
-            m_binaryTexturesField.RegisterValueChangedCallback(evt => Plugins.CarX.Modding.Creator.Editor.BinaryMapPacker.TextureEncoding = (Plugins.CarX.Modding.Creator.Runtime.BinaryTextureEncoding)evt.newValue);
+            m_binaryTexturesField.RegisterValueChangedCallback(evt => CarX.Modding.Creator.Editor.BinaryMapPacker.TextureEncoding = (CarX.Modding.Creator.Runtime.BinaryTextureEncoding)evt.newValue);
             m_buildSection.Add(m_binaryTexturesField);
 
 			var actionsRow = new VisualElement();

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Plugins.CarX.Modding.Creator.Editor;
-using Plugins.CarX.Modding.Creator.Runtime;
+using CarX.Modding.Creator.Editor;
+using CarX.Modding.Creator.Runtime;
 using UnityEngine;
 
 namespace Editor.Validation
@@ -123,7 +123,7 @@ namespace Editor.Validation
 		private static void CheckComponents(MapValidationReport report, List<Transform> transforms, ValidItemData rules,
 			IReadOnlyList<string> skipTypes)
 		{
-            var animationRoots = Plugins.CarX.Modding.Creator.Editor.VertexAnimationBaker.GetAnimationRoots(
+            var animationRoots = CarX.Modding.Creator.Editor.VertexAnimationBaker.GetAnimationRoots(
                 transforms.Select(t => t.root).Distinct(), IsExcluded);
 			foreach (var transform in transforms)
 			{
@@ -250,7 +250,7 @@ namespace Editor.Validation
 
 				if (head == "animation")
 				{
-					var settings = marker.markerData.value as Plugins.CarX.Modding.Creator.Runtime.AnimationMarkerSettings;
+					var settings = marker.markerData.value as CarX.Modding.Creator.Runtime.AnimationMarkerSettings;
 					var animator = settings?.animator != null ? settings.animator : marker.GetComponent<Animator>();
 					if (animator == null || animator.runtimeAnimatorController == null || animator.runtimeAnimatorController.animationClips.Length == 0)
 						report.Error(CategoryMarkers, "Animation marker requires an Animator with animation clips.", marker);
@@ -869,14 +869,14 @@ namespace Editor.Validation
         private static void CheckSectorBudgets(MapValidationReport report, List<Transform> transforms)
         {
             var config = MapManagerConfig.instance.mapMetaConfigValue;
-            var settings = (config?.optimization ?? new Plugins.CarX.Modding.Creator.Runtime.BuildOptimizationSettings()).Snapshot();
+            var settings = (config?.optimization ?? new CarX.Modding.Creator.Runtime.BuildOptimizationSettings()).Snapshot();
             if (!settings.enabled)
                 report.Warning(CategoryGeometry,
                     "Build optimization is off: static meshes and colliders are exported as-is, without sector chunking, collider simplification or LODs. " +
                     "Large maps get more draw calls, heavier physics and longer loading. Enable it in Build > Optimization.", config);
             foreach (var t in transforms)
             {
-                if (!Plugins.CarX.Modding.Creator.Editor.SceneExportOptimization.IsEligible(t)) continue;
+                if (!CarX.Modding.Creator.Editor.SceneExportOptimization.IsEligible(t)) continue;
                 // Meshes that optimization splits into sectors fit the budget after export; warn only about the ones
                 // that are exported as they are.
                 void Check(Mesh mesh, Component context, string kind, bool partitioned)
@@ -884,7 +884,7 @@ namespace Editor.Validation
                     if (mesh == null || (settings.enabled && partitioned)) return;
                     long triangles = 0;
                     for (int i = 0; i < mesh.subMeshCount; i++) if (mesh.GetTopology(i) == MeshTopology.Triangles) triangles += mesh.GetIndexCount(i) / 3;
-                    var bounds = Plugins.CarX.Modding.Creator.Editor.SceneExportOptimization.WorldBounds(mesh, t.localToWorldMatrix);
+                    var bounds = CarX.Modding.Creator.Editor.SceneExportOptimization.WorldBounds(mesh, t.localToWorldMatrix);
                     var size = bounds.size;
                     if (triangles <= settings.maxTriangles && Mathf.Max(size.x, Mathf.Max(size.y, size.z)) <= settings.sectorSize) return;
                     report.AddCapped(MapValidationSeverity.Warning, CategoryGeometry, "sector-" + kind,

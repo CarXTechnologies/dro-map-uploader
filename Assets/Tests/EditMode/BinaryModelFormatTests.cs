@@ -3,8 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using Plugins.CarX.Modding.Creator.Runtime;
-using Plugins.CarX.Modding.Creator.Editor;
+using CarX.Modding.Creator.Runtime;
+using CarX.Modding.Creator.Editor;
 using UnityEngine;
 
 namespace MapUploader.Tests

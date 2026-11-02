@@ -1,5 +1,5 @@
 using System.Linq;
-using Plugins.CarX.Modding.Creator.Runtime;
+using CarX.Modding.Creator.Runtime;
 using UnityEditor;
 using UnityEngine;
 
@@ -117,8 +117,8 @@ namespace Editor
 
 			if (propHead.stringValue == "Animation")
 			{
-				if (propValue.managedReferenceValue is not Plugins.CarX.Modding.Creator.Runtime.AnimationMarkerSettings)
-					propValue.managedReferenceValue = new Plugins.CarX.Modding.Creator.Runtime.AnimationMarkerSettings
+				if (propValue.managedReferenceValue is not CarX.Modding.Creator.Runtime.AnimationMarkerSettings)
+					propValue.managedReferenceValue = new CarX.Modding.Creator.Runtime.AnimationMarkerSettings
 					{
 						animator = gameMarkerData != null ? gameMarkerData.GetComponent<Animator>() : null
 					};
