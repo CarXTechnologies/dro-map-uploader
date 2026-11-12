@@ -1378,6 +1378,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f88ed3aea3eb4a29bc49201491861439, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_worldMapPreview: 1
   m_boundsLayers:
     serializedVersion: 2
     m_Bits: 32768

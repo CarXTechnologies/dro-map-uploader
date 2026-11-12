@@ -21,6 +21,14 @@ public class Minimap : MonoBehaviour
 		[HideInInspector] public Texture alphaTexture;
 	}
 
+	public enum WorldMapPreviewMode
+	{
+		MinimapImage,
+		Generated3D,
+	}
+
+	[Tooltip("World map preview of the map: the minimap image, or a 3D miniature generated from the map geometry at export")]
+	[SerializeField] private WorldMapPreviewMode m_worldMapPreview = WorldMapPreviewMode.MinimapImage;
 	[SerializeField] private LayerMask m_boundsLayers;
 	[SerializeField] private Vector2 m_boundsCenter;
 	[SerializeField] private Vector2 m_boundsSize;
@@ -30,6 +38,7 @@ public class Minimap : MonoBehaviour
 	public TexturePair[] Textures => m_textures;
 	public Vector2 BoundsCenter => m_boundsCenter;
 	public Vector2 BoundsSize => m_boundsSize;
+	public WorldMapPreviewMode WorldMapPreview => m_worldMapPreview;
 
 	private void OnValidate()
 	{

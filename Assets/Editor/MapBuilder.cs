@@ -146,7 +146,11 @@ namespace Editor
                 await m_optimization.BuildAsync(exportRoots, settings, token);
                 if (m_optimization.Root != null) exportRoots = exportRoots.Concat(new[] { m_optimization.Root }).ToArray();
             }
-            var collector = new SceneFormatCollector(exportRoots, scene.name, "Garbage") { Optimization = m_optimization };
+            var collector = new SceneFormatCollector(exportRoots, scene.name, "Garbage")
+            {
+                Optimization = m_optimization,
+                IsMiniatureEnabled = FindMinimap()?.WorldMapPreview == Minimap.WorldMapPreviewMode.Generated3D,
+            };
 			m_results = collector.CollectModResults(m_provider, ModdingVersion.GetFullVersionFormat());
 			return m_results.success;
 		}
@@ -202,11 +206,16 @@ namespace Editor
 			await m_results.UploadInCatalogAsync(GetTemporary(TempData.Meta), progress, token);
 		}
 
-		private static ModMinimapMeta CollectMinimapMeta()
+		private static Minimap FindMinimap()
 		{
-			var minimap = SceneManager.GetActiveScene().GetRootGameObjects()
+			return SceneManager.GetActiveScene().GetRootGameObjects()
 				.SelectMany(root => root.GetComponentsInChildren<Minimap>())
 				.FirstOrDefault();
+		}
+
+		private static ModMinimapMeta CollectMinimapMeta()
+		{
+			var minimap = FindMinimap();
 			if (minimap == null || minimap.Textures == null)
 			{
 				return null;
