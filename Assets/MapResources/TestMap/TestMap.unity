@@ -1379,13 +1379,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_worldMapPreview: 1
+  m_miniatureMesh: {fileID: 4300000, guid: 69754d7d89367e748856cb3c9a978d98, type: 2}
   m_boundsLayers:
     serializedVersion: 2
     m_Bits: 32768
   m_boundsCenter: {x: 0, y: 0}
   m_boundsSize: {x: 602.5515, y: 602.5515}
   m_textures:
-  - mainTexture: {fileID: 2800000, guid: 93502ed171324a0468bb1f1adbdf5e47, type: 3}
+  - mainTexture: {fileID: 2800000, guid: d3ccd33575892c643995e7a534afe2b3, type: 3}
     alphaTexture: {fileID: 0}
   m_lockSize: 1
 --- !u!4 &90618264
@@ -6521,6 +6522,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 731353371}
+  - component: {fileID: 731353372}
   m_Layer: 0
   m_Name: Flora
   m_TagString: Untagged
@@ -6708,6 +6710,35 @@ Transform:
   - {fileID: 1810911934}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &731353372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 731353370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &754913373
 GameObject:
   m_ObjectHideFlags: 0
@@ -19802,6 +19833,7 @@ GameObject:
   - component: {fileID: 2297044725129168894}
   - component: {fileID: 6283484491297608122}
   - component: {fileID: 700413071115656118}
+  - component: {fileID: 6283484491297608123}
   m_Layer: 0
   m_Name: fence
   m_TagString: Untagged
@@ -26185,6 +26217,7 @@ GameObject:
   m_Component:
   - component: {fileID: 89499026858653128}
   - component: {fileID: 7665775200371633694}
+  - component: {fileID: 7665775200371633695}
   m_Layer: 0
   m_Name: light_tower
   m_TagString: Untagged
@@ -26405,6 +26438,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7520228150761790543}
+  - component: {fileID: 7520228150761790544}
   m_Layer: 0
   m_Name: tribune 1
   m_TagString: Untagged
@@ -28000,6 +28034,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5040949402955326073}
   - component: {fileID: 3392186171626968987}
+  - component: {fileID: 5040949402955326074}
   m_Layer: 0
   m_Name: radio_tower
   m_TagString: Untagged
@@ -30745,6 +30780,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7158252705290392495}
   - component: {fileID: 1477738646499028062}
+  - component: {fileID: 7158252705290392496}
   m_Layer: 0
   m_Name: metal_sides_tribune_0_advert0
   m_TagString: Untagged
@@ -32969,6 +33005,7 @@ GameObject:
   - component: {fileID: 8680558528537889381}
   - component: {fileID: 4945089126597890315}
   - component: {fileID: 4559016390622616957}
+  - component: {fileID: 8680558528537889382}
   m_Layer: 0
   m_Name: advertising_stand_small_6
   m_TagString: Untagged
@@ -33030,6 +33067,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6317636298364943675}
   - component: {fileID: 3796299977834797999}
+  - component: {fileID: 6317636298364943676}
   m_Layer: 0
   m_Name: racing_billlboards_pitched_01
   m_TagString: Untagged
@@ -38244,6 +38282,7 @@ GameObject:
   - component: {fileID: 6721259841997854464}
   - component: {fileID: 4395133622382782365}
   - component: {fileID: 3450026182567280455}
+  - component: {fileID: 6721259841997854465}
   m_Layer: 0
   m_Name: roadside
   m_TagString: Untagged
@@ -38494,6 +38533,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8412307316465383397}
   - component: {fileID: 6731478312715088303}
+  - component: {fileID: 8412307316465383398}
   m_Layer: 0
   m_Name: billboards_one_sided_Middle_02
   m_TagString: Untagged
@@ -41894,6 +41934,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2698518220526041919}
   - component: {fileID: 5633065302898958569}
+  - component: {fileID: 5633065302898958570}
   m_Layer: 0
   m_Name: light_tower
   m_TagString: Untagged
@@ -43262,6 +43303,7 @@ GameObject:
   - component: {fileID: 6006693050770087327}
   - component: {fileID: 2461999405057509219}
   - component: {fileID: 6426004541271691527}
+  - component: {fileID: 6426004541271691528}
   m_Layer: 0
   m_Name: advertising_stand_small_7
   m_TagString: Untagged
@@ -43554,6 +43596,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7787606881449328022}
   - component: {fileID: 8572920659767830016}
+  - component: {fileID: 8572920659767830017}
   m_Layer: 0
   m_Name: billboards_one_sided_Small_01
   m_TagString: Untagged
@@ -45580,6 +45623,7 @@ GameObject:
   - component: {fileID: 2144049797249970422}
   - component: {fileID: 5143048831589187896}
   - component: {fileID: 4760127444057720283}
+  - component: {fileID: 5143048831589187897}
   m_Layer: 0
   m_Name: road
   m_TagString: Untagged
@@ -45749,6 +45793,7 @@ GameObject:
   - component: {fileID: 5952290962708597959}
   - component: {fileID: 7959699501341308402}
   - component: {fileID: 6258589307412510245}
+  - component: {fileID: 7959699501341308403}
   m_Layer: 0
   m_Name: tribune
   m_TagString: Untagged
@@ -47612,6 +47657,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4482179357541247551}
   - component: {fileID: 4908594407482263511}
+  - component: {fileID: 5019692211729327469}
   m_Layer: 0
   m_Name: billboards_one_sided_Small_04
   m_TagString: Untagged
@@ -47619,6 +47665,35 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
   m_IsActive: 1
+--- !u!114 &5019692211729327469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5019692211729327468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &5023859417784715179
 GameObject:
   m_ObjectHideFlags: 0
@@ -47811,6 +47886,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6197742045561191021}
   - component: {fileID: 2887719087165372479}
+  - component: {fileID: 6197742045561191022}
   m_Layer: 0
   m_Name: tribune_irwindale
   m_TagString: Untagged
@@ -47875,6 +47951,35 @@ Transform:
   - {fileID: 3863134406025535296}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5040949402955326074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1701378019606355068}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Object
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 34
+    lastHeadObject: Miniature/Object
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!23 &5047270906446345478
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -48386,6 +48491,35 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4599875431115054913}
   m_Mesh: {fileID: 8728854048086142887, guid: d727c609d45ffc141b380cf9d5cdd890, type: 3}
+--- !u!114 &5143048831589187897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4599875431115054913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Road
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 32
+    lastHeadObject: Miniature/Road
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!4 &5145039374200100373
 Transform:
   m_ObjectHideFlags: 0
@@ -48800,6 +48934,7 @@ GameObject:
   - component: {fileID: 4837939967107449731}
   - component: {fileID: 8398099850982706214}
   - component: {fileID: 6010330883473881324}
+  - component: {fileID: 8398099850982706215}
   m_Layer: 0
   m_Name: Marking
   m_TagString: Untagged
@@ -49517,6 +49652,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8433213179600229712}
   - component: {fileID: 2082963588031051446}
+  - component: {fileID: 8433213179600229713}
   m_Layer: 0
   m_Name: billboards_one_sided_Small_06
   m_TagString: Untagged
@@ -50946,6 +51082,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7975533171609328810}
   - component: {fileID: 3085159605578939766}
+  - component: {fileID: 7975533171609328811}
   m_Layer: 0
   m_Name: billboards_one_sided_Middle_03
   m_TagString: Untagged
@@ -51212,6 +51349,7 @@ GameObject:
   - component: {fileID: 3139303118873998585}
   - component: {fileID: 1855258208778182999}
   - component: {fileID: 5585822562049254842}
+  - component: {fileID: 5585822562049254843}
   m_Layer: 0
   m_Name: terrain
   m_TagString: Untagged
@@ -51259,6 +51397,35 @@ MonoBehaviour:
         bump2Min: 0
         bump2Max: 0
         bump2Scale: 0
+--- !u!114 &5585822562049254843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5585822562049254841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Terrain
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 33
+    lastHeadObject: Miniature/Terrain
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!4 &5589511445018055356
 Transform:
   m_ObjectHideFlags: 0
@@ -51581,6 +51748,35 @@ LODGroup:
     renderers:
     - renderer: {fileID: 7780559545901033407}
   m_Enabled: 1
+--- !u!114 &5633065302898958570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4022011573253834624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!205 &5639665512465697071
 LODGroup:
   m_ObjectHideFlags: 0
@@ -51828,6 +52024,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6630103854785871809}
   - component: {fileID: 3989458498444649495}
+  - component: {fileID: 6630103854785871810}
   m_Layer: 0
   m_Name: light_tower
   m_TagString: Untagged
@@ -52153,6 +52350,7 @@ GameObject:
   - component: {fileID: 2717160638845975236}
   - component: {fileID: 4395046192255066166}
   - component: {fileID: 7182250530606786023}
+  - component: {fileID: 7182250530606786024}
   m_Layer: 0
   m_Name: terrain
   m_TagString: Untagged
@@ -52214,6 +52412,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6915180179807457401}
   - component: {fileID: 5366104556664272607}
+  - component: {fileID: 6915180179807457402}
   m_Layer: 0
   m_Name: advertising_stand_big
   m_TagString: Untagged
@@ -52655,6 +52854,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8436335319839191916}
   - component: {fileID: 902915909808882497}
+  - component: {fileID: 8436335319839191917}
   m_Layer: 0
   m_Name: billboards_one_sided_Middle_04
   m_TagString: Untagged
@@ -54695,6 +54895,35 @@ Transform:
   - {fileID: 1852796779}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6197742045561191022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5037990115028539718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Object
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 34
+    lastHeadObject: Miniature/Object
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!23 &6204227225007118844
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -55120,6 +55349,35 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 414832605807354515}
   m_Mesh: {fileID: -8223828571603864074, guid: 070581d045b46bf438be1e64f98827fe, type: 3}
+--- !u!114 &6283484491297608123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 414832605807354515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &6285987587538972302
 GameObject:
   m_ObjectHideFlags: 0
@@ -55197,6 +55455,7 @@ GameObject:
   - component: {fileID: 1472200982636410471}
   - component: {fileID: 4168933593596570380}
   - component: {fileID: 5318139816658509350}
+  - component: {fileID: 6298589315096501825}
   m_Layer: 0
   m_Name: roadside
   m_TagString: Untagged
@@ -55204,6 +55463,35 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
   m_IsActive: 1
+--- !u!114 &6298589315096501825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6298589315096501824}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Road
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 32
+    lastHeadObject: Miniature/Road
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!4 &6311037776167212239
 Transform:
   m_ObjectHideFlags: 0
@@ -55358,6 +55646,35 @@ Transform:
   - {fileID: 516262185761134058}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6317636298364943676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2564212041276646532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!4 &6318009211505784714
 Transform:
   m_ObjectHideFlags: 0
@@ -56012,6 +56329,35 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &6426004541271691528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4269570071106569534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &6428008878634521405
 GameObject:
   m_ObjectHideFlags: 0
@@ -57060,6 +57406,35 @@ Transform:
   - {fileID: 7323530493166282373}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6630103854785871810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5665742071628301182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!33 &6631479113061489790
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -57365,6 +57740,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5625839413053527174}
   - component: {fileID: 2687879498312175440}
+  - component: {fileID: 6679085718882691130}
   m_Layer: 0
   m_Name: light_tower
   m_TagString: Untagged
@@ -57372,6 +57748,35 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
   m_IsActive: 1
+--- !u!114 &6679085718882691130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6679085718882691129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!4 &6688397515090924416
 Transform:
   m_ObjectHideFlags: 0
@@ -57512,6 +57917,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7370350627299264747}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6721259841997854465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3450026182567280454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Road
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 32
+    lastHeadObject: Miniature/Road
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!4 &6726418683289825670
 Transform:
   m_ObjectHideFlags: 0
@@ -58529,6 +58963,35 @@ Transform:
   - {fileID: 6755549711710274477}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6915180179807457402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5734904084907470596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &6915458882830554326
 GameObject:
   m_ObjectHideFlags: 0
@@ -58918,6 +59381,7 @@ GameObject:
   - component: {fileID: 8947123131734787414}
   - component: {fileID: 7654259332255936916}
   - component: {fileID: 1873222891848449839}
+  - component: {fileID: 8947123131734787415}
   m_Layer: 0
   m_Name: tribune 2
   m_TagString: Untagged
@@ -59436,6 +59900,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7971046994190040077}
   - component: {fileID: 5253266413301836892}
+  - component: {fileID: 7971046994190040078}
   m_Layer: 0
   m_Name: billboards_one_sided_Big_01
   m_TagString: Untagged
@@ -59964,6 +60429,35 @@ Transform:
   - {fileID: 8947123131734787414}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7158252705290392496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2170268042374851498}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Object
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 34
+    lastHeadObject: Miniature/Object
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &7161101839708648063
 GameObject:
   m_ObjectHideFlags: 0
@@ -60203,6 +60697,35 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &7182250530606786024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5722418371106232735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Terrain
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 33
+    lastHeadObject: Miniature/Terrain
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &7186577860401347622
 GameObject:
   m_ObjectHideFlags: 0
@@ -62404,6 +62927,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7158252705290392495}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7520228150761790544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1449525461979685840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Object
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 34
+    lastHeadObject: Miniature/Object
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &7520469432179666146
 GameObject:
   m_ObjectHideFlags: 0
@@ -62414,6 +62966,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8861972645786226781}
   - component: {fileID: 1271059773450636171}
+  - component: {fileID: 8861972645786226782}
   m_Layer: 0
   m_Name: light_tower
   m_TagString: Untagged
@@ -63069,6 +63622,35 @@ LODGroup:
     renderers:
     - renderer: {fileID: 5743496131968248136}
   m_Enabled: 1
+--- !u!114 &7665775200371633695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1414104811014883703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &7668195893985078312
 GameObject:
   m_ObjectHideFlags: 0
@@ -64332,6 +64914,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9100888579408088879}
   - component: {fileID: 1518666332777092345}
+  - component: {fileID: 9100888579408088880}
   m_Layer: 0
   m_Name: light_tower
   m_TagString: Untagged
@@ -64692,6 +65275,35 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4677648568323091041}
   m_Mesh: {fileID: -9119233761660237642, guid: 070581d045b46bf438be1e64f98827fe, type: 3}
+--- !u!114 &7959699501341308403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4677648568323091041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Object
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 34
+    lastHeadObject: Miniature/Object
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &7962825469804985264
 GameObject:
   m_ObjectHideFlags: 0
@@ -64749,6 +65361,35 @@ Transform:
   - {fileID: 27068390571741765}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7971046994190040078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7075887168045397946}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!33 &7973273312088272230
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -64776,6 +65417,35 @@ Transform:
   - {fileID: 6450648020835766733}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7975533171609328811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5570714270735075181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!23 &7975737691864249151
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -65576,6 +66246,7 @@ GameObject:
   - component: {fileID: 3096383684961853845}
   - component: {fileID: 4724174409590040206}
   - component: {fileID: 8134195311772322375}
+  - component: {fileID: 8134195311772322376}
   m_Layer: 0
   m_Name: road
   m_TagString: Untagged
@@ -65623,6 +66294,35 @@ MonoBehaviour:
         bump2Min: 0
         bump2Max: 0
         bump2Scale: 0
+--- !u!114 &8134195311772322376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8134195311772322374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Road
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 32
+    lastHeadObject: Miniature/Road
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!4 &8139446777150389040
 Transform:
   m_ObjectHideFlags: 0
@@ -67061,6 +67761,35 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5217420615432706361}
   m_Mesh: {fileID: 1856353271550359841, guid: 2337ca82b5cf1384baea44da9c329792, type: 3}
+--- !u!114 &8398099850982706215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5217420615432706361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!4 &8404247408457890353
 Transform:
   m_ObjectHideFlags: 0
@@ -67202,6 +67931,35 @@ Transform:
   - {fileID: 455136467123682336}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8412307316465383398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3496903546071328947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &8414661800729977173
 GameObject:
   m_ObjectHideFlags: 0
@@ -67352,6 +68110,35 @@ Transform:
   - {fileID: 5981877682804413194}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8433213179600229713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5379747141079652389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!205 &8433844550729569054
 LODGroup:
   m_ObjectHideFlags: 0
@@ -67417,6 +68204,35 @@ Transform:
   - {fileID: 1340095392998037202}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8436335319839191917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5825134300088479094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!4 &8441141214609614013
 Transform:
   m_ObjectHideFlags: 0
@@ -67985,6 +68801,7 @@ GameObject:
   - component: {fileID: 8867670313395152070}
   - component: {fileID: 4275272102699331187}
   - component: {fileID: 4400533194776706807}
+  - component: {fileID: 8867670313395152071}
   m_Layer: 0
   m_Name: trees
   m_TagString: Untagged
@@ -68187,6 +69004,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7277911382771899343}
   - component: {fileID: 1950522013518010781}
+  - component: {fileID: 8568117030752745701}
   m_Layer: 0
   m_Name: tribune_irwindale
   m_TagString: Untagged
@@ -68194,6 +69012,35 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
   m_IsActive: 1
+--- !u!114 &8568117030752745701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8568117030752745700}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Object
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 34
+    lastHeadObject: Miniature/Object
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &8569416423056210193
 GameObject:
   m_ObjectHideFlags: 0
@@ -68239,6 +69086,35 @@ LODGroup:
     renderers:
     - renderer: {fileID: 665172712077451965}
   m_Enabled: 1
+--- !u!114 &8572920659767830017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4301980336606953652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!23 &8575159236988490064
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -68785,6 +69661,35 @@ Transform:
   - {fileID: 3070653524697219094}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8680558528537889382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2561644017980669112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!23 &8685492193164013658
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -70134,6 +71039,35 @@ Transform:
   - {fileID: 4853958258690246937}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8861972645786226782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7520469432179666146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!23 &8862415975483923853
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -70255,6 +71189,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7370350627299264747}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8867670313395152071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8518111260162396426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &8869299655062471758
 GameObject:
   m_ObjectHideFlags: 0
@@ -70768,6 +71731,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7158252705290392495}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8947123131734787415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6970522918382211712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Object
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 34
+    lastHeadObject: Miniature/Object
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!33 &8950083862482748920
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -71770,6 +72762,35 @@ Transform:
   - {fileID: 5182637716283070059}
   m_Father: {fileID: 731353371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9100888579408088880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7849430830485533584}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0f3ebd2d0ade54387ba2db51cbc992, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MapUploader.Runtime::GameMarkerData
+  markerData:
+    head: Miniature
+    param: Miniature/Hidden
+    value:
+      rid: -2
+    customValue:
+      rid: -2
+    index: 35
+    lastHeadObject: Miniature/Hidden
+    templateName: 
+    templateIndex: 0
+    templateConfig: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!33 &9113284853508766086
 MeshFilter:
   m_ObjectHideFlags: 0
