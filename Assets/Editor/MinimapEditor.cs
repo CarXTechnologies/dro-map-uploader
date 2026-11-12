@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Editor
 {
-	// Minimap inspector: generates the 3D miniature into a mesh asset before the build and shows it in the Scene view
+	// Minimap inspector: generates the 3D miniature and its minimap image before the build and shows the miniature in the Scene view
 	[CustomEditor(typeof(Minimap))]
 	public class MinimapEditor : UnityEditor.Editor
 	{
@@ -15,14 +15,9 @@ namespace Editor
 		private const string GarbageTag = "Garbage";
 		// The preview floats over the map so the map geometry does not hide it, meters
 		private const float PreviewLift = 30f;
-
-		// The game colors of the miniature layers (linear there), by submesh
-		private static readonly Color[] s_previewColors =
-		{
-			new Color(0.075f, 0.082f, 0.09f).gamma,
-			new Color(0.13f, 0.13f, 0.13f).gamma,
-			new Color(0.045f, 0.05f, 0.062f).gamma,
-		};
+		// Bounds smaller than this were never set: the generation frames the miniature itself
+		private const float MinBoundsSize = 10f;
+		private const float BoundsMargin = 1.1f;
 
 		private static bool IsPreviewShown
 		{
@@ -42,8 +37,9 @@ namespace Editor
 			}
 
 			EditorGUILayout.Space();
-			EditorGUILayout.HelpBox("Generate 3D preview builds the world map miniature from the scene into a mesh asset next to the scene. " +
-				"Export uses the mesh in Miniature Mesh: keep the generated one or set your own.", MessageType.Info);
+			EditorGUILayout.HelpBox("Generate 3D preview builds the world map miniature from the scene into a mesh asset next to the scene and " +
+				"draws it from above into a minimap image, which replaces Textures > Element 0. Export uses the mesh in Miniature Mesh " +
+				"and the image in Textures: keep the generated ones or set your own.", MessageType.Info);
 
 			if (GUILayout.Button("Generate 3D preview"))
 			{
@@ -83,31 +79,101 @@ namespace Editor
 				return;
 			}
 
-			string directory = string.IsNullOrEmpty(scene.path) ? "Assets" : Path.GetDirectoryName(scene.path);
-			string path = $"{directory}/{scene.name}_Miniature.asset".Replace('\\', '/');
-			Mesh mesh = MiniatureMeshUtility.ToMesh(miniature, $"{scene.name}_Miniature");
+			string directory = string.IsNullOrEmpty(scene.path) ? "Assets" : Path.GetDirectoryName(scene.path).Replace('\\', '/');
+			Mesh mesh = SaveMesh(miniature, $"{directory}/{scene.name}_Miniature.asset", $"{scene.name}_Miniature");
+
+			var serializedMinimap = new SerializedObject(minimap);
+			FrameUnsetBounds(serializedMinimap, miniature, minimap.name);
+			serializedMinimap.FindProperty("m_miniatureMesh").objectReferenceValue = mesh;
+
+			Vector2 boundsCenter = serializedMinimap.FindProperty("m_boundsCenter").vector2Value;
+			Vector2 boundsSize = serializedMinimap.FindProperty("m_boundsSize").vector2Value;
+			Texture2D image = SaveImage(miniature, boundsCenter, boundsSize, $"{directory}/{scene.name}_MiniatureMap.png");
+
+			SerializedProperty textures = serializedMinimap.FindProperty("m_textures");
+
+			if (textures.arraySize == 0)
+			{
+				textures.arraySize = 1;
+			}
+
+			textures.GetArrayElementAtIndex(0).FindPropertyRelative("mainTexture").objectReferenceValue = image;
+			serializedMinimap.ApplyModifiedProperties();
+
+			IsPreviewShown = true;
+			SceneView.RepaintAll();
+		}
+
+		// Regenerating keeps the asset (and the references to it), only its data changes
+		private static Mesh SaveMesh(MiniatureMeta miniature, string path, string name)
+		{
+			Mesh mesh = MiniatureMeshUtility.ToMesh(miniature, name);
 			var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
 
-			// Regenerating keeps the asset (and the references to it), only its data changes
 			if (existing != null)
 			{
 				EditorUtility.CopySerialized(mesh, existing);
 				DestroyImmediate(mesh);
-				mesh = existing;
-				EditorUtility.SetDirty(mesh);
-			}
-			else
-			{
-				AssetDatabase.CreateAsset(mesh, path);
+				EditorUtility.SetDirty(existing);
+				AssetDatabase.SaveAssets();
+
+				return existing;
 			}
 
+			AssetDatabase.CreateAsset(mesh, path);
 			AssetDatabase.SaveAssets();
 
-			Undo.RecordObject(minimap, "Generate 3D preview");
-			minimap.MiniatureMesh = mesh;
-			EditorUtility.SetDirty(minimap);
-			IsPreviewShown = true;
-			SceneView.RepaintAll();
+			return mesh;
+		}
+
+		private static Texture2D SaveImage(MiniatureMeta miniature, Vector2 boundsCenter, Vector2 boundsSize, string path)
+		{
+			Texture2D rendered = MiniatureTextureRenderer.Render(miniature, boundsCenter, boundsSize);
+			File.WriteAllBytes(path, rendered.EncodeToPNG());
+			DestroyImmediate(rendered);
+			AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+
+			// The image keeps its own size and its transparent background
+			if (AssetImporter.GetAtPath(path) is TextureImporter importer &&
+				(importer.npotScale != TextureImporterNPOTScale.None || !importer.alphaIsTransparency || importer.maxTextureSize < MiniatureTextureRenderer.MaxSize))
+			{
+				importer.npotScale = TextureImporterNPOTScale.None;
+				importer.alphaIsTransparency = true;
+				importer.maxTextureSize = Mathf.Max(importer.maxTextureSize, MiniatureTextureRenderer.MaxSize);
+				importer.SaveAndReimport();
+			}
+
+			return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+		}
+
+		// A minimap without bounds collapses to a point in the game: frame the roads and objects, or the terrain when there are none
+		private static void FrameUnsetBounds(SerializedObject serializedMinimap, MiniatureMeta miniature, string minimapName)
+		{
+			SerializedProperty size = serializedMinimap.FindProperty("m_boundsSize");
+
+			if (size.vector2Value.x >= MinBoundsSize && size.vector2Value.y >= MinBoundsSize)
+			{
+				return;
+			}
+
+			MiniatureLayer[] layers = miniature.layers.Where(layer => layer.kind != MiniatureLayerKind.Terrain && layer.vertices.Length > 0).ToArray();
+
+			if (layers.Length == 0)
+			{
+				layers = miniature.layers.Where(layer => layer.vertices.Length > 0).ToArray();
+			}
+
+			Vector3[] vertices = layers.SelectMany(layer => layer.vertices).ToArray();
+			var min = new Vector2(vertices.Min(v => v.x), vertices.Min(v => v.z));
+			var max = new Vector2(vertices.Max(v => v.x), vertices.Max(v => v.z));
+			float side = Mathf.Max(max.x - min.x, max.y - min.y) * BoundsMargin;
+
+			// Lock Size would copy the object scale back into the bounds
+			serializedMinimap.FindProperty("m_lockSize").boolValue = false;
+			serializedMinimap.FindProperty("m_boundsCenter").vector2Value = (min + max) * 0.5f;
+			size.vector2Value = new Vector2(side, side);
+
+			Debug.Log($"[Miniature] '{minimapName}': Bounds Size was not set, the bounds now frame the miniature ({side:F0} m).", serializedMinimap.targetObject);
 		}
 
 		private static bool IsGarbage(Transform transform)
@@ -135,9 +201,14 @@ namespace Editor
 
 			Vector3 position = Vector3.up * (mesh.bounds.size.y + PreviewLift);
 
-			for (int submesh = 0; submesh < Mathf.Min(mesh.subMeshCount, s_previewColors.Length); submesh++)
+			for (int submesh = 0; submesh < mesh.subMeshCount; submesh++)
 			{
-				Gizmos.color = s_previewColors[submesh];
+				Gizmos.color = (MiniatureLayerKind)submesh switch
+				{
+					MiniatureLayerKind.Ground => MiniatureTextureRenderer.GroundColor,
+					MiniatureLayerKind.Terrain => MiniatureTextureRenderer.TerrainColor,
+					_ => MiniatureTextureRenderer.GetObjectColor(0f),
+				};
 				Gizmos.DrawMesh(mesh, submesh, position, Quaternion.identity, Vector3.one);
 			}
 		}

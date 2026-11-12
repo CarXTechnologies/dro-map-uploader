@@ -27,7 +27,7 @@ public class Minimap : MonoBehaviour
 		Generated3D,
 	}
 
-	[Tooltip("World map preview of the map: the minimap image, or a 3D miniature generated from the map geometry at export")]
+	[Tooltip("World map preview of the map: the minimap image, or a 3D miniature generated from the map geometry. Generate 3D preview also draws the miniature into the minimap image in Textures")]
 	[SerializeField] private WorldMapPreviewMode m_worldMapPreview = WorldMapPreviewMode.MinimapImage;
 	[Tooltip("3D miniature exported with the map: Generate 3D preview writes it here, or set your own mesh in world space of the map " +
 		"(submesh 0 roads and pads, 1 objects, 2 terrain). Empty: generated at export")]
