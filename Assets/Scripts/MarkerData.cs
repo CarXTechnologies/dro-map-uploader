@@ -37,13 +37,18 @@ public class MarkerData
 		"Road/wood",
 		"Road/wood_plank",
 		"Animation",
-		"Material"
+		"Material",
+		ClipZoneHead + "/TouchAndGo",
+		ClipZoneHead + "/Triple"
 	};
 
-	public static bool IsSupportedHead(string head) => head == "SpawnPoint" || head == "Road" || head == "Animation" || head == MaterialHead;
+	public static bool IsSupportedHead(string head) => head == "SpawnPoint" || head == "Road" || head == "Animation" || head == MaterialHead || head == ClipZoneHead;
 
 	/// <summary>Маркер Material: переопределение материалов рендерера вариантами rendercore (только Binary).</summary>
 	public const string MaterialHead = CarX.Modding.Creator.Runtime.RenderCoreMaterialMarkerSettings.MarkerHead;
+
+	/// <summary>ClipZone marker: a free ride clipping zone along the child points of the marker object.</summary>
+	public const string ClipZoneHead = CarX.Modding.Creator.Runtime.ClipZoneMarkerSettings.MarkerHead;
 
 	public static int FindEditorIndex(string head, string param)
 	{
@@ -68,6 +73,7 @@ public class MarkerData
 			{ "Road", name => AssetUtils.GetDBConfig<SurfaceTemplate>(name.Replace("Road/", string.Empty)).physicMaterial },
 			{ "Animation", name => new CarX.Modding.Creator.Runtime.AnimationMarkerSettings() },
 			{ MaterialHead, name => new CarX.Modding.Creator.Runtime.RenderCoreMaterialMarkerSettings() },
+			{ ClipZoneHead, CarX.Modding.Creator.Runtime.ClipZoneMarkerSettings.Create },
 		};
 
 	public static string[] paramEditorOnlyParameters
@@ -87,7 +93,7 @@ public class MarkerData
 
 	public void Update()
 	{
-		if (templateConfig == null && head != "Animation" && head != MaterialHead)
+		if (templateConfig == null && head != "Animation" && head != MaterialHead && head != ClipZoneHead)
 		{
 			value = null;
 		}

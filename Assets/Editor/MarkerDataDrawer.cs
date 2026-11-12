@@ -88,7 +88,7 @@ namespace Editor
 				{
 					Space();
 					amountRect.height = propHeight * 3;
-					EditorGUI.HelpBox(amountRect, $"Unsupported marker: {propHead.stringValue}. Select SpawnPoint, Road, Animation or Material, or remove the component.", MessageType.Error);
+					EditorGUI.HelpBox(amountRect, $"Unsupported marker: {propHead.stringValue}. Select SpawnPoint, Road, Animation, Material or ClipZone, or remove the component.", MessageType.Error);
 					m_height += amountRect.height;
 					EditorGUI.indentLevel = indent;
 					EditorGUI.EndProperty();
@@ -143,6 +143,32 @@ namespace Editor
 				Space();
 				amountRect.height = EditorGUI.GetPropertyHeight(propValue, true);
 				EditorGUI.PropertyField(amountRect, propValue, new GUIContent("Render core materials"), true);
+				m_height += amountRect.height;
+				EditorGUI.indentLevel = indent;
+				EditorGUI.EndProperty();
+				return;
+			}
+
+			if (propHead.stringValue == MarkerData.ClipZoneHead)
+			{
+				// The settings type follows the selected kind: a triple zone has the block settings and its own width. The chain stays
+				ClipZoneMarkerSettings created = ClipZoneMarkerSettings.Create(propParam.stringValue);
+
+				if (propValue.managedReferenceValue?.GetType() != created.GetType())
+				{
+					if (propValue.managedReferenceValue is ClipZoneMarkerSettings previous)
+					{
+						created.chain = previous.chain;
+						created.order = previous.order;
+					}
+
+					propValue.managedReferenceValue = created;
+				}
+
+				propLastHead.stringValue = propParam.stringValue;
+				Space();
+				amountRect.height = EditorGUI.GetPropertyHeight(propValue, true);
+				EditorGUI.PropertyField(amountRect, propValue, new GUIContent("Clip zone"), true);
 				m_height += amountRect.height;
 				EditorGUI.indentLevel = indent;
 				EditorGUI.EndProperty();
