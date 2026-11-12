@@ -88,7 +88,7 @@ namespace Editor
 				{
 					Space();
 					amountRect.height = propHeight * 3;
-					EditorGUI.HelpBox(amountRect, $"Unsupported marker: {propHead.stringValue}. Select SpawnPoint, Road, Animation, Material or ClipZone, or remove the component.", MessageType.Error);
+					EditorGUI.HelpBox(amountRect, $"Unsupported marker: {propHead.stringValue}. Select SpawnPoint, Road, Animation, Material, ClipZone or Miniature, or remove the component.", MessageType.Error);
 					m_height += amountRect.height;
 					EditorGUI.indentLevel = indent;
 					EditorGUI.EndProperty();
@@ -143,6 +143,25 @@ namespace Editor
 				Space();
 				amountRect.height = EditorGUI.GetPropertyHeight(propValue, true);
 				EditorGUI.PropertyField(amountRect, propValue, new GUIContent("Render core materials"), true);
+				m_height += amountRect.height;
+				EditorGUI.indentLevel = indent;
+				EditorGUI.EndProperty();
+				return;
+			}
+
+			if (propHead.stringValue == MiniatureMarker.Head)
+			{
+				propValue.managedReferenceValue = null;
+				propLastHead.stringValue = propParam.stringValue;
+				Space();
+				amountRect.height = propHeight * 2;
+				EditorGUI.HelpBox(amountRect, "World map 3D preview: this object and its children are drawn as " + propParam.stringValue switch
+				{
+					MiniatureMarker.Road => "roads and pads.",
+					MiniatureMarker.Terrain => "the terrain backdrop.",
+					MiniatureMarker.Object => "boxes of their bounds.",
+					_ => "nothing.",
+				}, MessageType.None);
 				m_height += amountRect.height;
 				EditorGUI.indentLevel = indent;
 				EditorGUI.EndProperty();

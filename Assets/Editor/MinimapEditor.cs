@@ -64,8 +64,18 @@ namespace Editor
 		{
 			var scene = minimap.gameObject.scene;
 			Transform[] roots = scene.GetRootGameObjects().Select(root => root.transform).ToArray();
-			MiniatureMeta miniature = MiniatureCollector.Collect(scene.name, ModdingVersion.GetFullVersionFormat(), roots, IsGarbage,
-				MapBuilder.CreateMiniatureRoadFilter(minimap));
+			MiniatureMeta miniature;
+
+			// The miniature reads the triangles: Read/Write is enabled for the generation only
+			try
+			{
+				RigidbodyExporter.EnsureMeshReadability(roots);
+				miniature = MiniatureCollector.Collect(scene.name, ModdingVersion.GetFullVersionFormat(), roots, IsGarbage);
+			}
+			finally
+			{
+				ExportImporterSettings.RestoreAll();
+			}
 
 			if (miniature == null)
 			{

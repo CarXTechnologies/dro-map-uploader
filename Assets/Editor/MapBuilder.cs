@@ -138,6 +138,19 @@ namespace Editor
 			if (HasSceneErrors(roots)) return false;
 
 			var exportRoots = roots.Select(root => root.transform).ToArray();
+            // The miniature comes from the scene as the author built it: the optimization merges meshes and drops their markers
+            Minimap minimap = FindMinimap();
+            Mesh miniatureMesh = minimap != null ? minimap.MiniatureMesh : null;
+            bool isMiniatureEnabled = minimap != null && minimap.WorldMapPreview == Minimap.WorldMapPreviewMode.Generated3D;
+
+            if (isMiniatureEnabled && miniatureMesh == null)
+            {
+                // The miniature reads the triangles: Read/Write is restored at the end of export, as for the optimization
+                RigidbodyExporter.EnsureMeshReadability(exportRoots);
+                MiniatureMeta miniature = MiniatureCollector.Collect(scene.name, ModdingVersion.GetFullVersionFormat(), exportRoots, IsGarbage);
+                miniatureMesh = miniature != null ? MiniatureMeshUtility.ToMesh(miniature, scene.name + "_Miniature") : null;
+            }
+
             var settings = MapManagerConfig.instance.mapMetaConfigValue.optimization;
             if (settings != null && settings.enabled)
             {
@@ -149,9 +162,8 @@ namespace Editor
             var collector = new SceneFormatCollector(exportRoots, scene.name, "Garbage")
             {
                 Optimization = m_optimization,
-                IsMiniatureEnabled = FindMinimap()?.WorldMapPreview == Minimap.WorldMapPreviewMode.Generated3D,
-                MiniatureRoadFilter = CreateMiniatureRoadFilter(FindMinimap()),
-                MiniatureMesh = FindMinimap()?.MiniatureMesh,
+                IsMiniatureEnabled = isMiniatureEnabled && miniatureMesh != null,
+                MiniatureMesh = miniatureMesh,
             };
 			m_results = collector.CollectModResults(m_provider, ModdingVersion.GetFullVersionFormat());
 			return m_results.success;
@@ -208,34 +220,17 @@ namespace Editor
 			await m_results.UploadInCatalogAsync(GetTemporary(TempData.Meta), progress, token);
 		}
 
-		private const float MiniatureRoadMaxSaturation = 0.12f;
-		private const float MiniatureRoadMinValue = 0.15f;
-
-		// Roads and pads are grey on the minimap image, terrain (soil, grass, trees) is colored
-		internal static Func<Vector3, bool> CreateMiniatureRoadFilter(Minimap minimap)
+		private static bool IsGarbage(Transform transform)
 		{
-			if (minimap == null || minimap.WorldMapPreview != Minimap.WorldMapPreviewMode.Generated3D ||
-				minimap.Textures == null || minimap.Textures.Length == 0 || minimap.Textures[0].mainTexture is not Texture2D source)
+			for (Transform t = transform; t != null; t = t.parent)
 			{
-				return null;
+				if (t.CompareTag("Garbage"))
+				{
+					return true;
+				}
 			}
 
-			Texture2D texture = UnityGoObjExporter.EnsureTextureIsReadableAndUncompressed(source);
-			Vector2 size = minimap.BoundsSize;
-			Vector2 min = minimap.BoundsCenter - size * 0.5f;
-
-			if (texture == null || size.x <= 0f || size.y <= 0f)
-			{
-				return null;
-			}
-
-			return point =>
-			{
-				Color color = texture.GetPixelBilinear((point.x - min.x) / size.x, (point.z - min.y) / size.y);
-				Color.RGBToHSV(color, out _, out float saturation, out float value);
-
-				return saturation <= MiniatureRoadMaxSaturation && value >= MiniatureRoadMinValue;
-			};
+			return false;
 		}
 
 		private static Minimap FindMinimap()

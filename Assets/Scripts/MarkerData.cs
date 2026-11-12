@@ -39,10 +39,15 @@ public class MarkerData
 		"Animation",
 		"Material",
 		ClipZoneHead + "/TouchAndGo",
-		ClipZoneHead + "/Triple"
+		ClipZoneHead + "/Triple",
+		CarX.Modding.Creator.Runtime.MiniatureMarker.Road,
+		CarX.Modding.Creator.Runtime.MiniatureMarker.Terrain,
+		CarX.Modding.Creator.Runtime.MiniatureMarker.Object,
+		CarX.Modding.Creator.Runtime.MiniatureMarker.Hidden
 	};
 
-	public static bool IsSupportedHead(string head) => head == "SpawnPoint" || head == "Road" || head == "Animation" || head == MaterialHead || head == ClipZoneHead;
+	public static bool IsSupportedHead(string head) => head == "SpawnPoint" || head == "Road" || head == "Animation" || head == MaterialHead || head == ClipZoneHead ||
+		head == CarX.Modding.Creator.Runtime.MiniatureMarker.Head;
 
 	/// <summary>Маркер Material: переопределение материалов рендерера вариантами rendercore (только Binary).</summary>
 	public const string MaterialHead = CarX.Modding.Creator.Runtime.RenderCoreMaterialMarkerSettings.MarkerHead;
