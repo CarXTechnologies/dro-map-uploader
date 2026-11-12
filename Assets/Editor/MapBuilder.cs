@@ -151,6 +151,7 @@ namespace Editor
                 Optimization = m_optimization,
                 IsMiniatureEnabled = FindMinimap()?.WorldMapPreview == Minimap.WorldMapPreviewMode.Generated3D,
                 MiniatureRoadFilter = CreateMiniatureRoadFilter(FindMinimap()),
+                MiniatureMesh = FindMinimap()?.MiniatureMesh,
             };
 			m_results = collector.CollectModResults(m_provider, ModdingVersion.GetFullVersionFormat());
 			return m_results.success;
@@ -211,7 +212,7 @@ namespace Editor
 		private const float MiniatureRoadMinValue = 0.15f;
 
 		// Roads and pads are grey on the minimap image, terrain (soil, grass, trees) is colored
-		private static Func<Vector3, bool> CreateMiniatureRoadFilter(Minimap minimap)
+		internal static Func<Vector3, bool> CreateMiniatureRoadFilter(Minimap minimap)
 		{
 			if (minimap == null || minimap.WorldMapPreview != Minimap.WorldMapPreviewMode.Generated3D ||
 				minimap.Textures == null || minimap.Textures.Length == 0 || minimap.Textures[0].mainTexture is not Texture2D source)

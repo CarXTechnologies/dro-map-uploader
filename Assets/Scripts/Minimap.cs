@@ -29,6 +29,9 @@ public class Minimap : MonoBehaviour
 
 	[Tooltip("World map preview of the map: the minimap image, or a 3D miniature generated from the map geometry at export")]
 	[SerializeField] private WorldMapPreviewMode m_worldMapPreview = WorldMapPreviewMode.MinimapImage;
+	[Tooltip("3D miniature exported with the map: Generate 3D preview writes it here, or set your own mesh in world space of the map " +
+		"(submesh 0 roads and pads, 1 objects, 2 terrain). Empty: generated at export")]
+	[SerializeField] private Mesh m_miniatureMesh;
 	[SerializeField] private LayerMask m_boundsLayers;
 	[SerializeField] private Vector2 m_boundsCenter;
 	[SerializeField] private Vector2 m_boundsSize;
@@ -39,6 +42,12 @@ public class Minimap : MonoBehaviour
 	public Vector2 BoundsCenter => m_boundsCenter;
 	public Vector2 BoundsSize => m_boundsSize;
 	public WorldMapPreviewMode WorldMapPreview => m_worldMapPreview;
+
+	public Mesh MiniatureMesh
+	{
+		get => m_miniatureMesh;
+		set => m_miniatureMesh = value;
+	}
 
 	private void OnValidate()
 	{
