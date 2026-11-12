@@ -150,6 +150,7 @@ namespace Editor
             {
                 Optimization = m_optimization,
                 IsMiniatureEnabled = FindMinimap()?.WorldMapPreview == Minimap.WorldMapPreviewMode.Generated3D,
+                MiniatureRoadFilter = CreateMiniatureRoadFilter(FindMinimap()),
             };
 			m_results = collector.CollectModResults(m_provider, ModdingVersion.GetFullVersionFormat());
 			return m_results.success;
@@ -204,6 +205,36 @@ namespace Editor
 
 			m_results.Add(modHierarchy);
 			await m_results.UploadInCatalogAsync(GetTemporary(TempData.Meta), progress, token);
+		}
+
+		private const float MiniatureRoadMaxSaturation = 0.12f;
+		private const float MiniatureRoadMinValue = 0.15f;
+
+		// Roads and pads are grey on the minimap image, terrain (soil, grass, trees) is colored
+		private static Func<Vector3, bool> CreateMiniatureRoadFilter(Minimap minimap)
+		{
+			if (minimap == null || minimap.WorldMapPreview != Minimap.WorldMapPreviewMode.Generated3D ||
+				minimap.Textures == null || minimap.Textures.Length == 0 || minimap.Textures[0].mainTexture is not Texture2D source)
+			{
+				return null;
+			}
+
+			Texture2D texture = UnityGoObjExporter.EnsureTextureIsReadableAndUncompressed(source);
+			Vector2 size = minimap.BoundsSize;
+			Vector2 min = minimap.BoundsCenter - size * 0.5f;
+
+			if (texture == null || size.x <= 0f || size.y <= 0f)
+			{
+				return null;
+			}
+
+			return point =>
+			{
+				Color color = texture.GetPixelBilinear((point.x - min.x) / size.x, (point.z - min.y) / size.y);
+				Color.RGBToHSV(color, out _, out float saturation, out float value);
+
+				return saturation <= MiniatureRoadMaxSaturation && value >= MiniatureRoadMinValue;
+			};
 		}
 
 		private static Minimap FindMinimap()
