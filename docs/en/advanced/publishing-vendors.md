@@ -18,7 +18,7 @@ MapUploader has two vendor implementations. Only mod.io is available in the **Ma
 
 ## How it fits together
 
-MapUploader never calls a vendor SDK directly. It talks to one vendor-neutral contract in the [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/fe4f4dff325048f0e594a77c1e87a36c08c12154) submodule. Each vendor implementation sits in its own assembly behind a define constraint, so a project compiles only the vendors whose SDKs it carries, and another project can add a vendor without changing the contract.
+MapUploader never calls a vendor SDK directly. It talks to one vendor-neutral contract in the [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/92b7e4e05b4d2ba82c722fafe6ebd8e91e2b4345) submodule. Each vendor implementation sits in its own assembly behind a define constraint, so a project compiles only the vendors whose SDKs it carries, and another project can add a vendor without changing the contract.
 
 ```
 Assets/Plugins/CarX.Modding.Creator/          submodule
@@ -276,7 +276,7 @@ To add a vendor:
 
 Result: After the recompile, `ModPublisherSession.AvailableVendors` lists the new vendor, and the **MapBuilder** window offers it as far as your changes to those members allow.
 
-The interfaces are in the submodule: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/fe4f4dff325048f0e594a77c1e87a36c08c12154/Publishing/Core/IModPublisher.cs) and [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/fe4f4dff325048f0e594a77c1e87a36c08c12154/Publishing/Core/IModAuthProvider.cs).
+The interfaces are in the submodule: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/92b7e4e05b4d2ba82c722fafe6ebd8e91e2b4345/Publishing/Core/IModPublisher.cs) and [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/92b7e4e05b4d2ba82c722fafe6ebd8e91e2b4345/Publishing/Core/IModAuthProvider.cs).
 
 <a name="differences"></a>
 ## Known differences between vendors

@@ -121,9 +121,11 @@ A Minimap under a `Garbage` object isn't counted, so validation reports the mini
 <a name="world-map-3d"></a>
 ## 3D preview on the world map
 
-The world map shows a map at **Track Selection**, on the **Mods** screen, in online rooms and in the pause menu. By default it shows the minimap image. A map can show a 3D miniature in the style of the game's own tracks instead: roads and pads in dark grey, buildings as light grey boxes that get lighter with height, and the terrain as a dark backdrop.
+The world map shows a map at **Track Selection**, on the **Mods** screen, in online rooms and in the pause menu. By default it shows the minimap image. A map can show a 3D miniature in the style of the game's own tracks instead: roads and pads in grey, buildings as lighter boxes that get lighter with height, and the terrain as a dark backdrop.
 
 The miniature is a mesh with three submeshes: 0 is roads and pads, 1 is objects, 2 is terrain. Its vertices are in the world space of the map, the same space as the minimap rectangle. The build exports it to the mod, and the game colors it. <!-- src: Assets/Scripts/Minimap.cs:24-34 -->
+
+The generator also draws the miniature from above into a minimap image in the same colors. That image becomes the minimap image of the map, so the picture of the map, such as the preview panel at **Track Selection**, matches the 3D miniature and loads as fast as any minimap. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureTextureRenderer.cs:7-16 -->
 
 <a name="world-map-3d-enable"></a>
 ### Turn on the 3D preview
@@ -132,12 +134,18 @@ The miniature is a mesh with three submeshes: 0 is roads and pads, 1 is objects,
 1. In **World Map Preview**, select **Generated 3D**.
    The **Generate 3D preview** button and the **Show in Scene view** box appear under the component.
 1. Select **Generate 3D preview**.
-   The miniature is saved as a `_Miniature.asset` file named after the scene, next to the scene, and **Miniature Mesh** points to it. <!-- src: Assets/Editor/MinimapEditor.cs:48,87,106 -->
-1. Look at the miniature in the **Scene** view: it floats 30 m over the map in the game's colors. To hide it, clear **Show in Scene view**. <!-- src: Assets/Editor/MinimapEditor.cs:17,54 -->
+   The generator saves two files next to the scene, named after the scene: the miniature `_Miniature.asset`, which **Miniature Mesh** now points to, and the minimap image `_MiniatureMap.png`, which replaces the image in **Textures** > **Element 0** > **Main Texture**. <!-- src: Assets/Editor/MinimapEditor.cs:44,83-100 -->
+   When **Bounds Size** is under 10 m, the generator also clears **Lock Size** and sets **Bounds Center** and **Bounds Size** to a square around the roads and objects with a 10% margin. <!-- src: Assets/Editor/MinimapEditor.cs:19-20,150-174 -->
+1. Look at the miniature in the **Scene** view: it floats 30 m over the map in the game's colors. To hide it, clear **Show in Scene view**. <!-- src: Assets/Editor/MinimapEditor.cs:17,50 -->
 
-Result: the build exports the mesh in **Miniature Mesh**. When the field is empty, the build generates the miniature from the scene, as the button does. <!-- src: Assets/Editor/MapBuilder.cs:144-150 -->
+Result: the build exports the mesh in **Miniature Mesh** and the image in **Textures**. When **Miniature Mesh** is empty, the build generates the miniature from the scene, as the button does, but doesn't draw the image: the minimap image stays the one in **Textures**. <!-- src: Assets/Editor/MapBuilder.cs:143-152 -->
 
-To use your own miniature, model it in your 3D tool in the world space of the map with the three submeshes above, and set it in **Miniature Mesh**. Generating again overwrites the generated asset only. <!-- src: Assets/Editor/MinimapEditor.cs:87-104 -->
+After generating, you can set either result by hand:
+
+- **Your own miniature.** Model it in your 3D tool in the world space of the map with the three submeshes above, and set it in **Miniature Mesh**.
+- **Your own image.** Set it in **Textures** > **Element 0** > **Main Texture**. The image that the generator replaced stays in the project, so you can set it back.
+
+Generating again rewrites the two generated files and points both fields back to them. <!-- src: Assets/Editor/MinimapEditor.cs:87,100,107-126 -->
 
 <a name="world-map-3d-markers"></a>
 ### Mark what each object is
@@ -148,8 +156,10 @@ The **Miniature** markers tell the generator what an object is, so that it doesn
 | --- | --- |
 | **Miniature/Road** | Roads and pads: all its faces, in the road color |
 | **Miniature/Terrain** | The terrain backdrop: all its faces, coarser, in the backdrop color |
-| **Miniature/Object** | Boxes: one box for each separate piece of its mesh |
+| **Miniature/Object** | Boxes: one for each group of touching pieces of its mesh |
 | **Miniature/Hidden** | Nothing |
+
+An object marked **Miniature/Object** is taken whole: a stand built of seats and beams is one box, and a mesh merged from separate buildings gives one box for each building. Groups under 0.5 m are left out. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureCollector.cs:26,131-135,369 -->
 
 Typical marking: **Road** on the root of the road meshes, **Terrain** on the terrain and rocks, **Object** on buildings and stands, **Hidden** on trees, grass, fences, guardrails, poles, signs, cars and invisible walls.
 
@@ -159,9 +169,9 @@ Typical marking: **Road** on the root of the road meshes, **Terrain** on the ter
 Objects without a **Miniature** marker on them or their parents are sorted automatically. The rules work for most maps, but not for all: when the result is wrong, mark the objects.
 
 - **Left out.** Disabled renderers, objects under a Garbage object, LOD levels other than the first, and renderers with a cutout or transparent material (render queue 2450 or higher, or alpha test on): foliage, glass, decals. A marker doesn't bring these back. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureCollector.cs:179-198 -->
-- **Ground or object.** A mesh at least 15 m wide where 70% of the surface or more faces up or down, slopes included, is ground. Anything else is an object. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureCollector.cs:20-22,120 -->
+- **Ground or object.** A mesh at least 15 m wide where 70% of the surface or more faces up or down, slopes included, is ground. Anything else is an object. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureCollector.cs:21-23,127 -->
 - **Road or terrain.** Each submesh of a ground mesh goes by the average color of its material: the color textures (base color, albedo, diffuse, main texture, all splat layers) times the tint. Grey with saturation up to 0.2, neither too dark nor white, is a road, like asphalt and concrete. Colored is terrain, like grass, soil and sand. Grey rock counts as road, so mark rocks as **Terrain**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MaterialColorSampler.cs:13-18,39 -->
-- **Objects.** Each separate piece of an object mesh becomes a box of its bounds, turned with the object. Pieces under 0.5 m are left out. A mesh merged from many cars or buildings gives one box for each of them. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureCollector.cs:124-138 -->
+- **Objects.** Each separate piece of an object mesh that is at least 5 m in size becomes a box of its bounds, turned with the object. Smaller pieces are left out: barriers, cones, signs and lamps would only clutter the miniature. A mesh merged from many buildings gives one box for each of them. An object built of many small pieces, such as a stand, disappears, so mark it as **Object**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureCollector.cs:27,136-141 -->
 - **Flipped normals.** Ground faces turned down are turned up, so flat meshes exported with flipped normals still show.
 
 The minimap image isn't used: on many maps it is a photo, a line drawing or a stylized picture, and its colors say nothing reliable about the surfaces.
@@ -169,7 +179,9 @@ The minimap image isn't used: on many maps it is a photo, a line drawing or a st
 <a name="world-map-3d-limits"></a>
 ### Size of the miniature
 
-The generator simplifies the roads to about 1/600 of the map size and the terrain to about 1/150, and keeps the ground under 120 000 triangles and the objects under 20 000 boxes. Over the limits it simplifies further or drops the rest of the objects, and the **Console** shows a warning that starts with [Miniature]. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureCollector.cs:14-15,29-30,146 -->
+The generator simplifies the roads to a grid of about 1/600 of the map size, 1.5 m at most, and the terrain to about 1/150, 6 m at most, and keeps the ground under 120 000 triangles and the objects under 20 000 boxes. Over the limits it simplifies further or drops the rest of the objects, and the **Console** shows a warning that starts with [Miniature]. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureCollector.cs:14-15,32-37,146,489 -->
+
+The minimap image is 2048 pixels on its long side and covers the minimap rectangle; outside the map it is transparent. Roads are drawn over the terrain and objects over the roads. Seams between the roads and the terrain and holes inside the map, such as a lake or the footprint of a hidden building, are painted in the terrain color. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureTextureRenderer.cs:11,23,190,213 -->
 
 <a name="capture"></a>
 ## Capture images with CaptureCamera

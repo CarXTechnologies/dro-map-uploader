@@ -195,7 +195,7 @@ flowchart LR
 
 ### Структура файла
 
-Все числа записаны в порядке little-endian. Эталонная реализация чтения — [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/fe4f4dff325048f0e594a77c1e87a36c08c12154/Runtime/Binary/BinaryModArchive.cs) в SDK CarX.Modding.Creator.
+Все числа записаны в порядке little-endian. Эталонная реализация чтения — [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/92b7e4e05b4d2ba82c722fafe6ebd8e91e2b4345/Runtime/Binary/BinaryModArchive.cs) в SDK CarX.Modding.Creator.
 
 | Часть | Тип | Содержимое |
 | --- | --- | --- |
