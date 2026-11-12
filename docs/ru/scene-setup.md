@@ -171,7 +171,7 @@ Unity Terrain не экспортируется, поэтому сделайте
 - Rigidbody находится в иерархии объекта с LODGroup на любой глубине. Поместите Rigidbody на объект с LODGroup или на одного из его родителей. Сообщение начинается с `Rigidbody '<name>' cannot split an enclosing LODGroup.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:37-39 -->
 - У коллайдера Rigidbody скошенный трансформ — он возникает из-за неравномерного масштаба у родителя повёрнутого объекта. Примените масштаб в модели. Сообщение заканчивается на `has a sheared transform. Apply scale in the model first.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:63-68 -->
 - MeshCollider некинематического Rigidbody не выпуклый: `Rigidbody '<name>': a dynamic MeshCollider must be Convex.` Сборку останавливает и MeshCollider у Rigidbody без меша. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:75-76 -->
-- Rigidbody находится внутри объекта с маркером Animation. Поместите Rigidbody на корень Animator или на одного из его родителей: `Put Rigidbody on the Animator root or above it; a baked animation cannot contain independent moving bodies.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:45-46 -->
+- Rigidbody находится внутри объекта с маркером Animation. Поместите Rigidbody на корень Animator или на одного из его родителей: `Put Rigidbody on the Animator root or above it; a baked animation cannot contain independent moving bodies.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:51-52 -->
 
 В следующих случаях в Console только появляется предупреждение, и сборка продолжается:
 
@@ -224,7 +224,7 @@ Unity Terrain не экспортируется, поэтому сделайте
 Игра использует собственное освещение окружения, например небо и солнце. Из вашей сцены она берёт только источники света Point и Spot.
 
 - Экспортируются только включённые источники Point и Spot на активных объектах, в обоих форматах. Все остальные типы, включая Directional и Area, пропускаются.
-- Сборка экспортирует для каждого источника положение, поворот, цвет, интенсивность, дальность, углы конуса, настройки теней и цветовую температуру. Интенсивность она переводит в канделы, умножает на 0,1 и ограничивает значением 5000. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:71-85 -->
+- Сборка экспортирует для каждого источника положение, поворот, цвет, интенсивность, дальность, углы конуса, настройки теней и цветовую температуру. Интенсивность она переводит в канделы, умножает на 0,1 и ограничивает значением 5000. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:94-108 -->
 - На карте может быть до 500 источников света. <!-- src: Assets/Editor/MapSceneRules.cs:20-21 -->
 - Volume (небо, туман, экспозиция), источники Directional и Area и Reflection Probe освещают сцену только в редакторе.
 - Запечённые лайтмапы не экспортируются, а оптимизация сборки не объединяет рендереры, использующие запечённый лайтмап. Не запекайте освещение в сцене карты.

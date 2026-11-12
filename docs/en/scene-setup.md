@@ -171,7 +171,7 @@ Of the rules below, **Validate map** checks only **Convex**; it also checks the 
 - A Rigidbody is inside the hierarchy of a LODGroup object, at any depth. Put the Rigidbody on the LODGroup object or on one of its parents. The message starts with `Rigidbody '<name>' cannot split an enclosing LODGroup.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:37-39 -->
 - A collider of a Rigidbody has a sheared transform, which comes from non-uniform scale on a parent of a rotated object. Apply the scale in the model. The message ends with `has a sheared transform. Apply scale in the model first.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:63-68 -->
 - A MeshCollider of a non-kinematic Rigidbody isn't convex: `Rigidbody '<name>': a dynamic MeshCollider must be Convex.` A MeshCollider of a Rigidbody without a mesh stops the build too. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:75-76 -->
-- A Rigidbody sits inside an object with an Animation marker. Put the Rigidbody on the Animator root or on one of its parents: `Put Rigidbody on the Animator root or above it; a baked animation cannot contain independent moving bodies.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:45-46 -->
+- A Rigidbody sits inside an object with an Animation marker. Put the Rigidbody on the Animator root or on one of its parents: `Put Rigidbody on the Animator root or above it; a baked animation cannot contain independent moving bodies.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:51-52 -->
 
 These cases only add a warning to the Console, and the build continues:
 
@@ -224,7 +224,7 @@ The build doesn't add, remove or move objects in your scene. It only recalculate
 The game supplies its own environment lighting, such as the sky and the sun. From your scene, it takes only Point and Spot lights.
 
 - Only enabled Point and Spot lights on active objects are exported, in both formats. Every other type, including Directional and Area lights, is skipped.
-- The build exports each light's position, rotation, color, intensity, range, spot angles, shadow settings and color temperature. It converts the intensity to candela, multiplies it by 0.1 and caps it at 5000. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:71-85 -->
+- The build exports each light's position, rotation, color, intensity, range, spot angles, shadow settings and color temperature. It converts the intensity to candela, multiplies it by 0.1 and caps it at 5000. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:94-108 -->
 - A map can have up to 500 lights. <!-- src: Assets/Editor/MapSceneRules.cs:20-21 -->
 - Volumes (sky, fog, exposure), Directional and Area lights and Reflection Probes light only the scene in the editor.
 - Baked lightmaps aren't exported, and build optimization doesn't merge renderers that use a baked lightmap. Don't bake lighting in the map scene.

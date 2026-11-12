@@ -102,13 +102,13 @@ File and object names come from asset ids and content hashes rather than from Ga
 | `contentType` | Always `map`. |
 | `id` | The mod.io id of the linked publication when its row is selected while you build; otherwise the id of the map config. The game keys the networked physics of dynamic objects by this id, so build after you link a publication; see [Update a publication](../publish.md#update). |
 | `version` | The data format version, `v1.0`. |
-| `contentVersion` | **Version** from the **Map** tab, or `1.0.0` when it is empty. <!-- src: Assets/Editor/MapBuilder.cs:170 --> |
+| `contentVersion` | **Version** from the **Map** tab, or `1.0.0` when it is empty. <!-- src: Assets/Editor/MapBuilder.cs:188 --> |
 | `name` | **Name**. |
 | `description` | **Description**. The summary isn't stored in the mod; only mod.io receives it. |
 | `icon` | The path of the **Icon · 16:9** image inside the mod, without an extension: `textures/<texture name>`. |
 | `largeIcon` | The path of the **Preview · 16:9** image, in the same form. |
 | `minimap` | `textures`: the paths of the Minimap textures; the game shows only the first one. `boundsCenterX` and `boundsCenterY`: the world X and Z of the image centre. `boundsSizeX` and `boundsSizeY`: the world X and Z extent. See [Add the minimap](../minimap-and-images.md#minimap). |
-| `madeIn` | The tool that built the map: `Mod Map Uploader v3.0`. <!-- src: Assets/Editor/MapBuilder.cs:168 --> |
+| `madeIn` | The tool that built the map: `Mod Map Uploader v3.0`. <!-- src: Assets/Editor/MapBuilder.cs:186 --> |
 | `url` | **URL**. |
 | `authors` | **Authors**. |
 
@@ -120,7 +120,7 @@ Each scene document has an `id`, which is the scene name, and a `version`, which
 - `hierarchies/<Scene>.json` lists `staticObjects`: one entry per placed object outside LOD groups, with its `prefabId`, its world transform `localToWorld` and a `rigidbodyId`. An object with a SpawnPoint or Road marker but no exported geometry gets an entry with `prefabId` `-1`. The same file holds the `rigidbodies` records.
 - `lods/<Scene>.json` lists `lodInstances`: the `lodLevels` (each a `prefabId`, a `localOffset` from the LOD group and a `lodIndex`), the world transform, a `rigidbodyId` and the switch distances `LODDistances0` (levels 0–3) and `LODDistances1` (levels 4–7). A switch distance is the group's world size divided by the level's screen-relative transition height. A group with one level stays a LOD group and keeps its cull distance; see [LOD groups](../scene-setup.md#lod).
 - `markers/<Scene>.json` lists `markers`: `staticInstanceId` (an index into `staticObjects`), `head` (`SpawnPoint` or `Road`), `param` and `data`. For a road, `param` is one of the 27 surface presets, for example `Road/asphalt`, and `data` is a JSON string with the surface values: friction, roll friction, bumps, water rate and one of 7 physical surface types. When `data` is empty, the game uses its own values for that surface. For a spawn point, `data` holds the GameObject name. See [Mark road surfaces](../markers.md#road).
-- `lights/<Scene>.json` lists `lights`: the world transform, `type` (Unity's light type: `0` Spot, `2` Point), colour, intensity, range, spot angles, shadow type and near plane, and colour temperature. Intensity is candela × 0.1, at most 5000. See [Light export rules](../reference.md#lights). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:71-85 -->
+- `lights/<Scene>.json` lists `lights`: the world transform, `type` (Unity's light type: `0` Spot, `2` Point), colour, intensity, range, spot angles, shadow type and near plane, and colour temperature. Intensity is candela × 0.1, at most 5000. See [Light export rules](../reference.md#lights). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:94-108 -->
 - `animations/<Scene>.json` holds the baked vertex animation: one asset per distinct baked object, with its position, normal and tangent atlases and its material surfaces, and one instance per Animation marker. Wavefront stores the atlases and surface textures as Base64 text. See [Animate objects](../markers.md#animation).
 
 `rigidbodyId` in `staticObjects`, `lodInstances` and animation `instances` is a 1-based index into `rigidbodies`, and `0` means the object is static.
@@ -195,7 +195,7 @@ The PNG files of re-encoded material textures aren't stored. Packing needs both 
 
 ### File layout
 
-All numbers are little-endian. The reference reader is [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/Runtime/Binary/BinaryModArchive.cs) in the CarX.Modding.Creator SDK.
+All numbers are little-endian. The reference reader is [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/fe4f4dff325048f0e594a77c1e87a36c08c12154/Runtime/Binary/BinaryModArchive.cs) in the CarX.Modding.Creator SDK.
 
 | Part | Type | Contents |
 | --- | --- | --- |

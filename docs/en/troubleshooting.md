@@ -390,7 +390,7 @@ See also: [Image limits](reference.md#limits-images)
 
 Message: `The scene itself was not validated - fix the configuration first, then build again.`
 
-Severity: Note (doesn't block the build) · Category: Meta <!-- src: Assets/Editor/MapBuilder.cs:292-293 -->
+Severity: Note (doesn't block the build) · Category: Meta <!-- src: Assets/Editor/MapBuilder.cs:328-329 -->
 
 **Cause.** The map settings have at least one error. A build stops at the settings and doesn't check the scene, so more errors can appear once you fix them.
 
@@ -462,9 +462,9 @@ See also: [Add dynamic objects (Rigidbody)](scene-setup.md#dynamic)
 <a name="msg-scene-not-opened"></a>
 #### `'<scene>' was not opened, so only the configuration was checked.`
 
-Severity: Note (doesn't block the build) · Category: Scene <!-- src: Assets/Editor/MapBuilder.cs:391 -->
+Severity: Note (doesn't block the build) · Category: Scene <!-- src: Assets/Editor/MapBuilder.cs:427 -->
 
-**Cause.** **Validate map** had to open the scene selected in **Scene**, and you cancelled the prompt to save the scene that was open. Only the map settings were checked. The note also appears, with an empty name (`'' was not opened, …`), when no scene is selected in **Scene**; see [The Scene dropdown is empty](#scene-empty). <!-- src: Assets/Editor/MapBuilder.cs:391,399-404 -->
+**Cause.** **Validate map** had to open the scene selected in **Scene**, and you cancelled the prompt to save the scene that was open. Only the map settings were checked. The note also appears, with an empty name (`'' was not opened, …`), when no scene is selected in **Scene**; see [The Scene dropdown is empty](#scene-empty). <!-- src: Assets/Editor/MapBuilder.cs:427,435-440 -->
 
 **Fix.**
 
@@ -475,7 +475,7 @@ See also: [Run validation](validation.md#run)
 <a name="build-errors"></a>
 ## Build errors in the Console
 
-Some problems are found only while the map is exported. They stop the build with an exception in the Console, not in the **Map Validation** window: the Console line starts with the exception type, usually `InvalidOperationException`, or `InvalidDataException` for a Layered Lit material. The **Build** tab then shows `Build incomplete. Check validation results and the Console.` To open the Console, select **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:324-328; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
+Some problems are found only while the map is exported. They stop the build with an exception in the Console, not in the **Map Validation** window: the Console line starts with the exception type, usually `InvalidOperationException`, or `InvalidDataException` for a Layered Lit material. The **Build** tab then shows `Build incomplete. Check validation results and the Console.` To open the Console, select **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:360-364; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
 <a name="export-errors"></a>
 ### Export errors
@@ -507,7 +507,7 @@ The following table lists every error that stops a build during export, or an ex
 | `Layered Lit '<material>': '<option>' is not supported by the mod material format.` | The Layered Lit material uses an option that a map can't store. `<option>` is the shader property: `_UseHeightBasedBlend` is **Use Height Based Blend**, `_UseMainLayerInfluence` is **Main Layer Influence**, `_UVBlendMask` is a **BlendMask UV Mapping** other than **UV0**, and `_UseDensityMode` is the density blend mode. | In the material's **Inspector**, clear the option, or set **BlendMask UV Mapping** to **UV0**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/LayeredPbrWriter.cs:10-25 --> |
 | `Layered Lit '<material>': layer <n> requires UV0 mapping for mod export.` | Layer `<n>` of the material has a **Base UV mapping** other than **UV0**. Layer 0 is the main layer. | Set **Base UV mapping** of that layer to **UV0**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/LayeredPbrWriter.cs:65-68 --> |
 | `meshoptimizer is unavailable for this Editor platform. Install its native Editor library or disable build optimization.` | **Optimize build** is on in a Unity Editor that isn't Windows x64. | Clear **Optimize build**. [Details](#msg-meshoptimizer) |
-| `Invalid or extreme vertex coordinates in '<mesh>'.` | With **Optimize build** on, a static mesh has a vertex more than 10 000 km from the world origin, or one whose position isn't a finite number. `<mesh>` is the name of the mesh, not of the object. | Find the objects that use the mesh, and correct their position or scale, or the mesh in your 3D tool. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:301-303 --> |
+| `Invalid or extreme vertex coordinates in '<mesh>'.` | With **Optimize build** on, a static mesh has a vertex more than 10 000 km from the world origin, or one whose position isn't a finite number. `<mesh>` is the name of the mesh, not of the object. | Find the objects that use the mesh, and correct their position or scale, or the mesh in your 3D tool. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:302-304 --> |
 | `A triangle spans too many sectors. Increase the optimization sector size or fix the source mesh.` | With **Optimize build** on, a static mesh has a triangle so large that cutting it into sectors would make more than 100 000 pieces. | Split the large triangles in your 3D tool. For a render mesh, a larger **Sector size (m)** also helps. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SectorMeshGeometry.cs:167-169 --> |
 | `Binary mesh block exceeds 256 MiB. Split the source mesh.` | In a Binary build, one exported mesh takes more than 256 MiB before compression, for example a single mesh with millions of vertices. | Split the mesh into several meshes in your 3D tool, then select the **Build map** button. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModModelCodecV2.cs:15,206-208; Assets/Plugins/CarX.Modding.Creator/Editor/UnityGoObjExporter.cs:189 --> |
 | `Shader 'Hidden/ConvertingEx' is not found.` or `VAT normal export shader is missing.` | A shader of the SDK in `Assets/Plugins/CarX.Modding.Creator` is missing. | Update the submodule, as in [The submodule folder is empty](#submodule-empty). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ExportTextureUtility.cs:166-170; Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:274 --> |
@@ -515,7 +515,7 @@ The following table lists every error that stops a build during export, or an ex
 | `Binary map requires both Meta and Binary Map staging data. Rebuild Map and Meta.`, or another message from packing, such as `Missing map texture: <path>` | When you export or publish a Binary map, packing finds the build cache incomplete. | Set **Rebuild targets** to `Everything`, select the **Build map** button, then export or publish again. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/BinaryMapPacker.cs:60-62 --> |
 | Any other exception during a build | An internal error of the exporter. | Select the **Build map** button again. If the error repeats, open an issue in the [issue tracker](https://github.com/CarXTechnologies/dro-map-uploader/issues) with the full Console text. |
 
-Export also logs the following warnings in the Console. They don't stop the build, but the map in the game differs from the scene. A warning that repeats a validation error, such as `LODGroup has more than 8 LOD - Not supported`, doesn't appear, because the error stops the build before export. <!-- src: Assets/Editor/MapBuilder.cs:138; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:137-141 -->
+Export also logs the following warnings in the Console. They don't stop the build, but the map in the game differs from the scene. A warning that repeats a validation error, such as `LODGroup has more than 8 LOD - Not supported`, doesn't appear, because the error stops the build before export. <!-- src: Assets/Editor/MapBuilder.cs:138; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:160-164 -->
 
 | Message | Cause | Fix |
 | --- | --- | --- |
@@ -524,8 +524,8 @@ Export also logs the following warnings in the Console. They don't stop the buil
 | `Rigidbody '<name>': Multiply material combine uses the Unity Physics geometric mean approximation.` | A collider of a dynamic object has a physics material with **Multiply** for **Friction Combine** or **Bounce Combine**. The game uses a geometric mean instead. | Choose another combine mode, or drive the map to check how the object behaves. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:85-86 --> |
 | `[ObjExporter] Material '<material>' property '<property>' holds a <type>, only Texture2D can be exported. Skipped.` | A texture slot of a material holds a cubemap, a Render Texture or another texture that isn't a Texture2D. Export leaves the slot empty. | Assign an imported image (Texture2D) to the slot, or clear it. [Details](#materials-wrong) <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MtlTextureMapWriter.cs:391 --> |
 | `Layered Lit '<material>': transparent blending mode <mode> is not supported by the mod material format, exported as Alpha.` | A transparent Layered Lit material uses the **Additive** or **Premultiply** **Blending Mode**; `<mode>` is `1` or `4`. The game blends it by alpha. | In the material's **Inspector**, set **Blending Mode** to **Alpha**, so that the editor shows the material as the game does. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/LayeredPbrWriter.cs:105-118 --> |
-| `Optimization skipped '<name>': mesh must be readable and use triangle topology. Original export is retained.` | With **Optimize build** on, the mesh of a static renderer or MeshCollider isn't readable or has a submesh that isn't made of triangles. The build turns on **Read/Write** for imported models itself, so this concerns a mesh saved as a Unity asset, or a mesh of quads, lines or points. The object keeps its own mesh and isn't cut into sectors. | Nothing is required. To have the object optimized, export the mesh with triangles from your 3D tool and import it as a model. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:273-281; Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:11-33 --> |
-| `Light '<name>' of type <type> is not supported - only Point and Spot lights are exported` | An enabled light isn't a Point or Spot light, for example the Directional light of the preview lighting. Validation reports the same light as a note or a warning. | Nothing for a Directional light: the game uses its own sun. Replace a light of another type with a Point or Spot light. See [Set up lighting](scene-setup.md#lighting). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:90-101 --> |
+| `Optimization skipped '<name>': mesh must be readable and use triangle topology. Original export is retained.` | With **Optimize build** on, the mesh of a static renderer or MeshCollider isn't readable or has a submesh that isn't made of triangles. The build turns on **Read/Write** for imported models itself, so this concerns a mesh saved as a Unity asset, or a mesh of quads, lines or points. The object keeps its own mesh and isn't cut into sectors. | Nothing is required. To have the object optimized, export the mesh with triangles from your 3D tool and import it as a model. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:274-282; Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:11-33 --> |
+| `Light '<name>' of type <type> is not supported - only Point and Spot lights are exported` | An enabled light isn't a Point or Spot light, for example the Directional light of the preview lighting. Validation reports the same light as a note or a warning. | Nothing for a Directional light: the game uses its own sun. Replace a light of another type with a Point or Spot light. See [Set up lighting](scene-setup.md#lighting). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:113-124 --> |
 | `Material '<material>': its render core values were exported from material for revision <n> of <variant>, the current revision is <n>. The game uses the fallback material until you re-run Export from material on its Material marker.` | A Material marker entry holds values exported for an older revision of its render core variant. Validation shows the same problem as a Markers warning. | In the Material marker, select **Export from material** for that entry, then build the map again. [Details](#msg-render-core-revision) <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RenderCoreMaterialWriter.cs:36-41 --> |
 | `[ModExport] Previous export did not restore import settings of <n> textures and <n> models; they will be restored at the end of this export.` | The previous build ended before it restored the import settings it had changed, for example because Unity closed during the build. A build turns on **Read/Write** and turns off compression for the textures and models it exports, and restores them at the end. | Nothing: this build restores them. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ExportImporterSettings.cs:186-199 --> |
 
@@ -580,7 +580,7 @@ See also: [Add dynamic objects (Rigidbody)](scene-setup.md#dynamic)
 
 Message: `Put Rigidbody on the Animator root or above it; a baked animation cannot contain independent moving bodies.`
 
-Severity: Error (stops the build) · Shown in: Console <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:46 -->
+Severity: Error (stops the build) · Shown in: Console <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:52 -->
 
 **Cause.** A Rigidbody is inside a hierarchy that an Animation marker bakes into vertex animation. A baked animation can't contain bodies that move on their own.
 
@@ -612,7 +612,7 @@ See also: [Animate objects with vertex animation](markers.md#animation)
 
 Message: `meshoptimizer is unavailable for this Editor platform. Install its native Editor library or disable build optimization.`
 
-Severity: Error (stops the build) · Shown in: Console <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:177 -->
+Severity: Error (stops the build) · Shown in: Console <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:178 -->
 
 **Cause.** **Optimize build** is on, and the Editor runs on a platform without the meshoptimizer native library. The project ships it only for the Windows x64 Editor.
 
@@ -709,7 +709,7 @@ See also: [Where the build goes](build.md#cache) · [Create a publication](publi
 
 Shown in: the build summary on the **Build** tab <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
-**Cause.** After the last build, Map and Meta aren't both built: a validation error, an exception during export or **Cancel** stopped it. A build discards the parts it rebuilds before it starts, even after earlier successful builds. When the failed build had both Map and Meta in **Rebuild targets**, as by default, the map's row in **LOCAL MAPS** shows `Not built`; when only one part failed, it shows `Rebuild needed`. <!-- src: Assets/Editor/MapBuilder.cs:271 -->
+**Cause.** After the last build, Map and Meta aren't both built: a validation error, an exception during export or **Cancel** stopped it. A build discards the parts it rebuilds before it starts, even after earlier successful builds. When the failed build had both Map and Meta in **Rebuild targets**, as by default, the map's row in **LOCAL MAPS** shows `Not built`; when only one part failed, it shows `Rebuild needed`. <!-- src: Assets/Editor/MapBuilder.cs:307 -->
 
 **Fix.**
 
@@ -754,7 +754,7 @@ See also: [Remove the local copy after you publish](test-in-game.md#after-publis
 
 **Cause.** One of these:
 
-- The surface has a render mesh but no supported collider. Only a MeshCollider with a mesh, and enabled BoxCollider, SphereCollider and CapsuleCollider components that aren't triggers, are exported. A MeshCollider is exported even when it is disabled or a trigger. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:304-307,339 -->
+- The surface has a render mesh but no supported collider. Only a MeshCollider with a mesh, and enabled BoxCollider, SphereCollider and CapsuleCollider components that aren't triggers, are exported. A MeshCollider is exported even when it is disabled or a trigger. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:327-330,362 -->
 - The surface is a Unity Terrain. Terrain and TerrainCollider aren't exported, even when a Road marker on the terrain passes validation.
 - A MeshCollider has no mesh. Validation warns: `'<object>' has a MeshCollider with no mesh assigned, so it collides with nothing.`
 - The surface is inside an object tagged `Garbage`, which leaves it out of the export.

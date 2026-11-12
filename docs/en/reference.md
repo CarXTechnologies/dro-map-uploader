@@ -40,7 +40,7 @@ Other limits on scene content:
 | **Bake frames per second** of an Animation marker | 1–60, default 30 | The **Inspector** slider doesn't go outside the range. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Meta/AnimationMeta.cs:12 --> |
 | Animation markers per Animator | 1 | The build stops with `Animator '<name>' has multiple Animation markers.` in the Console. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:34-35 --> |
 | Marked Animators inside each other | Not allowed | The build stops with `Animation marker hierarchies must not overlap.` in the Console. |
-| Rigidbody inside a marked Animator's hierarchy | Only on the Animator root or above it | The build stops with `Put Rigidbody on the Animator root or above it; a baked animation cannot contain independent moving bodies.` in the Console. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:45-46 --> |
+| Rigidbody inside a marked Animator's hierarchy | Only on the Animator root or above it | The build stops with `Put Rigidbody on the Animator root or above it; a baked animation cannot contain independent moving bodies.` in the Console. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:51-52 --> |
 
 After a build that includes **Map**, the **Scene contents** panel on the **Build** tab lists, in this form, the count of each component type that the scene contains. Types with a count of 0 aren't listed. See [Build the map](build.md). <!-- src: Assets/Scripts/ValidItemData.cs:29-35,95-98 -->
 
@@ -70,7 +70,7 @@ Validation also gives a Geometry warning for each large static mesh that build o
 | --- | --- | --- |
 | Scene name | Starts with a letter; only letters, digits and `_` | The file name of the scene selected in **Scene**, without `.unity`. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:32-45 --> |
 | **Name** | Required; at most 50 characters | Letters of any alphabet, digits, spaces and `- _ ' . , : ! ? ( ) & + /`, with no space at the start or end. Shown in the game and on mod.io. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:8-30 --> |
-| **Version** | None | When empty, `1.0.0` is used. It becomes the version of each file uploaded to mod.io and is stored in the map metadata. <!-- src: Assets/Editor/MapBuilder.cs:170 --> |
+| **Version** | None | When empty, `1.0.0` is used. It becomes the version of each file uploaded to mod.io and is stored in the map metadata. <!-- src: Assets/Editor/MapBuilder.cs:188 --> |
 | **Summary (optional)** | At most 250 characters | Only the first line is used, and the limit applies to it. When **Summary (optional)** is empty, the first line of **Description** is used; when both are empty, `<Name> track.` is used. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:47-60 --> |
 | **Description** | At most 50 000 characters | Stored in the map metadata. Sent to mod.io by **Create publication** when it isn't empty, and by **Update publication** with **Update description** on. See [Create a publication](publish.md#create) and [Update a publication](publish.md#update). |
 | **Authors** | None | The game shows up to 5 names joined with `, `, then `...`. With no authors, it shows the name of the mod.io account that created the publication. <!-- src: game --> |
@@ -88,8 +88,8 @@ For the Icon, the Preview and the minimap image, with whether each is required, 
 
 | Part | Limit | Measured on |
 | --- | --- | --- |
-| Map: geometry, materials, textures, collision, markers, lights, dynamic objects and animation | 4096 MB | The `MapTemp` folder of the [build cache](build.md#cache). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182; Assets/Editor/MapBuilder.cs:134-157 --> |
-| Metadata: map settings, Icon, Preview and minimap images | 24 MB | The `MetaTemp` folder of the build cache. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26; Assets/Editor/MapBuilder.cs:159-202 --> |
+| Map: geometry, materials, textures, collision, markers, lights, dynamic objects and animation | 4096 MB | The `MapTemp` folder of the [build cache](build.md#cache). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182; Assets/Editor/MapBuilder.cs:134-175 --> |
+| Metadata: map settings, Icon, Preview and minimap images | 24 MB | The `MetaTemp` folder of the build cache. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26; Assets/Editor/MapBuilder.cs:177-220 --> |
 
 > [!IMPORTANT]
 > The build size is checked only immediately before **Create publication** or **Update publication**, and the result appears only in the Console. **Validate map**, the **Build map** button and the **Export to folder** button don't check it.
@@ -174,13 +174,13 @@ The build resolves the values of each marker from its **Template Config** and it
 | --- | --- |
 | No **Template Config** | None: the game uses its own surface. This also applies to a marker whose type you changed with **Select : &lt;type&gt;**, and to values that the **Inspector** or an earlier version saved on the marker. |
 | **Template Config** with a named template | The template's values at the time of the build. After you edit a template, build the map again; its markers don't need to be selected. |
-| **Template Config** with **Custom** | The marker's own values. They start from the surface defaults. When the surface changes, in the type menu of one marker or with **Select : &lt;type&gt;** for several, they reset to the defaults of the new surface. **Select : &lt;type&gt;** keeps them when every selected marker already has that surface. <!-- src: Assets/Editor/MarkerDataDrawer.cs:59-75,208-221 --> |
+| **Template Config** with **Custom** | The marker's own values. They start from the surface defaults. When the surface changes, in the type menu of one marker or with **Select : &lt;type&gt;** for several, they reset to the defaults of the new surface. **Select : &lt;type&gt;** keeps them when every selected marker already has that surface. <!-- src: Assets/Editor/MarkerDataDrawer.cs:59-75,253-266 --> |
 | **Template Config** whose template was removed | The marker's own **Custom** values. The **Inspector** shows **Custom** in its template menu. |
-| Values that are `0` in every field | None: the game uses its own surface. **Friction** `0` would make the surface as slippery as ice. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:555-560 --> |
+| Values that are `0` in every field | None: the game uses its own surface. **Friction** `0` would make the surface as slippery as ice. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:578-583 --> |
 
 The surface defaults are the MapUploader values in `Assets/Resources/DefaultRoadValues/<surface>.asset`, and a new template and a **Custom** marker start from them. Their **Surface Type** matches the game's type for that surface (`Asphalt` for `default` and `pavement`, `Ice` for `ice_snowy`), and their **Water Rate** is `0`, as on every game surface. Their other fields can differ from the game's surface: for example, `grass` has **Bump Min** `0.05`, against `-0.03` in the game, and `wood` has **Friction** `0.85`, against `1`. To keep the game's surface, don't assign a **Template Config**. <!-- src: Assets/Resources/DefaultRoadValues/grass.asset:15-25 -->
 
-The fields appear only after you assign a **Template Config** to the marker. A named template shows its values read-only, and **Custom** gives the marker its own editable values. See [Reuse road values with templates](markers.md#templates). <!-- src: Assets/Editor/MarkerDataDrawer.cs:152-201,223-236 -->
+The fields appear only after you assign a **Template Config** to the marker. A named template shows its values read-only, and **Custom** gives the marker its own editable values. See [Reuse road values with templates](markers.md#templates). <!-- src: Assets/Editor/MarkerDataDrawer.cs:197-246,268-281 -->
 
 <a name="older-values"></a>
 ### Values saved by an earlier version
@@ -220,14 +220,14 @@ Each map stores its build optimization settings in its map config. The **Optimiz
 <a name="lights"></a>
 ## Light export rules
 
-Both formats export lights the same way. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:87-123 -->
+Both formats export lights the same way. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:110-146 -->
 
 | Rule | Detail |
 | --- | --- |
 | Exported types | Point and Spot lights only. Directional, Area and other types are skipped with a Console warning. |
 | Which lights | An enabled Light component on an active GameObject that isn't tagged `Garbage` or inside such an object. |
 | Exported properties | Position, rotation and scale; type; color; intensity; range; spot angle and inner spot angle; shadow type; shadow near plane; whether color temperature is used, and the color temperature. |
-| Intensity | Converted to candela, multiplied by 0.1 and capped at 5000. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:71,78-85 --> |
+| Intensity | Converted to candela, multiplied by 0.1 and capped at 5000. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:94,101-108 --> |
 | Budget | At most 500 Light and 500 HDAdditionalLightData components. Disabled lights and lights on inactive objects count too. |
 | In the game | Exported lights turn on only at night. <!-- src: game --> |
 | Preview only | Directional and Area lights, Volume (sky, fog, exposure) and Reflection Probes light only the preview in the editor. The game supplies its own environment lighting. |

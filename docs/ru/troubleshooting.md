@@ -390,7 +390,7 @@
 
 Сообщение: `The scene itself was not validated - fix the configuration first, then build again.`
 
-Уровень: заметка (не блокирует сборку) · Категория: Meta <!-- src: Assets/Editor/MapBuilder.cs:292-293 -->
+Уровень: заметка (не блокирует сборку) · Категория: Meta <!-- src: Assets/Editor/MapBuilder.cs:328-329 -->
 
 **Причина.** В настройках карты есть хотя бы одна ошибка. Сборка останавливается на настройках и не проверяет сцену, поэтому после их исправления могут появиться новые ошибки.
 
@@ -462,9 +462,9 @@
 <a name="msg-scene-not-opened"></a>
 #### `'<scene>' was not opened, so only the configuration was checked.`
 
-Уровень: заметка (не блокирует сборку) · Категория: Scene <!-- src: Assets/Editor/MapBuilder.cs:391 -->
+Уровень: заметка (не блокирует сборку) · Категория: Scene <!-- src: Assets/Editor/MapBuilder.cs:427 -->
 
-**Причина.** **Проверить карту** нужно было открыть сцену, выбранную в списке **Сцена**, а вы отменили предложение сохранить открытую сцену. Проверены только настройки карты. Заметка также появляется с пустым именем (`'' was not opened, …`), если в списке **Сцена** не выбрана ни одна сцена; см. [Список «Сцена» пуст](#scene-empty). <!-- src: Assets/Editor/MapBuilder.cs:391,399-404 -->
+**Причина.** **Проверить карту** нужно было открыть сцену, выбранную в списке **Сцена**, а вы отменили предложение сохранить открытую сцену. Проверены только настройки карты. Заметка также появляется с пустым именем (`'' was not opened, …`), если в списке **Сцена** не выбрана ни одна сцена; см. [Список «Сцена» пуст](#scene-empty). <!-- src: Assets/Editor/MapBuilder.cs:427,435-440 -->
 
 **Исправление.**
 
@@ -475,7 +475,7 @@
 <a name="build-errors"></a>
 ## Ошибки сборки в Console
 
-Некоторые проблемы обнаруживаются только во время экспорта карты. Они останавливают сборку с исключением в Console, а не в окне **Map Validation**: строка в Console начинается с типа исключения — обычно `InvalidOperationException`, а для материала Layered Lit — `InvalidDataException`. Вкладка **Сборка** затем показывает `Сборка не завершена полностью. Проверьте результаты проверки и Console.` (`Build incomplete. Check validation results and the Console.`). Чтобы открыть Console, выберите **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:324-328; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
+Некоторые проблемы обнаруживаются только во время экспорта карты. Они останавливают сборку с исключением в Console, а не в окне **Map Validation**: строка в Console начинается с типа исключения — обычно `InvalidOperationException`, а для материала Layered Lit — `InvalidDataException`. Вкладка **Сборка** затем показывает `Сборка не завершена полностью. Проверьте результаты проверки и Console.` (`Build incomplete. Check validation results and the Console.`). Чтобы открыть Console, выберите **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:360-364; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
 <a name="export-errors"></a>
 ### Ошибки экспорта
@@ -507,7 +507,7 @@
 | `Layered Lit '<material>': '<option>' is not supported by the mod material format.` | Материал Layered Lit использует параметр, который карта не может хранить. `<option>` — свойство шейдера: `_UseHeightBasedBlend` — это **Use Height Based Blend**, `_UseMainLayerInfluence` — **Main Layer Influence**, `_UVBlendMask` — значение **BlendMask UV Mapping**, отличное от **UV0**, а `_UseDensityMode` — режим смешивания по плотности. | В окне **Inspector** материала снимите флажок этого параметра или выберите для **BlendMask UV Mapping** значение **UV0**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/LayeredPbrWriter.cs:10-25 --> |
 | `Layered Lit '<material>': layer <n> requires UV0 mapping for mod export.` | У слоя `<n>` материала значение **Base UV mapping** отличается от **UV0**. Слой 0 — основной. | Выберите для **Base UV mapping** этого слоя значение **UV0**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/LayeredPbrWriter.cs:65-68 --> |
 | `meshoptimizer is unavailable for this Editor platform. Install its native Editor library or disable build optimization.` | Флажок **Оптимизировать сборку** установлен в Unity Editor не под Windows x64. | Снимите флажок **Оптимизировать сборку**. [Подробнее](#msg-meshoptimizer) |
-| `Invalid or extreme vertex coordinates in '<mesh>'.` | При установленном флажке **Оптимизировать сборку** у статического меша есть вершина дальше 10 000 км от начала координат мира или вершина, координаты которой не являются конечными числами. `<mesh>` — имя меша, а не объекта. | Найдите объекты, которые используют этот меш, и исправьте их положение или масштаб либо сам меш в своём 3D-редакторе. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:301-303 --> |
+| `Invalid or extreme vertex coordinates in '<mesh>'.` | При установленном флажке **Оптимизировать сборку** у статического меша есть вершина дальше 10 000 км от начала координат мира или вершина, координаты которой не являются конечными числами. `<mesh>` — имя меша, а не объекта. | Найдите объекты, которые используют этот меш, и исправьте их положение или масштаб либо сам меш в своём 3D-редакторе. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:302-304 --> |
 | `A triangle spans too many sectors. Increase the optimization sector size or fix the source mesh.` | При установленном флажке **Оптимизировать сборку** у статического меша есть настолько большой треугольник, что при разрезании на секторы получилось бы больше 100 000 частей. | Разделите большие треугольники в своём 3D-редакторе. Для меша рендера также поможет больший **Размер сектора (м)**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SectorMeshGeometry.cs:167-169 --> |
 | `Binary mesh block exceeds 256 MiB. Split the source mesh.` | В сборке Binary один экспортируемый меш до сжатия занимает больше 256 МиБ, например это один меш с миллионами вершин. | Разделите меш на несколько мешей в своём 3D-редакторе, затем нажмите кнопку **Собрать карту**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModModelCodecV2.cs:15,206-208; Assets/Plugins/CarX.Modding.Creator/Editor/UnityGoObjExporter.cs:189 --> |
 | `Shader 'Hidden/ConvertingEx' is not found.` или `VAT normal export shader is missing.` | Не хватает шейдера SDK из `Assets/Plugins/CarX.Modding.Creator`. | Обновите сабмодуль, как описано в разделе [Папка сабмодуля пуста](#submodule-empty). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ExportTextureUtility.cs:166-170; Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:274 --> |
@@ -515,7 +515,7 @@
 | `Binary map requires both Meta and Binary Map staging data. Rebuild Map and Meta.` или другое сообщение упаковки, например `Missing map texture: <path>` | При экспорте или публикации карты Binary упаковка обнаруживает, что кэш сборки неполный. | Выберите в поле **Что пересобрать** (Rebuild targets) значение `Everything`, нажмите кнопку **Собрать карту**, затем снова экспортируйте или опубликуйте карту. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/BinaryMapPacker.cs:60-62 --> |
 | Любое другое исключение во время сборки | Внутренняя ошибка экспортёра. | Снова нажмите кнопку **Собрать карту**. Если ошибка повторяется, создайте issue в [трекере задач](https://github.com/CarXTechnologies/dro-map-uploader/issues) и приложите полный текст из Console. |
 
-Кроме того, экспорт выводит в Console следующие предупреждения. Они не останавливают сборку, но карта в игре отличается от сцены. Предупреждение, которое повторяет ошибку проверки, например `LODGroup has more than 8 LOD - Not supported`, не появляется: ошибка останавливает сборку до экспорта. <!-- src: Assets/Editor/MapBuilder.cs:138; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:137-141 -->
+Кроме того, экспорт выводит в Console следующие предупреждения. Они не останавливают сборку, но карта в игре отличается от сцены. Предупреждение, которое повторяет ошибку проверки, например `LODGroup has more than 8 LOD - Not supported`, не появляется: ошибка останавливает сборку до экспорта. <!-- src: Assets/Editor/MapBuilder.cs:138; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:160-164 -->
 
 | Сообщение | Причина | Исправление |
 | --- | --- | --- |
@@ -524,8 +524,8 @@
 | `Rigidbody '<name>': Multiply material combine uses the Unity Physics geometric mean approximation.` | У коллайдера динамического объекта физический материал с **Multiply** в **Friction Combine** или **Bounce Combine**. Игра вместо этого использует среднее геометрическое. | Выберите другой режим комбинирования или проедьте по карте и проверьте, как ведёт себя объект. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:85-86 --> |
 | `[ObjExporter] Material '<material>' property '<property>' holds a <type>, only Texture2D can be exported. Skipped.` | В слоте текстуры материала кубическая карта, Render Texture или другая текстура, которая не является Texture2D. Экспорт оставляет слот пустым. | Назначьте в слот импортированное изображение (Texture2D) или очистите слот. [Подробнее](#materials-wrong) <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MtlTextureMapWriter.cs:391 --> |
 | `Layered Lit '<material>': transparent blending mode <mode> is not supported by the mod material format, exported as Alpha.` | Прозрачный материал Layered Lit использует **Blending Mode** **Additive** или **Premultiply**; `<mode>` — `1` или `4`. Игра смешивает его по альфе. | В окне **Inspector** материала выберите для **Blending Mode** значение **Alpha**, чтобы редактор показывал материал так же, как игра. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/LayeredPbrWriter.cs:105-118 --> |
-| `Optimization skipped '<name>': mesh must be readable and use triangle topology. Original export is retained.` | При установленном флажке **Оптимизировать сборку** меш статического рендерера или MeshCollider недоступен для чтения или содержит подмеш не из треугольников. Для импортированных моделей сборка сама включает **Read/Write**, поэтому речь о меше, сохранённом как ассет Unity, или о меше из четырёхугольников, линий или точек. Объект сохраняет собственный меш и не разрезается на секторы. | Ничего делать не нужно. Чтобы объект оптимизировался, экспортируйте меш с треугольниками из своего 3D-редактора и импортируйте его как модель. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:273-281; Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:11-33 --> |
-| `Light '<name>' of type <type> is not supported - only Point and Spot lights are exported` | Включённый источник света не является Point или Spot, например это Directional light из освещения для предпросмотра. Проверка сообщает о том же источнике заметкой или предупреждением. | Для Directional light ничего делать не нужно: игра использует своё солнце. Источник другого типа замените на Point или Spot. См. [Настройка освещения](scene-setup.md#lighting). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:90-101 --> |
+| `Optimization skipped '<name>': mesh must be readable and use triangle topology. Original export is retained.` | При установленном флажке **Оптимизировать сборку** меш статического рендерера или MeshCollider недоступен для чтения или содержит подмеш не из треугольников. Для импортированных моделей сборка сама включает **Read/Write**, поэтому речь о меше, сохранённом как ассет Unity, или о меше из четырёхугольников, линий или точек. Объект сохраняет собственный меш и не разрезается на секторы. | Ничего делать не нужно. Чтобы объект оптимизировался, экспортируйте меш с треугольниками из своего 3D-редактора и импортируйте его как модель. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:274-282; Assets/Plugins/CarX.Modding.Creator/Editor/RigidbodyExporter.cs:11-33 --> |
+| `Light '<name>' of type <type> is not supported - only Point and Spot lights are exported` | Включённый источник света не является Point или Spot, например это Directional light из освещения для предпросмотра. Проверка сообщает о том же источнике заметкой или предупреждением. | Для Directional light ничего делать не нужно: игра использует своё солнце. Источник другого типа замените на Point или Spot. См. [Настройка освещения](scene-setup.md#lighting). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:113-124 --> |
 | `Material '<material>': its render core values were exported from material for revision <n> of <variant>, the current revision is <n>. The game uses the fallback material until you re-run Export from material on its Material marker.` | Запись маркера Material хранит значения, экспортированные для более старой ревизии её варианта render core. Проверка показывает ту же проблему предупреждением категории Markers. | В маркере Material нажмите для этой записи **Export from material**, затем снова соберите карту. [Подробнее](#msg-render-core-revision) <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RenderCoreMaterialWriter.cs:36-41 --> |
 | `[ModExport] Previous export did not restore import settings of <n> textures and <n> models; they will be restored at the end of this export.` | Предыдущая сборка завершилась, не вернув изменённые ею настройки импорта, например потому что Unity закрылся во время сборки. Сборка включает **Read/Write** и отключает сжатие у экспортируемых текстур и моделей и в конце возвращает прежние настройки. | Ничего делать не нужно: эта сборка вернёт их. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ExportImporterSettings.cs:186-199 --> |
 
@@ -580,7 +580,7 @@
 
 Сообщение: `Put Rigidbody on the Animator root or above it; a baked animation cannot contain independent moving bodies.`
 
-Уровень: ошибка (прерывает сборку) · Где видно: Console <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:46 -->
+Уровень: ошибка (прерывает сборку) · Где видно: Console <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:52 -->
 
 **Причина.** Rigidbody находится внутри иерархии, которую маркер Animation запекает в вершинную анимацию. Запечённая анимация не может содержать тела, которые двигаются сами по себе.
 
@@ -612,7 +612,7 @@
 
 Сообщение: `meshoptimizer is unavailable for this Editor platform. Install its native Editor library or disable build optimization.`
 
-Уровень: ошибка (прерывает сборку) · Где видно: Console <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:177 -->
+Уровень: ошибка (прерывает сборку) · Где видно: Console <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneExportOptimization.cs:178 -->
 
 **Причина.** Флажок **Оптимизировать сборку** установлен, а Unity Editor работает на платформе без нативной библиотеки meshoptimizer. Проект поставляет её только для Unity Editor под Windows x64.
 
@@ -709,7 +709,7 @@
 
 Где видно: сводка сборки на вкладке **Сборка**; в английском интерфейсе — `Build incomplete. Check validation results and the Console.` <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
-**Причина.** После последней сборки собраны не обе части, Map и Meta: её остановила ошибка проверки, исключение во время экспорта или **Отмена**. Перед началом сборка сбрасывает части, которые пересобирает, даже если предыдущие сборки были успешными. Если в неудачной сборке в поле **Что пересобрать** были выбраны и Map, и Meta, как по умолчанию, строка карты в списке **ЛОКАЛЬНЫЕ КАРТЫ** показывает `Не собрана` (`Not built`); если не удалась только одна часть — `Нужна пересборка`. <!-- src: Assets/Editor/MapBuilder.cs:271 -->
+**Причина.** После последней сборки собраны не обе части, Map и Meta: её остановила ошибка проверки, исключение во время экспорта или **Отмена**. Перед началом сборка сбрасывает части, которые пересобирает, даже если предыдущие сборки были успешными. Если в неудачной сборке в поле **Что пересобрать** были выбраны и Map, и Meta, как по умолчанию, строка карты в списке **ЛОКАЛЬНЫЕ КАРТЫ** показывает `Не собрана` (`Not built`); если не удалась только одна часть — `Нужна пересборка`. <!-- src: Assets/Editor/MapBuilder.cs:307 -->
 
 **Исправление.**
 
@@ -754,7 +754,7 @@
 
 **Причина.** Одно из следующего:
 
-- У поверхности есть меш для рендера, но нет поддерживаемого коллайдера. Экспортируются только MeshCollider с мешем, а также включённые BoxCollider, SphereCollider и CapsuleCollider, которые не являются триггерами. MeshCollider экспортируется, даже если он выключен или является триггером. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:304-307,339 -->
+- У поверхности есть меш для рендера, но нет поддерживаемого коллайдера. Экспортируются только MeshCollider с мешем, а также включённые BoxCollider, SphereCollider и CapsuleCollider, которые не являются триггерами. MeshCollider экспортируется, даже если он выключен или является триггером. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:327-330,362 -->
 - Поверхность — это Unity Terrain. Terrain и TerrainCollider не экспортируются, даже если маркер Road на террейне проходит проверку.
 - У MeshCollider нет меша. Проверка предупреждает: `'<object>' has a MeshCollider with no mesh assigned, so it collides with nothing.`
 - Поверхность находится внутри объекта с тегом `Garbage`, который исключает её из экспорта.

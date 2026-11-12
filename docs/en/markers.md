@@ -50,7 +50,7 @@ Don't use `Ambient.prefab`. Its marker type, `Ambient`, is no longer supported; 
 <a name="types"></a>
 ## Choose the marker type
 
-The type menu has 30 entries: **SpawnPoint**, a **Road** submenu with 27 surfaces, **Animation** and **Material**. <!-- src: Assets/Scripts/MarkerData.cs:9-41 -->
+The type menu has 36 entries: **SpawnPoint**, a **Road** submenu with 27 surfaces, **Animation**, **Material**, a **ClipZone** submenu with 2 zone kinds and a **Miniature** submenu with 4 kinds. <!-- src: Assets/Scripts/MarkerData.cs:9-47 -->
 
 | Type | Put it on | What it does | Formats |
 | --- | --- | --- | --- |
@@ -58,6 +58,8 @@ The type menu has 30 entries: **SpawnPoint**, a **Road** submenu with 27 surface
 | **Road** > *surface* | The GameObject with the collider | Gives that collider a road surface | Binary and Wavefront |
 | **Animation** | The GameObject with the Animator | Bakes the Animator's clips into vertex animation | Binary and Wavefront |
 | **Material** | The GameObject with the MeshRenderer or the LODGroup | Replaces its materials with render core variants | Binary only |
+| **ClipZone** > *kind* | An empty GameObject whose children are the points of the zone center line | Makes a free ride clipping zone: touch and go or triple | Binary and Wavefront |
+| **Miniature** > *kind* | Any GameObject, often the root of a group | Sets what the object and its children are in the 3D preview on the world map; see [3D preview on the world map](minimap-and-images.md#world-map-3d) | Binary and Wavefront |
 
 To give several GameObjects the same type:
 
@@ -235,7 +237,7 @@ Validation checks only that the marker has an Animator with clips: `Animation ma
 - The hierarchy has at least one enabled MeshRenderer or SkinnedMeshRenderer, every such renderer has a mesh, and each mesh has as many materials as submeshes.
 - The baked data stays within its size limit. Otherwise the build reports `VAT for '<name>' is too large …`; reduce the vertices, the clips or **Bake frames per second**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:128 -->
 
-An Animator or SkinnedMeshRenderer without an Animation marker isn't exported, and validation shows a Components note for it. The game plays the baked clips only: Animator transitions, parameters, events, scripts and IK aren't reproduced, and collider shapes don't deform with the animation. For the full scope, see [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/VertexAnimation.md#supported-scope) in the SDK's VertexAnimation.md.
+An Animator or SkinnedMeshRenderer without an Animation marker isn't exported, and validation shows a Components note for it. The game plays the baked clips only: Animator transitions, parameters, events, scripts and IK aren't reproduced, and collider shapes don't deform with the animation. For the full scope, see [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/fe4f4dff325048f0e594a77c1e87a36c08c12154/VertexAnimation.md#supported-scope) in the SDK's VertexAnimation.md.
 
 <a name="material"></a>
 ## Replace materials with render core variants
@@ -281,7 +283,7 @@ The following screenshot shows a Material marker on a LODGroup object, with its 
 
 `MAT_LAYERS4` blends four layers by the mesh's vertex colors: RGB is the layer mask and A tints the albedo. A mesh without vertex colors is exported white and shows only the fourth layer. The game keeps the vertex colors of a mesh with `MAT_LAYERS4`, so they also multiply the emission of the mesh's other submeshes. Put emissive parts on a separate GameObject: build optimization merges objects with `MAT_LAYERS4` only with each other, so that object stays a separate mesh. Validation warns about a mesh without vertex colors and about a mesh that mixes `MAT_LAYERS4` and emission.
 
-The SDK's RenderCoreMaterial.md describes the alpha-test, `MAT_LAYERS4`, emission and `MAT_INTERIOR` variants in [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/RenderCoreMaterial.md#variant-notes), and when an entry needs **Export from material** again in [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/RenderCoreMaterial.md#revision-policy). For how Layered Lit materials are exported, see [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/LayeredPbr.md).
+The SDK's RenderCoreMaterial.md describes the alpha-test, `MAT_LAYERS4`, emission and `MAT_INTERIOR` variants in [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/fe4f4dff325048f0e594a77c1e87a36c08c12154/RenderCoreMaterial.md#variant-notes), and when an entry needs **Export from material** again in [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/fe4f4dff325048f0e594a77c1e87a36c08c12154/RenderCoreMaterial.md#revision-policy). For how Layered Lit materials are exported, see [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/fe4f4dff325048f0e594a77c1e87a36c08c12154/LayeredPbr.md).
 
 <a name="unsupported"></a>
 ## Remove unsupported markers

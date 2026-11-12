@@ -50,7 +50,7 @@
 <a name="types"></a>
 ## Выбор типа маркера
 
-В меню типа 30 пунктов: **SpawnPoint**, подменю **Road** с 27 поверхностями, **Animation** и **Material**. <!-- src: Assets/Scripts/MarkerData.cs:9-41 -->
+В меню типа 36 пунктов: **SpawnPoint**, подменю **Road** с 27 поверхностями, **Animation**, **Material**, подменю **ClipZone** с 2 видами зон и подменю **Miniature** с 4 видами. <!-- src: Assets/Scripts/MarkerData.cs:9-47 -->
 
 | Тип | На какой объект | Что делает | Форматы |
 | --- | --- | --- | --- |
@@ -58,6 +58,8 @@
 | **Road** > *поверхность* | GameObject с коллайдером | Задаёт этому коллайдеру дорожную поверхность | Binary и Wavefront |
 | **Animation** | GameObject с Animator | Запекает клипы Animator в вершинную анимацию | Binary и Wavefront |
 | **Material** | GameObject с MeshRenderer или LODGroup | Заменяет его материалы вариантами render core | Только Binary |
+| **ClipZone** > *вид* | Пустой GameObject, дети которого — точки центральной линии зоны | Создаёт клиппинг-зону фрирайда: touch and go или тройную | Binary и Wavefront |
+| **Miniature** > *вид* | Любой GameObject, обычно корень группы | Задаёт, чем объект и его дети будут в 3D-превью на глобальной карте; см. [3D-превью на глобальной карте](minimap-and-images.md#world-map-3d) | Binary и Wavefront |
 
 Чтобы задать один тип нескольким объектам GameObject:
 
@@ -235,7 +237,7 @@
 - В иерархии есть хотя бы один включённый MeshRenderer или SkinnedMeshRenderer, у каждого такого рендерера есть меш, и у каждого меша столько материалов, сколько в нём подмешей.
 - Запечённые данные не превышают лимит размера. Иначе сборка сообщает `VAT for '<name>' is too large …`; уменьшите число вершин, клипов или значение **Bake frames per second**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:128 -->
 
-Animator или SkinnedMeshRenderer без маркера Animation не экспортируется, и проверка показывает для него заметку категории Components. Игра проигрывает только запечённые клипы: переходы, параметры, события, скрипты и IK из Animator не воспроизводятся, а формы коллайдеров не деформируются вместе с анимацией. Полное описание возможностей — в разделе [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/VertexAnimation.md#supported-scope) файла VertexAnimation.md в SDK.
+Animator или SkinnedMeshRenderer без маркера Animation не экспортируется, и проверка показывает для него заметку категории Components. Игра проигрывает только запечённые клипы: переходы, параметры, события, скрипты и IK из Animator не воспроизводятся, а формы коллайдеров не деформируются вместе с анимацией. Полное описание возможностей — в разделе [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/fe4f4dff325048f0e594a77c1e87a36c08c12154/VertexAnimation.md#supported-scope) файла VertexAnimation.md в SDK.
 
 <a name="material"></a>
 ## Замена материалов вариантами render core
@@ -281,7 +283,7 @@ Animator или SkinnedMeshRenderer без маркера Animation не экс�
 
 `MAT_LAYERS4` смешивает четыре слоя по цветам вершин меша: RGB — маска слоёв, а A тонирует альбедо. Меш без цветов вершин экспортируется белым и показывает только четвёртый слой. Игра сохраняет цвета вершин меша с `MAT_LAYERS4`, поэтому они умножают и свечение других подмешей этого меша. Вынесите светящиеся части на отдельный GameObject: оптимизация сборки объединяет объекты с `MAT_LAYERS4` только друг с другом, поэтому такой объект остаётся отдельным мешем. Проверка предупреждает о меше без цветов вершин и о меше, в котором сочетаются `MAT_LAYERS4` и свечение.
 
-В файле RenderCoreMaterial.md в SDK варианты alpha test, `MAT_LAYERS4`, свечения и `MAT_INTERIOR` описаны в разделе [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/RenderCoreMaterial.md#variant-notes), а когда запись нужно снова экспортировать кнопкой **Export from material** — в разделе [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/RenderCoreMaterial.md#revision-policy). Как экспортируются материалы Layered Lit, см. в [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/1f0b558aeffaa069344fb3e909f3fa5ddc1fff95/LayeredPbr.md).
+В файле RenderCoreMaterial.md в SDK варианты alpha test, `MAT_LAYERS4`, свечения и `MAT_INTERIOR` описаны в разделе [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/fe4f4dff325048f0e594a77c1e87a36c08c12154/RenderCoreMaterial.md#variant-notes), а когда запись нужно снова экспортировать кнопкой **Export from material** — в разделе [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/fe4f4dff325048f0e594a77c1e87a36c08c12154/RenderCoreMaterial.md#revision-policy). Как экспортируются материалы Layered Lit, см. в [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/fe4f4dff325048f0e594a77c1e87a36c08c12154/LayeredPbr.md).
 
 <a name="unsupported"></a>
 ## Удаление неподдерживаемых маркеров
