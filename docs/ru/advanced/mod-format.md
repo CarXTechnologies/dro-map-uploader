@@ -102,13 +102,13 @@ flowchart LR
 | `contentType` | Всегда `map`. |
 | `id` | ID связанной публикации на mod.io, если во время сборки выбрана её строка; иначе id настроек карты. По этому id игра связывает сетевую физику динамических объектов, поэтому собирайте карту после того, как свяжете её с публикацией; см. [Обновление публикации](../publish.md#update). |
 | `version` | Версия формата данных, `v1.0`. |
-| `contentVersion` | **Версия** с вкладки **Карта** (Map) или `1.0.0`, если поле пустое. <!-- src: Assets/Editor/MapBuilder.cs:188 --> |
+| `contentVersion` | **Версия** с вкладки **Карта** (Map) или `1.0.0`, если поле пустое. <!-- src: Assets/Editor/MapBuilder.cs:190 --> |
 | `name` | **Название**. |
 | `description` | **Описание**. Краткое описание в мод не записывается, его получает только mod.io. |
 | `icon` | Путь к изображению **Иконка · 16:9** внутри мода без расширения: `textures/<texture name>`. |
 | `largeIcon` | Путь к изображению **Превью · 16:9** в том же виде. |
 | `minimap` | `textures`: пути к текстурам мини-карты; игра показывает только первую. `boundsCenterX` и `boundsCenterY`: мировые координаты X и Z центра изображения. `boundsSizeX` и `boundsSizeY`: размер по мировым осям X и Z. См. [Добавление мини-карты](../minimap-and-images.md#minimap). |
-| `madeIn` | Инструмент, которым собрана карта: `Mod Map Uploader v3.0`. <!-- src: Assets/Editor/MapBuilder.cs:186 --> |
+| `madeIn` | Инструмент, которым собрана карта: `Mod Map Uploader v3.0`. <!-- src: Assets/Editor/MapBuilder.cs:188 --> |
 | `url` | **Ссылка**. |
 | `authors` | **Авторы**. |
 
@@ -195,7 +195,7 @@ flowchart LR
 
 ### Структура файла
 
-Все числа записаны в порядке little-endian. Эталонная реализация чтения — [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/0938b52b4301b67ebfdc964befb88977d0412e8d/Runtime/Binary/BinaryModArchive.cs) в SDK CarX.Modding.Creator.
+Все числа записаны в порядке little-endian. Эталонная реализация чтения — [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/c1326406e98608d01f51b3ec7647b65fb70925e3/Runtime/Binary/BinaryModArchive.cs) в SDK CarX.Modding.Creator.
 
 | Часть | Тип | Содержимое |
 | --- | --- | --- |

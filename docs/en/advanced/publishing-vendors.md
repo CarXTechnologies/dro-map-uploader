@@ -18,7 +18,7 @@ MapUploader has two vendor implementations. Only mod.io is available in the **Ma
 
 ## How it fits together
 
-MapUploader never calls a vendor SDK directly. It talks to one vendor-neutral contract in the [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/0938b52b4301b67ebfdc964befb88977d0412e8d) submodule. Each vendor implementation sits in its own assembly behind a define constraint, so a project compiles only the vendors whose SDKs it carries, and another project can add a vendor without changing the contract.
+MapUploader never calls a vendor SDK directly. It talks to one vendor-neutral contract in the [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/c1326406e98608d01f51b3ec7647b65fb70925e3) submodule. Each vendor implementation sits in its own assembly behind a define constraint, so a project compiles only the vendors whose SDKs it carries, and another project can add a vendor without changing the contract.
 
 ```
 Assets/Plugins/CarX.Modding.Creator/          submodule
@@ -178,7 +178,7 @@ These settings apply to every game:
 | **Max Summary Length** | `250` | Longest summary allowed. mod.io requires a summary and caps it at 250 characters. | To set a stricter project limit. |
 | **Max Description Length** | `50000` | Longest **Description** allowed. | To set a stricter project limit. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:25-30 --> |
 
-The limits are editable because they are project policy as well as vendor rules. **Validate map** checks **Name**, the summary, **Description** and the size of the icon file against the limits of the active vendor. The map and metadata sizes are checked only when you select **Create publication** or **Update publication**; see [Size limits at upload](../publish.md#size-limits). When no vendor can be created at all, validation falls back to built-in limits: 128 characters for **Name**, 8000 for the summary and **Description**, and 1 MB for the icon. <!-- src: Assets/Editor/MapBuilder.cs:41-46 -->
+The limits are editable because they are project policy as well as vendor rules. **Validate map** checks **Name**, the summary, **Description** and the size of the icon file against the limits of the active vendor. The map and metadata sizes are checked only when you select **Create publication** or **Update publication**; see [Size limits at upload](../publish.md#size-limits). When no vendor can be created at all, validation falls back to built-in limits: 128 characters for **Name**, 8000 for the summary and **Description**, and 1 MB for the icon. <!-- src: Assets/Editor/MapBuilder.cs:43-48 -->
 
 How changes to the asset apply:
 
@@ -276,7 +276,7 @@ To add a vendor:
 
 Result: After the recompile, `ModPublisherSession.AvailableVendors` lists the new vendor, and the **MapBuilder** window offers it as far as your changes to those members allow.
 
-The interfaces are in the submodule: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/0938b52b4301b67ebfdc964befb88977d0412e8d/Publishing/Core/IModPublisher.cs) and [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/0938b52b4301b67ebfdc964befb88977d0412e8d/Publishing/Core/IModAuthProvider.cs).
+The interfaces are in the submodule: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/c1326406e98608d01f51b3ec7647b65fb70925e3/Publishing/Core/IModPublisher.cs) and [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/c1326406e98608d01f51b3ec7647b65fb70925e3/Publishing/Core/IModAuthProvider.cs).
 
 <a name="differences"></a>
 ## Known differences between vendors

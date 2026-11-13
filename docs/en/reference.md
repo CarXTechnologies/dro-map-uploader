@@ -70,7 +70,7 @@ Validation also gives a Geometry warning for each large static mesh that build o
 | --- | --- | --- |
 | Scene name | Starts with a letter; only letters, digits and `_` | The file name of the scene selected in **Scene**, without `.unity`. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:32-45 --> |
 | **Name** | Required; at most 50 characters | Letters of any alphabet, digits, spaces and `- _ ' . , : ! ? ( ) & + /`, with no space at the start or end. Shown in the game and on mod.io. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:8-30 --> |
-| **Version** | None | When empty, `1.0.0` is used. It becomes the version of each file uploaded to mod.io and is stored in the map metadata. <!-- src: Assets/Editor/MapBuilder.cs:188 --> |
+| **Version** | None | When empty, `1.0.0` is used. It becomes the version of each file uploaded to mod.io and is stored in the map metadata. <!-- src: Assets/Editor/MapBuilder.cs:190 --> |
 | **Summary (optional)** | At most 250 characters | Only the first line is used, and the limit applies to it. When **Summary (optional)** is empty, the first line of **Description** is used; when both are empty, `<Name> track.` is used. <!-- src: Assets/Scripts/Rules/MapMetaRules.cs:47-60 --> |
 | **Description** | At most 50 000 characters | Stored in the map metadata. Sent to mod.io by **Create publication** when it isn't empty, and by **Update publication** with **Update description** on. See [Create a publication](publish.md#create) and [Update a publication](publish.md#update). |
 | **Authors** | None | The game shows up to 5 names joined with `, `, then `...`. With no authors, it shows the name of the mod.io account that created the publication. <!-- src: game --> |
@@ -88,8 +88,8 @@ For the Icon, the Preview and the minimap image, with whether each is required, 
 
 | Part | Limit | Measured on |
 | --- | --- | --- |
-| Map: geometry, materials, textures, collision, markers, lights, dynamic objects and animation | 4096 MB | The `MapTemp` folder of the [build cache](build.md#cache). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182; Assets/Editor/MapBuilder.cs:134-175 --> |
-| Metadata: map settings, Icon, Preview and minimap images | 24 MB | The `MetaTemp` folder of the build cache. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26; Assets/Editor/MapBuilder.cs:177-220 --> |
+| Map: geometry, materials, textures, collision, markers, lights, dynamic objects and animation | 4096 MB | The `MapTemp` folder of the [build cache](build.md#cache). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182; Assets/Editor/MapBuilder.cs:136-177 --> |
+| Metadata: map settings, Icon, Preview and minimap images | 24 MB | The `MetaTemp` folder of the build cache. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:25-26; Assets/Editor/MapBuilder.cs:179-222 --> |
 
 > [!IMPORTANT]
 > The build size is checked only immediately before **Create publication** or **Update publication**, and the result appears only in the Console. **Validate map**, the **Build map** button and the **Export to folder** button don't check it.

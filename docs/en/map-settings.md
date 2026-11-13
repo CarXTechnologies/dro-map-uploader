@@ -69,7 +69,7 @@ To fill in the map settings:
 1. Select the **Map** tab.
 1. In **Name**, enter the name players see.
 1. Optional: In **Version**, enter the release version, for example `1.0.0`.
-   When **Version** is empty, the build and mod.io use `1.0.0`. <!-- src: Assets/Editor/MapBuilder.cs:188 -->
+   When **Version** is empty, the build and mod.io use `1.0.0`. <!-- src: Assets/Editor/MapBuilder.cs:190 -->
 1. Optional: In **Summary (optional)**, enter one line about the map.
 1. Optional: In **Description**, enter the full text about the map.
 1. Optional: From the **Project** window, drag the preview PNG onto the **Preview · 16:9** box.

@@ -39,7 +39,7 @@ Map validation - <map name> (<scene>): no problems found.
 The **Build map** button runs the same checks before it builds anything:
 
 - It checks the map settings first, while the footer shows `Checking map settings…`. If the settings have an error, the build stops there, and the scene isn't checked. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:404 -->
-- Like **Validate map**, it then opens **Scene** if it isn't the active scene, even when **Rebuild targets** doesn't include **Map**. If you cancel Unity's prompt to save the open scenes, the build stops without adding a validation issue, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` <!-- src: Assets/Editor/MapBuilder.cs:332; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
+- Like **Validate map**, it then opens **Scene** if it isn't the active scene, even when **Rebuild targets** doesn't include **Map**. If you cancel Unity's prompt to save the open scenes, the build stops without adding a validation issue, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` <!-- src: Assets/Editor/MapBuilder.cs:335; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 - It then checks the scene, while the footer shows `Validating and collecting scene resources…`. This step runs only when **Rebuild targets** under **Advanced settings** includes **Map**. Any error stops the build. <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:405 -->
 - Warnings and notes never stop a build.
 
@@ -308,7 +308,7 @@ A Rigidbody that isn't kinematic needs convex mesh colliders. The Rigidbody can 
 <details>
 <summary><b>Scene</b> and <b>Summary</b></summary>
 
-The Scene note comes from **Validate map** itself, and the Summary note from the limit of 25 listed issues per rule. <!-- src: Assets/Editor/MapBuilder.cs:426-427 -->
+The Scene note comes from **Validate map** itself, and the Summary note from the limit of 25 listed issues per rule. <!-- src: Assets/Editor/MapBuilder.cs:429-430 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -339,7 +339,7 @@ Some problems never appear in the **Map Validation** window. Check for them sepa
 
 **Build size.** MapBuilder checks the size of the map and its metadata only immediately before **Create publication** or **Update publication**, and a build that is too large stops the upload with an error in the Console. For the limits, see [Build size](reference.md#limits-size); for the fix, see [Troubleshooting](troubleshooting.md#msg-map-size). <!-- src: Assets/Editor/MapBuilder.Storage.cs:158-182 -->
 
-**Export errors.** Some problems are found only while the build exports the scene. They stop the build and appear in the Console as an exception, usually `InvalidOperationException`, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` Export can also log warnings that don't stop the build. For every export error and warning with its cause and fix, see [Build errors in the Console](troubleshooting.md#build-errors). <!-- src: Assets/Editor/MapBuilder.cs:360-364; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
+**Export errors.** Some problems are found only while the build exports the scene. They stop the build and appear in the Console as an exception, usually `InvalidOperationException`, and the summary line on the **Build** tab reads `Build incomplete. Check validation results and the Console.` Export can also log warnings that don't stop the build. For every export error and warning with its cause and fix, see [Build errors in the Console](troubleshooting.md#build-errors). <!-- src: Assets/Editor/MapBuilder.cs:363-367; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
 **Image size in pixels.** Validation checks the format, Read/Write and file size of the Icon and the Preview, but not their size in pixels or their aspect ratio. See [Image requirements](minimap-and-images.md#images).
 

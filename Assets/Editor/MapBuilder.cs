@@ -18,6 +18,8 @@ namespace Editor
 {
 	public static partial class MapBuilder
 	{
+		internal const string GarbageTag = "Garbage";
+
 		public static ValidItemData LastSceneValidation { get; private set; }
         public static bool IsBuilding { get; private set; }
 
@@ -159,7 +161,7 @@ namespace Editor
                 await m_optimization.BuildAsync(exportRoots, settings, token);
                 if (m_optimization.Root != null) exportRoots = exportRoots.Concat(new[] { m_optimization.Root }).ToArray();
             }
-            var collector = new SceneFormatCollector(exportRoots, scene.name, "Garbage")
+            var collector = new SceneFormatCollector(exportRoots, scene.name, GarbageTag)
             {
                 Optimization = m_optimization,
                 IsMiniatureEnabled = isMiniatureEnabled && miniatureMesh != null,
@@ -220,11 +222,12 @@ namespace Editor
 			await m_results.UploadInCatalogAsync(GetTemporary(TempData.Meta), progress, token);
 		}
 
-		private static bool IsGarbage(Transform transform)
+		// Objects under a Garbage object are left out of the export and of the miniature
+		internal static bool IsGarbage(Transform transform)
 		{
 			for (Transform t = transform; t != null; t = t.parent)
 			{
-				if (t.CompareTag("Garbage"))
+				if (t.CompareTag(GarbageTag))
 				{
 					return true;
 				}

@@ -390,7 +390,7 @@ See also: [Image limits](reference.md#limits-images)
 
 Message: `The scene itself was not validated - fix the configuration first, then build again.`
 
-Severity: Note (doesn't block the build) · Category: Meta <!-- src: Assets/Editor/MapBuilder.cs:328-329 -->
+Severity: Note (doesn't block the build) · Category: Meta <!-- src: Assets/Editor/MapBuilder.cs:331-332 -->
 
 **Cause.** The map settings have at least one error. A build stops at the settings and doesn't check the scene, so more errors can appear once you fix them.
 
@@ -462,9 +462,9 @@ See also: [Add dynamic objects (Rigidbody)](scene-setup.md#dynamic)
 <a name="msg-scene-not-opened"></a>
 #### `'<scene>' was not opened, so only the configuration was checked.`
 
-Severity: Note (doesn't block the build) · Category: Scene <!-- src: Assets/Editor/MapBuilder.cs:427 -->
+Severity: Note (doesn't block the build) · Category: Scene <!-- src: Assets/Editor/MapBuilder.cs:430 -->
 
-**Cause.** **Validate map** had to open the scene selected in **Scene**, and you cancelled the prompt to save the scene that was open. Only the map settings were checked. The note also appears, with an empty name (`'' was not opened, …`), when no scene is selected in **Scene**; see [The Scene dropdown is empty](#scene-empty). <!-- src: Assets/Editor/MapBuilder.cs:427,435-440 -->
+**Cause.** **Validate map** had to open the scene selected in **Scene**, and you cancelled the prompt to save the scene that was open. Only the map settings were checked. The note also appears, with an empty name (`'' was not opened, …`), when no scene is selected in **Scene**; see [The Scene dropdown is empty](#scene-empty). <!-- src: Assets/Editor/MapBuilder.cs:430,438-443 -->
 
 **Fix.**
 
@@ -475,7 +475,7 @@ See also: [Run validation](validation.md#run)
 <a name="build-errors"></a>
 ## Build errors in the Console
 
-Some problems are found only while the map is exported. They stop the build with an exception in the Console, not in the **Map Validation** window: the Console line starts with the exception type, usually `InvalidOperationException`, or `InvalidDataException` for a Layered Lit material. The **Build** tab then shows `Build incomplete. Check validation results and the Console.` To open the Console, select **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:360-364; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
+Some problems are found only while the map is exported. They stop the build with an exception in the Console, not in the **Map Validation** window: the Console line starts with the exception type, usually `InvalidOperationException`, or `InvalidDataException` for a Layered Lit material. The **Build** tab then shows `Build incomplete. Check validation results and the Console.` To open the Console, select **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:363-367; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
 <a name="export-errors"></a>
 ### Export errors
@@ -515,7 +515,7 @@ The following table lists every error that stops a build during export, or an ex
 | `Binary map requires both Meta and Binary Map staging data. Rebuild Map and Meta.`, or another message from packing, such as `Missing map texture: <path>` | When you export or publish a Binary map, packing finds the build cache incomplete. | Set **Rebuild targets** to `Everything`, select the **Build map** button, then export or publish again. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/BinaryMapPacker.cs:60-62 --> |
 | Any other exception during a build | An internal error of the exporter. | Select the **Build map** button again. If the error repeats, open an issue in the [issue tracker](https://github.com/CarXTechnologies/dro-map-uploader/issues) with the full Console text. |
 
-Export also logs the following warnings in the Console. They don't stop the build, but the map in the game differs from the scene. A warning that repeats a validation error, such as `LODGroup has more than 8 LOD - Not supported`, doesn't appear, because the error stops the build before export. <!-- src: Assets/Editor/MapBuilder.cs:138; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:160-164 -->
+Export also logs the following warnings in the Console. They don't stop the build, but the map in the game differs from the scene. A warning that repeats a validation error, such as `LODGroup has more than 8 LOD - Not supported`, doesn't appear, because the error stops the build before export. <!-- src: Assets/Editor/MapBuilder.cs:140; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:160-164 -->
 
 | Message | Cause | Fix |
 | --- | --- | --- |
@@ -528,6 +528,12 @@ Export also logs the following warnings in the Console. They don't stop the buil
 | `Light '<name>' of type <type> is not supported - only Point and Spot lights are exported` | An enabled light isn't a Point or Spot light, for example the Directional light of the preview lighting. Validation reports the same light as a note or a warning. | Nothing for a Directional light: the game uses its own sun. Replace a light of another type with a Point or Spot light. See [Set up lighting](scene-setup.md#lighting). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:113-124 --> |
 | `Material '<material>': its render core values were exported from material for revision <n> of <variant>, the current revision is <n>. The game uses the fallback material until you re-run Export from material on its Material marker.` | A Material marker entry holds values exported for an older revision of its render core variant. Validation shows the same problem as a Markers warning. | In the Material marker, select **Export from material** for that entry, then build the map again. [Details](#msg-render-core-revision) <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RenderCoreMaterialWriter.cs:36-41 --> |
 | `[ModExport] Previous export did not restore import settings of <n> textures and <n> models; they will be restored at the end of this export.` | The previous build ended before it restored the import settings it had changed, for example because Unity closed during the build. A build turns on **Read/Write** and turns off compression for the textures and models it exports, and restores them at the end. | Nothing: this build restores them. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ExportImporterSettings.cs:186-199 --> |
+| `[ClipZones] More than 256 clipping zones: '<name>' and the rest are not exported.` | The map has more than 256 **ClipZone** markers. | Remove the zones the map doesn't need, or join short zones. See [3D preview and markers](markers.md). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ClipZonesCollector.cs:12,37-39 --> |
+| `[ClipZones] Zone '<name>' needs at least 2 points (child objects) and is skipped.` | A **ClipZone** marker has fewer than two active child objects; they are the points of the zone center line. | Add child objects along the zone, in the driving order. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ClipZonesCollector.cs:128 --> |
+| `[ClipZones] Zone '<name>' has more than 64 points and is skipped.` | A **ClipZone** marker has more than 64 active child objects. | Remove points on straight parts of the zone, or split it into two zones of one chain. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ClipZonesCollector.cs:13,132-134 --> |
+| `[ClipZones] Zone '<name>' is shorter than 0.5 m and is skipped.` | The points of a **ClipZone** marker lie almost at one place. | Move the points along the road. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ClipZonesCollector.cs:14,145-147 --> |
+| `[Miniature] More than 20000 objects: the rest are not in the miniature.` | The 3D preview generator found more than 20 000 object boxes. | Mark small objects as **Miniature/Hidden**, or mark groups as **Miniature/Object**: a marked group of touching pieces is one box. See [3D preview on the world map](minimap-and-images.md#world-map-3d-markers). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureCollector.cs:15,146 --> |
+| `[Miniature] The ground is too detailed: it keeps <n> triangles over the budget of 120000.` | Even the coarsest simplification left more than 120 000 ground triangles. | Mark distant terrain as **Miniature/Terrain** or hide it with **Miniature/Hidden**. See [Size of the miniature](minimap-and-images.md#world-map-3d-limits). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureCollector.cs:14,489 --> |
 
 <a name="msg-rigidbody-lodgroup"></a>
 ### `Rigidbody '<name>' cannot split an enclosing LODGroup. Put the…`
@@ -709,7 +715,7 @@ See also: [Where the build goes](build.md#cache) · [Create a publication](publi
 
 Shown in: the build summary on the **Build** tab <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
-**Cause.** After the last build, Map and Meta aren't both built: a validation error, an exception during export or **Cancel** stopped it. A build discards the parts it rebuilds before it starts, even after earlier successful builds. When the failed build had both Map and Meta in **Rebuild targets**, as by default, the map's row in **LOCAL MAPS** shows `Not built`; when only one part failed, it shows `Rebuild needed`. <!-- src: Assets/Editor/MapBuilder.cs:307 -->
+**Cause.** After the last build, Map and Meta aren't both built: a validation error, an exception during export or **Cancel** stopped it. A build discards the parts it rebuilds before it starts, even after earlier successful builds. When the failed build had both Map and Meta in **Rebuild targets**, as by default, the map's row in **LOCAL MAPS** shows `Not built`; when only one part failed, it shows `Rebuild needed`. <!-- src: Assets/Editor/MapBuilder.cs:310 -->
 
 **Fix.**
 

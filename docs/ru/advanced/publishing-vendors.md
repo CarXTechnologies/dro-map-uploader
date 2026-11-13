@@ -18,7 +18,7 @@
 
 ## Как устроен слой публикации
 
-MapUploader никогда не вызывает SDK площадки напрямую. Он работает с одним контрактом, не зависящим от площадки, — он находится в сабмодуле [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/0938b52b4301b67ebfdc964befb88977d0412e8d). Реализация каждой площадки лежит в отдельной сборке с define-ограничением (define constraint), поэтому проект компилирует только те площадки, SDK которых в нём есть, а другой проект может добавить площадку, не меняя контракт.
+MapUploader никогда не вызывает SDK площадки напрямую. Он работает с одним контрактом, не зависящим от площадки, — он находится в сабмодуле [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/c1326406e98608d01f51b3ec7647b65fb70925e3). Реализация каждой площадки лежит в отдельной сборке с define-ограничением (define constraint), поэтому проект компилирует только те площадки, SDK которых в нём есть, а другой проект может добавить площадку, не меняя контракт.
 
 ```
 Assets/Plugins/CarX.Modding.Creator/          сабмодуль
@@ -178,7 +178,7 @@ Assets/Resources/CarX.Modding/                ModIoConfig.asset, SteamWorkshopCo
 | **Max Summary Length** | `250` | Наибольшая допустимая длина краткого описания. mod.io требует краткое описание и ограничивает его 250 символами. | Чтобы задать более строгий лимит проекта. |
 | **Max Description Length** | `50000` | Наибольшая допустимая длина поля **Описание** (Description). | Чтобы задать более строгий лимит проекта. <!-- src: Assets/Resources/CarX.Modding/ModIoConfig.asset:25-30 --> |
 
-Лимиты можно менять, потому что это не только правила площадки, но и политика проекта. **Проверить карту** проверяет **Название**, краткое описание, **Описание** и размер файла иконки по лимитам активной площадки. Размеры карты и метаданных проверяются, только когда вы нажимаете **Создать публикацию** (Create publication) или **Обновить публикацию** (Update publication); см. [Ограничения размера при загрузке](../publish.md#size-limits). Если не удаётся создать ни одну площадку, проверка использует встроенные лимиты: 128 символов для поля **Название**, 8000 для краткого описания и поля **Описание** и 1 МБ для иконки. <!-- src: Assets/Editor/MapBuilder.cs:41-46 -->
+Лимиты можно менять, потому что это не только правила площадки, но и политика проекта. **Проверить карту** проверяет **Название**, краткое описание, **Описание** и размер файла иконки по лимитам активной площадки. Размеры карты и метаданных проверяются, только когда вы нажимаете **Создать публикацию** (Create publication) или **Обновить публикацию** (Update publication); см. [Ограничения размера при загрузке](../publish.md#size-limits). Если не удаётся создать ни одну площадку, проверка использует встроенные лимиты: 128 символов для поля **Название**, 8000 для краткого описания и поля **Описание** и 1 МБ для иконки. <!-- src: Assets/Editor/MapBuilder.cs:43-48 -->
 
 Как применяются изменения ассета:
 
@@ -276,7 +276,7 @@ Assets/Resources/CarX.Modding/                ModIoConfig.asset, SteamWorkshopCo
 
 Результат: после перекомпиляции `ModPublisherSession.AvailableVendors` содержит новую площадку, а окно **MapBuilder** предлагает её в той мере, в какой это позволяют ваши изменения этих членов классов.
 
-Интерфейсы находятся в сабмодуле: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/0938b52b4301b67ebfdc964befb88977d0412e8d/Publishing/Core/IModPublisher.cs) и [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/0938b52b4301b67ebfdc964befb88977d0412e8d/Publishing/Core/IModAuthProvider.cs).
+Интерфейсы находятся в сабмодуле: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/c1326406e98608d01f51b3ec7647b65fb70925e3/Publishing/Core/IModPublisher.cs) и [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/c1326406e98608d01f51b3ec7647b65fb70925e3/Publishing/Core/IModAuthProvider.cs).
 
 <a name="differences"></a>
 ## Известные различия площадок

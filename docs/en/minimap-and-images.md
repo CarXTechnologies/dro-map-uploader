@@ -134,18 +134,18 @@ The generator also draws the miniature from above into a minimap image in the sa
 1. In **World Map Preview**, select **Generated 3D**.
    The **Generate 3D preview** button and the **Show in Scene view** box appear under the component.
 1. Select **Generate 3D preview**.
-   The generator saves two files next to the scene, named after the scene: the miniature `_Miniature.asset`, which **Miniature Mesh** now points to, and the minimap image `_MiniatureMap.png`, which replaces the image in **Textures** > **Element 0** > **Main Texture**. <!-- src: Assets/Editor/MinimapEditor.cs:47,93-110 -->
-   When **Bounds Size** is under 10 m, the generator also clears **Lock Size** and sets **Bounds Center** and **Bounds Size** to a square around the roads and objects with a 10% margin. <!-- src: Assets/Editor/MinimapEditor.cs:19-20,160-184 -->
-1. Look at the miniature in the **Scene** view: it floats 30 m over the map in the game's colors. To hide it, clear **Show in Scene view**. <!-- src: Assets/Editor/MinimapEditor.cs:17,54 -->
+   The generator saves two files next to the scene, named after the scene: the miniature `_Miniature.asset`, which **Miniature Mesh** now points to, and the minimap image `_MiniatureMap.png`, which replaces the image in **Textures** > **Element 0** > **Main Texture**. <!-- src: Assets/Editor/MinimapEditor.cs:46,92-109 -->
+   When **Bounds Size** is under 10 m, the generator also clears **Lock Size** and sets **Bounds Center** and **Bounds Size** to a square around the roads and objects with a 10% margin. <!-- src: Assets/Editor/MinimapEditor.cs:18-19,159-183 -->
+1. Look at the miniature in the **Scene** view: it floats 30 m over the map in the game's colors. To hide it, clear **Show in Scene view**. <!-- src: Assets/Editor/MinimapEditor.cs:16,53 -->
 
-Result: the build exports the mesh in **Miniature Mesh** and the image in **Textures**. When **Miniature Mesh** is empty, the build generates the miniature from the scene, as the button does, but doesn't draw the image: the minimap image stays the one in **Textures**. <!-- src: Assets/Editor/MapBuilder.cs:143-152 -->
+Result: the build exports the mesh in **Miniature Mesh** and the image in **Textures**. When **Miniature Mesh** is empty, the build generates the miniature from the scene, as the button does, but doesn't draw the image: the minimap image stays the one in **Textures**. <!-- src: Assets/Editor/MapBuilder.cs:145-154 -->
 
 After generating, you can set either result by hand:
 
 - **Your own miniature.** Model it in your 3D tool in the world space of the map with the three submeshes above, and set it in **Miniature Mesh**.
 - **Your own image.** Set it in **Textures** > **Element 0** > **Main Texture**. The image that the generator replaced stays in the project, so you can set it back.
 
-Generating again rewrites the two generated files and points both fields back to them. <!-- src: Assets/Editor/MinimapEditor.cs:97,110,117-136 -->
+Generating again rewrites the two generated files and points both fields back to them. <!-- src: Assets/Editor/MinimapEditor.cs:96,109,116-135 -->
 
 <a name="world-map-3d-markers"></a>
 ### Mark what each object is

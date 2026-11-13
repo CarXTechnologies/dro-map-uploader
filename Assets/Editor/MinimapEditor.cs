@@ -12,7 +12,6 @@ namespace Editor
 	public class MinimapEditor : UnityEditor.Editor
 	{
 		private const string ShowMiniaturePref = "MapUploader.Minimap.ShowMiniature";
-		private const string GarbageTag = "Garbage";
 		// The preview floats over the map so the map geometry does not hide it, meters
 		private const float PreviewLift = 30f;
 		// Bounds smaller than this were never set: the generation frames the miniature itself
@@ -76,7 +75,7 @@ namespace Editor
 			try
 			{
 				RigidbodyExporter.EnsureMeshReadability(roots);
-				miniature = MiniatureCollector.Collect(scene.name, ModdingVersion.GetFullVersionFormat(), roots, IsGarbage);
+				miniature = MiniatureCollector.Collect(scene.name, ModdingVersion.GetFullVersionFormat(), roots, MapBuilder.IsGarbage);
 			}
 			finally
 			{
@@ -186,19 +185,6 @@ namespace Editor
 			Debug.Log($"[Miniature] '{minimapName}': Bounds Size was not set, the bounds now frame the miniature ({side:F0} m).", serializedMinimap.targetObject);
 		}
 
-		private static bool IsGarbage(Transform transform)
-		{
-			for (Transform t = transform; t != null; t = t.parent)
-			{
-				if (t.CompareTag(GarbageTag))
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
-
 		[DrawGizmo(GizmoType.Selected | GizmoType.NonSelected)]
 		private static void DrawPreview(Minimap minimap, GizmoType gizmoType)
 		{
@@ -213,12 +199,14 @@ namespace Editor
 
 			for (int submesh = 0; submesh < mesh.subMeshCount; submesh++)
 			{
-				Gizmos.color = (MiniatureLayerKind)submesh switch
+				// Gizmo colors are not linear: the palette is converted as for the minimap image
+				Color layerColor = (MiniatureLayerKind)submesh switch
 				{
-					MiniatureLayerKind.Ground => MiniatureTextureRenderer.GroundColor,
-					MiniatureLayerKind.Terrain => MiniatureTextureRenderer.TerrainColor,
-					_ => MiniatureTextureRenderer.GetObjectColor(0f),
+					MiniatureLayerKind.Ground => MiniaturePalette.GroundColor,
+					MiniatureLayerKind.Terrain => MiniaturePalette.TerrainColor,
+					_ => MiniaturePalette.GetObjectColor(heightAboveBase: 0f),
 				};
+				Gizmos.color = layerColor.gamma;
 				Gizmos.DrawMesh(mesh, submesh, position, Quaternion.identity, Vector3.one);
 			}
 		}

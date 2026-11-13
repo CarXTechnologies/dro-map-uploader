@@ -390,7 +390,7 @@
 
 Сообщение: `The scene itself was not validated - fix the configuration first, then build again.`
 
-Уровень: заметка (не блокирует сборку) · Категория: Meta <!-- src: Assets/Editor/MapBuilder.cs:328-329 -->
+Уровень: заметка (не блокирует сборку) · Категория: Meta <!-- src: Assets/Editor/MapBuilder.cs:331-332 -->
 
 **Причина.** В настройках карты есть хотя бы одна ошибка. Сборка останавливается на настройках и не проверяет сцену, поэтому после их исправления могут появиться новые ошибки.
 
@@ -462,9 +462,9 @@
 <a name="msg-scene-not-opened"></a>
 #### `'<scene>' was not opened, so only the configuration was checked.`
 
-Уровень: заметка (не блокирует сборку) · Категория: Scene <!-- src: Assets/Editor/MapBuilder.cs:427 -->
+Уровень: заметка (не блокирует сборку) · Категория: Scene <!-- src: Assets/Editor/MapBuilder.cs:430 -->
 
-**Причина.** **Проверить карту** нужно было открыть сцену, выбранную в списке **Сцена**, а вы отменили предложение сохранить открытую сцену. Проверены только настройки карты. Заметка также появляется с пустым именем (`'' was not opened, …`), если в списке **Сцена** не выбрана ни одна сцена; см. [Список «Сцена» пуст](#scene-empty). <!-- src: Assets/Editor/MapBuilder.cs:427,435-440 -->
+**Причина.** **Проверить карту** нужно было открыть сцену, выбранную в списке **Сцена**, а вы отменили предложение сохранить открытую сцену. Проверены только настройки карты. Заметка также появляется с пустым именем (`'' was not opened, …`), если в списке **Сцена** не выбрана ни одна сцена; см. [Список «Сцена» пуст](#scene-empty). <!-- src: Assets/Editor/MapBuilder.cs:430,438-443 -->
 
 **Исправление.**
 
@@ -475,7 +475,7 @@
 <a name="build-errors"></a>
 ## Ошибки сборки в Console
 
-Некоторые проблемы обнаруживаются только во время экспорта карты. Они останавливают сборку с исключением в Console, а не в окне **Map Validation**: строка в Console начинается с типа исключения — обычно `InvalidOperationException`, а для материала Layered Lit — `InvalidDataException`. Вкладка **Сборка** затем показывает `Сборка не завершена полностью. Проверьте результаты проверки и Console.` (`Build incomplete. Check validation results and the Console.`). Чтобы открыть Console, выберите **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:360-364; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
+Некоторые проблемы обнаруживаются только во время экспорта карты. Они останавливают сборку с исключением в Console, а не в окне **Map Validation**: строка в Console начинается с типа исключения — обычно `InvalidOperationException`, а для материала Layered Lit — `InvalidDataException`. Вкладка **Сборка** затем показывает `Сборка не завершена полностью. Проверьте результаты проверки и Console.` (`Build incomplete. Check validation results and the Console.`). Чтобы открыть Console, выберите **Window** > **General** > **Console**. <!-- src: Assets/Editor/MapBuilder.cs:363-367; Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
 <a name="export-errors"></a>
 ### Ошибки экспорта
@@ -515,7 +515,7 @@
 | `Binary map requires both Meta and Binary Map staging data. Rebuild Map and Meta.` или другое сообщение упаковки, например `Missing map texture: <path>` | При экспорте или публикации карты Binary упаковка обнаруживает, что кэш сборки неполный. | Выберите в поле **Что пересобрать** (Rebuild targets) значение `Everything`, нажмите кнопку **Собрать карту**, затем снова экспортируйте или опубликуйте карту. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/BinaryMapPacker.cs:60-62 --> |
 | Любое другое исключение во время сборки | Внутренняя ошибка экспортёра. | Снова нажмите кнопку **Собрать карту**. Если ошибка повторяется, создайте issue в [трекере задач](https://github.com/CarXTechnologies/dro-map-uploader/issues) и приложите полный текст из Console. |
 
-Кроме того, экспорт выводит в Console следующие предупреждения. Они не останавливают сборку, но карта в игре отличается от сцены. Предупреждение, которое повторяет ошибку проверки, например `LODGroup has more than 8 LOD - Not supported`, не появляется: ошибка останавливает сборку до экспорта. <!-- src: Assets/Editor/MapBuilder.cs:138; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:160-164 -->
+Кроме того, экспорт выводит в Console следующие предупреждения. Они не останавливают сборку, но карта в игре отличается от сцены. Предупреждение, которое повторяет ошибку проверки, например `LODGroup has more than 8 LOD - Not supported`, не появляется: ошибка останавливает сборку до экспорта. <!-- src: Assets/Editor/MapBuilder.cs:140; Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:160-164 -->
 
 | Сообщение | Причина | Исправление |
 | --- | --- | --- |
@@ -528,6 +528,12 @@
 | `Light '<name>' of type <type> is not supported - only Point and Spot lights are exported` | Включённый источник света не является Point или Spot, например это Directional light из освещения для предпросмотра. Проверка сообщает о том же источнике заметкой или предупреждением. | Для Directional light ничего делать не нужно: игра использует своё солнце. Источник другого типа замените на Point или Spot. См. [Настройка освещения](scene-setup.md#lighting). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:113-124 --> |
 | `Material '<material>': its render core values were exported from material for revision <n> of <variant>, the current revision is <n>. The game uses the fallback material until you re-run Export from material on its Material marker.` | Запись маркера Material хранит значения, экспортированные для более старой ревизии её варианта render core. Проверка показывает ту же проблему предупреждением категории Markers. | В маркере Material нажмите для этой записи **Export from material**, затем снова соберите карту. [Подробнее](#msg-render-core-revision) <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/RenderCoreMaterialWriter.cs:36-41 --> |
 | `[ModExport] Previous export did not restore import settings of <n> textures and <n> models; they will be restored at the end of this export.` | Предыдущая сборка завершилась, не вернув изменённые ею настройки импорта, например потому что Unity закрылся во время сборки. Сборка включает **Read/Write** и отключает сжатие у экспортируемых текстур и моделей и в конце возвращает прежние настройки. | Ничего делать не нужно: эта сборка вернёт их. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ExportImporterSettings.cs:186-199 --> |
+| `[ClipZones] More than 256 clipping zones: '<name>' and the rest are not exported.` | На карте больше 256 маркеров **ClipZone**. | Удалите лишние зоны или объедините короткие. См. [Добавление маркеров](markers.md). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ClipZonesCollector.cs:12,37-39 --> |
+| `[ClipZones] Zone '<name>' needs at least 2 points (child objects) and is skipped.` | У маркера **ClipZone** меньше двух активных дочерних объектов — точек центральной линии зоны. | Добавьте дочерние объекты вдоль зоны в порядке проезда. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ClipZonesCollector.cs:128 --> |
+| `[ClipZones] Zone '<name>' has more than 64 points and is skipped.` | У маркера **ClipZone** больше 64 активных дочерних объектов. | Уберите точки на прямых участках или разделите зону на две зоны одной цепочки. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ClipZonesCollector.cs:13,132-134 --> |
+| `[ClipZones] Zone '<name>' is shorter than 0.5 m and is skipped.` | Точки маркера **ClipZone** лежат почти в одном месте. | Расставьте точки вдоль дороги. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/ClipZonesCollector.cs:14,145-147 --> |
+| `[Miniature] More than 20000 objects: the rest are not in the miniature.` | Генератор 3D-превью нашёл больше 20 000 коробок объектов. | Разметьте мелкие объекты как **Miniature/Hidden** или группы как **Miniature/Object**: размеченная группа соприкасающихся кусков — одна коробка. См. [3D-превью на глобальной карте](minimap-and-images.md#world-map-3d-markers). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureCollector.cs:15,146 --> |
+| `[Miniature] The ground is too detailed: it keeps <n> triangles over the budget of 120000.` | Даже после самого грубого упрощения осталось больше 120 000 треугольников земли. | Разметьте дальний рельеф как **Miniature/Terrain** или скройте его через **Miniature/Hidden**. См. [Размер миниатюры](minimap-and-images.md#world-map-3d-limits). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureCollector.cs:14,489 --> |
 
 <a name="msg-rigidbody-lodgroup"></a>
 ### `Rigidbody '<name>' cannot split an enclosing LODGroup. Put the…`
@@ -709,7 +715,7 @@
 
 Где видно: сводка сборки на вкладке **Сборка**; в английском интерфейсе — `Build incomplete. Check validation results and the Console.` <!-- src: Assets/Editor/MapBuilderEditorWindow.Workspace.cs:387 -->
 
-**Причина.** После последней сборки собраны не обе части, Map и Meta: её остановила ошибка проверки, исключение во время экспорта или **Отмена**. Перед началом сборка сбрасывает части, которые пересобирает, даже если предыдущие сборки были успешными. Если в неудачной сборке в поле **Что пересобрать** были выбраны и Map, и Meta, как по умолчанию, строка карты в списке **ЛОКАЛЬНЫЕ КАРТЫ** показывает `Не собрана` (`Not built`); если не удалась только одна часть — `Нужна пересборка`. <!-- src: Assets/Editor/MapBuilder.cs:307 -->
+**Причина.** После последней сборки собраны не обе части, Map и Meta: её остановила ошибка проверки, исключение во время экспорта или **Отмена**. Перед началом сборка сбрасывает части, которые пересобирает, даже если предыдущие сборки были успешными. Если в неудачной сборке в поле **Что пересобрать** были выбраны и Map, и Meta, как по умолчанию, строка карты в списке **ЛОКАЛЬНЫЕ КАРТЫ** показывает `Не собрана` (`Not built`); если не удалась только одна часть — `Нужна пересборка`. <!-- src: Assets/Editor/MapBuilder.cs:310 -->
 
 **Исправление.**
 
