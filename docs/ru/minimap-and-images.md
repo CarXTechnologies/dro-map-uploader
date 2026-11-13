@@ -134,9 +134,9 @@ DrawZoneBehaviour не экспортируется, и проверка его 
 1. В **World Map Preview** выберите **Generated 3D**.
    Под компонентом появятся кнопка **Generate 3D preview** и флажок **Show in Scene view**.
 1. Нажмите **Generate 3D preview**.
-   Генератор сохранит рядом со сценой два файла с именем сцены: миниатюру `_Miniature.asset`, на которую теперь ссылается **Miniature Mesh**, и изображение мини-карты `_MiniatureMap.png`, которое заменит изображение в **Textures** > **Element 0** > **Main Texture**. <!-- src: Assets/Editor/MinimapEditor.cs:44,83-100 -->
-   Если **Bounds Size** меньше 10 м, генератор также снимет **Lock Size** и задаст в **Bounds Center** и **Bounds Size** квадрат вокруг дорог и объектов с запасом 10%. <!-- src: Assets/Editor/MinimapEditor.cs:19-20,150-174 -->
-1. Посмотрите на миниатюру в окне **Scene**: она висит на 30 м над картой в цветах игры. Чтобы скрыть её, снимите **Show in Scene view**. <!-- src: Assets/Editor/MinimapEditor.cs:17,50 -->
+   Генератор сохранит рядом со сценой два файла с именем сцены: миниатюру `_Miniature.asset`, на которую теперь ссылается **Miniature Mesh**, и изображение мини-карты `_MiniatureMap.png`, которое заменит изображение в **Textures** > **Element 0** > **Main Texture**. <!-- src: Assets/Editor/MinimapEditor.cs:47,93-110 -->
+   Если **Bounds Size** меньше 10 м, генератор также снимет **Lock Size** и задаст в **Bounds Center** и **Bounds Size** квадрат вокруг дорог и объектов с запасом 10%. <!-- src: Assets/Editor/MinimapEditor.cs:19-20,160-184 -->
+1. Посмотрите на миниатюру в окне **Scene**: она висит на 30 м над картой в цветах игры. Чтобы скрыть её, снимите **Show in Scene view**. <!-- src: Assets/Editor/MinimapEditor.cs:17,54 -->
 
 Результат: сборка выгружает меш из **Miniature Mesh** и изображение из **Textures**. Если поле **Miniature Mesh** пустое, сборка генерирует миниатюру по сцене так же, как кнопка, но изображение не рисует: изображением мини-карты остаётся то, что стоит в **Textures**. <!-- src: Assets/Editor/MapBuilder.cs:143-152 -->
 
@@ -145,7 +145,7 @@ DrawZoneBehaviour не экспортируется, и проверка его 
 - **Своя миниатюра.** Смоделируйте её в 3D-редакторе в мировых координатах карты с тремя подмешами, как описано выше, и укажите в **Miniature Mesh**.
 - **Своё изображение.** Укажите его в **Textures** > **Element 0** > **Main Texture**. Изображение, которое заменил генератор, остаётся в проекте, и его можно вернуть.
 
-Повторная генерация перезаписывает два сгенерированных файла и снова направляет на них оба поля. <!-- src: Assets/Editor/MinimapEditor.cs:87,100,107-126 -->
+Повторная генерация перезаписывает два сгенерированных файла и снова направляет на них оба поля. <!-- src: Assets/Editor/MinimapEditor.cs:97,110,117-136 -->
 
 <a name="world-map-3d-markers"></a>
 ### Разметка объектов

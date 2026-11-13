@@ -195,7 +195,7 @@ The PNG files of re-encoded material textures aren't stored. Packing needs both 
 
 ### File layout
 
-All numbers are little-endian. The reference reader is [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/92b7e4e05b4d2ba82c722fafe6ebd8e91e2b4345/Runtime/Binary/BinaryModArchive.cs) in the CarX.Modding.Creator SDK.
+All numbers are little-endian. The reference reader is [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/0938b52b4301b67ebfdc964befb88977d0412e8d/Runtime/Binary/BinaryModArchive.cs) in the CarX.Modding.Creator SDK.
 
 | Part | Type | Contents |
 | --- | --- | --- |
