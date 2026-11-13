@@ -41,9 +41,13 @@ namespace Editor
 				"draws it from above into a minimap image, which replaces Textures > Element 0. Export uses the mesh in Miniature Mesh " +
 				"and the image in Textures: keep the generated ones or set your own.", MessageType.Info);
 
-			if (GUILayout.Button("Generate 3D preview"))
+			// The generation restores the import settings the running build has just changed for export
+			using (new EditorGUI.DisabledScope(MapBuilder.IsBuilding))
 			{
-				Generate(minimap);
+				if (GUILayout.Button("Generate 3D preview"))
+				{
+					Generate(minimap);
+				}
 			}
 
 			EditorGUI.BeginChangeCheck();
@@ -58,6 +62,12 @@ namespace Editor
 
 		private static void Generate(Minimap minimap)
 		{
+			if (MapBuilder.IsBuilding)
+			{
+				Debug.LogWarning("[Miniature] The map is being built: generate the 3D preview after the build.");
+				return;
+			}
+
 			var scene = minimap.gameObject.scene;
 			Transform[] roots = scene.GetRootGameObjects().Select(root => root.transform).ToArray();
 			MiniatureMeta miniature;

@@ -72,6 +72,12 @@ namespace Editor
 						propCustomValue.managedReferenceValue = getValue(m_msPropParam);
 						propLastHead.stringValue = m_msPropParam;
 					}
+
+					if (m_msPropHead == MarkerData.ClipZoneHead)
+					{
+						SetClipZoneSettings(property.serializedObject.targetObjects, propValue.propertyPath, m_msPropParam);
+						propLastHead.stringValue = m_msPropParam;
+					}
 				}
 
 				Space();
@@ -287,6 +293,33 @@ namespace Editor
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
 		{
 			return m_height;
+		}
+
+		// As one marker does in the Inspector: each selected marker gets the settings type of the zone kind and keeps its chain and
+		// order. Otherwise a marker switched from Road keeps the road settings and the exporter skips it, and a triple zone with the
+		// touch and go settings is exported as touch and go
+		private static void SetClipZoneSettings(Object[] targetObjects, string valuePath, string param)
+		{
+			foreach (Object targetObject in targetObjects)
+			{
+				var markerObject = new SerializedObject(targetObject);
+				SerializedProperty markerValue = markerObject.FindProperty(valuePath);
+				ClipZoneMarkerSettings created = ClipZoneMarkerSettings.Create(param);
+
+				if (markerValue.managedReferenceValue is ClipZoneMarkerSettings previous)
+				{
+					if (previous.GetType() == created.GetType())
+					{
+						continue;
+					}
+
+					created.chain = previous.chain;
+					created.order = previous.order;
+				}
+
+				markerValue.managedReferenceValue = created;
+				markerObject.ApplyModifiedProperties();
+			}
 		}
 	}
 }
