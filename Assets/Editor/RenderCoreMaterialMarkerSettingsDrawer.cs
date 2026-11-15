@@ -25,6 +25,8 @@ namespace Editor
 		private const string LayerBlendTooltip = "The variant blends its layers by mesh vertex colors: RGB is the layer mask, A tints the albedo. " +
 			"A mesh without vertex colors is exported white and shows only the fourth layer.";
 
+		private const string WaterHelpText = "Game water: its look comes from the map lighting. Use UVs in meters (1 UV unit = 1 m) or adjust Tiling.";
+
 		private const string UnusedValuesTooltip = "Stored values of properties this variant does not have (left from another variant or " +
 			"removed from render core). They are not exported.";
 
@@ -40,6 +42,12 @@ namespace Editor
 		private static readonly GUIContent s_layerBlendContent = new GUIContent(LayerBlendText, LayerBlendTooltip);
 		private static readonly GUIContent s_unusedValuesLabel = new GUIContent("Unused values", UnusedValuesTooltip);
 		private static readonly GUIContent s_removeUnusedContent = new GUIContent("Remove", "Remove the unused values of this entry.");
+
+		private static readonly GUIContent s_exportContent = new GUIContent("Export from material",
+			"Fill the variant properties from the source HDRP material. Generated textures are saved to a RenderCore folder next to it.");
+
+		private static readonly GUIContent s_resetWaterContent = new GUIContent("Reset to defaults",
+			"Water takes nothing from the source material: set Tiling and the speeds to their default values.");
 
 		// Варианты таблицы статичны, поэтому кэш по ссылке на свойство конечен.
 		private static readonly Dictionary<ModRenderCoreVariantProperty, GUIContent> s_channelLayouts = new();
@@ -221,14 +229,26 @@ namespace Editor
 					}
 				}
 
+				bool isWater = available && ModWater.IsWater(variantName);
+
+				if (isWater)
+				{
+					Rect waterRect = next(GetHelpBoxLines(WaterHelpText));
+
+					if (draw)
+					{
+						EditorGUI.HelpBox(EditorGUI.IndentedRect(waterRect), WaterHelpText, MessageType.Info);
+					}
+				}
+
 				Rect exportRect = next(1);
 
 				if (draw)
 				{
 					using (new EditorGUI.DisabledScope(source.objectReferenceValue == null || !available))
 					{
-						if (GUI.Button(EditorGUI.IndentedRect(exportRect), new GUIContent("Export from material",
-							"Fill the variant properties from the source HDRP material. Generated textures are saved to a RenderCore folder next to it.")))
+						// Water bakes no textures: the same action only resets its numbers
+						if (GUI.Button(EditorGUI.IndentedRect(exportRect), isWater ? s_resetWaterContent : s_exportContent))
 						{
 							ScheduleExport(settings, index);
 						}
@@ -520,7 +540,9 @@ namespace Editor
 				try
 				{
 					IReadOnlyList<string> manual = RenderCoreMaterialBaker.Bake(materialOverride);
-					string message = $"'{materialOverride.source.name}' exported to {materialOverride.variant}.";
+					string message = ModWater.IsWater(materialOverride.variant)
+						? $"'{materialOverride.source.name}': {materialOverride.variant} values reset to defaults."
+						: $"'{materialOverride.source.name}' exported to {materialOverride.variant}.";
 					Debug.Log(manual.Count == 0 ? message : message + " Set manually: " + string.Join(", ", manual) + ".", component);
 				}
 				catch (Exception exception)

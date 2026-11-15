@@ -125,12 +125,12 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 | Budget | Сколько в сцене компонентов каждого поддерживаемого типа | Ошибки |
 | Components | Компоненты, которые экспорт пропускает: неподдерживаемые типы, отсутствующие скрипты, анимация без маркера | Заметки |
 | Format | Компоненты, которые освещают только предпросмотр в редакторе, и формат сборки | Заметки, ошибка |
-| Geometry | Меши, слоты материалов, коллайдеры MeshCollider, группы LOD, оптимизация сборки и бюджет сектора | Предупреждения, ошибка |
+| Geometry | Меши, слоты материалов, коллайдеры MeshCollider, группы LOD, UV игровой воды, оптимизация сборки и бюджет сектора | Предупреждения, ошибка |
 | Lighting | Источники света, которые не попадают в игру | Предупреждения, заметка |
-| Markers | GameMarkerData: типы маркеров, точки появления, коллайдеры для Road, маркеры Animation, Material и Sound | Ошибки, предупреждения, заметка |
+| Markers | GameMarkerData: типы маркеров, точки появления, коллайдеры для Road, маркеры Animation, Material, Sound и Water | Ошибки, предупреждения, заметка |
 | Meta | Настройки карты: имя сцены, **Название** (Name), краткое описание, **Описание** (Description), иконка и превью | Ошибки, предупреждения, заметка |
 | Minimap | Размер и текстуры Minimap | Ошибки |
-| Physics | Коллайдеры MeshCollider на движущихся Rigidbody | Ошибка |
+| Physics | Коллайдеры MeshCollider на движущихся Rigidbody, коллайдеры игровой воды | Ошибка, предупреждение |
 | Scene | Удалось ли кнопке **Проверить карту** открыть выбранную сцену | Заметка |
 | Summary | Замечания одного правила сверх первых 25 | Заметки |
 
@@ -151,7 +151,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Components</b>: компоненты, которые экспорт пропускает</summary>
 
-Проверка принимает типы компонентов из [таблицы лимитов](reference.md#budgets). Animator и SkinnedMeshRenderer тоже принимаются, но только под тем Animator, который использует маркер Animation. Для любого другого компонента проверка добавляет заметку, а экспорт его пропускает. <!-- src: Assets/Editor/Validation/SceneValidator.cs:139-180 -->
+Проверка принимает типы компонентов из [таблицы лимитов](reference.md#budgets). Animator и SkinnedMeshRenderer тоже принимаются, но только под тем Animator, который использует маркер Animation. Для любого другого компонента проверка добавляет заметку, а экспорт его пропускает. <!-- src: Assets/Editor/Validation/SceneValidator.cs:147-188 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -164,7 +164,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Format</b>: компоненты только для предпросмотра и формат сборки</summary>
 
-Эти замечания относятся к компонентам, которые использует только предпросмотр в редакторе, и к выбранному формату. <!-- src: Assets/Editor/Validation/SceneValidator.cs:156-160 -->
+Эти замечания относятся к компонентам, которые использует только предпросмотр в редакторе, и к выбранному формату. <!-- src: Assets/Editor/Validation/SceneValidator.cs:164-168 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -176,10 +176,12 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Geometry</b>: меши, группы LOD и бюджет сектора</summary>
 
-Эти проверки охватывают меши, слоты материалов, коллайдеры MeshCollider, группы LOD и оптимизацию сборки. См. [Оптимизация](build.md#optimization). <!-- src: Assets/Editor/Validation/SceneValidator.cs:912-978,1003-1033 -->
+Эти проверки охватывают меши, слоты материалов, коллайдеры MeshCollider, группы LOD и оптимизацию сборки. См. [Оптимизация](build.md#optimization). <!-- src: Assets/Editor/Validation/SceneValidator.cs:1126-1192,1217-1247 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
+| Предупреждение | `'<object>': the mesh has no UVs under the water material '<material>', so the waves don't show. Add UVs in meters (1 UV unit = 1 m).` | Сделайте в 3D-редакторе развёртку меша воды с UV в метрах. Только Binary. См. [Создание игровой воды](markers.md#water-material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:587-589 --> |
+| Предупреждение | `'<object>': the water '<material>' repeats <n> times per meter (<n> UV units per meter x Tiling <n>); it looks right from 0.01 to 0.25. Set Tiling to about <n> or use UVs in meters.` | В записи `WATER` маркера Material задайте **Tiling**, предложенный в сообщении, или сделайте развёртку меша с UV в метрах и оставьте **Tiling** равным `0.05`. Только Binary. <!-- src: Assets/Editor/Validation/SceneValidator.cs:30-31,602-605 --> |
 | Предупреждение | `'<object>' has a MeshRenderer but no MeshFilter, so it has no geometry to export.` | Добавьте MeshFilter с мешем или удалите MeshRenderer. |
 | Предупреждение | `'<object>' has a MeshFilter with no mesh assigned.` | Назначьте меш или удалите MeshFilter. |
 | Предупреждение | `'<object>' has an empty material slot; it will render as magenta in game.` | Назначьте материал в каждый слот MeshRenderer. См. [Решение проблем](troubleshooting.md#msg-empty-material-slot). |
@@ -196,7 +198,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Lighting</b>: источники света, которые не попадают в игру</summary>
 
-Экспортируются только источники света Point и Spot. См. [Настройка освещения](scene-setup.md#lighting). <!-- src: Assets/Editor/Validation/SceneValidator.cs:863-910 -->
+Экспортируются только источники света Point и Spot. См. [Настройка освещения](scene-setup.md#lighting). <!-- src: Assets/Editor/Validation/SceneValidator.cs:1077-1124 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -209,7 +211,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Markers</b>: GameMarkerData</summary>
 
-Эти проверки охватывают типы маркеров, точки появления, маркеры Road и маркеры Animation. См. [Маркеры GameMarkerData](markers.md). <!-- src: Assets/Editor/Validation/SceneValidator.cs:216-436 -->
+Эти проверки охватывают типы маркеров, точки появления, маркеры Road и маркеры Animation. См. [Маркеры GameMarkerData](markers.md). <!-- src: Assets/Editor/Validation/SceneValidator.cs:224-444 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -221,33 +223,34 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 | Ошибка | `The map has no GameMarkerData at all - at minimum it needs a spawn point.` | Добавьте маркер SpawnPoint. Сцена без маркеров получает также следующую ошибку и ошибку Budget. См. [Решение проблем](troubleshooting.md#msg-no-spawn). |
 | Ошибка | `The map has no SpawnPoint marker, so there is nowhere for a car to appear. Add an empty object with GameMarkerData set to SpawnPoint.` | Создайте пустой GameObject, добавьте компонент GameMarkerData и выберите **SpawnPoint**. См. [Решение проблем](troubleshooting.md#msg-no-spawn). |
 | Предупреждение | `<n> spawn points are all named '<name>'. Wavefront/Binary exports the object name as the spawn point's identity, so give each one a distinct, meaningful name.` | Переименуйте объекты точек появления. Карта мира в игре показывает каждую точку появления под её именем. См. [Решение проблем](troubleshooting.md#spawn-names). |
+| Предупреждение | `The map has <n> Water/Sea markers: <objects>. A map has one sea, so only the first one is used. Remove the other sea markers.` | Оставьте один маркер **Water** > **Sea**. Остальные сборка пропускает. См. [Добавление моря](markers.md#water). <!-- src: Assets/Editor/Validation/SceneValidator.cs:472-474 --> |
 
 </details>
 
 <details>
 <summary><b>Markers</b>: маркеры Sound</summary>
 
-Эти проверки охватывают активные маркеры Sound, которые экспортирует сборка. См. [Добавление звуков](markers.md#sound). <!-- src: Assets/Editor/Validation/SceneValidator.cs:311-433 -->
+Эти проверки охватывают активные маркеры Sound, которые экспортирует сборка. См. [Добавление звуков](markers.md#sound). <!-- src: Assets/Editor/Validation/SceneValidator.cs:319-441 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
-| Ошибка | `'<object>' is a Sound marker without settings. Select the object to create them, then set the sound.` | Выберите объект: окно **Inspector** создаст настройки. Затем задайте поля маркера. <!-- src: Assets/Editor/Validation/SceneValidator.cs:336-337 --> |
-| Ошибка | `'<object>' has no sound selected. Select a sound in its <type> marker.` | Выберите в маркере звук в поле **Sound**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:401-402 --> |
-| Ошибка | `'<object>' uses the sound '<sound>', which <type> doesn't have. Select a sound from the list.` | Выберите в поле **Sound** звук из списка. Звук **Preset** не подходит для **Ambience**, поэтому так бывает после смены вида. <!-- src: Assets/Editor/Validation/SceneValidator.cs:408-409 --> |
-| Ошибка | `'<object>' is a Sound/Custom marker without an audio clip. Assign an .ogg or .wav clip.` | Назначьте клип в **Audio clip**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:420-421 --> |
-| Ошибка | `'<object>' plays '<file>'. Only .ogg and .wav files are exported: convert the clip to one of them.` | Конвертируйте клип в `.ogg` или `.wav` и назначьте новый файл. <!-- src: Assets/Editor/Validation/SceneValidator.cs:427-428 --> |
-| Предупреждение | `'<object>' is a second Sound/Ambience marker. A map plays one ambience: the first one, '<object>'. Remove the other ambience markers.` | Оставьте один маркер **Sound** > **Ambience**. Остальные сборка пропускает. <!-- src: Assets/Editor/Validation/SceneValidator.cs:360-362 --> |
-| Ошибка | `'<object>': Min Distance <n> m is greater than Max Distance <n> m. Make Min Distance smaller.` | Уменьшите **Min Distance** или увеличьте **Max Distance**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:367-369 --> |
-| Ошибка | `The map has <n> Sound markers, at most 128 are exported. Remove the sounds the map doesn't need.` | Удалите маркеры Sound, чтобы их осталось не больше 128. <!-- src: Assets/Editor/Validation/SceneValidator.cs:374-377 --> |
-| Ошибка | `Sound/Custom markers use <n> audio files, at most 32 are exported. Use fewer different clips.` | Используйте один клип на нескольких маркерах. <!-- src: Assets/Editor/Validation/SceneValidator.cs:380-383 --> |
-| Ошибка | `The audio files of Sound/Custom markers take <size> MB, at most 20 MB are exported. Shorten the clips or save them as .ogg.` | Укоротите клипы или сохраните их в `.ogg`. <!-- src: Assets/Editor/Validation/SceneValidator.cs:386-390 --> |
+| Ошибка | `'<object>' is a Sound marker without settings. Select the object to create them, then set the sound.` | Выберите объект: окно **Inspector** создаст настройки. Затем задайте поля маркера. <!-- src: Assets/Editor/Validation/SceneValidator.cs:344-345 --> |
+| Ошибка | `'<object>' has no sound selected. Select a sound in its <type> marker.` | Выберите в маркере звук в поле **Sound**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:409-410 --> |
+| Ошибка | `'<object>' uses the sound '<sound>', which <type> doesn't have. Select a sound from the list.` | Выберите в поле **Sound** звук из списка. Звук **Preset** не подходит для **Ambience**, поэтому так бывает после смены вида. <!-- src: Assets/Editor/Validation/SceneValidator.cs:416-417 --> |
+| Ошибка | `'<object>' is a Sound/Custom marker without an audio clip. Assign an .ogg or .wav clip.` | Назначьте клип в **Audio clip**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:428-429 --> |
+| Ошибка | `'<object>' plays '<file>'. Only .ogg and .wav files are exported: convert the clip to one of them.` | Конвертируйте клип в `.ogg` или `.wav` и назначьте новый файл. <!-- src: Assets/Editor/Validation/SceneValidator.cs:435-436 --> |
+| Предупреждение | `'<object>' is a second Sound/Ambience marker. A map plays one ambience: the first one, '<object>'. Remove the other ambience markers.` | Оставьте один маркер **Sound** > **Ambience**. Остальные сборка пропускает. <!-- src: Assets/Editor/Validation/SceneValidator.cs:368-370 --> |
+| Ошибка | `'<object>': Min Distance <n> m is greater than Max Distance <n> m. Make Min Distance smaller.` | Уменьшите **Min Distance** или увеличьте **Max Distance**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:375-377 --> |
+| Ошибка | `The map has <n> Sound markers, at most 128 are exported. Remove the sounds the map doesn't need.` | Удалите маркеры Sound, чтобы их осталось не больше 128. <!-- src: Assets/Editor/Validation/SceneValidator.cs:382-385 --> |
+| Ошибка | `Sound/Custom markers use <n> audio files, at most 32 are exported. Use fewer different clips.` | Используйте один клип на нескольких маркерах. <!-- src: Assets/Editor/Validation/SceneValidator.cs:388-391 --> |
+| Ошибка | `The audio files of Sound/Custom markers take <size> MB, at most 20 MB are exported. Shorten the clips or save them as .ogg.` | Укоротите клипы или сохраните их в `.ogg`. <!-- src: Assets/Editor/Validation/SceneValidator.cs:394-398 --> |
 
 </details>
 
 <details>
 <summary><b>Markers</b>: маркеры Material</summary>
 
-Маркеры Material заменяют материалы вариантами render core и действуют только в сборках Binary. Их замечания появляются в категории Markers. Две последние строки проверяются, только если в списке **Формат** выбрано **Binary**. См. [Замена материалов вариантами render core](markers.md#material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:442-666,734-805 -->
+Маркеры Material заменяют материалы вариантами render core и действуют только в сборках Binary. Их замечания появляются в категории Markers. Две последние строки проверяются, только если в списке **Формат** выбрано **Binary**. См. [Замена материалов вариантами render core](markers.md#material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:651-880,948-1019 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -261,6 +264,8 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 | Предупреждение | `'<object>': material '<material>' is not used by the renderer, so its render core override is never applied.` | Удалите запись или назначьте материал рендереру. |
 | Предупреждение | `'<object>': render core material '<material>' (<variant>) stores values that the variant does not have: <names>. They are not exported. Press 'Export from material' or 'Remove' next to 'Unused values' in the marker.` | В записи нажмите **Export from material** или нажмите **Remove** рядом с **Unused values**. |
 | Предупреждение | `'<object>': render core material '<material>' (<variant>) was exported from material for revision <n>, but this SDK has revision <n> of the variant. The game uses the fallback material until you re-run Export from material on this entry.` | В записи нажмите **Export from material**. См. [Решение проблем](troubleshooting.md#msg-render-core-revision). |
+| Предупреждение | `'<object>': water '<material>' has Tiling <n>, outside 0.001 to 10. With UVs in meters use 0.05.` | В записи `WATER` задайте **Tiling** от 0,001 до 10. См. [Создание игровой воды](markers.md#water-material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:617-619 --> |
+| Предупреждение | `'<object>': water '<material>' has <field> <n>, faster than 1 UV units per second. Use a value from -1 to 1.` | `<field>` — **Ripple speed** или **Foam speed**. В записи `WATER` задайте значение от -1 до 1. <!-- src: Assets/Editor/Validation/SceneValidator.cs:633-635 --> |
 | Предупреждение | `'<object>': render core material '<material>' (<variant>) has no diffuse texture and will render white. Press 'Export from material' or assign the texture.` | В записи нажмите **Export from material** или назначьте диффузную текстуру. См. [Решение проблем](troubleshooting.md#msg-render-core-no-diffuse). |
 | Предупреждение | `'<renderer>': mesh '<mesh>' has no vertex colors, but <variant> blends its layers by them (RGB - layer mask, A - albedo tint). It is exported white, so only the fourth layer shows. Paint vertex colors in the mesh.` | Раскрасьте цвета вершин меша в своём 3D-редакторе, затем импортируйте его снова. |
 | Предупреждение | `'<renderer>': mesh '<mesh>' mixes <variant> and <source> submeshes. The game keeps the layer blend vertex colors for the whole mesh, so the emission is multiplied by them. Move the emissive part to a separate object without layer blend materials: build optimization merges layer blend objects only with each other.` | Перенесите эмиссивную часть на отдельный объект. `<source>` — эмиссивный вариант или `emissive material '<material>'`. |
@@ -303,7 +308,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Minimap</b>: размер и текстуры</summary>
 
-В сцене должен быть ровно один Minimap; их количество проверяет категория Budget. Держите объект Minimap активным: проверка учитывает и неактивный Minimap, но сборка экспортирует только активный. См. [Добавление мини-карты](minimap-and-images.md#minimap). <!-- src: Assets/Editor/Validation/SceneValidator.cs:1035-1084 -->
+В сцене должен быть ровно один Minimap; их количество проверяет категория Budget. Держите объект Minimap активным: проверка учитывает и неактивный Minimap, но сборка экспортирует только активный. См. [Добавление мини-карты](minimap-and-images.md#minimap). <!-- src: Assets/Editor/Validation/SceneValidator.cs:1249-1298 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -317,10 +322,11 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Physics</b>: MeshCollider на движущихся Rigidbody</summary>
 
-Rigidbody, который не является кинематическим, требует выпуклых (convex) коллайдеров MeshCollider. Rigidbody может находиться на объекте коллайдера или на родительском объекте. <!-- src: Assets/Editor/Validation/SceneValidator.cs:980-1001 -->
+Rigidbody, который не является кинематическим, требует выпуклых (convex) коллайдеров MeshCollider. Rigidbody может находиться на объекте коллайдера или на родительском объекте. Игровой воде не нужен коллайдер, по которому едут машины. <!-- src: Assets/Editor/Validation/SceneValidator.cs:1194-1215 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
+| Предупреждение | `'<object>' has the water material '<material>' and a <type>: cars will drive on the water surface. Remove the collider or tick Is Trigger.` | Удалите коллайдер с объекта воды или установите на нём флажок **Is Trigger**. Только Binary. См. [Создание игровой воды](markers.md#water-material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:543-545 --> |
 | Ошибка | `'<object>' has a non-convex MeshCollider driven by a non-kinematic Rigidbody, which the physics engine no longer supports. Tick Convex, or make the Rigidbody kinematic.` | На MeshCollider установите флажок **Convex** или на Rigidbody установите флажок **Is Kinematic**. См. [Решение проблем](troubleshooting.md#msg-non-convex-dynamic). |
 
 </details>

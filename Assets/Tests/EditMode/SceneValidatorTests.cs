@@ -756,6 +756,71 @@ namespace MapUploader.Tests
 			Assert.IsFalse(HasIssue(report, MapValidationSeverity.Warning, FoliageLighting));
 		}
 
+		[Test]
+		public void WarnsThatOnlyOneSeaIsUsed()
+		{
+			GameObject root = NewObject("Track");
+			NewMarker("Sea", MarkerData.WaterHead, root).markerData.param = WaterMarkerSettings.SeaParam;
+			Assert.IsFalse(Has(Validate(FormatBuild.Binary, root), SceneValidator.CategoryMarkers, "only the first one is used"));
+
+			NewMarker("Lake", MarkerData.WaterHead, root).markerData.param = WaterMarkerSettings.SeaParam;
+			Assert.IsTrue(HasIssue(Validate(FormatBuild.Binary, root), MapValidationSeverity.Warning, "only the first one is used"));
+		}
+
+		[TestCase(false, true)]
+		[TestCase(true, false)]
+		public void WarnsAboutWaterThatCarsCanDriveOn(bool isTrigger, bool expectsWarning)
+		{
+			GameObject root = NewObject("Track");
+			GameMarkerData marker = NewMaterialMarker(root, NewWaterMesh(uvPerMeter: 1), NewOverride(ModWater.Variant));
+			marker.gameObject.AddComponent<BoxCollider>().isTrigger = isTrigger;
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.AreEqual(expectsWarning, Has(report, SceneValidator.CategoryPhysics, "cars will drive on the water surface"));
+		}
+
+		[TestCase(1f, false)]
+		[TestCase(0.05f, true)]
+		[TestCase(100f, true)]
+		public void WarnsAboutAWaterUvDensityFarFromMeters(float uvPerMeter, bool expectsWarning)
+		{
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewWaterMesh(uvPerMeter), NewOverride(ModWater.Variant));
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.AreEqual(expectsWarning, Has(report, SceneValidator.CategoryGeometry, "Set Tiling to about"));
+			Assert.IsFalse(Has(report, SceneValidator.CategoryMarkers, "has no diffuse texture"));
+		}
+
+		[Test]
+		public void SuggestsTheTilingOfTheStockWaterLook()
+		{
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewWaterMesh(uvPerMeter: 100), NewOverride(ModWater.Variant));
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsTrue(Has(report, SceneValidator.CategoryGeometry, "Set Tiling to about 0.0005 "));
+		}
+
+		[Test]
+		public void WarnsAboutWaterValuesOutsideTheLimits()
+		{
+			RenderCoreMaterialOverride materialOverride = NewOverride(ModWater.Variant);
+			materialOverride.values.Add(new RenderCoreMaterialValue { name = ModWater.TilingProperty, vector = new Vector4(ModWater.MaxTiling * 2, 0, 0, 0) });
+			materialOverride.values.Add(new RenderCoreMaterialValue { name = ModWater.FoamSpeedProperty, vector = new Vector4(-ModWater.MaxSpeed * 2, 0, 0, 0) });
+			GameObject root = NewObject("Track");
+			NewMaterialMarker(root, NewWaterMesh(uvPerMeter: 1), materialOverride);
+
+			MapValidationReport report = Validate(FormatBuild.Binary, root);
+
+			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Warning, $"has Tiling {ModWater.MaxTiling * 2}, outside"));
+			Assert.IsTrue(HasIssue(report, MapValidationSeverity.Warning, "has Foam speed"));
+			Assert.IsFalse(HasIssue(report, MapValidationSeverity.Warning, "has Ripple speed"));
+		}
+
 		private MapValidationReport Validate(FormatBuild format, params GameObject[] roots)
 		{
 			return Validate(format, roots, new List<string>());
@@ -969,6 +1034,18 @@ namespace MapUploader.Tests
 		{
 			return new ModRenderCoreVariant(variant.name, variant.id, variant.queue, variant.renderType, variant.keywords, variant.vertexColors,
 				variant.requiredStreams, variant.unavailableReason, revision, variant.properties);
+		}
+
+		/// <summary>A flat 10 x 10 m water quad whose UVs are its XZ position times <paramref name="uvPerMeter"/>.</summary>
+		private Mesh NewWaterMesh(float uvPerMeter)
+		{
+			const float size = 10f;
+			var mesh = new Mesh { name = "Water" + m_assets.Count };
+			mesh.vertices = new[] { Vector3.zero, new Vector3(0, 0, size), new Vector3(size, 0, size), new Vector3(size, 0, 0) };
+			mesh.uv = mesh.vertices.Select(vertex => new Vector2(vertex.x, vertex.z) * uvPerMeter).ToArray();
+			mesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
+			m_assets.Add(mesh);
+			return mesh;
 		}
 
 		/// <summary>Треугольник на каждый сабмеш, с цветом вершин или без него.</summary>

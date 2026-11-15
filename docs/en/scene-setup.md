@@ -188,7 +188,7 @@ In the game, a dynamic Rigidbody works like the game's own props: the car body p
 
 Add a LODGroup to an object as in any Unity project. The build exports every level, and the game switches levels at distances calculated from the group's size and transition heights.
 
-- A LODGroup can have at most 8 levels. More is a validation error, which stops the build: `'<name>' has <n> LOD levels; at most 8 are supported…` <!-- src: Assets/Editor/Validation/SceneValidator.cs:961-969 -->
+- A LODGroup can have at most 8 levels. More is a validation error, which stops the build: `'<name>' has <n> LOD levels; at most 8 are supported…` <!-- src: Assets/Editor/Validation/SceneValidator.cs:1175-1183 -->
 - A LODGroup with a single level is still exported as a LOD group, so the object disappears at its **Culled** transition.
 - A LODGroup with no renderers on any level gets a Geometry warning.
 - The build recalculates each LODGroup's bounds, so a hand-set **Object Size** is replaced.
@@ -248,7 +248,7 @@ A preset adds these notes to validation. They don't block the build:
 'Volume' is used only for the SDK preview and is not exported or required.
 ```
 
-Validation adds a note for each enabled Directional light and a light-type warning for each enabled light of another type that isn't Point or Spot, such as an Area light. It adds one more warning when the scene has two or more Directional lights, counting disabled ones. <!-- src: Assets/Editor/Validation/SceneValidator.cs:886-908 -->
+Validation adds a note for each enabled Directional light and a light-type warning for each enabled light of another type that isn't Point or Spot, such as an Area light. It adds one more warning when the scene has two or more Directional lights, counting disabled ones. <!-- src: Assets/Editor/Validation/SceneValidator.cs:1100-1122 -->
 
 <a name="reference-scene"></a>
 ## Explore the reference scene

@@ -26,6 +26,13 @@ namespace Editor.Validation
 		/// <summary>Render core variants with foliage lighting (MAT_FOLIAGE_ALPHATEST, MAT_FOLIAGE_SIMPLE_ALPHATEST).</summary>
 		private const string FoliageVariantPrefix = "MAT_FOLIAGE_";
 
+		/// <summary>Water repeats per meter of the surface (UV per meter x Tiling) that look right; the stock look is <see cref="ModWater.RecommendedRepeatsPerMeter"/>.</summary>
+		private const float MinWaterRepeatsPerMeter = 0.01f;
+		private const float MaxWaterRepeatsPerMeter = 0.25f;
+
+		/// <summary>World area, m2, below which a water submesh has no surface to measure its UVs on.</summary>
+		private const float MinWaterArea = 1e-4f;
+
 		/// <summary>How many object names a message lists before "and N more".</summary>
 		private const int ListedObjects = 3;
 
@@ -51,6 +58,7 @@ namespace Editor.Validation
 			CheckBudget(report, rules);
 			CheckMarkers(report, transforms);
 			CheckSounds(report, transforms);
+			CheckWater(report, transforms);
 			CheckMaterialMarkerCoverage(report, transforms);
 			CheckLighting(report, transforms);
 			CheckGeometry(report, transforms);
@@ -436,6 +444,207 @@ namespace Editor.Validation
 		}
 
 		/// <summary>
+		/// Water: one Water/Sea marker per map, counted as the exporter takes them (active, enabled). Binary only, for every renderer a WATER
+		/// entry of a Material marker applies to (<see cref="MaterialMarkerCoverage"/>): no solid collider and a sensible UV density.
+		/// </summary>
+		private static void CheckWater(MapValidationReport report, List<Transform> transforms)
+		{
+			var seas = new List<GameMarkerData>();
+
+			foreach (Transform transform in transforms)
+			{
+				if (!transform.gameObject.activeInHierarchy)
+				{
+					continue;
+				}
+
+				foreach (GameMarkerData marker in transform.GetComponents<GameMarkerData>())
+				{
+					if (marker.enabled && marker.MarkerHead == MarkerData.WaterHead && marker.MarkerParam == WaterMarkerSettings.SeaParam)
+					{
+						seas.Add(marker);
+					}
+				}
+			}
+
+			if (seas.Count > 1)
+			{
+				report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "water-sea-twice",
+					$"The map has {seas.Count} {WaterMarkerSettings.SeaParam} markers: {DescribeObjects(seas.Select(sea => sea.name).ToList())}. " +
+					"A map has one sea, so only the first one is used. Remove the other sea markers.", seas[1]);
+			}
+
+			if (report.format != FormatBuild.Binary)
+			{
+				return;
+			}
+
+			List<Transform> animationRoots = VertexAnimationBaker.GetAnimationRoots(transforms.Select(transform => transform.root).Distinct(), IsExcluded);
+			var vertices = new List<Vector3>();
+			var uvs = new List<Vector2>();
+			var triangles = new List<int>();
+
+			foreach ((MeshRenderer renderer, GameObject _, RenderCoreMaterialMarkerSettings settings) in MaterialMarkerCoverage.Collect(transforms, animationRoots))
+			{
+				if (settings == null)
+				{
+					continue;
+				}
+
+				Material[] materials = renderer.sharedMaterials;
+				Mesh mesh = renderer.GetComponent<MeshFilter>().sharedMesh;
+				bool meshRead = false;
+				bool colliderChecked = false;
+
+				for (int subMesh = 0; subMesh < materials.Length && subMesh < mesh.subMeshCount; subMesh++)
+				{
+					RenderCoreMaterialOverride materialOverride = materials[subMesh] != null ? settings.Find(materials[subMesh]) : null;
+
+					if (materialOverride == null || !ModWater.IsWater(materialOverride.variant))
+					{
+						continue;
+					}
+
+					if (!colliderChecked)
+					{
+						CheckWaterCollider(report, renderer, materials[subMesh]);
+						colliderChecked = true;
+					}
+
+					// Edit mode reads any mesh; in Play mode only a readable one
+					if (mesh.GetTopology(subMesh) != MeshTopology.Triangles || (!mesh.isReadable && Application.isPlaying))
+					{
+						continue;
+					}
+
+					if (!meshRead)
+					{
+						mesh.GetVertices(vertices);
+						mesh.GetUVs(0, uvs);
+						meshRead = true;
+					}
+
+					mesh.GetTriangles(triangles, subMesh);
+					CheckWaterUvDensity(report, renderer, materials[subMesh], materialOverride, vertices, uvs, triangles);
+				}
+			}
+		}
+
+		/// <summary>Cars collide with a solid collider of the water mesh as with a road.</summary>
+		private static void CheckWaterCollider(MapValidationReport report, MeshRenderer renderer, Material material)
+		{
+			foreach (Collider collider in renderer.GetComponents<Collider>())
+			{
+				if (!collider.enabled || collider.isTrigger)
+				{
+					continue;
+				}
+
+				report.AddCapped(MapValidationSeverity.Warning, CategoryPhysics, "water-collider",
+					$"'{renderer.name}' has the water material '{material.name}' and a {collider.GetType().Name}: cars will drive on the water surface. " +
+					"Remove the collider or tick Is Trigger.", collider);
+				return;
+			}
+		}
+
+		/// <summary>
+		/// UV units per meter of the submesh (square root of its UV area over its world area) times Tiling: how many times per meter the water
+		/// repeats. The suggested Tiling gives <see cref="ModWater.RecommendedRepeatsPerMeter"/>.
+		/// </summary>
+		private static void CheckWaterUvDensity(MapValidationReport report, MeshRenderer renderer, Material material,
+			RenderCoreMaterialOverride materialOverride, List<Vector3> vertices, List<Vector2> uvs, List<int> triangles)
+		{
+			Matrix4x4 localToWorld = renderer.transform.localToWorldMatrix;
+			bool hasUvs = uvs.Count == vertices.Count;
+			double worldArea = 0;
+			double uvArea = 0;
+
+			for (int i = 0; i + 2 < triangles.Count; i += 3)
+			{
+				int a = triangles[i];
+				int b = triangles[i + 1];
+				int c = triangles[i + 2];
+				Vector3 origin = localToWorld.MultiplyPoint3x4(vertices[a]);
+				Vector3 edgeB = localToWorld.MultiplyPoint3x4(vertices[b]) - origin;
+				Vector3 edgeC = localToWorld.MultiplyPoint3x4(vertices[c]) - origin;
+				worldArea += Vector3.Cross(edgeB, edgeC).magnitude * 0.5;
+
+				if (hasUvs)
+				{
+					Vector2 uvB = uvs[b] - uvs[a];
+					Vector2 uvC = uvs[c] - uvs[a];
+					uvArea += Mathf.Abs(uvB.x * uvC.y - uvB.y * uvC.x) * 0.5;
+				}
+			}
+
+			if (worldArea < MinWaterArea)
+			{
+				return;
+			}
+
+			if (uvArea <= 0)
+			{
+				report.AddCapped(MapValidationSeverity.Warning, CategoryGeometry, "water-uv",
+					$"'{renderer.name}': the mesh has no UVs under the water material '{material.name}', so the waves don't show. " +
+					"Add UVs in meters (1 UV unit = 1 m).", renderer);
+				return;
+			}
+
+			float tiling = GetWaterValue(materialOverride, ModWater.TilingProperty, ModWater.DefaultTiling);
+			float uvPerMeter = (float)Math.Sqrt(uvArea / worldArea);
+			float repeats = uvPerMeter * tiling;
+
+			if (repeats >= MinWaterRepeatsPerMeter && repeats <= MaxWaterRepeatsPerMeter)
+			{
+				return;
+			}
+
+			report.AddCapped(MapValidationSeverity.Warning, CategoryGeometry, "water-uv",
+				$"'{renderer.name}': the water '{material.name}' repeats {repeats:0.####} times per meter ({uvPerMeter:0.###} UV units per meter x " +
+				$"Tiling {tiling:0.####}); it looks right from {MinWaterRepeatsPerMeter} to {MaxWaterRepeatsPerMeter}. Set Tiling to about " +
+				$"{ModWater.RecommendedRepeatsPerMeter / uvPerMeter:0.####} or use UVs in meters.", renderer);
+		}
+
+		/// <summary>Tiling and speeds of a WATER entry within the limits of the game water.</summary>
+		private static void CheckWaterValues(MapValidationReport report, GameMarkerData marker, RenderCoreMaterialOverride materialOverride)
+		{
+			string name = marker.transform.name;
+			string source = materialOverride.source.name;
+			float tiling = GetWaterValue(materialOverride, ModWater.TilingProperty, ModWater.DefaultTiling);
+
+			if (tiling < ModWater.MinTiling || tiling > ModWater.MaxTiling)
+			{
+				report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "water-tiling",
+					$"'{name}': water '{source}' has Tiling {tiling}, outside {ModWater.MinTiling} to {ModWater.MaxTiling}. " +
+					$"With UVs in meters use {ModWater.DefaultTiling}.", marker);
+			}
+
+			foreach (ModRenderCoreVariantProperty property in ModWater.Definition.properties)
+			{
+				if (property.name == ModWater.TilingProperty)
+				{
+					continue;
+				}
+
+				float speed = GetWaterValue(materialOverride, property.name, property.defaultValue.x);
+
+				if (Mathf.Abs(speed) > ModWater.MaxSpeed)
+				{
+					report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "water-speed",
+						$"'{name}': water '{source}' has {property.label} {speed}, faster than {ModWater.MaxSpeed} UV units per second. " +
+						$"Use a value from -{ModWater.MaxSpeed} to {ModWater.MaxSpeed}.", marker);
+				}
+			}
+		}
+
+		/// <summary>A value the entry stores, or the default the export writes for a missing one.</summary>
+		private static float GetWaterValue(RenderCoreMaterialOverride materialOverride, string property, float defaultValue)
+		{
+			RenderCoreMaterialValue value = materialOverride.Find(property);
+			return value != null ? value.vector.x : defaultValue;
+		}
+
+		/// <summary>
 		/// Маркер Material: только Binary, есть что переопределять, вариант известен и доступен в модах, материал из рендерера, нет лишних
 		/// значений, значения запечены для текущей ревизии варианта, задан diffuse, цвет вершин подходит варианту.
 		/// </summary>
@@ -509,6 +718,11 @@ namespace Editor.Validation
 
 				CheckOrphanValues(report, marker, materialOverride, variant);
 				CheckBakedRevision(report, marker, materialOverride, variant);
+
+				if (ModWater.IsWater(variant.name))
+				{
+					CheckWaterValues(report, marker, materialOverride);
+				}
 
 				ModRenderCoreVariantProperty diffuse = FindDiffuse(variant);
 

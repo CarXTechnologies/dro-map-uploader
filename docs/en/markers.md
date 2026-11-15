@@ -51,7 +51,7 @@ Don't use `Ambient.prefab`. Its marker type, `Ambient`, is no longer supported; 
 <a name="types"></a>
 ## Choose the marker type
 
-The type menu has 39 entries: **SpawnPoint**, a **Road** submenu with 27 surfaces, **Animation**, **Material**, a **ClipZone** submenu with 2 zone kinds, a **Miniature** submenu with 4 kinds and a **Sound** submenu with 3 kinds. <!-- src: Assets/Scripts/MarkerData.cs:9-50 -->
+The type menu has 40 entries: **SpawnPoint**, a **Road** submenu with 27 surfaces, **Animation**, **Material**, a **ClipZone** submenu with 2 zone kinds, a **Miniature** submenu with 4 kinds, a **Sound** submenu with 3 kinds and a **Water** submenu with **Sea**. <!-- src: Assets/Scripts/MarkerData.cs:9-51 -->
 
 | Type | Put it on | What it does | Formats |
 | --- | --- | --- | --- |
@@ -62,6 +62,7 @@ The type menu has 39 entries: **SpawnPoint**, a **Road** submenu with 27 surface
 | **ClipZone** > *kind* | An empty GameObject whose children are the points of the zone center line | Makes a free ride clipping zone: touch and go or triple | Binary and Wavefront |
 | **Miniature** > *kind* | Any GameObject, often the root of a group | Sets what the object and its children are in the 3D preview on the world map; see [3D preview on the world map](minimap-and-images.md#world-map-3d) | Binary and Wavefront |
 | **Sound** > *kind* | An empty GameObject at the place of the sound | Plays a game sound or your own audio file at the object, or the background sound of the whole map; see [Add sounds](#sound) | Binary and Wavefront |
+| **Water** > **Sea** | An empty GameObject at the sea level | Adds an endless sea at the height of the object; see [Add a sea](#water) | Binary and Wavefront |
 
 To give several GameObjects the same type:
 
@@ -72,7 +73,7 @@ To give several GameObjects the same type:
 
 Result: every selected marker has the new type.
 
-The button keeps the **Template Config** and the template of each marker. For a **Road** type, it also resets the marker's own values, which **Custom** uses, to the defaults of the new surface, as changing the surface of one marker does. When the selected markers have different surfaces, it resets those that already had the new surface too; when every selected marker already has it, their **Custom** values stay. After the button, a marker without a **Template Config** gets the game's surface of its new type, a marker with a named template exports the template's values, and a **Custom** marker exports the defaults of the new surface; see [Physics values](#values). <!-- src: Assets/Editor/MarkerDataDrawer.cs:62-78 -->
+The button keeps the **Template Config** and the template of each marker. For a **Road** type, it also resets the marker's own values, which **Custom** uses, to the defaults of the new surface, as changing the surface of one marker does. When the selected markers have different surfaces, it resets those that already had the new surface too; when every selected marker already has it, their **Custom** values stay. After the button, a marker without a **Template Config** gets the game's surface of its new type, a marker with a named template exports the template's values, and a **Custom** marker exports the defaults of the new surface; see [Physics values](#values). <!-- src: Assets/Editor/MarkerDataDrawer.cs:64-80 -->
 
 <a name="spawn"></a>
 ## Add spawn points
@@ -92,8 +93,8 @@ How the game uses spawn points:
 
 - By default, the car starts at the first spawn point in Hierarchy order. Make the start position the first spawn point in the **Hierarchy**, and don't put one spawn point inside another: a child spawn point comes before its parent.
 - Every spawn point is a fast-travel point on the in-game world map, which shows your [minimap](minimap-and-images.md#minimap). The world map lists each point under its GameObject name, and players confirm the teleport.
-- Without spawn points, validation reports an error: `The map has no SpawnPoint marker, so there is nowhere for a car to appear. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:293 -->
-- When several spawn points share a name, validation warns: `<n> spawn points are all named '<name>'. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:848 -->
+- Without spawn points, validation reports an error: `The map has no SpawnPoint marker, so there is nowhere for a car to appear. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:301 -->
+- When several spawn points share a name, validation warns: `<n> spawn points are all named '<name>'. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:1062 -->
 
 The `SpawnPoint` example prefab also has the Draw Zone Behaviour helper. While the **Scene** view draws gizmos, it draws a green box at the point, and with **Cast To Floor** selected it moves the GameObject down until it sits on the first collider below it. To place a point at an exact height, clear **Cast To Floor**. The helper isn't exported, and validation ignores it. <!-- src: Assets/Resources/MapSkipComponentConfig.asset:16 -->
 
@@ -115,7 +116,7 @@ Result: the type menu shows `Road/<surface>`, for example `Road/asphalt`, and th
 
 In the TestMap sample, `Content/workshop_map_main/road` is set up this way: the GameObject has only a Mesh Collider and a `Road/asphalt` marker. Its marker also uses the `AsphaultDef` template, so the game gets the template's values instead of its own `asphalt`; see [Values saved by an earlier version](reference.md#older-values).
 
-- A Road marker with no collider on its GameObject or its children is a validation error: `'<name>' is marked as Road but has no Collider on it or its children, …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:278 -->
+- A Road marker with no collider on its GameObject or its children is a validation error: `'<name>' is marked as Road but has no Collider on it or its children, …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:286 -->
 - A collider without a Road marker still collides, but the game gives it a default physics material instead of a road surface.
 - A Road marker on a LODGroup object, or on a renderer that is one of its LOD levels, gives no surface. Put the collider and the marker on a separate GameObject that isn't part of any LOD level.
 - A Road marker on the GameObject with a Rigidbody, or on one of its children, gives no surface. The colliders of a dynamic object use the friction and bounciness of their physics material instead. This also applies to the child of the `Box` example prefab.
@@ -136,7 +137,7 @@ The **Road** submenu lists `default` first, then 26 surfaces in alphabetical ord
 | Water | `liquid_water` |
 | Metal, plastic and wood | `metal`, `metal_grille`, `plastic`, `wood`, `wood_plank` |
 
-The game has no surface named `default`, `ice_snowy` or `pavement`. A collider with one of them gets no road surface in the game, with values or without, and behaves like a collider without a Road marker. Validation warns about such a marker with `'<object>' uses the surface '<surface>', which the game doesn't have, …` and names the surface to use instead: `asphalt` instead of `default`, `road_icy` instead of `ice_snowy` and `paving_slab` instead of `pavement`. In the TestMap sample, `Content/workshop_map_main/wall_coll` uses `Road/default` and gets this warning. <!-- src: Assets/Editor/Validation/SceneValidator.cs:267-273,856-861 -->
+The game has no surface named `default`, `ice_snowy` or `pavement`. A collider with one of them gets no road surface in the game, with values or without, and behaves like a collider without a Road marker. Validation warns about such a marker with `'<object>' uses the surface '<surface>', which the game doesn't have, …` and names the surface to use instead: `asphalt` instead of `default`, `road_icy` instead of `ice_snowy` and `paving_slab` instead of `pavement`. In the TestMap sample, `Content/workshop_map_main/wall_coll` uses `Road/default` and gets this warning. <!-- src: Assets/Editor/Validation/SceneValidator.cs:275-281,1070-1075 -->
 
 <a name="values"></a>
 ### Physics values
@@ -231,7 +232,7 @@ The Animation marker has these fields: <!-- src: Assets/Plugins/CarX.Modding.Cre
 | **Initial phase (0..1)** | `0` | Where in the clip playback starts, as a fraction of its length | To keep copies of the same object out of step |
 | **Loop** | Selected | Repeats the clip | Clear it for a clip that plays once |
 
-Validation checks only that the marker has an Animator with clips: `Animation marker requires an Animator with animation clips.` The build checks the following rules and stops with an error in the **Console** when one fails: <!-- src: Assets/Editor/Validation/SceneValidator.cs:259 -->
+Validation checks only that the marker has an Animator with clips: `Animation marker requires an Animator with animation clips.` The build checks the following rules and stops with an error in the **Console** when one fails: <!-- src: Assets/Editor/Validation/SceneValidator.cs:267 -->
 
 - Each Animator has one Animation marker.
 - Animated hierarchies don't overlap: a marked Animator can't be inside the hierarchy of another marked Animator.
@@ -239,7 +240,7 @@ Validation checks only that the marker has an Animator with clips: `Animation ma
 - The hierarchy has at least one enabled MeshRenderer or SkinnedMeshRenderer, every such renderer has a mesh, and each mesh has as many materials as submeshes.
 - The baked data stays within its size limit. Otherwise the build reports `VAT for '<name>' is too large …`; reduce the vertices, the clips or **Bake frames per second**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:128 -->
 
-An Animator or SkinnedMeshRenderer without an Animation marker isn't exported, and validation shows a Components note for it. The game plays the baked clips only: Animator transitions, parameters, events, scripts and IK aren't reproduced, and collider shapes don't deform with the animation. For the full scope, see [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/VertexAnimation.md#supported-scope) in the SDK's VertexAnimation.md.
+An Animator or SkinnedMeshRenderer without an Animation marker isn't exported, and validation shows a Components note for it. The game plays the baked clips only: Animator transitions, parameters, events, scripts and IK aren't reproduced, and collider shapes don't deform with the animation. For the full scope, see [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/365f9c9c803640246b5f2c2072e28a053b66c41d/VertexAnimation.md#supported-scope) in the SDK's VertexAnimation.md.
 
 <a name="material"></a>
 ## Replace materials with render core variants
@@ -256,7 +257,7 @@ To replace materials:
 1. Expand an entry. Its header reads `<material> -> <variant>`.
 1. In **Render core variant**, select a variant.
 1. Select **Export from material**.
-   The variant fields are filled from the HDRP Lit or Layered Lit material, generated textures are saved as PNG files in a `RenderCore` folder next to the material, and the **Console** shows `'<material>' exported to <variant>.` <!-- src: Assets/Editor/RenderCoreMaterialMarkerSettingsDrawer.cs:523 -->
+   The variant fields are filled from the HDRP Lit or Layered Lit material, generated textures are saved as PNG files in a `RenderCore` folder next to the material, and the **Console** shows `'<material>' exported to <variant>.` <!-- src: Assets/Editor/RenderCoreMaterialMarkerSettingsDrawer.cs:543 -->
 1. Optional: If the **Console** line ends with `Set manually: <fields>`, set those fields by hand.
 1. Repeat the last four steps for each remaining entry.
 
@@ -276,16 +277,43 @@ The following screenshot shows a Material marker on a LODGroup object, with its 
 | 6 | `Channels` | The channel layout of a packed map, for example `R Roughness · G Metalness · B AO · A —`. |
 
 - An entry without a diffuse texture renders white, and validation warns about it. **Export from material** fills the texture.
-- The variant menu offers 20 variants. `MAT_INTERIOR` isn't offered: it needs a second UV set, and mod meshes carry only UV0. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/RenderCore/ModRenderCoreVariantTable.g.cs:207 -->
+- The variant menu offers 21 variants: 20 render core surfaces and `WATER`, the game water; see [Make game water](#water-material). `MAT_INTERIOR` isn't offered: it needs a second UV set, and mod meshes carry only UV0. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/RenderCore/ModRenderCoreVariantTable.g.cs:207 -->
 - A LOD renderer whose own GameObject has a Material marker uses that marker instead of the LODGroup's marker.
 - A marker changes only its own object. The same material on another object, without a marker or with different settings, is exported separately.
 - On an object inside an Animation marker's hierarchy, the Material marker is ignored: animated objects keep their own materials.
-- After an SDK update, an entry can show `Exported from material for revision <n> of <variant>, the current revision is <m>. …`. Until you select **Export from material** again, the game uses the source material. <!-- src: Assets/Editor/RenderCoreMaterialMarkerSettingsDrawer.cs:204 -->
+- After an SDK update, an entry can show `Exported from material for revision <n> of <variant>, the current revision is <m>. …`. Until you select **Export from material** again, the game uses the source material. <!-- src: Assets/Editor/RenderCoreMaterialMarkerSettingsDrawer.cs:212 -->
 - **Unused values** lists stored values that the chosen variant doesn't have. They aren't exported; its **Remove** button deletes them.
 
 `MAT_LAYERS4` blends four layers by the mesh's vertex colors: RGB is the layer mask and A tints the albedo. A mesh without vertex colors is exported white and shows only the fourth layer. The game keeps the vertex colors of a mesh with `MAT_LAYERS4`, so they also multiply the emission of the mesh's other submeshes. Put emissive parts on a separate GameObject: build optimization merges objects with `MAT_LAYERS4` only with each other, so that object stays a separate mesh. Validation warns about a mesh without vertex colors and about a mesh that mixes `MAT_LAYERS4` and emission.
 
-The SDK's RenderCoreMaterial.md describes the alpha-test, `MAT_LAYERS4`, emission and `MAT_INTERIOR` variants in [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/RenderCoreMaterial.md#variant-notes), and when an entry needs **Export from material** again in [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/RenderCoreMaterial.md#revision-policy). For how Layered Lit materials are exported, see [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/LayeredPbr.md).
+The SDK's RenderCoreMaterial.md describes the alpha-test, `MAT_LAYERS4`, emission and `MAT_INTERIOR` variants in [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/365f9c9c803640246b5f2c2072e28a053b66c41d/RenderCoreMaterial.md#variant-notes), and when an entry needs **Export from material** again in [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/365f9c9c803640246b5f2c2072e28a053b66c41d/RenderCoreMaterial.md#revision-policy). For how Layered Lit materials are exported, see [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/365f9c9c803640246b5f2c2072e28a053b66c41d/LayeredPbr.md).
+
+<a name="water-material"></a>
+### Make game water
+
+The `WATER` variant turns a material into the game water. The look of the water, such as its colour, foam, normal maps and caustics, comes from the map lighting, so the entry has only three fields: **Tiling**, **Ripple speed** and **Foam speed**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Water/ModWater.cs:15-25 -->
+
+To make game water:
+
+1. In the **Hierarchy**, select the GameObject with the water mesh.
+1. Add a Material marker, as in [Replace materials with render core variants](#material).
+1. In the entry of the water material, in **Render core variant**, select `WATER`.
+
+Result: the entry shows `Game water: its look comes from the map lighting. Use UVs in meters (1 UV unit = 1 m) or adjust Tiling.` and the three fields with their defaults. <!-- src: Assets/Editor/RenderCoreMaterialMarkerSettingsDrawer.cs:28 -->
+
+The `WATER` entry has these fields: <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Water/ModWater.cs:19-25 -->
+
+| Option | Default | What it does | When to change |
+| --- | --- | --- | --- |
+| **Tiling** | `0.05` | Wave repeats per UV unit. With UVs in metres, `0.05` repeats the waves every 20 m, as on the maps of the game. From 0.001 to 10. | When the mesh UVs aren't in metres |
+| **Ripple speed** | `-0.03` | Speed of the small ripples, in UV units per second; the sign sets the direction. From -1 to 1. | To make the water calmer or rougher |
+| **Foam speed** | `0.01` | Speed of the foam, in UV units per second; the sign sets the direction. From -1 to 1. | To make the foam move faster or slower |
+
+- The water repeats its waves by the mesh UVs times **Tiling**. Unwrap the water mesh with UVs in metres, 1 UV unit = 1 m, and keep **Tiling** at `0.05`. With other UVs, set **Tiling** to `0.05` divided by the UV units per metre: validation warns outside 0.01 to 0.25 repeats per metre and suggests the value. <!-- src: Assets/Editor/Validation/SceneValidator.cs:30-31,602-605 -->
+- For `WATER`, **Export from material** is replaced by **Reset to defaults**: the water takes nothing from the HDRP material and bakes no textures.
+- Don't give the water a collider that isn't a trigger: cars drive on such a water surface. Validation warns about it.
+- Game versions without water show the fallback material, the HDRP material exported as if the entry weren't there. Give the water mesh an HDRP material that looks acceptable on its own. <!-- src: game -->
+- For a sea that reaches the horizon, add a [Water/Sea marker](#water).
 
 <a name="sound"></a>
 ## Add sounds
@@ -325,10 +353,35 @@ These rules apply to Sound markers: <!-- src: Assets/Plugins/CarX.Modding.Creato
 - A map plays one ambience: the first **Sound** > **Ambience** marker in Hierarchy order. Validation warns about the others, and the build skips them.
 - **Min Distance** can't be greater than **Max Distance**; validation reports it as an error.
 
+<a name="water"></a>
+## Add a sea
+
+A **Water** > **Sea** marker adds an endless sea at the height of its GameObject, beyond the map geometry up to the horizon. Its look comes from the map lighting, as for the [game water](#water-material). It works in both formats.
+
+To add a sea:
+
+1. Select **GameObject** > **Create Empty**.
+1. In the **Inspector**, in the Transform, set the Y of **Position** to the sea level.
+1. Add the GameMarkerData component.
+1. In the type menu, select **Water**, then **Sea**.
+1. Optional: To hide the map geometry below the sea level under the water, clear **Background**.
+
+Result: the **Scene** view shows a translucent blue plane at the sea level, a larger one with the object selected. The next build exports the sea.
+
+The Water/Sea marker has one field: <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Water/WaterMarkerSettings.cs:13-14 -->
+
+| Option | Default | What it does | When to change |
+| --- | --- | --- | --- |
+| **Background** | On | On: the sea is drawn behind all map geometry, so it never hides it. Off: map geometry below the sea level is hidden under the water. | Turn it off when parts of the map, such as a shore or a pier, go below the sea level |
+
+- Only the height of the object matters: the sea has no edges.
+- A map has one sea. The build exports the first Water/Sea marker and logs `[Water] '<name>' is a second Water/Sea marker and is not exported: …` for each other one; validation warns too. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:577-588 -->
+- A marker on an inactive GameObject, or a disabled marker, adds no sea.
+
 <a name="unsupported"></a>
 ## Remove unsupported markers
 
-Maps made with older versions of MapUploader can contain marker types that the game no longer supports: `Ambient`, `TimeObjectActivator` and `NetworkObject`. For such a marker, the **Inspector** shows `Unsupported marker: <type>. Select SpawnPoint, Road, Animation, Material, ClipZone, Miniature or Sound, or remove the component.`, validation shows a Markers warning, and export skips the marker. <!-- src: Assets/Editor/MarkerDataDrawer.cs:106 -->
+Maps made with older versions of MapUploader can contain marker types that the game no longer supports: `Ambient`, `TimeObjectActivator` and `NetworkObject`. For such a marker, the **Inspector** shows `Unsupported marker: <type>. Select SpawnPoint, Road, Animation, Material, ClipZone, Miniature, Sound or Water, or remove the component.`, validation shows a Markers warning, and export skips the marker. <!-- src: Assets/Editor/MarkerDataDrawer.cs:114 -->
 
 To remove an unsupported marker:
 

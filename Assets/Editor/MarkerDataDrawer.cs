@@ -16,6 +16,8 @@ namespace Editor
 		private string m_msPropHead;
 
 		private const string NoSoundPreset = "None";
+		private const string SeaHelp = "An endless sea at the height of this marker (its Y). Its look comes from the map lighting. One per map.";
+		private const int SeaHelpLines = 2;
 
 		public override void OnGUI(Rect position,
 			SerializedProperty property,
@@ -87,6 +89,12 @@ namespace Editor
 						SetSoundSettings(property.serializedObject.targetObjects, propValue.propertyPath);
 						propLastHead.stringValue = m_msPropParam;
 					}
+
+					if (m_msPropHead == MarkerData.WaterHead)
+					{
+						SetWaterSettings(property.serializedObject.targetObjects, propValue.propertyPath);
+						propLastHead.stringValue = m_msPropParam;
+					}
 				}
 
 				Space();
@@ -103,7 +111,7 @@ namespace Editor
 				{
 					Space();
 					amountRect.height = propHeight * 3;
-					EditorGUI.HelpBox(amountRect, $"Unsupported marker: {propHead.stringValue}. Select SpawnPoint, Road, Animation, Material, ClipZone, Miniature or Sound, or remove the component.", MessageType.Error);
+					EditorGUI.HelpBox(amountRect, $"Unsupported marker: {propHead.stringValue}. Select SpawnPoint, Road, Animation, Material, ClipZone, Miniature, Sound or Water, or remove the component.", MessageType.Error);
 					m_height += amountRect.height;
 					EditorGUI.indentLevel = indent;
 					EditorGUI.EndProperty();
@@ -250,6 +258,26 @@ namespace Editor
 				return;
 			}
 
+			if (propHead.stringValue == MarkerData.WaterHead)
+			{
+				if (propValue.managedReferenceValue is not WaterMarkerSettings)
+				{
+					propValue.managedReferenceValue = new WaterMarkerSettings();
+				}
+
+				propLastHead.stringValue = propParam.stringValue;
+				Space();
+				amountRect.height = propHeight * SeaHelpLines;
+				EditorGUI.HelpBox(amountRect, SeaHelp, MessageType.None);
+				Space(SeaHelpLines);
+				amountRect.height = propHeight;
+				EditorGUI.PropertyField(amountRect, propValue.FindPropertyRelative(nameof(WaterMarkerSettings.background)));
+				Space();
+				EditorGUI.indentLevel = indent;
+				EditorGUI.EndProperty();
+				return;
+			}
+
 			if (MarkerData.paramObjectsEditor.ContainsKey(paramPath))
 			{
 				Space();
@@ -384,6 +412,24 @@ namespace Editor
 				}
 
 				markerValue.managedReferenceValue = new SoundMarkerSettings();
+				markerObject.ApplyModifiedProperties();
+			}
+		}
+
+		// As one marker does in the Inspector: each selected marker without water settings gets them
+		private static void SetWaterSettings(Object[] targetObjects, string valuePath)
+		{
+			foreach (Object targetObject in targetObjects)
+			{
+				var markerObject = new SerializedObject(targetObject);
+				SerializedProperty markerValue = markerObject.FindProperty(valuePath);
+
+				if (markerValue.managedReferenceValue is WaterMarkerSettings)
+				{
+					continue;
+				}
+
+				markerValue.managedReferenceValue = new WaterMarkerSettings();
 				markerObject.ApplyModifiedProperties();
 			}
 		}

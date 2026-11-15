@@ -125,12 +125,12 @@ Validation checks the map settings first, then the scene. The window sorts the c
 | Budget | How many components of each supported type the scene has | Errors |
 | Components | Components that export skips: unsupported types, missing scripts, animation without a marker | Notes |
 | Format | Components that only light the editor preview, and the build format | Notes, an error |
-| Geometry | Meshes, material slots, mesh colliders, LOD groups, build optimization and the sector budget | Warnings, an error |
+| Geometry | Meshes, material slots, mesh colliders, LOD groups, the UVs of game water, build optimization and the sector budget | Warnings, an error |
 | Lighting | Lights that don't reach the game | Warnings, a note |
-| Markers | GameMarkerData: marker types, spawn points, Road colliders, Animation, Material and Sound markers | Errors, warnings, a note |
+| Markers | GameMarkerData: marker types, spawn points, Road colliders, Animation, Material, Sound and Water markers | Errors, warnings, a note |
 | Meta | The map settings: the scene name, **Name**, the summary, **Description**, the Icon and the Preview | Errors, warnings, a note |
 | Minimap | The Minimap size and textures | Errors |
-| Physics | Mesh colliders on moving Rigidbodies | An error |
+| Physics | Mesh colliders on moving Rigidbodies, colliders of game water | An error, a warning |
 | Scene | Whether **Validate map** could open the selected scene | A note |
 | Summary | Issues beyond the first 25 of one rule | Notes |
 
@@ -151,7 +151,7 @@ The scene must stay within the component counts in [Supported components and bud
 <details>
 <summary><b>Components</b>: components that export skips</summary>
 
-Validation accepts the component types of the [budget table](reference.md#budgets). Animator and SkinnedMeshRenderer are accepted too, but only under the Animator that an Animation marker uses. Validation adds a note for every other component, and export skips it. <!-- src: Assets/Editor/Validation/SceneValidator.cs:139-180 -->
+Validation accepts the component types of the [budget table](reference.md#budgets). Animator and SkinnedMeshRenderer are accepted too, but only under the Animator that an Animation marker uses. Validation adds a note for every other component, and export skips it. <!-- src: Assets/Editor/Validation/SceneValidator.cs:147-188 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -164,7 +164,7 @@ Validation accepts the component types of the [budget table](reference.md#budget
 <details>
 <summary><b>Format</b>: preview-only components and the build format</summary>
 
-These issues come from components that only the editor preview uses, and from the selected format. <!-- src: Assets/Editor/Validation/SceneValidator.cs:156-160 -->
+These issues come from components that only the editor preview uses, and from the selected format. <!-- src: Assets/Editor/Validation/SceneValidator.cs:164-168 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -176,10 +176,12 @@ These issues come from components that only the editor preview uses, and from th
 <details>
 <summary><b>Geometry</b>: meshes, LOD groups and the sector budget</summary>
 
-These checks cover meshes, material slots, mesh colliders, LOD groups and build optimization. See [Optimization](build.md#optimization). <!-- src: Assets/Editor/Validation/SceneValidator.cs:912-978,1003-1033 -->
+These checks cover meshes, material slots, mesh colliders, LOD groups and build optimization. See [Optimization](build.md#optimization). <!-- src: Assets/Editor/Validation/SceneValidator.cs:1126-1192,1217-1247 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
+| Warning | `'<object>': the mesh has no UVs under the water material '<material>', so the waves don't show. Add UVs in meters (1 UV unit = 1 m).` | Unwrap the water mesh in your 3D tool with UVs in metres. Binary only. See [Make game water](markers.md#water-material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:587-589 --> |
+| Warning | `'<object>': the water '<material>' repeats <n> times per meter (<n> UV units per meter x Tiling <n>); it looks right from 0.01 to 0.25. Set Tiling to about <n> or use UVs in meters.` | In the `WATER` entry of the Material marker, set **Tiling** to the suggested value, or unwrap the mesh with UVs in metres and keep **Tiling** at `0.05`. Binary only. <!-- src: Assets/Editor/Validation/SceneValidator.cs:30-31,602-605 --> |
 | Warning | `'<object>' has a MeshRenderer but no MeshFilter, so it has no geometry to export.` | Add a MeshFilter with a mesh, or remove the MeshRenderer. |
 | Warning | `'<object>' has a MeshFilter with no mesh assigned.` | Assign a mesh, or remove the MeshFilter. |
 | Warning | `'<object>' has an empty material slot; it will render as magenta in game.` | Assign a material to every slot of the MeshRenderer. See [Troubleshooting](troubleshooting.md#msg-empty-material-slot). |
@@ -196,7 +198,7 @@ For the meshes that the sector check covers, see [Sector budget](reference.md#se
 <details>
 <summary><b>Lighting</b>: lights that don't reach the game</summary>
 
-Only Point and Spot lights are exported. See [Set up lighting](scene-setup.md#lighting). <!-- src: Assets/Editor/Validation/SceneValidator.cs:863-910 -->
+Only Point and Spot lights are exported. See [Set up lighting](scene-setup.md#lighting). <!-- src: Assets/Editor/Validation/SceneValidator.cs:1077-1124 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -209,7 +211,7 @@ Only Point and Spot lights are exported. See [Set up lighting](scene-setup.md#li
 <details>
 <summary><b>Markers</b>: GameMarkerData</summary>
 
-These checks cover marker types, spawn points, Road markers and Animation markers. See [Add markers](markers.md). <!-- src: Assets/Editor/Validation/SceneValidator.cs:216-436 -->
+These checks cover marker types, spawn points, Road markers and Animation markers. See [Add markers](markers.md). <!-- src: Assets/Editor/Validation/SceneValidator.cs:224-444 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -221,33 +223,34 @@ These checks cover marker types, spawn points, Road markers and Animation marker
 | Error | `The map has no GameMarkerData at all - at minimum it needs a spawn point.` | Add a SpawnPoint marker. A scene with no markers also gets the next error and a Budget error. See [Troubleshooting](troubleshooting.md#msg-no-spawn). |
 | Error | `The map has no SpawnPoint marker, so there is nowhere for a car to appear. Add an empty object with GameMarkerData set to SpawnPoint.` | Create an empty GameObject, add the GameMarkerData component and choose **SpawnPoint**. See [Troubleshooting](troubleshooting.md#msg-no-spawn). |
 | Warning | `<n> spawn points are all named '<name>'. Wavefront/Binary exports the object name as the spawn point's identity, so give each one a distinct, meaningful name.` | Rename the spawn point GameObjects. The world map in the game lists each spawn point under its name. See [Troubleshooting](troubleshooting.md#spawn-names). |
+| Warning | `The map has <n> Water/Sea markers: <objects>. A map has one sea, so only the first one is used. Remove the other sea markers.` | Keep one **Water** > **Sea** marker. The build skips the others. See [Add a sea](markers.md#water). <!-- src: Assets/Editor/Validation/SceneValidator.cs:472-474 --> |
 
 </details>
 
 <details>
 <summary><b>Markers</b>: Sound markers</summary>
 
-These checks cover the active Sound markers, which the build exports. See [Add sounds](markers.md#sound). <!-- src: Assets/Editor/Validation/SceneValidator.cs:311-433 -->
+These checks cover the active Sound markers, which the build exports. See [Add sounds](markers.md#sound). <!-- src: Assets/Editor/Validation/SceneValidator.cs:319-441 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
-| Error | `'<object>' is a Sound marker without settings. Select the object to create them, then set the sound.` | Select the object: the **Inspector** creates the settings. Then set the fields of the marker. <!-- src: Assets/Editor/Validation/SceneValidator.cs:336-337 --> |
-| Error | `'<object>' has no sound selected. Select a sound in its <type> marker.` | In the marker, select a sound in **Sound**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:401-402 --> |
-| Error | `'<object>' uses the sound '<sound>', which <type> doesn't have. Select a sound from the list.` | In **Sound**, select a sound from the list. A **Preset** sound isn't an **Ambience** sound, so this happens after you change the kind. <!-- src: Assets/Editor/Validation/SceneValidator.cs:408-409 --> |
-| Error | `'<object>' is a Sound/Custom marker without an audio clip. Assign an .ogg or .wav clip.` | Assign a clip to **Audio clip**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:420-421 --> |
-| Error | `'<object>' plays '<file>'. Only .ogg and .wav files are exported: convert the clip to one of them.` | Convert the clip to `.ogg` or `.wav`, and assign the new file. <!-- src: Assets/Editor/Validation/SceneValidator.cs:427-428 --> |
-| Warning | `'<object>' is a second Sound/Ambience marker. A map plays one ambience: the first one, '<object>'. Remove the other ambience markers.` | Keep one **Sound** > **Ambience** marker. The build skips the others. <!-- src: Assets/Editor/Validation/SceneValidator.cs:360-362 --> |
-| Error | `'<object>': Min Distance <n> m is greater than Max Distance <n> m. Make Min Distance smaller.` | Lower **Min Distance**, or raise **Max Distance**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:367-369 --> |
-| Error | `The map has <n> Sound markers, at most 128 are exported. Remove the sounds the map doesn't need.` | Remove Sound markers until 128 or fewer are left. <!-- src: Assets/Editor/Validation/SceneValidator.cs:374-377 --> |
-| Error | `Sound/Custom markers use <n> audio files, at most 32 are exported. Use fewer different clips.` | Use the same clip on several markers. <!-- src: Assets/Editor/Validation/SceneValidator.cs:380-383 --> |
-| Error | `The audio files of Sound/Custom markers take <size> MB, at most 20 MB are exported. Shorten the clips or save them as .ogg.` | Shorten the clips, or save them as `.ogg`. <!-- src: Assets/Editor/Validation/SceneValidator.cs:386-390 --> |
+| Error | `'<object>' is a Sound marker without settings. Select the object to create them, then set the sound.` | Select the object: the **Inspector** creates the settings. Then set the fields of the marker. <!-- src: Assets/Editor/Validation/SceneValidator.cs:344-345 --> |
+| Error | `'<object>' has no sound selected. Select a sound in its <type> marker.` | In the marker, select a sound in **Sound**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:409-410 --> |
+| Error | `'<object>' uses the sound '<sound>', which <type> doesn't have. Select a sound from the list.` | In **Sound**, select a sound from the list. A **Preset** sound isn't an **Ambience** sound, so this happens after you change the kind. <!-- src: Assets/Editor/Validation/SceneValidator.cs:416-417 --> |
+| Error | `'<object>' is a Sound/Custom marker without an audio clip. Assign an .ogg or .wav clip.` | Assign a clip to **Audio clip**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:428-429 --> |
+| Error | `'<object>' plays '<file>'. Only .ogg and .wav files are exported: convert the clip to one of them.` | Convert the clip to `.ogg` or `.wav`, and assign the new file. <!-- src: Assets/Editor/Validation/SceneValidator.cs:435-436 --> |
+| Warning | `'<object>' is a second Sound/Ambience marker. A map plays one ambience: the first one, '<object>'. Remove the other ambience markers.` | Keep one **Sound** > **Ambience** marker. The build skips the others. <!-- src: Assets/Editor/Validation/SceneValidator.cs:368-370 --> |
+| Error | `'<object>': Min Distance <n> m is greater than Max Distance <n> m. Make Min Distance smaller.` | Lower **Min Distance**, or raise **Max Distance**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:375-377 --> |
+| Error | `The map has <n> Sound markers, at most 128 are exported. Remove the sounds the map doesn't need.` | Remove Sound markers until 128 or fewer are left. <!-- src: Assets/Editor/Validation/SceneValidator.cs:382-385 --> |
+| Error | `Sound/Custom markers use <n> audio files, at most 32 are exported. Use fewer different clips.` | Use the same clip on several markers. <!-- src: Assets/Editor/Validation/SceneValidator.cs:388-391 --> |
+| Error | `The audio files of Sound/Custom markers take <size> MB, at most 20 MB are exported. Shorten the clips or save them as .ogg.` | Shorten the clips, or save them as `.ogg`. <!-- src: Assets/Editor/Validation/SceneValidator.cs:394-398 --> |
 
 </details>
 
 <details>
 <summary><b>Markers</b>: Material markers</summary>
 
-Material markers replace materials with render core variants, and they apply only to Binary builds. Their issues appear in the Markers category. The last two rows are checked only when **Format** is **Binary**. See [Replace materials with render core variants](markers.md#material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:442-666,734-805 -->
+Material markers replace materials with render core variants, and they apply only to Binary builds. Their issues appear in the Markers category. The last two rows are checked only when **Format** is **Binary**. See [Replace materials with render core variants](markers.md#material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:651-880,948-1019 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -261,6 +264,8 @@ Material markers replace materials with render core variants, and they apply onl
 | Warning | `'<object>': material '<material>' is not used by the renderer, so its render core override is never applied.` | Remove the entry, or assign the material to the renderer. |
 | Warning | `'<object>': render core material '<material>' (<variant>) stores values that the variant does not have: <names>. They are not exported. Press 'Export from material' or 'Remove' next to 'Unused values' in the marker.` | In the entry, select **Export from material**, or select **Remove** next to **Unused values**. |
 | Warning | `'<object>': render core material '<material>' (<variant>) was exported from material for revision <n>, but this SDK has revision <n> of the variant. The game uses the fallback material until you re-run Export from material on this entry.` | In the entry, select **Export from material**. See [Troubleshooting](troubleshooting.md#msg-render-core-revision). |
+| Warning | `'<object>': water '<material>' has Tiling <n>, outside 0.001 to 10. With UVs in meters use 0.05.` | In the `WATER` entry, set **Tiling** from 0.001 to 10. See [Make game water](markers.md#water-material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:617-619 --> |
+| Warning | `'<object>': water '<material>' has <field> <n>, faster than 1 UV units per second. Use a value from -1 to 1.` | `<field>` is **Ripple speed** or **Foam speed**. In the `WATER` entry, set it from -1 to 1. <!-- src: Assets/Editor/Validation/SceneValidator.cs:633-635 --> |
 | Warning | `'<object>': render core material '<material>' (<variant>) has no diffuse texture and will render white. Press 'Export from material' or assign the texture.` | In the entry, select **Export from material**, or assign the diffuse texture. See [Troubleshooting](troubleshooting.md#msg-render-core-no-diffuse). |
 | Warning | `'<renderer>': mesh '<mesh>' has no vertex colors, but <variant> blends its layers by them (RGB - layer mask, A - albedo tint). It is exported white, so only the fourth layer shows. Paint vertex colors in the mesh.` | Paint vertex colors on the mesh in your 3D tool, then import it again. |
 | Warning | `'<renderer>': mesh '<mesh>' mixes <variant> and <source> submeshes. The game keeps the layer blend vertex colors for the whole mesh, so the emission is multiplied by them. Move the emissive part to a separate object without layer blend materials: build optimization merges layer blend objects only with each other.` | Move the emissive part to a separate object. `<source>` is an emissive variant or `emissive material '<material>'`. |
@@ -303,7 +308,7 @@ In the image messages, `<image>` is `icon` or `preview`. In the rows about an as
 <details>
 <summary><b>Minimap</b>: size and textures</summary>
 
-The scene needs exactly one Minimap; the Budget category checks the count. Keep the Minimap object active: validation also counts an inactive Minimap, but the build exports only an active one. See [Add the minimap](minimap-and-images.md#minimap). <!-- src: Assets/Editor/Validation/SceneValidator.cs:1035-1084 -->
+The scene needs exactly one Minimap; the Budget category checks the count. Keep the Minimap object active: validation also counts an inactive Minimap, but the build exports only an active one. See [Add the minimap](minimap-and-images.md#minimap). <!-- src: Assets/Editor/Validation/SceneValidator.cs:1249-1298 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -317,10 +322,11 @@ The scene needs exactly one Minimap; the Budget category checks the count. Keep 
 <details>
 <summary><b>Physics</b>: mesh colliders on moving Rigidbodies</summary>
 
-A Rigidbody that isn't kinematic needs convex mesh colliders. The Rigidbody can be on the collider's object or on a parent. <!-- src: Assets/Editor/Validation/SceneValidator.cs:980-1001 -->
+A Rigidbody that isn't kinematic needs convex mesh colliders. The Rigidbody can be on the collider's object or on a parent. Game water needs no collider that cars drive on. <!-- src: Assets/Editor/Validation/SceneValidator.cs:1194-1215 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
+| Warning | `'<object>' has the water material '<material>' and a <type>: cars will drive on the water surface. Remove the collider or tick Is Trigger.` | Remove the collider from the water object, or select **Is Trigger** on it. Binary only. See [Make game water](markers.md#water-material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:543-545 --> |
 | Error | `'<object>' has a non-convex MeshCollider driven by a non-kinematic Rigidbody, which the physics engine no longer supports. Tick Convex, or make the Rigidbody kinematic.` | On the MeshCollider, select **Convex**, or on the Rigidbody, select **Is Kinematic**. See [Troubleshooting](troubleshooting.md#msg-non-convex-dynamic). |
 
 </details>

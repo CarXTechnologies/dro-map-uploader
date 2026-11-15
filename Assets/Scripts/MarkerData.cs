@@ -46,11 +46,12 @@ public class MarkerData
 		CarX.Modding.Creator.Runtime.MiniatureMarker.Hidden,
 		CarX.Modding.Creator.Runtime.SoundMarkerSettings.PresetParam,
 		CarX.Modding.Creator.Runtime.SoundMarkerSettings.CustomParam,
-		CarX.Modding.Creator.Runtime.SoundMarkerSettings.AmbienceParam
+		CarX.Modding.Creator.Runtime.SoundMarkerSettings.AmbienceParam,
+		CarX.Modding.Creator.Runtime.WaterMarkerSettings.SeaParam
 	};
 
 	public static bool IsSupportedHead(string head) => head == "SpawnPoint" || head == "Road" || head == "Animation" || head == MaterialHead || head == ClipZoneHead ||
-		head == CarX.Modding.Creator.Runtime.MiniatureMarker.Head || head == SoundHead;
+		head == CarX.Modding.Creator.Runtime.MiniatureMarker.Head || head == SoundHead || head == WaterHead;
 
 	/// <summary>Маркер Material: переопределение материалов рендерера вариантами rendercore (только Binary).</summary>
 	public const string MaterialHead = CarX.Modding.Creator.Runtime.RenderCoreMaterialMarkerSettings.MarkerHead;
@@ -60,6 +61,9 @@ public class MarkerData
 
 	/// <summary>Sound marker: a game or own sound at the marker position, or the ambience of the whole map.</summary>
 	public const string SoundHead = CarX.Modding.Creator.Runtime.SoundMarkerSettings.MarkerHead;
+
+	/// <summary>Water marker: Water/Sea is an endless sea at the marker height.</summary>
+	public const string WaterHead = CarX.Modding.Creator.Runtime.WaterMarkerSettings.MarkerHead;
 
 	public static int FindEditorIndex(string head, string param)
 	{
@@ -104,7 +108,7 @@ public class MarkerData
 
 	public void Update()
 	{
-		if (templateConfig == null && head != "Animation" && head != MaterialHead && head != ClipZoneHead && head != SoundHead)
+		if (templateConfig == null && head != "Animation" && head != MaterialHead && head != ClipZoneHead && head != SoundHead && head != WaterHead)
 		{
 			value = null;
 		}

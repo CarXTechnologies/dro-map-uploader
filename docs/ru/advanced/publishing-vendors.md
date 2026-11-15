@@ -18,7 +18,7 @@
 
 ## Как устроен слой публикации
 
-MapUploader никогда не вызывает SDK площадки напрямую. Он работает с одним контрактом, не зависящим от площадки, — он находится в сабмодуле [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892). Реализация каждой площадки лежит в отдельной сборке с define-ограничением (define constraint), поэтому проект компилирует только те площадки, SDK которых в нём есть, а другой проект может добавить площадку, не меняя контракт.
+MapUploader никогда не вызывает SDK площадки напрямую. Он работает с одним контрактом, не зависящим от площадки, — он находится в сабмодуле [CarX.Modding.Creator](https://github.com/CarXTechnologies/CarX.Modding.Creator/tree/365f9c9c803640246b5f2c2072e28a053b66c41d). Реализация каждой площадки лежит в отдельной сборке с define-ограничением (define constraint), поэтому проект компилирует только те площадки, SDK которых в нём есть, а другой проект может добавить площадку, не меняя контракт.
 
 ```
 Assets/Plugins/CarX.Modding.Creator/          сабмодуль
@@ -276,7 +276,7 @@ Assets/Resources/CarX.Modding/                ModIoConfig.asset, SteamWorkshopCo
 
 Результат: после перекомпиляции `ModPublisherSession.AvailableVendors` содержит новую площадку, а окно **MapBuilder** предлагает её в той мере, в какой это позволяют ваши изменения этих членов классов.
 
-Интерфейсы находятся в сабмодуле: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/Publishing/Core/IModPublisher.cs) и [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/Publishing/Core/IModAuthProvider.cs).
+Интерфейсы находятся в сабмодуле: [`IModPublisher.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/365f9c9c803640246b5f2c2072e28a053b66c41d/Publishing/Core/IModPublisher.cs) и [`IModAuthProvider.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/365f9c9c803640246b5f2c2072e28a053b66c41d/Publishing/Core/IModAuthProvider.cs).
 
 <a name="differences"></a>
 ## Известные различия площадок

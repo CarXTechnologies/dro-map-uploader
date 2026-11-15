@@ -7,7 +7,7 @@ Look up the budgets, limits, road surfaces, export rules, menus and saved state 
 <a name="budgets"></a>
 ## Supported components and budgets
 
-Validation counts the components of every object in the scene selected in **Scene** on the **Build** tab, including inactive objects and disabled components. It skips objects tagged `Garbage` with their children, and hidden helper objects that aren't saved with the scene. A count outside its range is a Budget error, and errors stop the build. <!-- src: Assets/Editor/Validation/SceneValidator.cs:80-124,188-214 -->
+Validation counts the components of every object in the scene selected in **Scene** on the **Build** tab, including inactive objects and disabled components. It skips objects tagged `Garbage` with their children, and hidden helper objects that aren't saved with the scene. A count outside its range is a Budget error, and errors stop the build. <!-- src: Assets/Editor/Validation/SceneValidator.cs:88-132,196-222 -->
 
 | Component | Min | Max | Notes |
 | --- | --- | --- | --- |
@@ -25,7 +25,7 @@ Validation counts the components of every object in the scene selected in **Scen
 | GameMarkerData | 1 | 10 000 | A [marker](markers.md#types). The map needs at least one, because it needs a spawn point. |
 | Minimap | 1 | 1 | The [minimap](minimap-and-images.md#minimap): exactly one. <!-- src: Assets/Editor/MapSceneRules.cs:24 --> |
 
-Components that aren't in the table are reported as notes, which never stop the build: <!-- src: Assets/Editor/Validation/SceneValidator.cs:126-186 -->
+Components that aren't in the table are reported as notes, which never stop the build: <!-- src: Assets/Editor/Validation/SceneValidator.cs:134-194 -->
 
 - Volume, Reflection Probe and HDAdditionalReflectionData give a Format note. They light only the preview in the editor.
 - Animator and SkinnedMeshRenderer are accepted inside the hierarchy of an Animator that has an [Animation marker](markers.md#animation). Anywhere else they give a Components note and aren't exported.
@@ -36,7 +36,7 @@ Other limits on scene content:
 
 | Rule | Limit | What happens otherwise |
 | --- | --- | --- |
-| Levels in one LOD group | 8 | A Geometry error in validation, which stops the build. <!-- src: Assets/Editor/Validation/SceneValidator.cs:961-969 --> |
+| Levels in one LOD group | 8 | A Geometry error in validation, which stops the build. <!-- src: Assets/Editor/Validation/SceneValidator.cs:1175-1183 --> |
 | **Bake frames per second** of an Animation marker | 1–60, default 30 | The **Inspector** slider doesn't go outside the range. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Meta/AnimationMeta.cs:12 --> |
 | Animation markers per Animator | 1 | The build stops with `Animator '<name>' has multiple Animation markers.` in the Console. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:34-35 --> |
 | Marked Animators inside each other | Not allowed | The build stops with `Animation marker hierarchies must not overlap.` in the Console. |
@@ -51,9 +51,9 @@ After a build that includes **Map**, the **Scene contents** panel on the **Build
 <a name="sector-budget"></a>
 ### Sector budget
 
-Validation also gives a Geometry warning for each large static mesh that build optimization won't cut into sectors. These warnings never stop the build. <!-- src: Assets/Editor/Validation/SceneValidator.cs:1003-1033 -->
+Validation also gives a Geometry warning for each large static mesh that build optimization won't cut into sectors. These warnings never stop the build. <!-- src: Assets/Editor/Validation/SceneValidator.cs:1217-1247 -->
 
-- **What is checked.** Each enabled MeshRenderer that has a MeshFilter, and each enabled MeshCollider that isn't a trigger and isn't convex, on an object that optimization processes: an active object that isn't tagged `Garbage` and has no Rigidbody, Animator, Animation, LODGroup or marker other than Road and Material on itself or on a parent. <!-- src: Assets/Editor/Validation/SceneValidator.cs:1029-1031 -->
+- **What is checked.** Each enabled MeshRenderer that has a MeshFilter, and each enabled MeshCollider that isn't a trigger and isn't convex, on an object that optimization processes: an active object that isn't tagged `Garbage` and has no Rigidbody, Animator, Animation, LODGroup or marker other than Road and Material on itself or on a parent. <!-- src: Assets/Editor/Validation/SceneValidator.cs:1243-1245 -->
 - **The budget.** A mesh exceeds it when it is larger than **Sector size (m)** in any world dimension, `64` m by default, or has more triangles than **Max triangles per mesh**, `8192` by default. Colliders are measured against the same two values, not against the collider grid.
 - **When the warning appears.** Only for meshes that optimization won't cut into sectors: every such mesh while **Optimize build** is off, MeshColliders while **Partition static colliders** is off, and render meshes while **Partition static render meshes** is off. With the default settings, there are no sector-budget warnings, and the TestMap sample gets none.
 - **What isn't listed.** A renderer or MeshCollider that optimization leaves whole for another reason, for example a transparent renderer or an object with more than one MeshCollider, keeps its size and gets no warning. See [Optimization](build.md#optimization).
@@ -157,7 +157,7 @@ The **Road** submenu of the GameMarkerData type menu offers 27 surfaces, in this
 | 26 | **Road** > **wood** | `Road/wood` | `Earth` |
 | 27 | **Road** > **wood_plank** | `Road/wood_plank` | `Earth` |
 
-The game has no surface named `default`, `ice_snowy` or `pavement`, so a collider with one of them gets no road surface, with values or without. Use `asphalt` instead of `default`, `road_icy` instead of `ice_snowy` and `paving_slab` instead of `pavement`. Validation warns about a marker with one of them; see [Troubleshooting](troubleshooting.md#msg-road-unavailable-surface). <!-- src: Assets/Editor/Validation/SceneValidator.cs:267-273,856-861 -->
+The game has no surface named `default`, `ice_snowy` or `pavement`, so a collider with one of them gets no road surface, with values or without. Use `asphalt` instead of `default`, `road_icy` instead of `ice_snowy` and `paving_slab` instead of `pavement`. Validation warns about a marker with one of them; see [Troubleshooting](troubleshooting.md#msg-road-unavailable-surface). <!-- src: Assets/Editor/Validation/SceneValidator.cs:275-281,1070-1075 -->
 
 Such a collider behaves like a collider without a Road marker, and the game log, `Player.log`, shows a warning that starts with `Road marker references surface template '<name>'`. In the TestMap sample, `Content/workshop_map_main/wall_coll` has a `Road/default` marker, so it gets no road surface.
 
@@ -174,13 +174,13 @@ The build resolves the values of each marker from its **Template Config** and it
 | --- | --- |
 | No **Template Config** | None: the game uses its own surface. This also applies to a marker whose type you changed with **Select : &lt;type&gt;**, and to values that the **Inspector** or an earlier version saved on the marker. |
 | **Template Config** with a named template | The template's values at the time of the build. After you edit a template, build the map again; its markers don't need to be selected. |
-| **Template Config** with **Custom** | The marker's own values. They start from the surface defaults. When the surface changes, in the type menu of one marker or with **Select : &lt;type&gt;** for several, they reset to the defaults of the new surface. **Select : &lt;type&gt;** keeps them when every selected marker already has that surface. <!-- src: Assets/Editor/MarkerDataDrawer.cs:62-78,303-316 --> |
+| **Template Config** with **Custom** | The marker's own values. They start from the surface defaults. When the surface changes, in the type menu of one marker or with **Select : &lt;type&gt;** for several, they reset to the defaults of the new surface. **Select : &lt;type&gt;** keeps them when every selected marker already has that surface. <!-- src: Assets/Editor/MarkerDataDrawer.cs:64-80,331-344 --> |
 | **Template Config** whose template was removed | The marker's own **Custom** values. The **Inspector** shows **Custom** in its template menu. |
-| Values that are `0` in every field | None: the game uses its own surface. **Friction** `0` would make the surface as slippery as ice. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:591-596 --> |
+| Values that are `0` in every field | None: the game uses its own surface. **Friction** `0` would make the surface as slippery as ice. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:605-610 --> |
 
 The surface defaults are the MapUploader values in `Assets/Resources/DefaultRoadValues/<surface>.asset`, and a new template and a **Custom** marker start from them. Their **Surface Type** matches the game's type for that surface (`Asphalt` for `default` and `pavement`, `Ice` for `ice_snowy`), and their **Water Rate** is `0`, as on every game surface. Their other fields can differ from the game's surface: for example, `grass` has **Bump Min** `0.05`, against `-0.03` in the game, and `wood` has **Friction** `0.85`, against `1`. To keep the game's surface, don't assign a **Template Config**. <!-- src: Assets/Resources/DefaultRoadValues/grass.asset:15-25 -->
 
-The fields appear only after you assign a **Template Config** to the marker. A named template shows its values read-only, and **Custom** gives the marker its own editable values. See [Reuse road values with templates](markers.md#templates). <!-- src: Assets/Editor/MarkerDataDrawer.cs:206-296,318-331 -->
+The fields appear only after you assign a **Template Config** to the marker. A named template shows its values read-only, and **Custom** gives the marker its own editable values. See [Reuse road values with templates](markers.md#templates). <!-- src: Assets/Editor/MarkerDataDrawer.cs:214-324,346-359 -->
 
 <a name="older-values"></a>
 ### Values saved by an earlier version
@@ -231,7 +231,7 @@ Both formats export lights the same way. <!-- src: Assets/Plugins/CarX.Modding.C
 | Budget | At most 500 Light and 500 HDAdditionalLightData components. Disabled lights and lights on inactive objects count too. |
 | In the game | Exported lights turn on only at night. <!-- src: game --> |
 | Preview only | Directional and Area lights, Volume (sky, fog, exposure) and Reflection Probes light only the preview in the editor. The game supplies its own environment lighting. |
-| Validation | One Lighting note for each enabled Directional light, such as a preview sun. One Lighting warning for each enabled light of another type that isn't a Point or Spot light, such as an Area light. One more warning when the scene has two or more Directional lights, disabled ones included. <!-- src: Assets/Editor/Validation/SceneValidator.cs:863-910 --> |
+| Validation | One Lighting note for each enabled Directional light, such as a preview sun. One Lighting warning for each enabled light of another type that isn't a Point or Spot light, such as an Area light. One more warning when the scene has two or more Directional lights, disabled ones included. <!-- src: Assets/Editor/Validation/SceneValidator.cs:1077-1124 --> |
 
 For how to set up lights, see [Set up lighting](scene-setup.md#lighting).
 
@@ -290,7 +290,7 @@ The project also adds these entries to **Assets** > **Create**:
 
 `Assets/Resources/MapSkipComponentConfig.asset` lists component type names that validation doesn't report as unsupported. It ships with one entry, `DrawZoneBehaviour`: the gizmo helper on the `SpawnPoint` and `Ambient` example prefabs and on the spawn point and minimap of `TestMap`. <!-- src: Assets/Resources/MapSkipComponentConfig.asset:15-16 -->
 
-- An entry only silences the Components note `'<Type>' on '<object>' is not a supported component and will not be exported. …` The component is still not exported. <!-- src: Assets/Editor/Validation/SceneValidator.cs:172-180 -->
+- An entry only silences the Components note `'<Type>' on '<object>' is not a supported component and will not be exported. …` The component is still not exported. <!-- src: Assets/Editor/Validation/SceneValidator.cs:180-188 -->
 - An entry doesn't silence the Format note of preview components, the note about an Animator or SkinnedMeshRenderer without an Animation marker, or the note about a missing script.
 - An entry is a class name without its namespace, for example `AudioSource`. It must match exactly, including case.
 - The list applies to every map in the project.
@@ -424,7 +424,7 @@ Use these terms in both languages. The **Meaning** column says where each term i
 | Map and Meta targets | цели Map и Meta | The two parts of a build. Map holds geometry, collision, markers, lights, dynamic objects and animation; Meta holds the map settings, the icon, the preview and the minimap. |
 | map config | настройки карты | The MapMetaConfig asset with the **Map** tab fields, the optimization settings and the map id. **+ New map** creates it. See [Create or select a map](map-settings.md#new-map). |
 | map id | ID карты | The GUID of the map config asset. It names the build cache, and a build carries it in its metadata until you link a publication and build again. |
-| marker | маркер | A GameMarkerData component with a type: SpawnPoint, Road, Animation or Material. See [Add markers](markers.md). |
+| marker | маркер | A GameMarkerData component with a type: SpawnPoint, Road, Animation, Material, ClipZone, Miniature, Sound or Water. See [Add markers](markers.md). |
 | Material marker | маркер Material | A marker that replaces an object's materials with render core variants in Binary builds. See [Replace materials with render core variants](markers.md#material). |
 | metadata | метаданные | The Meta part of a build. See *Map and Meta targets*. |
 | minimap | мини-карта | The top-down image of the map from the Minimap component. See [Add the minimap](minimap-and-images.md#minimap). |

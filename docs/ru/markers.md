@@ -51,7 +51,7 @@
 <a name="types"></a>
 ## Выбор типа маркера
 
-В меню типа 39 пунктов: **SpawnPoint**, подменю **Road** с 27 поверхностями, **Animation**, **Material**, подменю **ClipZone** с 2 видами зон, подменю **Miniature** с 4 видами и подменю **Sound** с 3 видами. <!-- src: Assets/Scripts/MarkerData.cs:9-50 -->
+В меню типа 40 пунктов: **SpawnPoint**, подменю **Road** с 27 поверхностями, **Animation**, **Material**, подменю **ClipZone** с 2 видами зон, подменю **Miniature** с 4 видами, подменю **Sound** с 3 видами и подменю **Water** с пунктом **Sea**. <!-- src: Assets/Scripts/MarkerData.cs:9-51 -->
 
 | Тип | На какой объект | Что делает | Форматы |
 | --- | --- | --- | --- |
@@ -62,6 +62,7 @@
 | **ClipZone** > *вид* | Пустой GameObject, дети которого — точки центральной линии зоны | Создаёт клиппинг-зону фрирайда: touch and go или тройную | Binary и Wavefront |
 | **Miniature** > *вид* | Любой GameObject, обычно корень группы | Задаёт, чем объект и его дети будут в 3D-превью на глобальной карте; см. [3D-превью на глобальной карте](minimap-and-images.md#world-map-3d) | Binary и Wavefront |
 | **Sound** > *вид* | Пустой GameObject в месте звука | Проигрывает звук игры или ваш аудиофайл в месте объекта либо фоновый звук всей карты; см. [Добавление звуков](#sound) | Binary и Wavefront |
+| **Water** > **Sea** | Пустой GameObject на уровне моря | Добавляет бесконечное море на высоте объекта; см. [Добавление моря](#water) | Binary и Wavefront |
 
 Чтобы задать один тип нескольким объектам GameObject:
 
@@ -72,7 +73,7 @@
 
 Результат: у всех выбранных маркеров новый тип.
 
-Кнопка сохраняет **Template Config** и шаблон каждого маркера. Для типа **Road** она также сбрасывает собственные значения маркера, которые использует **Custom**, к значениям по умолчанию новой поверхности — так же, как смена поверхности у одного маркера. Если у выделенных маркеров разные поверхности, сбрасываются и те, у которых новая поверхность уже была; если она уже есть у всех выделенных маркеров, их значения **Custom** остаются. После нажатия кнопки маркер без **Template Config** получает поверхность игры, соответствующую новому типу, маркер с именованным шаблоном экспортирует значения шаблона, а маркер с **Custom** — значения по умолчанию новой поверхности; см. раздел [Физические значения](#values). <!-- src: Assets/Editor/MarkerDataDrawer.cs:62-78 -->
+Кнопка сохраняет **Template Config** и шаблон каждого маркера. Для типа **Road** она также сбрасывает собственные значения маркера, которые использует **Custom**, к значениям по умолчанию новой поверхности — так же, как смена поверхности у одного маркера. Если у выделенных маркеров разные поверхности, сбрасываются и те, у которых новая поверхность уже была; если она уже есть у всех выделенных маркеров, их значения **Custom** остаются. После нажатия кнопки маркер без **Template Config** получает поверхность игры, соответствующую новому типу, маркер с именованным шаблоном экспортирует значения шаблона, а маркер с **Custom** — значения по умолчанию новой поверхности; см. раздел [Физические значения](#values). <!-- src: Assets/Editor/MarkerDataDrawer.cs:64-80 -->
 
 <a name="spawn"></a>
 ## Добавление точек появления
@@ -92,8 +93,8 @@
 
 - По умолчанию машина стартует в первой точке появления по порядку в иерархии. Сделайте стартовую позицию первой точкой появления в окне **Hierarchy** и не вкладывайте одну точку появления в другую: дочерняя точка идёт раньше родительской.
 - Каждая точка появления — это точка быстрого перемещения на карте мира в игре, которая показывает вашу [мини-карту](minimap-and-images.md#minimap). Карта мира перечисляет точки по именам их GameObject, и игроки подтверждают телепортацию.
-- Если точек появления нет, проверка сообщает об ошибке: `The map has no SpawnPoint marker, so there is nowhere for a car to appear. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:293 -->
-- Если у нескольких точек появления одинаковое имя, проверка выдаёт предупреждение: `<n> spawn points are all named '<name>'. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:848 -->
+- Если точек появления нет, проверка сообщает об ошибке: `The map has no SpawnPoint marker, so there is nowhere for a car to appear. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:301 -->
+- Если у нескольких точек появления одинаковое имя, проверка выдаёт предупреждение: `<n> spawn points are all named '<name>'. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:1062 -->
 
 У примера префаба `SpawnPoint` есть также вспомогательный компонент Draw Zone Behaviour. Пока окно **Scene** рисует гизмо, компонент рисует в точке зелёный параллелепипед, а при установленном флажке **Cast To Floor** опускает GameObject, пока тот не встанет на первый коллайдер под ним. Чтобы поставить точку на точно заданной высоте, снимите флажок **Cast To Floor**. Этот компонент не экспортируется, и проверка его игнорирует. <!-- src: Assets/Resources/MapSkipComponentConfig.asset:16 -->
 
@@ -115,7 +116,7 @@
 
 В примере TestMap так устроен `Content/workshop_map_main/road`: у этого GameObject есть только Mesh Collider и маркер `Road/asphalt`. Кроме того, его маркер использует шаблон `AsphaultDef`, поэтому игра получает значения шаблона вместо собственной поверхности `asphalt`; см. [Значения, сохранённые прежней версией](reference.md#older-values).
 
-- Маркер Road без коллайдера на его GameObject или на дочерних объектах — ошибка проверки: `'<name>' is marked as Road but has no Collider on it or its children, …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:278 -->
+- Маркер Road без коллайдера на его GameObject или на дочерних объектах — ошибка проверки: `'<name>' is marked as Road but has no Collider on it or its children, …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:286 -->
 - Коллайдер без маркера Road всё равно участвует в столкновениях, но игра даёт ему физический материал по умолчанию вместо дорожной поверхности.
 - Маркер Road на объекте с LODGroup или на рендерере, который входит в один из её уровней LOD, не даёт поверхности. Поместите коллайдер и маркер на отдельный GameObject, который не входит ни в один уровень LOD.
 - Маркер Road на GameObject с Rigidbody или на одном из его дочерних объектов не даёт поверхности. Коллайдеры динамического объекта вместо этого используют трение и упругость своего физического материала. Это относится и к дочернему объекту примера префаба `Box`.
@@ -136,7 +137,7 @@
 | Вода | `liquid_water` |
 | Металл, пластик и дерево | `metal`, `metal_grille`, `plastic`, `wood`, `wood_plank` |
 
-В игре нет поверхностей с именами `default`, `ice_snowy` и `pavement`. Коллайдер с одной из них не получает в игре дорожной поверхности — со значениями или без — и ведёт себя как коллайдер без маркера Road. Проверка предупреждает о таком маркере сообщением `'<object>' uses the surface '<surface>', which the game doesn't have, …` и называет поверхность на замену: `asphalt` вместо `default`, `road_icy` вместо `ice_snowy` и `paving_slab` вместо `pavement`. В примере TestMap маркер `Content/workshop_map_main/wall_coll` использует `Road/default` и получает это предупреждение. <!-- src: Assets/Editor/Validation/SceneValidator.cs:267-273,856-861 -->
+В игре нет поверхностей с именами `default`, `ice_snowy` и `pavement`. Коллайдер с одной из них не получает в игре дорожной поверхности — со значениями или без — и ведёт себя как коллайдер без маркера Road. Проверка предупреждает о таком маркере сообщением `'<object>' uses the surface '<surface>', which the game doesn't have, …` и называет поверхность на замену: `asphalt` вместо `default`, `road_icy` вместо `ice_snowy` и `paving_slab` вместо `pavement`. В примере TestMap маркер `Content/workshop_map_main/wall_coll` использует `Road/default` и получает это предупреждение. <!-- src: Assets/Editor/Validation/SceneValidator.cs:275-281,1070-1075 -->
 
 <a name="values"></a>
 ### Физические значения
@@ -231,7 +232,7 @@
 | **Initial phase (0..1)** | `0` | С какого места клипа начинается воспроизведение, в долях его длины | Чтобы копии одного объекта двигались несинхронно |
 | **Loop** | Установлен | Повторяет клип | Снимите флажок для клипа, который проигрывается один раз |
 
-Проверка контролирует только то, что у маркера есть Animator с клипами: `Animation marker requires an Animator with animation clips.` Сборка проверяет следующие правила и останавливается с ошибкой в окне **Console**, если одно из них нарушено: <!-- src: Assets/Editor/Validation/SceneValidator.cs:259 -->
+Проверка контролирует только то, что у маркера есть Animator с клипами: `Animation marker requires an Animator with animation clips.` Сборка проверяет следующие правила и останавливается с ошибкой в окне **Console**, если одно из них нарушено: <!-- src: Assets/Editor/Validation/SceneValidator.cs:267 -->
 
 - У каждого Animator один маркер Animation.
 - Анимированные иерархии не пересекаются: отмеченный Animator не может находиться внутри иерархии другого отмеченного Animator.
@@ -239,7 +240,7 @@
 - В иерархии есть хотя бы один включённый MeshRenderer или SkinnedMeshRenderer, у каждого такого рендерера есть меш, и у каждого меша столько материалов, сколько в нём подмешей.
 - Запечённые данные не превышают лимит размера. Иначе сборка сообщает `VAT for '<name>' is too large …`; уменьшите число вершин, клипов или значение **Bake frames per second**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:128 -->
 
-Animator или SkinnedMeshRenderer без маркера Animation не экспортируется, и проверка показывает для него заметку категории Components. Игра проигрывает только запечённые клипы: переходы, параметры, события, скрипты и IK из Animator не воспроизводятся, а формы коллайдеров не деформируются вместе с анимацией. Полное описание возможностей — в разделе [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/VertexAnimation.md#supported-scope) файла VertexAnimation.md в SDK.
+Animator или SkinnedMeshRenderer без маркера Animation не экспортируется, и проверка показывает для него заметку категории Components. Игра проигрывает только запечённые клипы: переходы, параметры, события, скрипты и IK из Animator не воспроизводятся, а формы коллайдеров не деформируются вместе с анимацией. Полное описание возможностей — в разделе [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/365f9c9c803640246b5f2c2072e28a053b66c41d/VertexAnimation.md#supported-scope) файла VertexAnimation.md в SDK.
 
 <a name="material"></a>
 ## Замена материалов вариантами render core
@@ -256,7 +257,7 @@ Animator или SkinnedMeshRenderer без маркера Animation не экс�
 1. Разверните запись. Её заголовок имеет вид `<material> -> <variant>`.
 1. В поле **Render core variant** выберите вариант.
 1. Нажмите **Export from material**.
-   Поля варианта заполнятся из материала HDRP Lit или Layered Lit, сгенерированные текстуры сохранятся как файлы PNG в папке `RenderCore` рядом с материалом, а окно **Console** покажет `'<material>' exported to <variant>.` <!-- src: Assets/Editor/RenderCoreMaterialMarkerSettingsDrawer.cs:523 -->
+   Поля варианта заполнятся из материала HDRP Lit или Layered Lit, сгенерированные текстуры сохранятся как файлы PNG в папке `RenderCore` рядом с материалом, а окно **Console** покажет `'<material>' exported to <variant>.` <!-- src: Assets/Editor/RenderCoreMaterialMarkerSettingsDrawer.cs:543 -->
 1. Необязательно: если строка в окне **Console** заканчивается на `Set manually: <fields>`, задайте эти поля вручную.
 1. Повторите последние четыре шага для каждой оставшейся записи.
 
@@ -276,16 +277,43 @@ Animator или SkinnedMeshRenderer без маркера Animation не экс�
 | 6 | `Channels` | Раскладка каналов упакованной карты, например `R Roughness · G Metalness · B AO · A —`. |
 
 - Запись без диффузной текстуры отображается белой, и проверка предупреждает об этом. **Export from material** заполняет текстуру.
-- Меню вариантов предлагает 20 вариантов. `MAT_INTERIOR` в нём нет: этому варианту нужен второй набор UV, а меши модов содержат только UV0. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/RenderCore/ModRenderCoreVariantTable.g.cs:207 -->
+- Меню вариантов предлагает 21 вариант: 20 поверхностей render core и `WATER`, игровую воду; см. [Создание игровой воды](#water-material). `MAT_INTERIOR` в нём нет: этому варианту нужен второй набор UV, а меши модов содержат только UV0. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/RenderCore/ModRenderCoreVariantTable.g.cs:207 -->
 - Рендерер LOD, на собственном GameObject которого есть маркер Material, использует этот маркер вместо маркера LODGroup.
 - Маркер меняет только свой объект. Тот же материал на другом объекте, без маркера или с другими настройками, экспортируется отдельно.
 - На объекте внутри иерархии маркера Animation маркер Material игнорируется: анимированные объекты сохраняют свои материалы.
-- После обновления SDK запись может показать `Exported from material for revision <n> of <variant>, the current revision is <m>. …`. Пока вы снова не нажмёте **Export from material**, игра использует исходный материал. <!-- src: Assets/Editor/RenderCoreMaterialMarkerSettingsDrawer.cs:204 -->
+- После обновления SDK запись может показать `Exported from material for revision <n> of <variant>, the current revision is <m>. …`. Пока вы снова не нажмёте **Export from material**, игра использует исходный материал. <!-- src: Assets/Editor/RenderCoreMaterialMarkerSettingsDrawer.cs:212 -->
 - **Unused values** перечисляет сохранённые значения, которых нет у выбранного варианта. Они не экспортируются; кнопка **Remove** этого блока удаляет их.
 
 `MAT_LAYERS4` смешивает четыре слоя по цветам вершин меша: RGB — маска слоёв, а A тонирует альбедо. Меш без цветов вершин экспортируется белым и показывает только четвёртый слой. Игра сохраняет цвета вершин меша с `MAT_LAYERS4`, поэтому они умножают и свечение других подмешей этого меша. Вынесите светящиеся части на отдельный GameObject: оптимизация сборки объединяет объекты с `MAT_LAYERS4` только друг с другом, поэтому такой объект остаётся отдельным мешем. Проверка предупреждает о меше без цветов вершин и о меше, в котором сочетаются `MAT_LAYERS4` и свечение.
 
-В файле RenderCoreMaterial.md в SDK варианты alpha test, `MAT_LAYERS4`, свечения и `MAT_INTERIOR` описаны в разделе [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/RenderCoreMaterial.md#variant-notes), а когда запись нужно снова экспортировать кнопкой **Export from material** — в разделе [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/RenderCoreMaterial.md#revision-policy). Как экспортируются материалы Layered Lit, см. в [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/LayeredPbr.md).
+В файле RenderCoreMaterial.md в SDK варианты alpha test, `MAT_LAYERS4`, свечения и `MAT_INTERIOR` описаны в разделе [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/365f9c9c803640246b5f2c2072e28a053b66c41d/RenderCoreMaterial.md#variant-notes), а когда запись нужно снова экспортировать кнопкой **Export from material** — в разделе [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/365f9c9c803640246b5f2c2072e28a053b66c41d/RenderCoreMaterial.md#revision-policy). Как экспортируются материалы Layered Lit, см. в [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/365f9c9c803640246b5f2c2072e28a053b66c41d/LayeredPbr.md).
+
+<a name="water-material"></a>
+### Создание игровой воды
+
+Вариант `WATER` превращает материал в игровую воду. Вид воды — цвет, пена, карты нормалей и каустика — берётся из освещения карты, поэтому у записи всего три поля: **Tiling**, **Ripple speed** и **Foam speed**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Water/ModWater.cs:15-25 -->
+
+Чтобы создать игровую воду:
+
+1. В окне **Hierarchy** выберите GameObject с мешем воды.
+1. Добавьте маркер Material, как описано в разделе [Замена материалов вариантами render core](#material).
+1. В записи материала воды в поле **Render core variant** выберите `WATER`.
+
+Результат: запись показывает `Game water: its look comes from the map lighting. Use UVs in meters (1 UV unit = 1 m) or adjust Tiling.` и три поля со значениями по умолчанию. <!-- src: Assets/Editor/RenderCoreMaterialMarkerSettingsDrawer.cs:28 -->
+
+У записи `WATER` такие поля: <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Water/ModWater.cs:19-25 -->
+
+| Параметр | По умолчанию | Назначение | Когда менять |
+| --- | --- | --- | --- |
+| **Tiling** | `0.05` | Сколько раз волны повторяются на одну единицу UV. При UV в метрах `0.05` повторяет волны каждые 20 м, как на картах игры. От 0,001 до 10. | Когда UV меша не в метрах |
+| **Ripple speed** | `-0.03` | Скорость мелкой ряби в единицах UV в секунду; знак задаёт направление. От -1 до 1. | Чтобы вода была спокойнее или неспокойнее |
+| **Foam speed** | `0.01` | Скорость пены в единицах UV в секунду; знак задаёт направление. От -1 до 1. | Чтобы пена двигалась быстрее или медленнее |
+
+- Вода повторяет волны по UV меша, умноженным на **Tiling**. Сделайте развёртку меша воды с UV в метрах, 1 единица UV = 1 м, и оставьте **Tiling** равным `0.05`. При других UV задайте **Tiling** равным `0.05`, делённому на число единиц UV на метр: проверка предупреждает, если повторов на метр меньше 0,01 или больше 0,25, и предлагает значение. <!-- src: Assets/Editor/Validation/SceneValidator.cs:30-31,602-605 -->
+- Для `WATER` вместо **Export from material** кнопка **Reset to defaults**: вода ничего не берёт из материала HDRP и не запекает текстуры.
+- Не давайте воде коллайдер, который не является триггером: по такой воде машины едут, как по дороге. Проверка предупреждает об этом.
+- Версии игры без воды показывают запасной материал — материал HDRP, экспортированный так, будто записи нет. Дайте мешу воды материал HDRP, который сам по себе выглядит приемлемо. <!-- src: game -->
+- Для моря до горизонта добавьте [маркер Water/Sea](#water).
 
 <a name="sound"></a>
 ## Добавление звуков
@@ -325,10 +353,35 @@ Animator или SkinnedMeshRenderer без маркера Animation не экс�
 - На карте звучит один фон: первый маркер **Sound** > **Ambience** в порядке окна **Hierarchy**. Об остальных проверка предупреждает, а сборка их пропускает.
 - **Min Distance** не может быть больше **Max Distance**; проверка считает это ошибкой.
 
+<a name="water"></a>
+## Добавление моря
+
+Маркер **Water** > **Sea** добавляет бесконечное море на высоте своего GameObject — за геометрией карты до горизонта. Вид моря берётся из освещения карты, как у [игровой воды](#water-material). Маркер работает в обоих форматах.
+
+Чтобы добавить море:
+
+1. Выберите **GameObject** > **Create Empty**.
+1. В окне **Inspector**, в компоненте Transform, задайте в **Position** координату Y, равную уровню моря.
+1. Добавьте компонент GameMarkerData.
+1. В меню типа выберите **Water**, затем **Sea**.
+1. Необязательно: чтобы геометрия карты ниже уровня моря скрывалась под водой, снимите флажок **Background**.
+
+Результат: окно **Scene** показывает полупрозрачную синюю плоскость на уровне моря, а когда объект выбран — плоскость побольше. Следующая сборка экспортирует море.
+
+У маркера Water/Sea одно поле: <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Water/WaterMarkerSettings.cs:13-14 -->
+
+| Параметр | По умолчанию | Назначение | Когда менять |
+| --- | --- | --- | --- |
+| **Background** | Включено | Включено: море рисуется позади всей геометрии карты и никогда её не закрывает. Выключено: геометрия карты ниже уровня моря скрыта под водой. | Выключите, когда части карты, например берег или пирс, уходят ниже уровня моря |
+
+- Важна только высота объекта: у моря нет краёв.
+- На карте одно море. Сборка экспортирует первый маркер Water/Sea и для каждого следующего пишет `[Water] '<name>' is a second Water/Sea marker and is not exported: …`; проверка тоже предупреждает. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:577-588 -->
+- Маркер на неактивном GameObject или выключенный маркер не добавляет моря.
+
 <a name="unsupported"></a>
 ## Удаление неподдерживаемых маркеров
 
-Карты, сделанные в старых версиях MapUploader, могут содержать типы маркеров, которые игра больше не поддерживает: `Ambient`, `TimeObjectActivator` и `NetworkObject`. Для такого маркера окно **Inspector** показывает `Unsupported marker: <type>. Select SpawnPoint, Road, Animation, Material, ClipZone, Miniature or Sound, or remove the component.`, проверка выдаёт предупреждение категории Markers, а экспорт пропускает маркер. <!-- src: Assets/Editor/MarkerDataDrawer.cs:106 -->
+Карты, сделанные в старых версиях MapUploader, могут содержать типы маркеров, которые игра больше не поддерживает: `Ambient`, `TimeObjectActivator` и `NetworkObject`. Для такого маркера окно **Inspector** показывает `Unsupported marker: <type>. Select SpawnPoint, Road, Animation, Material, ClipZone, Miniature, Sound or Water, or remove the component.`, проверка выдаёт предупреждение категории Markers, а экспорт пропускает маркер. <!-- src: Assets/Editor/MarkerDataDrawer.cs:114 -->
 
 Чтобы удалить неподдерживаемый маркер:
 
