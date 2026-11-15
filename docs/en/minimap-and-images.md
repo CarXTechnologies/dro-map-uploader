@@ -127,6 +127,8 @@ The miniature is a mesh with three submeshes: 0 is roads and pads, 1 is objects,
 
 The generator also draws the miniature from above into a minimap image in the same colors. That image becomes the minimap image of the map, so the picture of the map, such as the preview panel at **Track Selection**, matches the 3D miniature and loads as fast as any minimap. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureTextureRenderer.cs:7-16 -->
 
+The build also writes the map spawn points (SpawnPoint markers) into the miniature, and the game marks them on it when a player picks the map for a race or a room. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:595-615 -->
+
 <a name="world-map-3d-enable"></a>
 ### Turn on the 3D preview
 
