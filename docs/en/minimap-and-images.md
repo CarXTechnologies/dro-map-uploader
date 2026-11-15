@@ -103,7 +103,7 @@ Give the image the same proportions as **Bounds Size** X : Y, because the game s
 
 ### What validation checks
 
-**Validate map** reports these errors for the minimap. The first two are in the Budget category, the rest in the Minimap category. <!-- src: Assets/Editor/Validation/SceneValidator.cs:901-950 -->
+**Validate map** reports these errors for the minimap. The first two are in the Budget category, the rest in the Minimap category. <!-- src: Assets/Editor/Validation/SceneValidator.cs:1035-1084 -->
 
 ```text
 'Minimap': the map has 0, at least 1 is required.
@@ -127,7 +127,7 @@ The miniature is a mesh with three submeshes: 0 is roads and pads, 1 is objects,
 
 The generator also draws the miniature from above into a minimap image in the same colors. That image becomes the minimap image of the map, so the picture of the map, such as the preview panel at **Track Selection**, matches the 3D miniature and loads as fast as any minimap. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureTextureRenderer.cs:7-16 -->
 
-The build also writes the map spawn points (SpawnPoint markers) into the miniature, and the game marks them on it when a player picks the map for a race or a room. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:595-615 -->
+The build also writes the map spawn points (SpawnPoint markers) into the miniature, and the game marks them on it when a player picks the map for a race or a room. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:608-628 -->
 
 <a name="world-map-3d-enable"></a>
 ### Turn on the 3D preview

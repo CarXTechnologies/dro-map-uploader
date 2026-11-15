@@ -54,10 +54,11 @@ The exporter walks every root object of the scene and writes only what the game 
 | Vertex animation | An Animator has an Animation marker. Its subtree is baked into animation data instead of static geometry. | `animations/` |
 | Lights | A Point or Spot light is enabled and on an active object. | `lights/` |
 | Markers | The marker is SpawnPoint or Road. | `markers/` |
+| Sounds | A Sound marker is active and enabled and has a known sound or an `.ogg` or `.wav` clip. | `sounds/` |
 | Render core materials | A renderer has a Material marker, and the build is Binary. | `models/` |
 | Map settings and images | Every build of the Meta part: **Name**, **Version**, **Description**, **Authors**, **URL**, the **Icon · 16:9** and **Preview · 16:9** images and the Minimap textures. | `<id>.json`, `textures/` |
 
-Everything else stays out of the mod, for example Directional and Area lights, Volume, Reflection Probes, Terrain, cameras, audio, particles, UI, video players and joints. Validation reports these components as notes or warnings; see [Supported components and budgets](../reference.md#budgets).
+Everything else stays out of the mod, for example Directional and Area lights, Volume, Reflection Probes, Terrain, cameras, Audio Sources, particles, UI, video players and joints. Validation reports these components as notes or warnings; see [Supported components and budgets](../reference.md#budgets).
 
 <a name="wavefront-tree"></a>
 ## The Wavefront tree
@@ -79,6 +80,10 @@ A Wavefront mod folder looks like this. `<id>` is the metadata id, and `<Scene>`
 │   └── <Scene>.json          Point and Spot lights
 ├── animations/
 │   └── <Scene>.json          baked vertex animation, only when the scene has Animation markers
+├── sounds/
+│   ├── <Scene>.json          sound emitters, only when the scene has Sound markers
+│   └── files/
+│       └── <clip>_<hash>.ogg audio files of Sound/Custom markers, .ogg or .wav
 ├── models/
 │   ├── <material set>.obj    render meshes that share one set of materials
 │   ├── <material set>.mtl    that set of materials
@@ -120,8 +125,10 @@ Each scene document has an `id`, which is the scene name, and a `version`, which
 - `hierarchies/<Scene>.json` lists `staticObjects`: one entry per placed object outside LOD groups, with its `prefabId`, its world transform `localToWorld` and a `rigidbodyId`. An object with a SpawnPoint or Road marker but no exported geometry gets an entry with `prefabId` `-1`. The same file holds the `rigidbodies` records.
 - `lods/<Scene>.json` lists `lodInstances`: the `lodLevels` (each a `prefabId`, a `localOffset` from the LOD group and a `lodIndex`), the world transform, a `rigidbodyId` and the switch distances `LODDistances0` (levels 0–3) and `LODDistances1` (levels 4–7). A switch distance is the group's world size divided by the level's screen-relative transition height. A group with one level stays a LOD group and keeps its cull distance; see [LOD groups](../scene-setup.md#lod).
 - `markers/<Scene>.json` lists `markers`: `staticInstanceId` (an index into `staticObjects`), `head` (`SpawnPoint` or `Road`), `param` and `data`. For a road, `param` is one of the 27 surface presets, for example `Road/asphalt`, and `data` is a JSON string with the surface values: friction, roll friction, bumps, water rate and one of 7 physical surface types. When `data` is empty, the game uses its own values for that surface. For a spawn point, `data` holds the GameObject name. See [Mark road surfaces](../markers.md#road).
-- `lights/<Scene>.json` lists `lights`: the world transform, `type` (Unity's light type: `0` Spot, `2` Point), colour, intensity, range, spot angles, shadow type and near plane, and colour temperature. Intensity is candela × 0.1, at most 5000. See [Light export rules](../reference.md#lights). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:94-108 -->
+- `lights/<Scene>.json` lists `lights`: the world transform, `type` (Unity's light type: `0` Spot, `2` Point), colour, intensity, range, spot angles, shadow type and near plane, and colour temperature. Intensity is candela × 0.1, at most 5000. See [Light export rules](../reference.md#lights). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:107-121 -->
 - `animations/<Scene>.json` holds the baked vertex animation: one asset per distinct baked object, with its position, normal and tangent atlases and its material surfaces, and one instance per Animation marker. Wavefront stores the atlases and surface textures as Base64 text. See [Animate objects](../markers.md#animation).
+- `sounds/<Scene>.json` lists `emitters` and `files`. Each emitter has a `kind` (`0` Preset, `1` Custom, `2` Ambience), a `preset` with the sound id for Preset and Ambience, a `file` with an index into `files` for Custom (otherwise `-1`), the world `position`, `volume`, `minDistance` and `maxDistance`. `files` lists the names of the audio files in `sounds/files/`, with their extensions. A map has at most 128 emitters and one Ambience. See [Add sounds](../markers.md#sound). <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Meta/SoundsMeta.cs:7-39 -->
+- `sounds/files/` holds the `.ogg` and `.wav` files of Sound/Custom markers, copied unchanged: at most 32 files of 20 MB in total. A file is named after its clip with the first 8 hexadecimal digits of the SHA-256 of its contents, for example `waves_1a2b3c4d.ogg`, and markers with the same clip share one file. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SoundsCollector.cs:16,99-111 -->
 
 `rigidbodyId` in `staticObjects`, `lodInstances` and animation `instances` is a 1-based index into `rigidbodies`, and `0` means the object is static.
 
@@ -188,6 +195,7 @@ Each material starts with `newmtl <id>`, where `<id>` is the material's asset id
 | `models/cx_<SHA-256>.cxtex` | Material textures, re-encoded with mipmaps (`CXTX`). Roughness, metallic and opacity are packed into one map, and the emission colour is baked into a texture. |
 | `models/*.pbr.json`, `models/*.rc.json` | Layered Lit and render core material documents, as binary documents. |
 | `textures/<image>.png` | The icon, preview and minimap images, copied unchanged. |
+| `sounds/files/<file>` | The audio files of Sound/Custom markers, copied unchanged. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/BinaryMapPacker.cs:147-151 --> |
 
 The PNG files of re-encoded material textures aren't stored. Packing needs both built parts; without them, it stops with `Binary map requires both Meta and Binary Map staging data. Rebuild Map and Meta.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/BinaryMapPacker.cs:62 -->
 
@@ -195,7 +203,7 @@ The PNG files of re-encoded material textures aren't stored. Packing needs both 
 
 ### File layout
 
-All numbers are little-endian. The reference reader is [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/2b4fa1f9975adf09f572f6632c38ae424b368c41/Runtime/Binary/BinaryModArchive.cs) in the CarX.Modding.Creator SDK.
+All numbers are little-endian. The reference reader is [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/Runtime/Binary/BinaryModArchive.cs) in the CarX.Modding.Creator SDK.
 
 | Part | Type | Contents |
 | --- | --- | --- |
@@ -211,7 +219,7 @@ The index ends the file, sorted by name. Names use forward slashes and are relat
 ### Integrity and limits
 
 - **Deduplication.** Resources with identical contents, found by SHA-256, share one block, so several names can point at the same bytes.
-- **Compression.** Each resource is compressed with raw Deflate only when that makes it smaller. `.png` and `.cxgeom` resources are never compressed. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:304 -->
+- **Compression.** Each resource is compressed with raw Deflate only when that makes it smaller. `.png`, `.cxgeom` and `.ogg` resources are never compressed. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:324-325 -->
 - **Checksums.** Readers check the CRC-32 (polynomial `0xEDB88320`) of every resource they read. A mismatch fails the read with `Binary resource checksum mismatch: <name>`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:249 -->
 - **Safe replacement.** The packer writes a temporary file next to `mod.cxmod`, reads its index back, and only then replaces the old file. If packing fails, the previous `mod.cxmod` stays as it was. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:208-224 -->
 - **Limits.** A container holds at most 100 000 resource names, a name is at most 1024 characters, and each resource is at most 256 MB. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:20-21,104 -->

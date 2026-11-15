@@ -127,7 +127,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 | Format | Компоненты, которые освещают только предпросмотр в редакторе, и формат сборки | Заметки, ошибка |
 | Geometry | Меши, слоты материалов, коллайдеры MeshCollider, группы LOD, оптимизация сборки и бюджет сектора | Предупреждения, ошибка |
 | Lighting | Источники света, которые не попадают в игру | Предупреждения, заметка |
-| Markers | GameMarkerData: типы маркеров, точки появления, коллайдеры для Road, маркеры Animation и Material | Ошибки, предупреждения, заметка |
+| Markers | GameMarkerData: типы маркеров, точки появления, коллайдеры для Road, маркеры Animation, Material и Sound | Ошибки, предупреждения, заметка |
 | Meta | Настройки карты: имя сцены, **Название** (Name), краткое описание, **Описание** (Description), иконка и превью | Ошибки, предупреждения, заметка |
 | Minimap | Размер и текстуры Minimap | Ошибки |
 | Physics | Коллайдеры MeshCollider на движущихся Rigidbody | Ошибка |
@@ -151,7 +151,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Components</b>: компоненты, которые экспорт пропускает</summary>
 
-Проверка принимает типы компонентов из [таблицы лимитов](reference.md#budgets). Animator и SkinnedMeshRenderer тоже принимаются, но только под тем Animator, который использует маркер Animation. Для любого другого компонента проверка добавляет заметку, а экспорт его пропускает. <!-- src: Assets/Editor/Validation/SceneValidator.cs:136-177 -->
+Проверка принимает типы компонентов из [таблицы лимитов](reference.md#budgets). Animator и SkinnedMeshRenderer тоже принимаются, но только под тем Animator, который использует маркер Animation. Для любого другого компонента проверка добавляет заметку, а экспорт его пропускает. <!-- src: Assets/Editor/Validation/SceneValidator.cs:139-180 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -164,7 +164,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Format</b>: компоненты только для предпросмотра и формат сборки</summary>
 
-Эти замечания относятся к компонентам, которые использует только предпросмотр в редакторе, и к выбранному формату. <!-- src: Assets/Editor/Validation/SceneValidator.cs:153-157 -->
+Эти замечания относятся к компонентам, которые использует только предпросмотр в редакторе, и к выбранному формату. <!-- src: Assets/Editor/Validation/SceneValidator.cs:156-160 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -176,7 +176,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Geometry</b>: меши, группы LOD и бюджет сектора</summary>
 
-Эти проверки охватывают меши, слоты материалов, коллайдеры MeshCollider, группы LOD и оптимизацию сборки. См. [Оптимизация](build.md#optimization). <!-- src: Assets/Editor/Validation/SceneValidator.cs:778-844,869-899 -->
+Эти проверки охватывают меши, слоты материалов, коллайдеры MeshCollider, группы LOD и оптимизацию сборки. См. [Оптимизация](build.md#optimization). <!-- src: Assets/Editor/Validation/SceneValidator.cs:912-978,1003-1033 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -196,7 +196,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Lighting</b>: источники света, которые не попадают в игру</summary>
 
-Экспортируются только источники света Point и Spot. См. [Настройка освещения](scene-setup.md#lighting). <!-- src: Assets/Editor/Validation/SceneValidator.cs:729-776 -->
+Экспортируются только источники света Point и Spot. См. [Настройка освещения](scene-setup.md#lighting). <!-- src: Assets/Editor/Validation/SceneValidator.cs:863-910 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -209,7 +209,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Markers</b>: GameMarkerData</summary>
 
-Эти проверки охватывают типы маркеров, точки появления, маркеры Road и маркеры Animation. См. [Маркеры GameMarkerData](markers.md). <!-- src: Assets/Editor/Validation/SceneValidator.cs:213-302 -->
+Эти проверки охватывают типы маркеров, точки появления, маркеры Road и маркеры Animation. См. [Маркеры GameMarkerData](markers.md). <!-- src: Assets/Editor/Validation/SceneValidator.cs:216-436 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -225,9 +225,29 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 </details>
 
 <details>
+<summary><b>Markers</b>: маркеры Sound</summary>
+
+Эти проверки охватывают активные маркеры Sound, которые экспортирует сборка. См. [Добавление звуков](markers.md#sound). <!-- src: Assets/Editor/Validation/SceneValidator.cs:311-433 -->
+
+| Уровень | Сообщение | Что сделать |
+| --- | --- | --- |
+| Ошибка | `'<object>' is a Sound marker without settings. Select the object to create them, then set the sound.` | Выберите объект: окно **Inspector** создаст настройки. Затем задайте поля маркера. <!-- src: Assets/Editor/Validation/SceneValidator.cs:336-337 --> |
+| Ошибка | `'<object>' has no sound selected. Select a sound in its <type> marker.` | Выберите в маркере звук в поле **Sound**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:401-402 --> |
+| Ошибка | `'<object>' uses the sound '<sound>', which <type> doesn't have. Select a sound from the list.` | Выберите в поле **Sound** звук из списка. Звук **Preset** не подходит для **Ambience**, поэтому так бывает после смены вида. <!-- src: Assets/Editor/Validation/SceneValidator.cs:408-409 --> |
+| Ошибка | `'<object>' is a Sound/Custom marker without an audio clip. Assign an .ogg or .wav clip.` | Назначьте клип в **Audio clip**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:420-421 --> |
+| Ошибка | `'<object>' plays '<file>'. Only .ogg and .wav files are exported: convert the clip to one of them.` | Конвертируйте клип в `.ogg` или `.wav` и назначьте новый файл. <!-- src: Assets/Editor/Validation/SceneValidator.cs:427-428 --> |
+| Предупреждение | `'<object>' is a second Sound/Ambience marker. A map plays one ambience: the first one, '<object>'. Remove the other ambience markers.` | Оставьте один маркер **Sound** > **Ambience**. Остальные сборка пропускает. <!-- src: Assets/Editor/Validation/SceneValidator.cs:360-362 --> |
+| Ошибка | `'<object>': Min Distance <n> m is greater than Max Distance <n> m. Make Min Distance smaller.` | Уменьшите **Min Distance** или увеличьте **Max Distance**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:367-369 --> |
+| Ошибка | `The map has <n> Sound markers, at most 128 are exported. Remove the sounds the map doesn't need.` | Удалите маркеры Sound, чтобы их осталось не больше 128. <!-- src: Assets/Editor/Validation/SceneValidator.cs:374-377 --> |
+| Ошибка | `Sound/Custom markers use <n> audio files, at most 32 are exported. Use fewer different clips.` | Используйте один клип на нескольких маркерах. <!-- src: Assets/Editor/Validation/SceneValidator.cs:380-383 --> |
+| Ошибка | `The audio files of Sound/Custom markers take <size> MB, at most 20 MB are exported. Shorten the clips or save them as .ogg.` | Укоротите клипы или сохраните их в `.ogg`. <!-- src: Assets/Editor/Validation/SceneValidator.cs:386-390 --> |
+
+</details>
+
+<details>
 <summary><b>Markers</b>: маркеры Material</summary>
 
-Маркеры Material заменяют материалы вариантами render core и действуют только в сборках Binary. Их замечания появляются в категории Markers. Две последние строки проверяются, только если в списке **Формат** выбрано **Binary**. См. [Замена материалов вариантами render core](markers.md#material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:308-532,600-671 -->
+Маркеры Material заменяют материалы вариантами render core и действуют только в сборках Binary. Их замечания появляются в категории Markers. Две последние строки проверяются, только если в списке **Формат** выбрано **Binary**. См. [Замена материалов вариантами render core](markers.md#material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:442-666,734-805 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -283,7 +303,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Minimap</b>: размер и текстуры</summary>
 
-В сцене должен быть ровно один Minimap; их количество проверяет категория Budget. Держите объект Minimap активным: проверка учитывает и неактивный Minimap, но сборка экспортирует только активный. См. [Добавление мини-карты](minimap-and-images.md#minimap). <!-- src: Assets/Editor/Validation/SceneValidator.cs:901-950 -->
+В сцене должен быть ровно один Minimap; их количество проверяет категория Budget. Держите объект Minimap активным: проверка учитывает и неактивный Minimap, но сборка экспортирует только активный. См. [Добавление мини-карты](minimap-and-images.md#minimap). <!-- src: Assets/Editor/Validation/SceneValidator.cs:1035-1084 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |
@@ -297,7 +317,7 @@ WARNING [Lighting] The map has <n> Directional Lights. These affect the SDK prev
 <details>
 <summary><b>Physics</b>: MeshCollider на движущихся Rigidbody</summary>
 
-Rigidbody, который не является кинематическим, требует выпуклых (convex) коллайдеров MeshCollider. Rigidbody может находиться на объекте коллайдера или на родительском объекте. <!-- src: Assets/Editor/Validation/SceneValidator.cs:846-867 -->
+Rigidbody, который не является кинематическим, требует выпуклых (convex) коллайдеров MeshCollider. Rigidbody может находиться на объекте коллайдера или на родительском объекте. <!-- src: Assets/Editor/Validation/SceneValidator.cs:980-1001 -->
 
 | Уровень | Сообщение | Что сделать |
 | --- | --- | --- |

@@ -43,17 +43,23 @@ public class MarkerData
 		CarX.Modding.Creator.Runtime.MiniatureMarker.Road,
 		CarX.Modding.Creator.Runtime.MiniatureMarker.Terrain,
 		CarX.Modding.Creator.Runtime.MiniatureMarker.Object,
-		CarX.Modding.Creator.Runtime.MiniatureMarker.Hidden
+		CarX.Modding.Creator.Runtime.MiniatureMarker.Hidden,
+		CarX.Modding.Creator.Runtime.SoundMarkerSettings.PresetParam,
+		CarX.Modding.Creator.Runtime.SoundMarkerSettings.CustomParam,
+		CarX.Modding.Creator.Runtime.SoundMarkerSettings.AmbienceParam
 	};
 
 	public static bool IsSupportedHead(string head) => head == "SpawnPoint" || head == "Road" || head == "Animation" || head == MaterialHead || head == ClipZoneHead ||
-		head == CarX.Modding.Creator.Runtime.MiniatureMarker.Head;
+		head == CarX.Modding.Creator.Runtime.MiniatureMarker.Head || head == SoundHead;
 
 	/// <summary>Маркер Material: переопределение материалов рендерера вариантами rendercore (только Binary).</summary>
 	public const string MaterialHead = CarX.Modding.Creator.Runtime.RenderCoreMaterialMarkerSettings.MarkerHead;
 
 	/// <summary>ClipZone marker: a free ride clipping zone along the child points of the marker object.</summary>
 	public const string ClipZoneHead = CarX.Modding.Creator.Runtime.ClipZoneMarkerSettings.MarkerHead;
+
+	/// <summary>Sound marker: a game or own sound at the marker position, or the ambience of the whole map.</summary>
+	public const string SoundHead = CarX.Modding.Creator.Runtime.SoundMarkerSettings.MarkerHead;
 
 	public static int FindEditorIndex(string head, string param)
 	{
@@ -98,7 +104,7 @@ public class MarkerData
 
 	public void Update()
 	{
-		if (templateConfig == null && head != "Animation" && head != MaterialHead && head != ClipZoneHead)
+		if (templateConfig == null && head != "Animation" && head != MaterialHead && head != ClipZoneHead && head != SoundHead)
 		{
 			value = null;
 		}

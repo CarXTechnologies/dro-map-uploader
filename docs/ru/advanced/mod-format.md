@@ -54,10 +54,11 @@ flowchart LR
 | Вершинная анимация | У Animator есть маркер Animation. Его поддерево запекается в данные анимации, а не в статическую геометрию. | `animations/` |
 | Источники света | Источник Point или Spot включён и находится на активном объекте. | `lights/` |
 | Маркеры | Маркер типа SpawnPoint или Road. | `markers/` |
+| Звуки | Маркер Sound активен и включён, и у него известный звук или клип `.ogg` или `.wav`. | `sounds/` |
 | Материалы render core | У рендерера есть маркер Material, и сборка в формате Binary. | `models/` |
 | Настройки карты и изображения | Каждая сборка части Meta: **Название** (Name), **Версия** (Version), **Описание** (Description), **Авторы** (Authors), **Ссылка** (URL), изображения **Иконка · 16:9** (Icon · 16:9) и **Превью · 16:9** (Preview · 16:9) и текстуры мини-карты. | `<id>.json`, `textures/` |
 
-Всё остальное в мод не попадает, например источники света Directional и Area, Volume, Reflection Probes, Terrain, камеры, звук, частицы, UI, видеоплееры и сочленения (joints). Проверка сообщает об этих компонентах заметками или предупреждениями; см. [Поддерживаемые компоненты и лимиты](../reference.md#budgets).
+Всё остальное в мод не попадает, например источники света Directional и Area, Volume, Reflection Probes, Terrain, камеры, Audio Source, частицы, UI, видеоплееры и сочленения (joints). Проверка сообщает об этих компонентах заметками или предупреждениями; см. [Поддерживаемые компоненты и лимиты](../reference.md#budgets).
 
 <a name="wavefront-tree"></a>
 ## Дерево файлов Wavefront
@@ -79,6 +80,10 @@ flowchart LR
 │   └── <Scene>.json          источники света Point и Spot
 ├── animations/
 │   └── <Scene>.json          запечённая вершинная анимация, только если в сцене есть маркеры Animation
+├── sounds/
+│   ├── <Scene>.json          источники звука, только если в сцене есть маркеры Sound
+│   └── files/
+│       └── <clip>_<hash>.ogg аудиофайлы маркеров Sound/Custom, .ogg или .wav
 ├── models/
 │   ├── <material set>.obj    меши для рендеринга с общим набором материалов
 │   ├── <material set>.mtl    этот набор материалов
@@ -120,8 +125,10 @@ flowchart LR
 - `hierarchies/<Scene>.json` содержит список `staticObjects`: по записи на каждый размещённый объект вне групп LOD, с его `prefabId`, мировой трансформацией `localToWorld` и `rigidbodyId`. Объект с маркером SpawnPoint или Road без экспортированной геометрии получает запись с `prefabId`, равным `-1`. В этом же файле хранятся записи `rigidbodies`.
 - `lods/<Scene>.json` содержит список `lodInstances`: `lodLevels` (каждый уровень — это `prefabId`, смещение `localOffset` от группы LOD и `lodIndex`), мировую трансформацию, `rigidbodyId` и расстояния переключения `LODDistances0` (уровни 0–3) и `LODDistances1` (уровни 4–7). Расстояние переключения — это мировой размер группы, делённый на высоту перехода уровня относительно экрана. Группа с одним уровнем остаётся группой LOD и сохраняет своё расстояние отсечения; см. [Использование LOD-групп](../scene-setup.md#lod).
 - `markers/<Scene>.json` содержит список `markers`: `staticInstanceId` (индекс в `staticObjects`), `head` (`SpawnPoint` или `Road`), `param` и `data`. Для дороги `param` — один из 27 пресетов поверхности, например `Road/asphalt`, а `data` — строка JSON со значениями поверхности: трение, трение качения, неровности, доля воды и один из 7 физических типов поверхности. Если `data` пустое, игра использует собственные значения для этой поверхности. Для точки появления `data` содержит имя GameObject. См. [Маркеры дорожных поверхностей](../markers.md#road).
-- `lights/<Scene>.json` содержит список `lights`: мировую трансформацию, `type` (тип источника света Unity: `0` — Spot, `2` — Point), цвет, интенсивность, дальность, углы конуса, тип теней и их ближнюю плоскость, а также цветовую температуру. Интенсивность записывается как кандела × 0,1, не больше 5000. См. [Правила экспорта света](../reference.md#lights). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:94-108 -->
+- `lights/<Scene>.json` содержит список `lights`: мировую трансформацию, `type` (тип источника света Unity: `0` — Spot, `2` — Point), цвет, интенсивность, дальность, углы конуса, тип теней и их ближнюю плоскость, а также цветовую температуру. Интенсивность записывается как кандела × 0,1, не больше 5000. См. [Правила экспорта света](../reference.md#lights). <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:107-121 -->
 - `animations/<Scene>.json` содержит запечённую вершинную анимацию: по ассету на каждый отдельный запечённый объект, с его атласами позиций, нормалей и касательных и поверхностями материалов, и по экземпляру на каждый маркер Animation. Wavefront хранит атласы и текстуры поверхностей как текст Base64. См. [Анимация объектов с помощью вершинной анимации](../markers.md#animation).
+- `sounds/<Scene>.json` содержит списки `emitters` и `files`. У каждого источника есть `kind` (`0` — Preset, `1` — Custom, `2` — Ambience), `preset` с id звука для Preset и Ambience, `file` с индексом в `files` для Custom (иначе `-1`), мировая позиция `position`, `volume`, `minDistance` и `maxDistance`. `files` перечисляет имена аудиофайлов в `sounds/files/` с расширениями. На карте не больше 128 источников и один Ambience. См. [Добавление звуков](../markers.md#sound). <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Meta/SoundsMeta.cs:7-39 -->
+- `sounds/files/` содержит файлы `.ogg` и `.wav` маркеров Sound/Custom, скопированные без изменений: не больше 32 файлов общим размером до 20 МБ. Файл называется по имени клипа с первыми 8 шестнадцатеричными цифрами SHA-256 его содержимого, например `waves_1a2b3c4d.ogg`, а маркеры с одним клипом используют один файл. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SoundsCollector.cs:16,99-111 -->
 
 `rigidbodyId` в `staticObjects`, `lodInstances` и `instances` анимации — это индекс в `rigidbodies`, начинающийся с 1, а `0` означает, что объект статический.
 
@@ -188,6 +195,7 @@ flowchart LR
 | `models/cx_<SHA-256>.cxtex` | Текстуры материалов, перекодированные с MIP-уровнями (`CXTX`). Шероховатость, металличность и непрозрачность упакованы в одну карту, а цвет излучения запечён в текстуру. |
 | `models/*.pbr.json`, `models/*.rc.json` | Документы материалов Layered Lit и render core в виде бинарных документов. |
 | `textures/<image>.png` | Изображения иконки, превью и мини-карты, скопированные без изменений. |
+| `sounds/files/<file>` | Аудиофайлы маркеров Sound/Custom, скопированные без изменений. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/BinaryMapPacker.cs:147-151 --> |
 
 Файлы PNG перекодированных текстур материалов не сохраняются. Для упаковки нужны обе собранные части; без них она останавливается с сообщением `Binary map requires both Meta and Binary Map staging data. Rebuild Map and Meta.` <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/BinaryMapPacker.cs:62 -->
 
@@ -195,7 +203,7 @@ flowchart LR
 
 ### Структура файла
 
-Все числа записаны в порядке little-endian. Эталонная реализация чтения — [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/2b4fa1f9975adf09f572f6632c38ae424b368c41/Runtime/Binary/BinaryModArchive.cs) в SDK CarX.Modding.Creator.
+Все числа записаны в порядке little-endian. Эталонная реализация чтения — [`BinaryModArchive.cs`](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/Runtime/Binary/BinaryModArchive.cs) в SDK CarX.Modding.Creator.
 
 | Часть | Тип | Содержимое |
 | --- | --- | --- |
@@ -211,7 +219,7 @@ flowchart LR
 ### Целостность и ограничения
 
 - **Дедупликация.** Ресурсы с одинаковым содержимым, найденные по SHA-256, используют один общий блок, поэтому несколько имён могут указывать на одни и те же байты.
-- **Сжатие.** Каждый ресурс сжимается методом raw Deflate, только если это уменьшает его размер. Ресурсы `.png` и `.cxgeom` не сжимаются никогда. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:304 -->
+- **Сжатие.** Каждый ресурс сжимается методом raw Deflate, только если это уменьшает его размер. Ресурсы `.png`, `.cxgeom` и `.ogg` не сжимаются никогда. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:324-325 -->
 - **Контрольные суммы.** При чтении проверяется CRC-32 (полином `0xEDB88320`) каждого считываемого ресурса. При несовпадении чтение завершается ошибкой `Binary resource checksum mismatch: <name>`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:249 -->
 - **Безопасная замена.** Упаковщик записывает временный файл рядом с `mod.cxmod`, считывает обратно его индекс и только после этого заменяет старый файл. Если упаковка не удалась, прежний `mod.cxmod` остаётся без изменений. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:208-224 -->
 - **Ограничения.** Контейнер содержит не больше 100 000 имён ресурсов, имя — не длиннее 1024 символов, а каждый ресурс — не больше 256 МБ. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Binary/BinaryModArchive.cs:20-21,104 -->

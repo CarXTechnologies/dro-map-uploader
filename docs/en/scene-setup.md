@@ -188,7 +188,7 @@ In the game, a dynamic Rigidbody works like the game's own props: the car body p
 
 Add a LODGroup to an object as in any Unity project. The build exports every level, and the game switches levels at distances calculated from the group's size and transition heights.
 
-- A LODGroup can have at most 8 levels. More is a validation error, which stops the build: `'<name>' has <n> LOD levels; at most 8 are supported…` <!-- src: Assets/Editor/Validation/SceneValidator.cs:827-835 -->
+- A LODGroup can have at most 8 levels. More is a validation error, which stops the build: `'<name>' has <n> LOD levels; at most 8 are supported…` <!-- src: Assets/Editor/Validation/SceneValidator.cs:961-969 -->
 - A LODGroup with a single level is still exported as a LOD group, so the object disappears at its **Culled** transition.
 - A LODGroup with no renderers on any level gets a Geometry warning.
 - The build recalculates each LODGroup's bounds, so a hand-set **Object Size** is replaced.
@@ -224,7 +224,7 @@ The build doesn't add, remove or move objects in your scene. It only recalculate
 The game supplies its own environment lighting, such as the sky and the sun. From your scene, it takes only Point and Spot lights.
 
 - Only enabled Point and Spot lights on active objects are exported, in both formats. Every other type, including Directional and Area lights, is skipped.
-- The build exports each light's position, rotation, color, intensity, range, spot angles, shadow settings and color temperature. It converts the intensity to candela, multiplies it by 0.1 and caps it at 5000. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:94-108 -->
+- The build exports each light's position, rotation, color, intensity, range, spot angles, shadow settings and color temperature. It converts the intensity to candela, multiplies it by 0.1 and caps it at 5000. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:107-121 -->
 - A map can have up to 500 lights. <!-- src: Assets/Editor/MapSceneRules.cs:20-21 -->
 - Volumes (sky, fog, exposure), Directional and Area lights and Reflection Probes light only the scene in the editor.
 - Baked lightmaps aren't exported, and build optimization doesn't merge renderers that use a baked lightmap. Don't bake lighting in the map scene.
@@ -248,7 +248,7 @@ A preset adds these notes to validation. They don't block the build:
 'Volume' is used only for the SDK preview and is not exported or required.
 ```
 
-Validation adds a note for each enabled Directional light and a light-type warning for each enabled light of another type that isn't Point or Spot, such as an Area light. It adds one more warning when the scene has two or more Directional lights, counting disabled ones. <!-- src: Assets/Editor/Validation/SceneValidator.cs:752-774 -->
+Validation adds a note for each enabled Directional light and a light-type warning for each enabled light of another type that isn't Point or Spot, such as an Area light. It adds one more warning when the scene has two or more Directional lights, counting disabled ones. <!-- src: Assets/Editor/Validation/SceneValidator.cs:886-908 -->
 
 <a name="reference-scene"></a>
 ## Explore the reference scene

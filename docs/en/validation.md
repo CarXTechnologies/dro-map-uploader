@@ -127,7 +127,7 @@ Validation checks the map settings first, then the scene. The window sorts the c
 | Format | Components that only light the editor preview, and the build format | Notes, an error |
 | Geometry | Meshes, material slots, mesh colliders, LOD groups, build optimization and the sector budget | Warnings, an error |
 | Lighting | Lights that don't reach the game | Warnings, a note |
-| Markers | GameMarkerData: marker types, spawn points, Road colliders, Animation and Material markers | Errors, warnings, a note |
+| Markers | GameMarkerData: marker types, spawn points, Road colliders, Animation, Material and Sound markers | Errors, warnings, a note |
 | Meta | The map settings: the scene name, **Name**, the summary, **Description**, the Icon and the Preview | Errors, warnings, a note |
 | Minimap | The Minimap size and textures | Errors |
 | Physics | Mesh colliders on moving Rigidbodies | An error |
@@ -151,7 +151,7 @@ The scene must stay within the component counts in [Supported components and bud
 <details>
 <summary><b>Components</b>: components that export skips</summary>
 
-Validation accepts the component types of the [budget table](reference.md#budgets). Animator and SkinnedMeshRenderer are accepted too, but only under the Animator that an Animation marker uses. Validation adds a note for every other component, and export skips it. <!-- src: Assets/Editor/Validation/SceneValidator.cs:136-177 -->
+Validation accepts the component types of the [budget table](reference.md#budgets). Animator and SkinnedMeshRenderer are accepted too, but only under the Animator that an Animation marker uses. Validation adds a note for every other component, and export skips it. <!-- src: Assets/Editor/Validation/SceneValidator.cs:139-180 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -164,7 +164,7 @@ Validation accepts the component types of the [budget table](reference.md#budget
 <details>
 <summary><b>Format</b>: preview-only components and the build format</summary>
 
-These issues come from components that only the editor preview uses, and from the selected format. <!-- src: Assets/Editor/Validation/SceneValidator.cs:153-157 -->
+These issues come from components that only the editor preview uses, and from the selected format. <!-- src: Assets/Editor/Validation/SceneValidator.cs:156-160 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -176,7 +176,7 @@ These issues come from components that only the editor preview uses, and from th
 <details>
 <summary><b>Geometry</b>: meshes, LOD groups and the sector budget</summary>
 
-These checks cover meshes, material slots, mesh colliders, LOD groups and build optimization. See [Optimization](build.md#optimization). <!-- src: Assets/Editor/Validation/SceneValidator.cs:778-844,869-899 -->
+These checks cover meshes, material slots, mesh colliders, LOD groups and build optimization. See [Optimization](build.md#optimization). <!-- src: Assets/Editor/Validation/SceneValidator.cs:912-978,1003-1033 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -196,7 +196,7 @@ For the meshes that the sector check covers, see [Sector budget](reference.md#se
 <details>
 <summary><b>Lighting</b>: lights that don't reach the game</summary>
 
-Only Point and Spot lights are exported. See [Set up lighting](scene-setup.md#lighting). <!-- src: Assets/Editor/Validation/SceneValidator.cs:729-776 -->
+Only Point and Spot lights are exported. See [Set up lighting](scene-setup.md#lighting). <!-- src: Assets/Editor/Validation/SceneValidator.cs:863-910 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -209,7 +209,7 @@ Only Point and Spot lights are exported. See [Set up lighting](scene-setup.md#li
 <details>
 <summary><b>Markers</b>: GameMarkerData</summary>
 
-These checks cover marker types, spawn points, Road markers and Animation markers. See [Add markers](markers.md). <!-- src: Assets/Editor/Validation/SceneValidator.cs:213-302 -->
+These checks cover marker types, spawn points, Road markers and Animation markers. See [Add markers](markers.md). <!-- src: Assets/Editor/Validation/SceneValidator.cs:216-436 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -225,9 +225,29 @@ These checks cover marker types, spawn points, Road markers and Animation marker
 </details>
 
 <details>
+<summary><b>Markers</b>: Sound markers</summary>
+
+These checks cover the active Sound markers, which the build exports. See [Add sounds](markers.md#sound). <!-- src: Assets/Editor/Validation/SceneValidator.cs:311-433 -->
+
+| Severity | Message | What to do |
+| --- | --- | --- |
+| Error | `'<object>' is a Sound marker without settings. Select the object to create them, then set the sound.` | Select the object: the **Inspector** creates the settings. Then set the fields of the marker. <!-- src: Assets/Editor/Validation/SceneValidator.cs:336-337 --> |
+| Error | `'<object>' has no sound selected. Select a sound in its <type> marker.` | In the marker, select a sound in **Sound**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:401-402 --> |
+| Error | `'<object>' uses the sound '<sound>', which <type> doesn't have. Select a sound from the list.` | In **Sound**, select a sound from the list. A **Preset** sound isn't an **Ambience** sound, so this happens after you change the kind. <!-- src: Assets/Editor/Validation/SceneValidator.cs:408-409 --> |
+| Error | `'<object>' is a Sound/Custom marker without an audio clip. Assign an .ogg or .wav clip.` | Assign a clip to **Audio clip**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:420-421 --> |
+| Error | `'<object>' plays '<file>'. Only .ogg and .wav files are exported: convert the clip to one of them.` | Convert the clip to `.ogg` or `.wav`, and assign the new file. <!-- src: Assets/Editor/Validation/SceneValidator.cs:427-428 --> |
+| Warning | `'<object>' is a second Sound/Ambience marker. A map plays one ambience: the first one, '<object>'. Remove the other ambience markers.` | Keep one **Sound** > **Ambience** marker. The build skips the others. <!-- src: Assets/Editor/Validation/SceneValidator.cs:360-362 --> |
+| Error | `'<object>': Min Distance <n> m is greater than Max Distance <n> m. Make Min Distance smaller.` | Lower **Min Distance**, or raise **Max Distance**. <!-- src: Assets/Editor/Validation/SceneValidator.cs:367-369 --> |
+| Error | `The map has <n> Sound markers, at most 128 are exported. Remove the sounds the map doesn't need.` | Remove Sound markers until 128 or fewer are left. <!-- src: Assets/Editor/Validation/SceneValidator.cs:374-377 --> |
+| Error | `Sound/Custom markers use <n> audio files, at most 32 are exported. Use fewer different clips.` | Use the same clip on several markers. <!-- src: Assets/Editor/Validation/SceneValidator.cs:380-383 --> |
+| Error | `The audio files of Sound/Custom markers take <size> MB, at most 20 MB are exported. Shorten the clips or save them as .ogg.` | Shorten the clips, or save them as `.ogg`. <!-- src: Assets/Editor/Validation/SceneValidator.cs:386-390 --> |
+
+</details>
+
+<details>
 <summary><b>Markers</b>: Material markers</summary>
 
-Material markers replace materials with render core variants, and they apply only to Binary builds. Their issues appear in the Markers category. The last two rows are checked only when **Format** is **Binary**. See [Replace materials with render core variants](markers.md#material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:308-532,600-671 -->
+Material markers replace materials with render core variants, and they apply only to Binary builds. Their issues appear in the Markers category. The last two rows are checked only when **Format** is **Binary**. See [Replace materials with render core variants](markers.md#material). <!-- src: Assets/Editor/Validation/SceneValidator.cs:442-666,734-805 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -283,7 +303,7 @@ In the image messages, `<image>` is `icon` or `preview`. In the rows about an as
 <details>
 <summary><b>Minimap</b>: size and textures</summary>
 
-The scene needs exactly one Minimap; the Budget category checks the count. Keep the Minimap object active: validation also counts an inactive Minimap, but the build exports only an active one. See [Add the minimap](minimap-and-images.md#minimap). <!-- src: Assets/Editor/Validation/SceneValidator.cs:901-950 -->
+The scene needs exactly one Minimap; the Budget category checks the count. Keep the Minimap object active: validation also counts an inactive Minimap, but the build exports only an active one. See [Add the minimap](minimap-and-images.md#minimap). <!-- src: Assets/Editor/Validation/SceneValidator.cs:1035-1084 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |
@@ -297,7 +317,7 @@ The scene needs exactly one Minimap; the Budget category checks the count. Keep 
 <details>
 <summary><b>Physics</b>: mesh colliders on moving Rigidbodies</summary>
 
-A Rigidbody that isn't kinematic needs convex mesh colliders. The Rigidbody can be on the collider's object or on a parent. <!-- src: Assets/Editor/Validation/SceneValidator.cs:846-867 -->
+A Rigidbody that isn't kinematic needs convex mesh colliders. The Rigidbody can be on the collider's object or on a parent. <!-- src: Assets/Editor/Validation/SceneValidator.cs:980-1001 -->
 
 | Severity | Message | What to do |
 | --- | --- | --- |

@@ -2,13 +2,14 @@
 
 [English](../en/markers.md) · **Русский**
 
-Маркеры сообщают игре, что представляют собой объекты сцены: где появляется машина, какая дорожная поверхность у каждого коллайдера, какие объекты проигрывают анимацию и какие материалы используют варианты render core. Добавьте их, когда в сцене уже есть модели и коллайдеры.
+Маркеры сообщают игре, что представляют собой объекты сцены: где появляется машина, какая дорожная поверхность у каждого коллайдера, какие объекты проигрывают анимацию, какие материалы используют варианты render core и где звучат звуки. Добавьте их, когда в сцене уже есть модели и коллайдеры.
 
 ## Перед началом работы
 
 - Сцена карты в `Assets/MapResources/<MapName>/` с моделями и коллайдерами. См. [Подготовка сцены](scene-setup.md).
 - Для маркеров Animation — Animator, контроллер которого содержит анимационные клипы.
 - Для маркеров Material — формат сборки **Binary**. См. [Выбор сцены и формата](build.md#format).
+- Для маркеров **Sound** > **Custom** — ваши звуки в файлах `.ogg` или `.wav` в проекте.
 
 ## Добавление компонента GameMarkerData
 
@@ -50,7 +51,7 @@
 <a name="types"></a>
 ## Выбор типа маркера
 
-В меню типа 36 пунктов: **SpawnPoint**, подменю **Road** с 27 поверхностями, **Animation**, **Material**, подменю **ClipZone** с 2 видами зон и подменю **Miniature** с 4 видами. <!-- src: Assets/Scripts/MarkerData.cs:9-47 -->
+В меню типа 39 пунктов: **SpawnPoint**, подменю **Road** с 27 поверхностями, **Animation**, **Material**, подменю **ClipZone** с 2 видами зон, подменю **Miniature** с 4 видами и подменю **Sound** с 3 видами. <!-- src: Assets/Scripts/MarkerData.cs:9-50 -->
 
 | Тип | На какой объект | Что делает | Форматы |
 | --- | --- | --- | --- |
@@ -60,6 +61,7 @@
 | **Material** | GameObject с MeshRenderer или LODGroup | Заменяет его материалы вариантами render core | Только Binary |
 | **ClipZone** > *вид* | Пустой GameObject, дети которого — точки центральной линии зоны | Создаёт клиппинг-зону фрирайда: touch and go или тройную | Binary и Wavefront |
 | **Miniature** > *вид* | Любой GameObject, обычно корень группы | Задаёт, чем объект и его дети будут в 3D-превью на глобальной карте; см. [3D-превью на глобальной карте](minimap-and-images.md#world-map-3d) | Binary и Wavefront |
+| **Sound** > *вид* | Пустой GameObject в месте звука | Проигрывает звук игры или ваш аудиофайл в месте объекта либо фоновый звук всей карты; см. [Добавление звуков](#sound) | Binary и Wavefront |
 
 Чтобы задать один тип нескольким объектам GameObject:
 
@@ -70,7 +72,7 @@
 
 Результат: у всех выбранных маркеров новый тип.
 
-Кнопка сохраняет **Template Config** и шаблон каждого маркера. Для типа **Road** она также сбрасывает собственные значения маркера, которые использует **Custom**, к значениям по умолчанию новой поверхности — так же, как смена поверхности у одного маркера. Если у выделенных маркеров разные поверхности, сбрасываются и те, у которых новая поверхность уже была; если она уже есть у всех выделенных маркеров, их значения **Custom** остаются. После нажатия кнопки маркер без **Template Config** получает поверхность игры, соответствующую новому типу, маркер с именованным шаблоном экспортирует значения шаблона, а маркер с **Custom** — значения по умолчанию новой поверхности; см. раздел [Физические значения](#values). <!-- src: Assets/Editor/MarkerDataDrawer.cs:59-75 -->
+Кнопка сохраняет **Template Config** и шаблон каждого маркера. Для типа **Road** она также сбрасывает собственные значения маркера, которые использует **Custom**, к значениям по умолчанию новой поверхности — так же, как смена поверхности у одного маркера. Если у выделенных маркеров разные поверхности, сбрасываются и те, у которых новая поверхность уже была; если она уже есть у всех выделенных маркеров, их значения **Custom** остаются. После нажатия кнопки маркер без **Template Config** получает поверхность игры, соответствующую новому типу, маркер с именованным шаблоном экспортирует значения шаблона, а маркер с **Custom** — значения по умолчанию новой поверхности; см. раздел [Физические значения](#values). <!-- src: Assets/Editor/MarkerDataDrawer.cs:62-78 -->
 
 <a name="spawn"></a>
 ## Добавление точек появления
@@ -90,8 +92,8 @@
 
 - По умолчанию машина стартует в первой точке появления по порядку в иерархии. Сделайте стартовую позицию первой точкой появления в окне **Hierarchy** и не вкладывайте одну точку появления в другую: дочерняя точка идёт раньше родительской.
 - Каждая точка появления — это точка быстрого перемещения на карте мира в игре, которая показывает вашу [мини-карту](minimap-and-images.md#minimap). Карта мира перечисляет точки по именам их GameObject, и игроки подтверждают телепортацию.
-- Если точек появления нет, проверка сообщает об ошибке: `The map has no SpawnPoint marker, so there is nowhere for a car to appear. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:290 -->
-- Если у нескольких точек появления одинаковое имя, проверка выдаёт предупреждение: `<n> spawn points are all named '<name>'. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:714 -->
+- Если точек появления нет, проверка сообщает об ошибке: `The map has no SpawnPoint marker, so there is nowhere for a car to appear. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:293 -->
+- Если у нескольких точек появления одинаковое имя, проверка выдаёт предупреждение: `<n> spawn points are all named '<name>'. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:848 -->
 
 У примера префаба `SpawnPoint` есть также вспомогательный компонент Draw Zone Behaviour. Пока окно **Scene** рисует гизмо, компонент рисует в точке зелёный параллелепипед, а при установленном флажке **Cast To Floor** опускает GameObject, пока тот не встанет на первый коллайдер под ним. Чтобы поставить точку на точно заданной высоте, снимите флажок **Cast To Floor**. Этот компонент не экспортируется, и проверка его игнорирует. <!-- src: Assets/Resources/MapSkipComponentConfig.asset:16 -->
 
@@ -113,7 +115,7 @@
 
 В примере TestMap так устроен `Content/workshop_map_main/road`: у этого GameObject есть только Mesh Collider и маркер `Road/asphalt`. Кроме того, его маркер использует шаблон `AsphaultDef`, поэтому игра получает значения шаблона вместо собственной поверхности `asphalt`; см. [Значения, сохранённые прежней версией](reference.md#older-values).
 
-- Маркер Road без коллайдера на его GameObject или на дочерних объектах — ошибка проверки: `'<name>' is marked as Road but has no Collider on it or its children, …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:275 -->
+- Маркер Road без коллайдера на его GameObject или на дочерних объектах — ошибка проверки: `'<name>' is marked as Road but has no Collider on it or its children, …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:278 -->
 - Коллайдер без маркера Road всё равно участвует в столкновениях, но игра даёт ему физический материал по умолчанию вместо дорожной поверхности.
 - Маркер Road на объекте с LODGroup или на рендерере, который входит в один из её уровней LOD, не даёт поверхности. Поместите коллайдер и маркер на отдельный GameObject, который не входит ни в один уровень LOD.
 - Маркер Road на GameObject с Rigidbody или на одном из его дочерних объектов не даёт поверхности. Коллайдеры динамического объекта вместо этого используют трение и упругость своего физического материала. Это относится и к дочернему объекту примера префаба `Box`.
@@ -134,7 +136,7 @@
 | Вода | `liquid_water` |
 | Металл, пластик и дерево | `metal`, `metal_grille`, `plastic`, `wood`, `wood_plank` |
 
-В игре нет поверхностей с именами `default`, `ice_snowy` и `pavement`. Коллайдер с одной из них не получает в игре дорожной поверхности — со значениями или без — и ведёт себя как коллайдер без маркера Road. Проверка предупреждает о таком маркере сообщением `'<object>' uses the surface '<surface>', which the game doesn't have, …` и называет поверхность на замену: `asphalt` вместо `default`, `road_icy` вместо `ice_snowy` и `paving_slab` вместо `pavement`. В примере TestMap маркер `Content/workshop_map_main/wall_coll` использует `Road/default` и получает это предупреждение. <!-- src: Assets/Editor/Validation/SceneValidator.cs:264-270,722-727 -->
+В игре нет поверхностей с именами `default`, `ice_snowy` и `pavement`. Коллайдер с одной из них не получает в игре дорожной поверхности — со значениями или без — и ведёт себя как коллайдер без маркера Road. Проверка предупреждает о таком маркере сообщением `'<object>' uses the surface '<surface>', which the game doesn't have, …` и называет поверхность на замену: `asphalt` вместо `default`, `road_icy` вместо `ice_snowy` и `paving_slab` вместо `pavement`. В примере TestMap маркер `Content/workshop_map_main/wall_coll` использует `Road/default` и получает это предупреждение. <!-- src: Assets/Editor/Validation/SceneValidator.cs:267-273,856-861 -->
 
 <a name="values"></a>
 ### Физические значения
@@ -229,7 +231,7 @@
 | **Initial phase (0..1)** | `0` | С какого места клипа начинается воспроизведение, в долях его длины | Чтобы копии одного объекта двигались несинхронно |
 | **Loop** | Установлен | Повторяет клип | Снимите флажок для клипа, который проигрывается один раз |
 
-Проверка контролирует только то, что у маркера есть Animator с клипами: `Animation marker requires an Animator with animation clips.` Сборка проверяет следующие правила и останавливается с ошибкой в окне **Console**, если одно из них нарушено: <!-- src: Assets/Editor/Validation/SceneValidator.cs:256 -->
+Проверка контролирует только то, что у маркера есть Animator с клипами: `Animation marker requires an Animator with animation clips.` Сборка проверяет следующие правила и останавливается с ошибкой в окне **Console**, если одно из них нарушено: <!-- src: Assets/Editor/Validation/SceneValidator.cs:259 -->
 
 - У каждого Animator один маркер Animation.
 - Анимированные иерархии не пересекаются: отмеченный Animator не может находиться внутри иерархии другого отмеченного Animator.
@@ -237,7 +239,7 @@
 - В иерархии есть хотя бы один включённый MeshRenderer или SkinnedMeshRenderer, у каждого такого рендерера есть меш, и у каждого меша столько материалов, сколько в нём подмешей.
 - Запечённые данные не превышают лимит размера. Иначе сборка сообщает `VAT for '<name>' is too large …`; уменьшите число вершин, клипов или значение **Bake frames per second**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:128 -->
 
-Animator или SkinnedMeshRenderer без маркера Animation не экспортируется, и проверка показывает для него заметку категории Components. Игра проигрывает только запечённые клипы: переходы, параметры, события, скрипты и IK из Animator не воспроизводятся, а формы коллайдеров не деформируются вместе с анимацией. Полное описание возможностей — в разделе [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/2b4fa1f9975adf09f572f6632c38ae424b368c41/VertexAnimation.md#supported-scope) файла VertexAnimation.md в SDK.
+Animator или SkinnedMeshRenderer без маркера Animation не экспортируется, и проверка показывает для него заметку категории Components. Игра проигрывает только запечённые клипы: переходы, параметры, события, скрипты и IK из Animator не воспроизводятся, а формы коллайдеров не деформируются вместе с анимацией. Полное описание возможностей — в разделе [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/VertexAnimation.md#supported-scope) файла VertexAnimation.md в SDK.
 
 <a name="material"></a>
 ## Замена материалов вариантами render core
@@ -283,12 +285,50 @@ Animator или SkinnedMeshRenderer без маркера Animation не экс�
 
 `MAT_LAYERS4` смешивает четыре слоя по цветам вершин меша: RGB — маска слоёв, а A тонирует альбедо. Меш без цветов вершин экспортируется белым и показывает только четвёртый слой. Игра сохраняет цвета вершин меша с `MAT_LAYERS4`, поэтому они умножают и свечение других подмешей этого меша. Вынесите светящиеся части на отдельный GameObject: оптимизация сборки объединяет объекты с `MAT_LAYERS4` только друг с другом, поэтому такой объект остаётся отдельным мешем. Проверка предупреждает о меше без цветов вершин и о меше, в котором сочетаются `MAT_LAYERS4` и свечение.
 
-В файле RenderCoreMaterial.md в SDK варианты alpha test, `MAT_LAYERS4`, свечения и `MAT_INTERIOR` описаны в разделе [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/2b4fa1f9975adf09f572f6632c38ae424b368c41/RenderCoreMaterial.md#variant-notes), а когда запись нужно снова экспортировать кнопкой **Export from material** — в разделе [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/2b4fa1f9975adf09f572f6632c38ae424b368c41/RenderCoreMaterial.md#revision-policy). Как экспортируются материалы Layered Lit, см. в [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/2b4fa1f9975adf09f572f6632c38ae424b368c41/LayeredPbr.md).
+В файле RenderCoreMaterial.md в SDK варианты alpha test, `MAT_LAYERS4`, свечения и `MAT_INTERIOR` описаны в разделе [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/RenderCoreMaterial.md#variant-notes), а когда запись нужно снова экспортировать кнопкой **Export from material** — в разделе [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/RenderCoreMaterial.md#revision-policy). Как экспортируются материалы Layered Lit, см. в [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/LayeredPbr.md).
+
+<a name="sound"></a>
+## Добавление звуков
+
+Маркер Sound добавляет на карту звук. Маркер работает в обоих форматах, и у него 3 вида:
+
+- **Sound** > **Preset** проигрывает в месте объекта звук игры, например море или толпу.
+- **Sound** > **Custom** проигрывает в месте объекта ваш файл `.ogg` или `.wav`. Сборка копирует файл в карту без изменений.
+- **Sound** > **Ambience** проигрывает на всей карте фоновый звук трассы игры или ветер. Положение объекта не важно.
+
+Чтобы добавить звук:
+
+1. Выберите **GameObject** > **Create Empty**.
+1. В окне **Inspector**, в компоненте Transform, задайте в **Position** место звука.
+1. Добавьте компонент GameMarkerData.
+1. В меню типа выберите **Sound**, затем вид.
+1. Для **Preset** и **Ambience** в поле **Sound** выберите звук. Для **Custom** в поле **Audio clip** выберите свой клип.
+1. Задайте поля, описанные в следующей таблице.
+
+Результат: окно **Scene** показывает сферу в месте объекта, а когда объект выбран — две каркасные сферы **Min Distance** и **Max Distance**. Следующая сборка экспортирует звук.
+
+У маркера Sound такие поля: <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Sounds/SoundMarkerSettings.cs:16-35 -->
+
+| Параметр | По умолчанию | Назначение | Когда менять |
+| --- | --- | --- | --- |
+| **Sound** | `None` | Только **Preset** и **Ambience**. Звук игры, сгруппированный по категориям: для **Preset** — звуки мест, например `Water/sea_close` или `People/crowd_small`; для **Ambience** — фон трассы игры, например `Tracks/ebisu`, или `Weather/wind`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Sounds/ModSoundPresets.cs:21-79 --> | Всегда: маркер без звука — ошибка проверки |
+| **Audio clip** | None | Только **Custom**. Файл `.ogg` или `.wav`, который звучит. | Всегда: маркер без клипа — ошибка проверки |
+| **Volume** | `1` | Громкость, от 0 до 1 | Чтобы сделать звук тише |
+| **Min Distance** | `5` | Только **Preset** и **Custom**. До этого расстояния, в метрах, звук звучит в полную громкость. От 0,5 до 500. | Чтобы увеличить или уменьшить громкую область |
+| **Max Distance** | `50` | Только **Preset** и **Custom**. Дальше этого расстояния, в метрах, звук не слышен. От 0,5 до 500. | Чтобы звук был слышен дальше или ближе |
+
+Для маркеров Sound действуют правила: <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Meta/SoundsMeta.cs:36-39 -->
+
+- На карте не больше 128 маркеров Sound, и они используют не больше 32 разных аудиофайлов общим размером до 20 МБ. Карту сверх этих лимитов проверка считает ошибкой.
+- Экспортируются только файлы `.ogg` и `.wav`. Другие форматы конвертируйте, а для длинных звуков выбирайте `.ogg`: он занимает меньше места.
+- Несколько маркеров **Custom** с одним клипом используют в карте один файл.
+- На карте звучит один фон: первый маркер **Sound** > **Ambience** в порядке окна **Hierarchy**. Об остальных проверка предупреждает, а сборка их пропускает.
+- **Min Distance** не может быть больше **Max Distance**; проверка считает это ошибкой.
 
 <a name="unsupported"></a>
 ## Удаление неподдерживаемых маркеров
 
-Карты, сделанные в старых версиях MapUploader, могут содержать типы маркеров, которые игра больше не поддерживает: `Ambient`, `TimeObjectActivator` и `NetworkObject`. Для такого маркера окно **Inspector** показывает `Unsupported marker: <type>. Select SpawnPoint, Road, Animation or Material, or remove the component.`, проверка выдаёт предупреждение категории Markers, а экспорт пропускает маркер. <!-- src: Assets/Editor/MarkerDataDrawer.cs:91 -->
+Карты, сделанные в старых версиях MapUploader, могут содержать типы маркеров, которые игра больше не поддерживает: `Ambient`, `TimeObjectActivator` и `NetworkObject`. Для такого маркера окно **Inspector** показывает `Unsupported marker: <type>. Select SpawnPoint, Road, Animation, Material, ClipZone, Miniature or Sound, or remove the component.`, проверка выдаёт предупреждение категории Markers, а экспорт пропускает маркер. <!-- src: Assets/Editor/MarkerDataDrawer.cs:106 -->
 
 Чтобы удалить неподдерживаемый маркер:
 
@@ -296,7 +336,7 @@ Animator или SkinnedMeshRenderer без маркера Animation не экс�
 
 Результат: при следующей проверке предупреждения для этого объекта нет.
 
-Если объект должен стать маркером другого типа, вместо удаления выберите в меню типа поддерживаемый тип. Движущимся физическим объектам маркер не нужен: добавьте им Rigidbody, как описано в разделе [Добавление динамических объектов (Rigidbody)](scene-setup.md#dynamic).
+Если объект должен стать маркером другого типа, вместо удаления выберите в меню типа поддерживаемый тип: для звука `Ambient` — тип **Sound**; см. [Добавление звуков](#sound). Движущимся физическим объектам маркер не нужен: добавьте им Rigidbody, как описано в разделе [Добавление динамических объектов (Rigidbody)](scene-setup.md#dynamic).
 
 В примере TestMap по-прежнему 8 маркеров `Ambient` под `AmbientSounds`, поэтому проверка TestMap показывает 8 таких предупреждений. У `Assets/ExamplePrefab/Ambient.prefab` тот же маркер, поэтому каждый его экземпляр в сцене тоже даёт это предупреждение.
 

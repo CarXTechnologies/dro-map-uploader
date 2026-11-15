@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using CarX.Modding.Creator.Editor;
 using CarX.Modding.Creator.Runtime;
+using UnityEditor;
 using UnityEngine;
 
 namespace Editor.Validation
@@ -48,6 +50,7 @@ namespace Editor.Validation
 			CheckComponents(report, transforms, rules, skipTypes);
 			CheckBudget(report, rules);
 			CheckMarkers(report, transforms);
+			CheckSounds(report, transforms);
 			CheckMaterialMarkerCoverage(report, transforms);
 			CheckLighting(report, transforms);
 			CheckGeometry(report, transforms);
@@ -298,6 +301,137 @@ namespace Editor.Validation
 					CheckSpawnPointNames(report, spawnPoints);
 
 					break;
+			}
+		}
+
+		/// <summary>
+		/// Sound markers as the exporter takes them (active, enabled): a known sound of the kind, an .ogg or .wav clip,
+		/// min distance not above max, one ambience and the limits of the sounds document.
+		/// </summary>
+		private static void CheckSounds(MapValidationReport report, List<Transform> transforms)
+		{
+			int emitters = 0;
+			GameMarkerData firstAmbience = null;
+			var files = new HashSet<string>(StringComparer.Ordinal);
+			long filesBytes = 0;
+
+			foreach (Transform transform in transforms)
+			{
+				if (!transform.gameObject.activeInHierarchy)
+				{
+					continue;
+				}
+
+				foreach (GameMarkerData marker in transform.GetComponents<GameMarkerData>())
+				{
+					if (!marker.enabled || marker.MarkerHead != MarkerData.SoundHead)
+					{
+						continue;
+					}
+
+					emitters++;
+
+					if (marker.MarkerData is not SoundMarkerSettings settings)
+					{
+						report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "sound-no-settings",
+							$"'{transform.name}' is a Sound marker without settings. Select the object to create them, then set the sound.", marker);
+						continue;
+					}
+
+					SoundEmitterKind kind = settings.Kind(marker.MarkerParam);
+
+					if (kind == SoundEmitterKind.Custom)
+					{
+						CheckSoundClip(report, marker, settings, files, ref filesBytes);
+					}
+					else
+					{
+						CheckSoundPreset(report, marker, settings, kind == SoundEmitterKind.Ambience ? ModSoundPresets.Ambience : ModSoundPresets.Point);
+					}
+
+					if (kind == SoundEmitterKind.Ambience)
+					{
+						if (firstAmbience == null)
+						{
+							firstAmbience = marker;
+						}
+						else
+						{
+							report.AddCapped(MapValidationSeverity.Warning, CategoryMarkers, "sound-ambience-twice",
+								$"'{transform.name}' is a second Sound/Ambience marker. A map plays one ambience: the first one, " +
+								$"'{firstAmbience.name}'. Remove the other ambience markers.", marker);
+						}
+					}
+					else if (settings.minDistance > settings.maxDistance)
+					{
+						report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "sound-distance",
+							$"'{transform.name}': Min Distance {settings.minDistance} m is greater than Max Distance {settings.maxDistance} m. " +
+							"Make Min Distance smaller.", marker);
+					}
+				}
+			}
+
+			if (emitters > SoundsMeta.MaxEmitters)
+			{
+				report.Error(CategoryMarkers,
+					$"The map has {emitters} Sound markers, at most {SoundsMeta.MaxEmitters} are exported. Remove the sounds the map doesn't need.");
+			}
+
+			if (files.Count > SoundsMeta.MaxFiles)
+			{
+				report.Error(CategoryMarkers,
+					$"Sound/Custom markers use {files.Count} audio files, at most {SoundsMeta.MaxFiles} are exported. Use fewer different clips.");
+			}
+
+			if (filesBytes > SoundsMeta.MaxFilesBytes)
+			{
+				report.Error(CategoryMarkers,
+					$"The audio files of Sound/Custom markers take {filesBytes / (1024f * 1024f):0.#} MB, at most {SoundsMeta.MaxFilesBytes / (1024 * 1024)} MB " +
+					"are exported. Shorten the clips or save them as .ogg.");
+			}
+		}
+
+		private static void CheckSoundPreset(MapValidationReport report, GameMarkerData marker, SoundMarkerSettings settings,
+			IReadOnlyList<ModSoundPresets.Preset> presets)
+		{
+			string preset = settings.preset?.Trim() ?? string.Empty;
+
+			if (preset.Length == 0)
+			{
+				report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "sound-no-preset",
+					$"'{marker.name}' has no sound selected. Select a sound in its {marker.MarkerParam} marker.", marker);
+				return;
+			}
+
+			if (presets.All(item => item.id != preset))
+			{
+				report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "sound-unknown-preset",
+					$"'{marker.name}' uses the sound '{preset}', which {marker.MarkerParam} doesn't have. Select a sound from the list.", marker);
+			}
+		}
+
+		private static void CheckSoundClip(MapValidationReport report, GameMarkerData marker, SoundMarkerSettings settings, HashSet<string> files,
+			ref long filesBytes)
+		{
+			string path = settings.clip != null ? AssetDatabase.GetAssetPath(settings.clip) : string.Empty;
+
+			if (string.IsNullOrEmpty(path))
+			{
+				report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "sound-no-clip",
+					$"'{marker.name}' is a Sound/Custom marker without an audio clip. Assign an .ogg or .wav clip.", marker);
+				return;
+			}
+
+			if (!SoundsCollector.IsSupportedFile(path))
+			{
+				report.AddCapped(MapValidationSeverity.Error, CategoryMarkers, "sound-clip-format",
+					$"'{marker.name}' plays '{Path.GetFileName(path)}'. Only .ogg and .wav files are exported: convert the clip to one of them.", marker);
+				return;
+			}
+
+			if (files.Add(path))
+			{
+				filesBytes += new FileInfo(FileUtil.GetPhysicalPath(path)).Length;
 			}
 		}
 

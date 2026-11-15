@@ -2,13 +2,14 @@
 
 **English** · [Русский](../ru/markers.md)
 
-Markers tell the game what your scene objects are: where the car appears, which road surface each collider has, which objects play an animation and which materials use render core variants. Add them once the scene has its models and colliders.
+Markers tell the game what your scene objects are: where the car appears, which road surface each collider has, which objects play an animation, which materials use render core variants and where sounds play. Add them once the scene has its models and colliders.
 
 ## Before you start
 
 - A map scene in `Assets/MapResources/<MapName>/` with its models and colliders. See [Set up the scene](scene-setup.md).
 - For Animation markers, an Animator whose controller contains the animation clips.
 - For Material markers, the **Binary** build format. See [Choose the scene and format](build.md#format).
+- For **Sound** > **Custom** markers, your sounds as `.ogg` or `.wav` files in the project.
 
 ## Add the GameMarkerData component
 
@@ -50,7 +51,7 @@ Don't use `Ambient.prefab`. Its marker type, `Ambient`, is no longer supported; 
 <a name="types"></a>
 ## Choose the marker type
 
-The type menu has 36 entries: **SpawnPoint**, a **Road** submenu with 27 surfaces, **Animation**, **Material**, a **ClipZone** submenu with 2 zone kinds and a **Miniature** submenu with 4 kinds. <!-- src: Assets/Scripts/MarkerData.cs:9-47 -->
+The type menu has 39 entries: **SpawnPoint**, a **Road** submenu with 27 surfaces, **Animation**, **Material**, a **ClipZone** submenu with 2 zone kinds, a **Miniature** submenu with 4 kinds and a **Sound** submenu with 3 kinds. <!-- src: Assets/Scripts/MarkerData.cs:9-50 -->
 
 | Type | Put it on | What it does | Formats |
 | --- | --- | --- | --- |
@@ -60,6 +61,7 @@ The type menu has 36 entries: **SpawnPoint**, a **Road** submenu with 27 surface
 | **Material** | The GameObject with the MeshRenderer or the LODGroup | Replaces its materials with render core variants | Binary only |
 | **ClipZone** > *kind* | An empty GameObject whose children are the points of the zone center line | Makes a free ride clipping zone: touch and go or triple | Binary and Wavefront |
 | **Miniature** > *kind* | Any GameObject, often the root of a group | Sets what the object and its children are in the 3D preview on the world map; see [3D preview on the world map](minimap-and-images.md#world-map-3d) | Binary and Wavefront |
+| **Sound** > *kind* | An empty GameObject at the place of the sound | Plays a game sound or your own audio file at the object, or the background sound of the whole map; see [Add sounds](#sound) | Binary and Wavefront |
 
 To give several GameObjects the same type:
 
@@ -70,7 +72,7 @@ To give several GameObjects the same type:
 
 Result: every selected marker has the new type.
 
-The button keeps the **Template Config** and the template of each marker. For a **Road** type, it also resets the marker's own values, which **Custom** uses, to the defaults of the new surface, as changing the surface of one marker does. When the selected markers have different surfaces, it resets those that already had the new surface too; when every selected marker already has it, their **Custom** values stay. After the button, a marker without a **Template Config** gets the game's surface of its new type, a marker with a named template exports the template's values, and a **Custom** marker exports the defaults of the new surface; see [Physics values](#values). <!-- src: Assets/Editor/MarkerDataDrawer.cs:59-75 -->
+The button keeps the **Template Config** and the template of each marker. For a **Road** type, it also resets the marker's own values, which **Custom** uses, to the defaults of the new surface, as changing the surface of one marker does. When the selected markers have different surfaces, it resets those that already had the new surface too; when every selected marker already has it, their **Custom** values stay. After the button, a marker without a **Template Config** gets the game's surface of its new type, a marker with a named template exports the template's values, and a **Custom** marker exports the defaults of the new surface; see [Physics values](#values). <!-- src: Assets/Editor/MarkerDataDrawer.cs:62-78 -->
 
 <a name="spawn"></a>
 ## Add spawn points
@@ -90,8 +92,8 @@ How the game uses spawn points:
 
 - By default, the car starts at the first spawn point in Hierarchy order. Make the start position the first spawn point in the **Hierarchy**, and don't put one spawn point inside another: a child spawn point comes before its parent.
 - Every spawn point is a fast-travel point on the in-game world map, which shows your [minimap](minimap-and-images.md#minimap). The world map lists each point under its GameObject name, and players confirm the teleport.
-- Without spawn points, validation reports an error: `The map has no SpawnPoint marker, so there is nowhere for a car to appear. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:290 -->
-- When several spawn points share a name, validation warns: `<n> spawn points are all named '<name>'. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:714 -->
+- Without spawn points, validation reports an error: `The map has no SpawnPoint marker, so there is nowhere for a car to appear. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:293 -->
+- When several spawn points share a name, validation warns: `<n> spawn points are all named '<name>'. …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:848 -->
 
 The `SpawnPoint` example prefab also has the Draw Zone Behaviour helper. While the **Scene** view draws gizmos, it draws a green box at the point, and with **Cast To Floor** selected it moves the GameObject down until it sits on the first collider below it. To place a point at an exact height, clear **Cast To Floor**. The helper isn't exported, and validation ignores it. <!-- src: Assets/Resources/MapSkipComponentConfig.asset:16 -->
 
@@ -113,7 +115,7 @@ Result: the type menu shows `Road/<surface>`, for example `Road/asphalt`, and th
 
 In the TestMap sample, `Content/workshop_map_main/road` is set up this way: the GameObject has only a Mesh Collider and a `Road/asphalt` marker. Its marker also uses the `AsphaultDef` template, so the game gets the template's values instead of its own `asphalt`; see [Values saved by an earlier version](reference.md#older-values).
 
-- A Road marker with no collider on its GameObject or its children is a validation error: `'<name>' is marked as Road but has no Collider on it or its children, …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:275 -->
+- A Road marker with no collider on its GameObject or its children is a validation error: `'<name>' is marked as Road but has no Collider on it or its children, …` <!-- src: Assets/Editor/Validation/SceneValidator.cs:278 -->
 - A collider without a Road marker still collides, but the game gives it a default physics material instead of a road surface.
 - A Road marker on a LODGroup object, or on a renderer that is one of its LOD levels, gives no surface. Put the collider and the marker on a separate GameObject that isn't part of any LOD level.
 - A Road marker on the GameObject with a Rigidbody, or on one of its children, gives no surface. The colliders of a dynamic object use the friction and bounciness of their physics material instead. This also applies to the child of the `Box` example prefab.
@@ -134,7 +136,7 @@ The **Road** submenu lists `default` first, then 26 surfaces in alphabetical ord
 | Water | `liquid_water` |
 | Metal, plastic and wood | `metal`, `metal_grille`, `plastic`, `wood`, `wood_plank` |
 
-The game has no surface named `default`, `ice_snowy` or `pavement`. A collider with one of them gets no road surface in the game, with values or without, and behaves like a collider without a Road marker. Validation warns about such a marker with `'<object>' uses the surface '<surface>', which the game doesn't have, …` and names the surface to use instead: `asphalt` instead of `default`, `road_icy` instead of `ice_snowy` and `paving_slab` instead of `pavement`. In the TestMap sample, `Content/workshop_map_main/wall_coll` uses `Road/default` and gets this warning. <!-- src: Assets/Editor/Validation/SceneValidator.cs:264-270,722-727 -->
+The game has no surface named `default`, `ice_snowy` or `pavement`. A collider with one of them gets no road surface in the game, with values or without, and behaves like a collider without a Road marker. Validation warns about such a marker with `'<object>' uses the surface '<surface>', which the game doesn't have, …` and names the surface to use instead: `asphalt` instead of `default`, `road_icy` instead of `ice_snowy` and `paving_slab` instead of `pavement`. In the TestMap sample, `Content/workshop_map_main/wall_coll` uses `Road/default` and gets this warning. <!-- src: Assets/Editor/Validation/SceneValidator.cs:267-273,856-861 -->
 
 <a name="values"></a>
 ### Physics values
@@ -229,7 +231,7 @@ The Animation marker has these fields: <!-- src: Assets/Plugins/CarX.Modding.Cre
 | **Initial phase (0..1)** | `0` | Where in the clip playback starts, as a fraction of its length | To keep copies of the same object out of step |
 | **Loop** | Selected | Repeats the clip | Clear it for a clip that plays once |
 
-Validation checks only that the marker has an Animator with clips: `Animation marker requires an Animator with animation clips.` The build checks the following rules and stops with an error in the **Console** when one fails: <!-- src: Assets/Editor/Validation/SceneValidator.cs:256 -->
+Validation checks only that the marker has an Animator with clips: `Animation marker requires an Animator with animation clips.` The build checks the following rules and stops with an error in the **Console** when one fails: <!-- src: Assets/Editor/Validation/SceneValidator.cs:259 -->
 
 - Each Animator has one Animation marker.
 - Animated hierarchies don't overlap: a marked Animator can't be inside the hierarchy of another marked Animator.
@@ -237,7 +239,7 @@ Validation checks only that the marker has an Animator with clips: `Animation ma
 - The hierarchy has at least one enabled MeshRenderer or SkinnedMeshRenderer, every such renderer has a mesh, and each mesh has as many materials as submeshes.
 - The baked data stays within its size limit. Otherwise the build reports `VAT for '<name>' is too large …`; reduce the vertices, the clips or **Bake frames per second**. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/VertexAnimationBaker.cs:128 -->
 
-An Animator or SkinnedMeshRenderer without an Animation marker isn't exported, and validation shows a Components note for it. The game plays the baked clips only: Animator transitions, parameters, events, scripts and IK aren't reproduced, and collider shapes don't deform with the animation. For the full scope, see [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/2b4fa1f9975adf09f572f6632c38ae424b368c41/VertexAnimation.md#supported-scope) in the SDK's VertexAnimation.md.
+An Animator or SkinnedMeshRenderer without an Animation marker isn't exported, and validation shows a Components note for it. The game plays the baked clips only: Animator transitions, parameters, events, scripts and IK aren't reproduced, and collider shapes don't deform with the animation. For the full scope, see [Supported scope](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/VertexAnimation.md#supported-scope) in the SDK's VertexAnimation.md.
 
 <a name="material"></a>
 ## Replace materials with render core variants
@@ -283,12 +285,50 @@ The following screenshot shows a Material marker on a LODGroup object, with its 
 
 `MAT_LAYERS4` blends four layers by the mesh's vertex colors: RGB is the layer mask and A tints the albedo. A mesh without vertex colors is exported white and shows only the fourth layer. The game keeps the vertex colors of a mesh with `MAT_LAYERS4`, so they also multiply the emission of the mesh's other submeshes. Put emissive parts on a separate GameObject: build optimization merges objects with `MAT_LAYERS4` only with each other, so that object stays a separate mesh. Validation warns about a mesh without vertex colors and about a mesh that mixes `MAT_LAYERS4` and emission.
 
-The SDK's RenderCoreMaterial.md describes the alpha-test, `MAT_LAYERS4`, emission and `MAT_INTERIOR` variants in [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/2b4fa1f9975adf09f572f6632c38ae424b368c41/RenderCoreMaterial.md#variant-notes), and when an entry needs **Export from material** again in [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/2b4fa1f9975adf09f572f6632c38ae424b368c41/RenderCoreMaterial.md#revision-policy). For how Layered Lit materials are exported, see [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/2b4fa1f9975adf09f572f6632c38ae424b368c41/LayeredPbr.md).
+The SDK's RenderCoreMaterial.md describes the alpha-test, `MAT_LAYERS4`, emission and `MAT_INTERIOR` variants in [Variant notes](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/RenderCoreMaterial.md#variant-notes), and when an entry needs **Export from material** again in [Revision policy](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/RenderCoreMaterial.md#revision-policy). For how Layered Lit materials are exported, see [LayeredPbr.md](https://github.com/CarXTechnologies/CarX.Modding.Creator/blob/d0276ff3fac03d5a8a9a5d59ace653df0cf9d892/LayeredPbr.md).
+
+<a name="sound"></a>
+## Add sounds
+
+A Sound marker adds a sound to the map. It works in both formats and has 3 kinds:
+
+- **Sound** > **Preset** plays a sound of the game at the object, for example the sea or a crowd.
+- **Sound** > **Custom** plays your own `.ogg` or `.wav` file at the object. The build copies the file into the map unchanged.
+- **Sound** > **Ambience** plays the background sound of a game track, or wind, over the whole map. Its position doesn't matter.
+
+To add a sound:
+
+1. Select **GameObject** > **Create Empty**.
+1. In the **Inspector**, in the Transform, set **Position** to the place of the sound.
+1. Add the GameMarkerData component.
+1. In the type menu, select **Sound**, then the kind.
+1. For **Preset** and **Ambience**, in **Sound**, select a sound. For **Custom**, in **Audio clip**, select your clip.
+1. Set the fields described in the following table.
+
+Result: the **Scene** view shows a sphere at the object, and with the object selected, two wire spheres show **Min Distance** and **Max Distance**. The next build exports the sound.
+
+The Sound marker has these fields: <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Sounds/SoundMarkerSettings.cs:16-35 -->
+
+| Option | Default | What it does | When to change |
+| --- | --- | --- | --- |
+| **Sound** | `None` | **Preset** and **Ambience** only. The game sound, grouped by category: for **Preset**, sounds of places, such as `Water/sea_close` or `People/crowd_small`; for **Ambience**, the background of a game track, such as `Tracks/ebisu`, or `Weather/wind`. <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Sounds/ModSoundPresets.cs:21-79 --> | Always: a marker without a sound is a validation error |
+| **Audio clip** | None | **Custom** only. The `.ogg` or `.wav` file that plays. | Always: a marker without a clip is a validation error |
+| **Volume** | `1` | Loudness, from 0 to 1 | To make the sound quieter |
+| **Min Distance** | `5` | **Preset** and **Custom** only. Up to this distance, in metres, the sound plays at full volume. From 0.5 to 500. | To make the loud area larger or smaller |
+| **Max Distance** | `50` | **Preset** and **Custom** only. Beyond this distance, in metres, the sound isn't heard. From 0.5 to 500. | To make the sound carry further or less far |
+
+These rules apply to Sound markers: <!-- src: Assets/Plugins/CarX.Modding.Creator/Runtime/Meta/SoundsMeta.cs:36-39 -->
+
+- A map has at most 128 Sound markers, which use at most 32 different audio files of 20 MB in total. Validation reports a map over these limits as an error.
+- Only `.ogg` and `.wav` files are exported. Convert other formats, and prefer `.ogg` for long sounds: it takes less space.
+- Several **Custom** markers with the same clip share one file in the map.
+- A map plays one ambience: the first **Sound** > **Ambience** marker in Hierarchy order. Validation warns about the others, and the build skips them.
+- **Min Distance** can't be greater than **Max Distance**; validation reports it as an error.
 
 <a name="unsupported"></a>
 ## Remove unsupported markers
 
-Maps made with older versions of MapUploader can contain marker types that the game no longer supports: `Ambient`, `TimeObjectActivator` and `NetworkObject`. For such a marker, the **Inspector** shows `Unsupported marker: <type>. Select SpawnPoint, Road, Animation or Material, or remove the component.`, validation shows a Markers warning, and export skips the marker. <!-- src: Assets/Editor/MarkerDataDrawer.cs:91 -->
+Maps made with older versions of MapUploader can contain marker types that the game no longer supports: `Ambient`, `TimeObjectActivator` and `NetworkObject`. For such a marker, the **Inspector** shows `Unsupported marker: <type>. Select SpawnPoint, Road, Animation, Material, ClipZone, Miniature or Sound, or remove the component.`, validation shows a Markers warning, and export skips the marker. <!-- src: Assets/Editor/MarkerDataDrawer.cs:106 -->
 
 To remove an unsupported marker:
 
@@ -296,7 +336,7 @@ To remove an unsupported marker:
 
 Result: the warning for that object disappears from the next validation.
 
-If the object should be another marker, select a supported type in the type menu instead. Moving physics objects need no marker: give them a Rigidbody, as described in [Add dynamic objects (Rigidbody)](scene-setup.md#dynamic).
+If the object should be another marker, select a supported type in the type menu instead: for an `Ambient` sound, a **Sound** type; see [Add sounds](#sound). Moving physics objects need no marker: give them a Rigidbody, as described in [Add dynamic objects (Rigidbody)](scene-setup.md#dynamic).
 
 The TestMap sample still has 8 `Ambient` markers under `AmbientSounds`, so validating TestMap shows 8 such warnings. `Assets/ExamplePrefab/Ambient.prefab` has the same marker, so each instance of it in a scene gives this warning too.
 

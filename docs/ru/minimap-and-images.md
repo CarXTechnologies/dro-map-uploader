@@ -103,7 +103,7 @@ DrawZoneBehaviour не экспортируется, и проверка его 
 
 ### Что проверяется
 
-**Проверить карту** сообщает о следующих ошибках мини-карты. Первые две относятся к категории Budget, остальные — к категории Minimap. <!-- src: Assets/Editor/Validation/SceneValidator.cs:901-950 -->
+**Проверить карту** сообщает о следующих ошибках мини-карты. Первые две относятся к категории Budget, остальные — к категории Minimap. <!-- src: Assets/Editor/Validation/SceneValidator.cs:1035-1084 -->
 
 ```text
 'Minimap': the map has 0, at least 1 is required.
@@ -127,7 +127,7 @@ DrawZoneBehaviour не экспортируется, и проверка его 
 
 Генератор также рисует миниатюру сверху в изображение мини-карты теми же цветами. Это изображение становится изображением мини-карты, поэтому картинка карты, например панель превью на экране **Выбор трассы**, совпадает с 3D-миниатюрой и загружается так же быстро, как любая мини-карта. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/MiniatureTextureRenderer.cs:7-16 -->
 
-Сборка также записывает в миниатюру точки спавна карты (маркеры SpawnPoint), и игра отмечает их на ней, когда игрок выбирает карту для заезда или комнаты. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:595-615 -->
+Сборка также записывает в миниатюру точки спавна карты (маркеры SpawnPoint), и игра отмечает их на ней, когда игрок выбирает карту для заезда или комнаты. <!-- src: Assets/Plugins/CarX.Modding.Creator/Editor/SceneFormatCollector.cs:608-628 -->
 
 <a name="world-map-3d-enable"></a>
 ### Включение 3D-превью

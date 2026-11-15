@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using CarX.Modding.Creator.Runtime;
 using UnityEditor;
@@ -13,6 +14,8 @@ namespace Editor
 		private int m_msPropIndex;
 		private string m_msPropParam;
 		private string m_msPropHead;
+
+		private const string NoSoundPreset = "None";
 
 		public override void OnGUI(Rect position,
 			SerializedProperty property,
@@ -78,6 +81,12 @@ namespace Editor
 						SetClipZoneSettings(property.serializedObject.targetObjects, propValue.propertyPath, m_msPropParam);
 						propLastHead.stringValue = m_msPropParam;
 					}
+
+					if (m_msPropHead == MarkerData.SoundHead)
+					{
+						SetSoundSettings(property.serializedObject.targetObjects, propValue.propertyPath);
+						propLastHead.stringValue = m_msPropParam;
+					}
 				}
 
 				Space();
@@ -94,7 +103,7 @@ namespace Editor
 				{
 					Space();
 					amountRect.height = propHeight * 3;
-					EditorGUI.HelpBox(amountRect, $"Unsupported marker: {propHead.stringValue}. Select SpawnPoint, Road, Animation, Material, ClipZone or Miniature, or remove the component.", MessageType.Error);
+					EditorGUI.HelpBox(amountRect, $"Unsupported marker: {propHead.stringValue}. Select SpawnPoint, Road, Animation, Material, ClipZone, Miniature or Sound, or remove the component.", MessageType.Error);
 					m_height += amountRect.height;
 					EditorGUI.indentLevel = indent;
 					EditorGUI.EndProperty();
@@ -200,6 +209,47 @@ namespace Editor
 				return;
 			}
 
+			if (propHead.stringValue == MarkerData.SoundHead)
+			{
+				// The settings stay when the kind changes: a preset id of another kind is reported by validation
+				if (propValue.managedReferenceValue is not SoundMarkerSettings settings)
+				{
+					settings = new SoundMarkerSettings();
+					propValue.managedReferenceValue = settings;
+				}
+
+				propLastHead.stringValue = propParam.stringValue;
+				SoundEmitterKind kind = settings.Kind(propParam.stringValue);
+
+				Space();
+
+				if (kind == SoundEmitterKind.Custom)
+				{
+					EditorGUI.PropertyField(amountRect, propValue.FindPropertyRelative(nameof(SoundMarkerSettings.clip)), new GUIContent("Audio clip"));
+				}
+				else
+				{
+					DrawSoundPreset(amountRect, propValue.FindPropertyRelative(nameof(SoundMarkerSettings.preset)),
+						kind == SoundEmitterKind.Ambience ? ModSoundPresets.Ambience : ModSoundPresets.Point);
+				}
+
+				Space();
+				EditorGUI.PropertyField(amountRect, propValue.FindPropertyRelative(nameof(SoundMarkerSettings.volume)));
+
+				if (kind != SoundEmitterKind.Ambience)
+				{
+					Space();
+					EditorGUI.PropertyField(amountRect, propValue.FindPropertyRelative(nameof(SoundMarkerSettings.minDistance)));
+					Space();
+					EditorGUI.PropertyField(amountRect, propValue.FindPropertyRelative(nameof(SoundMarkerSettings.maxDistance)));
+				}
+
+				Space();
+				EditorGUI.indentLevel = indent;
+				EditorGUI.EndProperty();
+				return;
+			}
+
 			if (MarkerData.paramObjectsEditor.ContainsKey(paramPath))
 			{
 				Space();
@@ -293,6 +343,49 @@ namespace Editor
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
 		{
 			return m_height;
+		}
+
+		// The game sounds of the kind, grouped by category. An id that is not in the list stays until another sound is selected
+		private static void DrawSoundPreset(Rect rect, SerializedProperty preset, IReadOnlyList<ModSoundPresets.Preset> presets)
+		{
+			GUIContent[] options = new[] { new GUIContent(NoSoundPreset) }
+				.Concat(presets.Select(item => new GUIContent(item.category + "/" + item.id)))
+				.ToArray();
+			int current = 0;
+
+			for (int i = 0; i < presets.Count; i++)
+			{
+				if (presets[i].id == preset.stringValue)
+				{
+					current = i + 1;
+					break;
+				}
+			}
+
+			int selected = EditorGUI.Popup(rect, new GUIContent("Sound", "Game sound played by the marker"), current, options);
+
+			if (selected != current)
+			{
+				preset.stringValue = selected > 0 ? presets[selected - 1].id : string.Empty;
+			}
+		}
+
+		// As one marker does in the Inspector: each selected marker without sound settings gets them, so the exporter does not skip it
+		private static void SetSoundSettings(Object[] targetObjects, string valuePath)
+		{
+			foreach (Object targetObject in targetObjects)
+			{
+				var markerObject = new SerializedObject(targetObject);
+				SerializedProperty markerValue = markerObject.FindProperty(valuePath);
+
+				if (markerValue.managedReferenceValue is SoundMarkerSettings)
+				{
+					continue;
+				}
+
+				markerValue.managedReferenceValue = new SoundMarkerSettings();
+				markerObject.ApplyModifiedProperties();
+			}
 		}
 
 		// As one marker does in the Inspector: each selected marker gets the settings type of the zone kind and keeps its chain and
